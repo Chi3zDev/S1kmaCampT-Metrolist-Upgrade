@@ -2583,4 +2583,8 @@
     <string name="streak_restore_failed">Streak tidak dapat dipulihkan. Periksa jeda dan jatah saat ini.</string>
     <string name="streak_level_glowing">Berpendar</string>
     <string name="streak_level_luminous">Bercahaya</string>
+    <string name="glass_navbar_motion">Animasi bilah navigasi</string>
+    <string name="glass_navbar_motion_full">Penuh</string>
+    <string name="glass_navbar_motion_light">Ringan, tanpa gelembung</string>
+    <string name="glass_navbar_motion_off">Mati</string>
 </resources>

@@ -5661,4 +5661,8 @@
     <string name="streak_restore_failed">Could not restore the streak. Please check the current gap and quota.</string>
     <string name="streak_level_glowing">Glowing</string>
     <string name="streak_level_luminous">Luminous</string>
+    <string name="glass_navbar_motion">Navbar animation</string>
+    <string name="glass_navbar_motion_full">Full</string>
+    <string name="glass_navbar_motion_light">Light, without bubble</string>
+    <string name="glass_navbar_motion_off">Off</string>
 </resources>

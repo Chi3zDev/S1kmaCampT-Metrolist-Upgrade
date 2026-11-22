@@ -350,6 +350,8 @@ import com.metrolist.shared.ui.navigation.LocalContentObscured
 import com.metrolist.shared.ui.navigation.LocalFloatingNavBar
 import com.metrolist.shared.ui.navigation.LocalGlassNavbarBottomOffset
 import com.metrolist.shared.ui.navigation.LocalExpandGlassNavigation
+import com.metrolist.shared.ui.navigation.LocalGlassMotionAllowed
+import com.metrolist.shared.ui.navigation.LocalGlassBubbleAllowed
 import com.metrolist.shared.ui.navigation.LocalGlassNavigationCollapsed
 import com.metrolist.shared.ui.navigation.LocalGlassNavigationEnabled
 import com.metrolist.shared.ui.navigation.LocalGlassNavigationState
@@ -1453,6 +1455,8 @@ fun MetrolistApp(
                             LocalGlassNavbarBottomOffset provides (if (glassPlayerBelow) miniPlayerHeight + miniPlayerBottomSpacing else 0.dp),
                             LocalGlassNavigationEnabled provides useGlassNavigation,
                             LocalGlassNavigationCollapsed provides glassNavigationCollapsed,
+                            LocalGlassMotionAllowed provides (android.provider.Settings.Global.getFloat(context.contentResolver, android.provider.Settings.Global.ANIMATOR_DURATION_SCALE, 1f) > 0f),
+                            LocalGlassBubbleAllowed provides (Build.VERSION.SDK_INT > Build.VERSION_CODES.R),
                             LocalExpandGlassNavigation provides { glassNavigationCollapsed = false },
                             LocalGlassNavigationState provides glassBackdrop,
                             LocalPlayerExpanded provides isPlayerExpanded,

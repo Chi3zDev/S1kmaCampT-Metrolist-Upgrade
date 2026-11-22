@@ -430,6 +430,7 @@ class Settings(
     var glassLyricsPoster by preference(true)
     var glassLightMode by preference(false)
     var glassNavbarLabels by preference(false)
+    var glassNavbarMotion by preference("FULL")
     var glassPlayerBelow by preference(false)
     var streakRecoveryJson by preference("")
     var floatingTopBar by preference(FloatingTopBarKey, false)

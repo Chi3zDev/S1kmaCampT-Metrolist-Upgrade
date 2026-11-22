@@ -107,6 +107,12 @@ internal fun SettingsUiRegistryBuilder.registerAppearanceSettings(host: SharedSe
                 switch(id = "glassProfile", title = stringResource(Res.string.glass_area_profile), checked = settings.glassProfile, enabled = settings.glassNavigation) { settings.glassProfile = it }
                 switch(id = "glassLyricsPoster", title = stringResource(Res.string.glass_area_poster), checked = settings.glassLyricsPoster, enabled = settings.glassNavigation) { settings.glassLyricsPoster = it }
                 switch(id = "glassLightMode", title = stringResource(Res.string.glass_light_mode), description = stringResource(Res.string.glass_light_mode_description), checked = settings.glassLightMode, enabled = settings.glassNavigation) { settings.glassLightMode = it }
+                val navbarMotionChoices = listOf(
+                    SettingsChoice("FULL", stringResource(Res.string.glass_navbar_motion_full)),
+                    SettingsChoice("LIGHT", stringResource(Res.string.glass_navbar_motion_light)),
+                    SettingsChoice("OFF", stringResource(Res.string.glass_navbar_motion_off)),
+                )
+                choice(id = "glassNavbarMotion", title = stringResource(Res.string.glass_navbar_motion), valueLabel = navbarMotionChoices.firstOrNull { it.id == settings.glassNavbarMotion }?.label, choices = navbarMotionChoices, selectedChoiceId = settings.glassNavbarMotion, enabled = settings.glassNavigation && settings.glassNavbar) { settings.glassNavbarMotion = it }
                 switch(id = "glassNavbarLabels", title = stringResource(Res.string.glass_show_labels), checked = settings.glassNavbarLabels, enabled = settings.glassNavigation) { settings.glassNavbarLabels = it }
                 val positions = listOf(SettingsChoice("ABOVE", stringResource(Res.string.glass_player_above)), SettingsChoice("BELOW", stringResource(Res.string.glass_player_below)))
                 val position = if (settings.glassPlayerBelow) "BELOW" else "ABOVE"
