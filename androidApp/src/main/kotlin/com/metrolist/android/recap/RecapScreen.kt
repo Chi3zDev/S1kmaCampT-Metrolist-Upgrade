@@ -3,6 +3,7 @@ package com.metrolist.android.recap
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
@@ -162,6 +164,14 @@ private fun RecapStory(data: RecapData, onBack: () -> Unit, onPeriod: () -> Unit
         if (!pressed && !paused && progress >= 1f && page < pages.lastIndex) page++
     }
     val colors = MaterialTheme.colorScheme
+    val slideColor = when (pages[page]) {
+        0 -> colors.primaryContainer
+        1 -> colors.tertiaryContainer
+        2 -> colors.secondaryContainer
+        3 -> colors.primaryContainer
+        4 -> colors.tertiaryContainer
+        else -> colors.secondaryContainer
+    }
     val graphicsLayer = rememberGraphicsLayer()
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -191,8 +201,12 @@ private fun RecapStory(data: RecapData, onBack: () -> Unit, onPeriod: () -> Unit
             Modifier.fillMaxSize().drawWithContent {
                 graphicsLayer.record { this@drawWithContent.drawContent() }
                 drawLayer(graphicsLayer)
-            }.background(Brush.linearGradient(listOf(colors.surface, if (page % 2 == 0) colors.primaryContainer else colors.secondaryContainer))),
+            }.background(Brush.linearGradient(listOf(colors.surface, slideColor, colors.surface))),
         ) {
+        Canvas(Modifier.fillMaxSize()) {
+            drawCircle(color = slideColor.copy(alpha = .35f), radius = size.width * .48f, center = Offset(size.width, size.height * .19f))
+            drawCircle(color = slideColor.copy(alpha = .25f), radius = size.width * .38f, center = Offset(0f, size.height * .85f))
+        }
         AnimatedContent(targetState = pages[page], modifier = Modifier.align(Alignment.Center).padding(28.dp), label = "recapSlide") { slide ->
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 when (slide) {
@@ -207,7 +221,7 @@ private fun RecapStory(data: RecapData, onBack: () -> Unit, onPeriod: () -> Unit
                     2 -> {
                         Text(stringResource(Res.string.recap_top_artists), style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold)
                         data.artists.take(5).forEachIndexed { index, artist ->
-                            StoryRow(index + 1, artist.name, null, artist.thumbnailUrl)
+                            StoryRow(index + 1, artist.name, null, artist.thumbnailUrl, artist = true)
                         }
                     }
                     3 -> {
@@ -276,10 +290,10 @@ private fun CountingNumber(value: Long) {
 }
 
 @Composable
-private fun StoryRow(rank: Int, title: String, subtitle: String?, artwork: String?) {
+private fun StoryRow(rank: Int, title: String, subtitle: String?, artwork: String?, artist: Boolean = false) {
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(rank.toString(), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-        AsyncImage(model = artwork, contentDescription = null, modifier = Modifier.size(48.dp).clip(RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.surfaceVariant), contentScale = ContentScale.Crop)
+        AsyncImage(model = artwork, contentDescription = null, modifier = Modifier.size(48.dp).clip(if (artist) CircleShape else RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.surfaceVariant), contentScale = ContentScale.Crop)
         Column(Modifier.weight(1f)) {
             Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.titleMedium)
             if (!subtitle.isNullOrBlank()) Text(subtitle, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodySmall)
