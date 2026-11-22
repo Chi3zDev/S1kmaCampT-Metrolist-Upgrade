@@ -52,6 +52,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -71,6 +72,7 @@ import com.metrolist.shared.generated.resources.cancel
 import com.metrolist.shared.generated.resources.customize_colors
 import com.metrolist.shared.generated.resources.gradient
 import com.metrolist.shared.generated.resources.logo
+import com.metrolist.shared.generated.resources.lyrics_poster_glass
 import com.metrolist.shared.generated.resources.lyrics_share_artwork_failed
 import com.metrolist.shared.generated.resources.lyrics_share_auto_fit
 import com.metrolist.shared.generated.resources.lyrics_share_color
@@ -185,6 +187,9 @@ fun LyricsShareDialog(
     val logo = painterResource(Res.drawable.logo)
     val appName = stringResource(Res.string.app_name)
     val direction = LocalLayoutDirection.current
+    val posterBackground = palette.firstOrNull() ?: MaterialTheme.colorScheme.surface
+    val posterText = if ((style.background == LyricsImageBackground.SOLID || artwork == null) && posterBackground.luminance() > 0.4f) Color.Black else Color.White
+    val renderStyle = style.copy(backgroundColor = posterBackground, textColor = posterText, secondaryColor = posterText.copy(alpha = 0.8f))
     val storyBackgroundColor = MaterialTheme.colorScheme.surface
     val storyCardColor = MaterialTheme.colorScheme.surfaceContainerHigh
     val storyTextColor = MaterialTheme.colorScheme.onSurface
@@ -202,7 +207,7 @@ fun LyricsShareDialog(
         title,
         artist,
         appName,
-        style,
+        renderStyle,
         artwork,
         blurredArtwork,
         palette,
@@ -230,7 +235,7 @@ fun LyricsShareDialog(
                                 artwork,
                                 blurredArtwork,
                                 palette,
-                                style,
+                                renderStyle,
                                 measurer,
                                 logo,
                                 direction,
@@ -336,7 +341,7 @@ fun LyricsShareDialog(
                                 Text(stringResource(Res.string.lyrics_share_auto_fit))
                             }
                         }
-                        if (!useStoryLayout) {
+                        run {
                             item {
                                 Text(stringResource(Res.string.player_background_style))
                                 val scrollState = rememberScrollState()
@@ -353,6 +358,7 @@ fun LyricsShareDialog(
                                                 Text(
                                                     stringResource(
                                                         when (background) {
+                                                            LyricsImageBackground.GLASS -> Res.string.lyrics_poster_glass
                                                             LyricsImageBackground.SOLID -> Res.string.settings_solid
                                                             LyricsImageBackground.BLUR -> Res.string.blurred_artwork
                                                             LyricsImageBackground.GRADIENT -> Res.string.gradient
@@ -366,48 +372,7 @@ fun LyricsShareDialog(
                                 }
                             }
                         }
-                        if (!useStoryLayout) {
-                            item {
-                                LyricsColorSwatches(
-                                    stringResource(Res.string.background_color),
-                                    (
-                                        palette +
-                                            listOf(
-                                                Color(0xFF242424),
-                                                Color(0xFF121212),
-                                                Color.White,
-                                                Color.Black,
-                                                Color(0xFFF5F5F5),
-                                            )
-                                    ).distinct(),
-                                    style.backgroundColor,
-                                    !busy,
-                                ) { style = style.copy(backgroundColor = it) }
-                            }
-                        }
-                        if (!useStoryLayout) {
-                            item {
-                                LyricsColorSwatches(
-                                    stringResource(Res.string.text_color),
-                                    (palette + listOf(Color.White, Color.Black, Color(0xFF1DB954))).distinct(),
-                                    style.textColor,
-                                    !busy,
-                                ) { style = style.copy(textColor = it) }
-                            }
-                        }
-                        if (!useStoryLayout) {
-                            item {
-                                LyricsColorSwatches(
-                                    stringResource(Res.string.secondary_text_color),
-                                    (
-                                        palette.map { it.copy(alpha = 0.7f) } +
-                                            listOf(Color.White.copy(alpha = 0.7f), Color.Black.copy(alpha = 0.7f), Color(0xFF1DB954))
-                                    ).distinct(),
-                                    style.secondaryColor,
-                                    !busy,
-                                ) { style = style.copy(secondaryColor = it) }
-                            }
-                        }
+
                     }
                     LazyListScrollbar(scrollState, Modifier.align(Alignment.CenterEnd))
                 }
@@ -449,7 +414,7 @@ fun LyricsShareDialog(
                                                     artwork,
                                                     blurredArtwork,
                                                     palette,
-                                                    style,
+                                                    renderStyle,
                                                     measurer,
                                                     logo,
                                                     direction,

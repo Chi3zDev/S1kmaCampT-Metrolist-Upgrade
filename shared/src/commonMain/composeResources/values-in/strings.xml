@@ -2532,4 +2532,5 @@
     <string name="story_next_month">Bulan berikutnya</string>
     <string name="lyrics_poster_selection_rule">Pilih hingga enam baris yang berurutan.</string>
     <string name="lyrics_poster_partial_only">Pilih kutipan, bukan seluruh lirik lagu.</string>
+    <string name="lyrics_poster_glass">Kaca</string>
 </resources>

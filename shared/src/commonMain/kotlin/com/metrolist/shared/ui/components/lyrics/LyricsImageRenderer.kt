@@ -41,7 +41,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.sp
 import com.metrolist.shared.ui.theme.getGradientColors
 
-internal enum class LyricsImageBackground { SOLID, BLUR, GRADIENT }
+internal enum class LyricsImageBackground { GLASS, SOLID, BLUR, GRADIENT }
 
 internal data class LyricsImageStyle(
     val background: LyricsImageBackground = LyricsImageBackground.SOLID,
@@ -123,7 +123,7 @@ internal fun renderLyricsImage(
     val textLeft = padding + lyricsInsetX
     val textStyle =
         TextStyle(
-            color = if (story) storyTextColor else style.textColor,
+            color = style.textColor,
             fontWeight = FontWeight.Bold,
             textAlign = style.alignment,
         )
@@ -174,33 +174,20 @@ internal fun renderLyricsImage(
                 addRoundRect(RoundRect(0f, 0f, size.width, size.height, CornerRadius(if (story) 0f else 20 * scale)))
             }
         clipPath(path) {
-            drawRect(if (story) storyBackgroundColor else style.backgroundColor)
-            if (!story) {
-                when (style.background) {
-                    LyricsImageBackground.SOLID -> {}
-
-                    LyricsImageBackground.BLUR -> {
-                        blurredArtwork?.let {
-                            drawCover(it, Offset.Zero, size.width)
-                            drawRect(Color.Black.copy(alpha = 0.3f))
-                        }
-                    }
-
-                    LyricsImageBackground.GRADIENT -> {
-                        val colors = palette.firstOrNull()?.let(::getGradientColors) ?: listOf(style.backgroundColor, style.backgroundColor)
-                        drawRect(Brush.linearGradient(colors))
+            drawRect(style.backgroundColor)
+            when (style.background) {
+                LyricsImageBackground.SOLID -> Unit
+                LyricsImageBackground.BLUR, LyricsImageBackground.GLASS -> {
+                    blurredArtwork?.let {
+                        drawImage(it, dstSize = IntSize(size.width.toInt(), size.height.toInt()), filterQuality = FilterQuality.High)
+                        drawRect(Color.Black.copy(alpha = if (style.background == LyricsImageBackground.GLASS) 0.65f else 0.55f))
                     }
                 }
-            }
-            if (story) {
-                val cardTop = (layout.cardTop + verticalOffset) * scale
-                val cardHeightPx = cardHeight * scale
-                drawRoundRect(
-                    storyCardColor,
-                    topLeft = Offset(padding, cardTop),
-                    size = Size(width, cardHeightPx),
-                    cornerRadius = CornerRadius(28f * scale),
-                )
+                LyricsImageBackground.GRADIENT -> {
+                    val colors = palette.firstOrNull()?.let(::getGradientColors) ?: listOf(style.backgroundColor, style.backgroundColor)
+                    drawRect(Brush.linearGradient(colors))
+                    drawRect(Color.Black.copy(alpha = 0.55f))
+                }
             }
             artwork?.let {
                 val topLeft = Offset(layout.artworkX * scale, (layout.artworkTop + verticalOffset) * scale)
@@ -286,7 +273,7 @@ internal fun renderLyricsImage(
                 headerX,
                 layout.titleTop + verticalOffset,
                 20f * contentScale,
-                if (story) storyTextColor else style.textColor,
+                style.textColor,
                 headerWidth,
             )
             label(
@@ -294,7 +281,7 @@ internal fun renderLyricsImage(
                 headerX,
                 layout.artistTop + verticalOffset,
                 16f * contentScale,
-                if (story) storySecondaryColor else style.secondaryColor,
+                style.secondaryColor,
                 headerWidth,
             )
             val textX =
@@ -311,7 +298,7 @@ internal fun renderLyricsImage(
             }
             val footerScale = scale * contentScale
             drawCircle(
-                if (story) storySecondaryColor else style.secondaryColor,
+                style.secondaryColor,
                 radius = (if (story) 10 else 22) * footerScale,
                 center =
                     Offset(
@@ -335,7 +322,7 @@ internal fun renderLyricsImage(
                 layout.padding + (if (story) 44f else 52f) * contentScale,
                 footerTop + verticalOffset + (if (story) 8f else 13f) * contentScale,
                 (if (story) 12f else 14f) * contentScale,
-                if (story) storySecondaryColor else style.secondaryColor,
+                style.secondaryColor,
                 layout.lyricsWidth - (if (story) 62f else 52f) * contentScale,
             )
             if (story && shareUrl != null) {
