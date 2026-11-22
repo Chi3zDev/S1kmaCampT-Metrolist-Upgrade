@@ -87,6 +87,30 @@ internal fun SettingsUiRegistryBuilder.registerAppearanceSettings(host: SharedSe
         tone = SettingsTone.ORANGE,
         subtitle = stringResource(Res.string.settings_appearance_overview),
     ) {
+        if (host.platform == SettingsPlatform.ANDROID) {
+            group("liquidGlass", stringResource(Res.string.glass_settings_title)) {
+                switch(id = "glassNavigation", title = stringResource(Res.string.glass_settings_title), checked = settings.glassNavigation) { settings.glassNavigation = it }
+                val styles = listOf(
+                    SettingsChoice("FROSTED", stringResource(Res.string.glass_style_frosted)),
+                    SettingsChoice("CLEAR", stringResource(Res.string.glass_style_clear)),
+                    SettingsChoice("BLUR", stringResource(Res.string.glass_style_blur)),
+                )
+                choice(id = "glassStyle", title = stringResource(Res.string.glass_style), valueLabel = styles.firstOrNull { it.id == settings.glassStyle }?.label, choices = styles, selectedChoiceId = settings.glassStyle, enabled = settings.glassNavigation) { settings.glassStyle = it }
+                slider(id = "glassBlurStrength", title = stringResource(Res.string.glass_blur_strength), value = settings.glassBlurStrength, range = 0f..100f, steps = 0, enabled = settings.glassNavigation) { settings.glassBlurStrength = it }
+                slider(id = "glassTintStrength", title = stringResource(Res.string.glass_tint_strength), value = settings.glassTintStrength, range = 0f..100f, steps = 0, enabled = settings.glassNavigation) { settings.glassTintStrength = it }
+                slider(id = "glassCornerRoundness", title = stringResource(Res.string.glass_corner_roundness), value = settings.glassCornerRoundness, range = 0f..100f, steps = 0, enabled = settings.glassNavigation) { settings.glassCornerRoundness = it }
+                switch(id = "glassNavbar", title = stringResource(Res.string.glass_area_navbar), checked = settings.glassNavbar, enabled = settings.glassNavigation) { settings.glassNavbar = it }
+                switch(id = "glassMiniPlayer", title = stringResource(Res.string.glass_area_mini_player), checked = settings.glassMiniPlayer, enabled = settings.glassNavigation) { settings.glassMiniPlayer = it }
+                switch(id = "glassTopBar", title = stringResource(Res.string.glass_area_top_bar), checked = settings.glassTopBar, enabled = settings.glassNavigation) { settings.glassTopBar = it }
+                switch(id = "glassCards", title = stringResource(Res.string.glass_area_cards), checked = settings.glassCards, enabled = settings.glassNavigation) { settings.glassCards = it }
+                switch(id = "glassLyricsPoster", title = stringResource(Res.string.glass_area_poster), checked = settings.glassLyricsPoster, enabled = settings.glassNavigation) { settings.glassLyricsPoster = it }
+                switch(id = "glassLightMode", title = stringResource(Res.string.glass_light_mode), description = stringResource(Res.string.glass_light_mode_description), checked = settings.glassLightMode, enabled = settings.glassNavigation) { settings.glassLightMode = it }
+                switch(id = "glassNavbarLabels", title = stringResource(Res.string.glass_show_labels), checked = settings.glassNavbarLabels, enabled = settings.glassNavigation) { settings.glassNavbarLabels = it }
+                val positions = listOf(SettingsChoice("ABOVE", stringResource(Res.string.glass_player_above)), SettingsChoice("BELOW", stringResource(Res.string.glass_player_below)))
+                val position = if (settings.glassPlayerBelow) "BELOW" else "ABOVE"
+                choice(id = "glassPlayerPosition", title = stringResource(Res.string.glass_player_position), valueLabel = positions.first { it.id == position }.label, choices = positions, selectedChoiceId = position, enabled = settings.glassNavigation) { settings.glassPlayerBelow = it == "BELOW" }
+            }
+        }
         group("theme", stringResource(Res.string.appearance_theme)) {
             choice(
                 id = "themeMode",
@@ -454,12 +478,6 @@ internal fun SettingsUiRegistryBuilder.registerAppearanceSettings(host: SharedSe
                     checked = settings.floatingNavBar,
                 ) { settings.floatingNavBar = it }
                 if (host.platform == SettingsPlatform.ANDROID) {
-                    switch(
-                        id = "glassNavigation",
-                        title = stringResource(Res.string.appearance_glass_navigation),
-                        description = stringResource(Res.string.appearance_glass_navigation_description),
-                        checked = settings.glassNavigation,
-                    ) { settings.glassNavigation = it }
                     switch(
                         id = "floatingTopBar",
                         title = stringResource(Res.string.appearance_floating_top_bar),

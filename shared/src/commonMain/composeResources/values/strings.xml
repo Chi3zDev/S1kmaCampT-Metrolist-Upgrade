@@ -5619,4 +5619,23 @@
     <string name="lyrics_poster_font_handwriting">Handwriting</string>
     <string name="appearance_glass_navigation">Navbar liquid glass</string>
     <string name="appearance_glass_navigation_description">Use a translucent floating navigation bar and mini player. Blur is disabled on older or low-memory devices.</string>
+    <string name="glass_settings_title">Liquid glass</string>
+    <string name="glass_style">Glass style</string>
+    <string name="glass_style_frosted">Frosted</string>
+    <string name="glass_style_clear">Clear</string>
+    <string name="glass_style_blur">Blur</string>
+    <string name="glass_blur_strength">Blur strength</string>
+    <string name="glass_tint_strength">Tint strength</string>
+    <string name="glass_corner_roundness">Corner roundness</string>
+    <string name="glass_area_navbar">Navigation bar</string>
+    <string name="glass_area_mini_player">Mini player</string>
+    <string name="glass_area_top_bar">Top bar</string>
+    <string name="glass_area_cards">Cards and buttons</string>
+    <string name="glass_area_poster">Lyrics poster</string>
+    <string name="glass_light_mode">Lightweight mode</string>
+    <string name="glass_light_mode_description">Use translucent tint without backdrop blur. Older and low-memory devices use this automatically.</string>
+    <string name="glass_show_labels">Show navigation labels</string>
+    <string name="glass_player_position">Mini player position</string>
+    <string name="glass_player_above">Above navigation bar</string>
+    <string name="glass_player_below">Below navigation bar</string>
 </resources>

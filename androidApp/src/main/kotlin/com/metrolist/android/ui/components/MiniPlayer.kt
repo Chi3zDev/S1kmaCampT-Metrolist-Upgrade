@@ -681,12 +681,15 @@ internal fun MiniPlayerCard(
             }
         }
     }
+    val glassSettings = Settings.shared
+    val glassTintAlpha = (glassSettings.glassTintStrength.coerceIn(0f, 100f) / 100f * when (glassSettings.glassStyle) { "FROSTED" -> 0.9f; "CLEAR" -> 0.45f; else -> 0.7f }).coerceIn(0.12f, 0.9f)
     val backgroundColor = when {
-        glassEnabled -> (dominantColor?.copy(alpha = 0.28f)?.compositeOver(surfaceColor) ?: surfaceColor).copy(alpha = 0.62f)
+        glassEnabled -> (dominantColor?.copy(alpha = 0.28f)?.compositeOver(surfaceColor) ?: surfaceColor).copy(alpha = glassTintAlpha)
         useSolidBlackMiniPlayer -> Color.Black
         else -> surfaceColor
     }
-    val glassStyle = remember { HazeBlurStyle { blurRadius(20.dp) } }
+    val glassRadius = (glassSettings.glassBlurStrength.coerceIn(0f, 100f) / 100f * when (glassSettings.glassStyle) { "FROSTED" -> 24f; "CLEAR" -> 8f; else -> 20f }).dp
+    val glassStyle = remember(glassRadius) { HazeBlurStyle { blurRadius(glassRadius) } }
     val contentColor =
         if (useSolidBlackMiniPlayer || useGradientMiniPlayer || useBlurMiniPlayer) Color.White else MaterialTheme.colorScheme.onSurface
     val secondaryContentColor = contentColor.copy(alpha = 0.7f)
@@ -708,6 +711,8 @@ internal fun MiniPlayerCard(
     val cornerRadius =
         if (useDesktopLayout) {
             0.dp
+        } else if (glassEnabled) {
+            modernMiniPlayerHeight(LocalDensity.current) * (0.12f + glassSettings.glassCornerRoundness.coerceIn(0f, 100f) * 0.0038f)
         } else if (isModern) {
             modernMiniPlayerHeight(LocalDensity.current) / 2
         } else {

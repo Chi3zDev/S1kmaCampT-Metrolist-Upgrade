@@ -805,8 +805,10 @@ fun MetrolistApp(
             }
         val useNavigationRail = !navigationSuiteType.isNavigationBar
         // Hiding navigation must not move the retained lookahead tree between scaffolds.
-        val useGlassNavigation =
+        val useGlass =
             Settings.shared.glassNavigation && !useDesktopUi && !usesDirectionalNavigation && navigationSuiteType.isNavigationBar
+        val useGlassNavigation = useGlass && Settings.shared.glassNavbar
+        val useGlassMiniPlayer = useGlass && Settings.shared.glassMiniPlayer
         val useFloatingNavBar =
             (Settings.shared.floatingNavBar || useGlassNavigation) && !useDesktopUi && !usesDirectionalNavigation &&
                 navigationSuiteType.isNavigationBar
@@ -815,7 +817,7 @@ fun MetrolistApp(
             Build.VERSION.SDK_INT > Build.VERSION_CODES.S_V2 &&
                 !(context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager).isLowRamDevice
         }
-        val glassBackdrop = if (useGlassNavigation && canBlurGlass) hazeState else null
+        val glassBackdrop = if (useGlass && canBlurGlass && !Settings.shared.glassLightMode) hazeState else null
         val isImeVisible = WindowInsets.ime.asPaddingValues().calculateBottomPadding() > 0.dp
         val shouldHideMiniPlayerForIme = isLandscape && isImeVisible
         val shouldShowMiniPlayer = hasMedia
@@ -870,8 +872,8 @@ fun MetrolistApp(
                 label = "navigationVisibility",
             )
         val hasBottomNavigation = navigationSuiteType.isNavigationBar
-        val isExpressiveMiniPlayer = !useGlassNavigation && Settings.shared.miniPlayerType == MiniPlayerType.EXPRESSIVE && !useDesktopMiniPlayer
-        val isModernMiniPlayer = (useGlassNavigation || Settings.shared.miniPlayerType == MiniPlayerType.MODERN) && !useDesktopMiniPlayer
+        val isExpressiveMiniPlayer = !useGlassMiniPlayer && Settings.shared.miniPlayerType == MiniPlayerType.EXPRESSIVE && !useDesktopMiniPlayer
+        val isModernMiniPlayer = (useGlassMiniPlayer || Settings.shared.miniPlayerType == MiniPlayerType.MODERN) && !useDesktopMiniPlayer
         val miniPlayerBottomSpacing =
             when {
                 isExpressiveMiniPlayer -> ModernMiniPlayerBottomSpacing
@@ -1885,13 +1887,13 @@ fun MetrolistApp(
                             isExpandable = true,
                             isDraggableWhenCollapsed = true,
                             preserveContentWhenCollapsed = true,
-                            morphCollapsedContainer = !useGlassNavigation,
+                            morphCollapsedContainer = !useGlassMiniPlayer,
                             collapsedContent = {
                                 if (shouldRenderMiniPlayer) {
                                     MiniPlayer(
                                         useDesktopLayout = useDesktopMiniPlayer,
-                                        glassEnabled = useGlassNavigation,
-                                        glassState = glassBackdrop,
+                                        glassEnabled = useGlassMiniPlayer,
+                                        glassState = if (useGlassMiniPlayer) glassBackdrop else null,
                                         onExpand = {
                                             focusManager.clearFocus(force = true)
                                             keyboardController?.hide()
