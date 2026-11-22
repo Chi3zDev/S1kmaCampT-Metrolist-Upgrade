@@ -5583,4 +5583,22 @@
     <string name="streak_level_middle">Menyala</string>
     <string name="streak_level_top">Membara</string>
     <string name="streak_next">Next level: %1$s</string>
+    <string name="recap_title">Recap</string>
+    <string name="recap_year">Your recap %1$d</string>
+    <string name="recap_minutes">minutes listened</string>
+    <string name="recap_songs_count">%1$d songs</string>
+    <string name="recap_artists_count">%1$d artists</string>
+    <string name="recap_year_filter">This year</string>
+    <string name="recap_thirty_filter">Last 30 days</string>
+    <string name="recap_month_filter">This month</string>
+    <string name="recap_all_filter">All time</string>
+    <string name="recap_top_songs">Top songs</string>
+    <string name="recap_top_artists">Top artists</string>
+    <string name="recap_top_albums">Top albums</string>
+    <string name="recap_empty">No listening history for this period</string>
+    <string name="recap_error">Could not load recap</string>
+    <string name="recap_continue">Continue recap</string>
+    <string name="recap_watch">Watch recap</string>
+    <string name="recap_share_square">Share square</string>
+    <string name="recap_share_story">Share story</string>
 </resources>

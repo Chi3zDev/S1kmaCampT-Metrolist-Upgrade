@@ -2505,4 +2505,22 @@
     <string name="streak_level_middle">Menyala</string>
     <string name="streak_level_top">Membara</string>
     <string name="streak_next">Level berikutnya: %1$s</string>
+    <string name="recap_title">Recap</string>
+    <string name="recap_year">Recap kamu %1$d</string>
+    <string name="recap_minutes">menit didengarkan</string>
+    <string name="recap_songs_count">%1$d lagu</string>
+    <string name="recap_artists_count">%1$d artis</string>
+    <string name="recap_year_filter">Tahun ini</string>
+    <string name="recap_thirty_filter">30 hari terakhir</string>
+    <string name="recap_month_filter">Bulan ini</string>
+    <string name="recap_all_filter">Sepanjang waktu</string>
+    <string name="recap_top_songs">Lagu teratas</string>
+    <string name="recap_top_artists">Artis teratas</string>
+    <string name="recap_top_albums">Album teratas</string>
+    <string name="recap_empty">Belum ada riwayat dengar pada periode ini</string>
+    <string name="recap_error">Recap tidak dapat dimuat</string>
+    <string name="recap_continue">Lanjut Recap</string>
+    <string name="recap_watch">Tonton Recap</string>
+    <string name="recap_share_square">Bagikan persegi</string>
+    <string name="recap_share_story">Bagikan story</string>
 </resources>
