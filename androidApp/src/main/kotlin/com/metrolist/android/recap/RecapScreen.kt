@@ -1,94 +1,67 @@
 package com.metrolist.android.recap
 
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Card
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalContext
-import com.metrolist.android.utils.shareImage
-import kotlinx.coroutines.launch
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import com.metrolist.shared.db.MusicDatabase
 import com.metrolist.shared.generated.resources.Res
 import com.metrolist.shared.generated.resources.back
-import com.metrolist.shared.generated.resources.cancel
-import com.metrolist.shared.generated.resources.share
-import com.metrolist.shared.generated.resources.recap_share_square
-import com.metrolist.shared.generated.resources.recap_share_story
-import com.metrolist.shared.generated.resources.recap_all_filter
-import com.metrolist.shared.generated.resources.recap_artists_count
 import com.metrolist.shared.generated.resources.recap_empty
-import com.metrolist.shared.generated.resources.recap_continue
-import com.metrolist.shared.generated.resources.recap_watch
 import com.metrolist.shared.generated.resources.recap_error
 import com.metrolist.shared.generated.resources.recap_minutes
-import com.metrolist.shared.generated.resources.recap_month_filter
 import com.metrolist.shared.generated.resources.recap_songs_count
+import com.metrolist.shared.generated.resources.recap_month_filter
 import com.metrolist.shared.generated.resources.recap_thirty_filter
 import com.metrolist.shared.generated.resources.recap_title
-import com.metrolist.shared.generated.resources.recap_top_albums
 import com.metrolist.shared.generated.resources.recap_top_artists
 import com.metrolist.shared.generated.resources.recap_top_songs
-import com.metrolist.shared.generated.resources.recap_year
 import com.metrolist.shared.generated.resources.recap_year_filter
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import java.time.Instant
 import java.time.ZoneId
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RecapScreen(onBack: () -> Unit) {
     val database: MusicDatabase = koinInject()
     var period by remember { mutableStateOf(RecapPeriod.YEAR) }
     var data by remember { mutableStateOf<RecapData?>(null) }
     var failed by remember { mutableStateOf(false) }
-    var showShare by remember { mutableStateOf(false) }
-    var showSlides by remember { mutableStateOf(false) }
-    val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-    val colors = MaterialTheme.colorScheme
-    val titleText = stringResource(Res.string.recap_title)
-    val minutesText = stringResource(Res.string.recap_minutes)
-    val songsText = stringResource(Res.string.recap_top_songs)
-    val artistsText = stringResource(Res.string.recap_top_artists)
-    val shareText = stringResource(Res.string.share)
-    val year = remember { Instant.now().atZone(ZoneId.systemDefault()).year }
+    var showPeriods by remember { mutableStateOf(false) }
     LaunchedEffect(database, period) {
         data = null
         failed = false
@@ -100,143 +73,92 @@ fun RecapScreen(onBack: () -> Unit) {
             failed = true
         }
     }
-    if (showSlides && data != null) {
-        RecapSlides(data!!, onDismiss = { showSlides = false })
-    }
-    if (showShare && data != null) {
+    if (showPeriods) {
         AlertDialog(
-            onDismissRequest = { showShare = false },
-            title = { Text(shareText) },
+            onDismissRequest = { showPeriods = false },
+            title = { Text(stringResource(Res.string.recap_title)) },
             text = {
                 Column {
-                    listOf(false, true).forEach { story ->
-                        TextButton(onClick = {
-                            val recap = data ?: return@TextButton
-                            showShare = false
-                            scope.launch {
-                                val image = renderRecapShare(recap, titleText, minutesText, songsText, artistsText,
-                                    colors.surface.toArgb(), colors.onSurface.toArgb(), colors.primary.toArgb(), story)
-                                shareImage(context, image, shareText)
-                            }
-                        }) {
-                            Text(stringResource(if (story) Res.string.recap_share_story else Res.string.recap_share_square))
+                    listOf(RecapPeriod.YEAR, RecapPeriod.MONTH, RecapPeriod.LAST_30_DAYS).forEach { choice ->
+                        val label = when (choice) {
+                            RecapPeriod.YEAR -> Res.string.recap_year_filter
+                            RecapPeriod.MONTH -> Res.string.recap_month_filter
+                            else -> Res.string.recap_thirty_filter
                         }
+                        TextButton(onClick = { period = choice; showPeriods = false }) { Text(stringResource(label)) }
                     }
                 }
             },
             confirmButton = {},
-            dismissButton = { TextButton(onClick = { showShare = false }) { Text(stringResource(Res.string.cancel)) } },
         )
     }
-    Scaffold(topBar = {
-        TopAppBar(
-            title = { Text(stringResource(Res.string.recap_title)) },
-            actions = {
-                IconButton(onClick = { showShare = true }, enabled = data != null) {
-                    Icon(MetrolistIcons.Outlined.Share, shareText)
-                }
-            },
-            navigationIcon = {
-                IconButton(onClick = onBack) {
-                    Icon(MetrolistIcons.AutoMirrored.Filled.ArrowBack, stringResource(Res.string.back))
-                }
-            },
-        )
-    }) { padding ->
-        LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(padding),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            item {
-                Card(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-                    shape = RoundedCornerShape(28.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
-                ) {
-                    Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text(
-                            if (period == RecapPeriod.YEAR) stringResource(Res.string.recap_year, year) else titleText,
-                            style = MaterialTheme.typography.headlineSmall,
-                        )
-                        Text((data?.minutes ?: 0).toString(), style = MaterialTheme.typography.displayLarge, color = MaterialTheme.colorScheme.primary)
-                        Text(stringResource(Res.string.recap_minutes), style = MaterialTheme.typography.bodyLarge)
-                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            Text(stringResource(Res.string.recap_songs_count, data?.songCount ?: 0), style = MaterialTheme.typography.labelLarge)
-                            Text(stringResource(Res.string.recap_artists_count, data?.artistCount ?: 0), style = MaterialTheme.typography.labelLarge)
-                        }
-                    }
-                }
+    Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface), contentAlignment = Alignment.Center) {
+        val recap = data
+        when {
+            failed -> Text(stringResource(Res.string.recap_error))
+            recap == null -> CircularProgressIndicator()
+            recap.songs.isEmpty() -> Column {
+                Text(stringResource(Res.string.recap_empty))
+                TextButton(onClick = { showPeriods = true }) { Text(stringResource(Res.string.recap_title)) }
+                TextButton(onClick = onBack) { Text(stringResource(Res.string.back)) }
             }
-            item {
-                Row(Modifier.horizontalScroll(rememberScrollState()).padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    RecapPeriod.entries.forEach { choice ->
-                        val label = when (choice) {
-                            RecapPeriod.YEAR -> Res.string.recap_year_filter
-                            RecapPeriod.LAST_30_DAYS -> Res.string.recap_thirty_filter
-                            RecapPeriod.MONTH -> Res.string.recap_month_filter
-                            RecapPeriod.ALL -> Res.string.recap_all_filter
-                        }
-                        FilterChip(selected = period == choice, onClick = { period = choice }, label = { Text(stringResource(label)) })
-                    }
-                }
-            }
-            item {
-                Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Button(onClick = { showSlides = true }, enabled = data != null, modifier = Modifier.fillMaxWidth()) {
-                        Text(stringResource(Res.string.recap_continue))
-                    }
-                    OutlinedButton(onClick = { showSlides = true }, enabled = data != null, modifier = Modifier.fillMaxWidth()) {
-                        Text(stringResource(Res.string.recap_watch))
-                    }
-                }
-            }
-            if (failed) item { Text(stringResource(Res.string.recap_error), Modifier.padding(16.dp)) }
-            else if (data == null) item { CircularProgressIndicator(Modifier.padding(16.dp)) }
-            else {
-                val recap = data!!
-                if (recap.songs.isEmpty()) item { Text(stringResource(Res.string.recap_empty), Modifier.padding(16.dp)) }
-                item { RecapList(stringResource(Res.string.recap_top_songs), recap.songs.take(10).map { it.title }) }
-                item { RecapList(stringResource(Res.string.recap_top_artists), recap.artists.take(10).map { it.name }) }
-                item { RecapList(stringResource(Res.string.recap_top_albums), recap.albums.take(10).map { it.name }) }
-            }
+            else -> RecapStory(recap, onBack, { showPeriods = true })
         }
     }
 }
 
 @Composable
-private fun RecapList(title: String, names: List<String>) {
-    Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(title, style = MaterialTheme.typography.titleLarge)
-        names.forEach { Text(it, style = MaterialTheme.typography.bodyLarge) }
+private fun RecapStory(data: RecapData, onBack: () -> Unit, onPeriod: () -> Unit) {
+    val pages = listOf(0, 1, 2)
+    var page by remember(data) { mutableIntStateOf(0) }
+    var progress by remember(data, page) { mutableFloatStateOf(0f) }
+    var pressed by remember { mutableStateOf(false) }
+    LaunchedEffect(page, pressed) {
+        while (!pressed && progress < 1f) {
+            delay(50)
+            progress = (progress + 1f / 120f).coerceAtMost(1f)
+        }
+        if (!pressed && progress >= 1f && page < pages.lastIndex) page++
     }
-}
-
-@Composable
-private fun RecapSlides(data: RecapData, onDismiss: () -> Unit) {
-    val pager = rememberPagerState(pageCount = { 3 })
-    Dialog(onDismissRequest = onDismiss) {
-        Card(shape = RoundedCornerShape(28.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh)) {
-            Column(Modifier.fillMaxWidth().padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                HorizontalPager(state = pager, modifier = Modifier.fillMaxWidth()) { page ->
-                    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        when (page) {
-                            0 -> {
-                                Text(data.minutes.toString(), style = MaterialTheme.typography.displayLarge, color = MaterialTheme.colorScheme.primary)
-                                Text(stringResource(Res.string.recap_minutes), style = MaterialTheme.typography.titleMedium)
-                            }
-                            1 -> {
-                                Text(stringResource(Res.string.recap_top_songs), style = MaterialTheme.typography.headlineSmall)
-                                data.songs.take(3).forEach { Text(it.title, style = MaterialTheme.typography.bodyLarge) }
-                            }
-                            else -> {
-                                Text(stringResource(Res.string.recap_top_artists), style = MaterialTheme.typography.headlineSmall)
-                                data.artists.take(3).forEach { Text(it.name, style = MaterialTheme.typography.bodyLarge) }
-                            }
-                        }
+    val colors = MaterialTheme.colorScheme
+    Box(
+        Modifier.fillMaxWidth().aspectRatio(9f / 16f)
+            .background(colors.primaryContainer)
+            .pointerInput(page) {
+                detectTapGestures(
+                    onPress = { pressed = true; tryAwaitRelease(); pressed = false },
+                    onTap = { offset: Offset ->
+                        page = if (offset.x < size.width / 2) (page - 1).coerceAtLeast(0) else (page + 1).coerceAtMost(pages.lastIndex)
+                        progress = 0f
+                    },
+                )
+            }
+            .pointerInput(Unit) {
+                var drag = 0f
+                detectVerticalDragGestures(onVerticalDrag = { _, amount -> drag += amount }, onDragEnd = {
+                    if (drag > 100f) onBack()
+                    drag = 0f
+                })
+            },
+    ) {
+        Column(Modifier.align(Alignment.Center).padding(28.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            when (pages[page]) {
+                0 -> { Text(data.songCount.toString(), style = MaterialTheme.typography.displayLarge); Text(stringResource(Res.string.recap_songs_count, data.songCount)) }
+                1 -> { Text(data.minutes.toString(), style = MaterialTheme.typography.displayLarge); Text(stringResource(Res.string.recap_minutes)) }
+                else -> { Text(stringResource(Res.string.recap_top_songs), style = MaterialTheme.typography.headlineLarge); data.songs.take(5).forEach { Text(it.title) } }
+            }
+        }
+        Column(Modifier.align(Alignment.TopCenter).fillMaxWidth().padding(12.dp)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.fillMaxWidth()) {
+                pages.forEachIndexed { index, _ ->
+                    Box(Modifier.weight(1f).height(4.dp).clip(RoundedCornerShape(2.dp)).background(colors.onPrimaryContainer.copy(alpha = .25f))) {
+                        Box(Modifier.fillMaxWidth(if (index < page) 1f else if (index == page) progress else 0f).height(4.dp).background(colors.onPrimaryContainer))
                     }
                 }
-                Text("${pager.currentPage + 1} / 3", style = MaterialTheme.typography.labelMedium)
-                TextButton(onClick = onDismiss) { Text(stringResource(Res.string.cancel)) }
+            }
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                IconButton(onClick = onBack) { Icon(MetrolistIcons.AutoMirrored.Filled.ArrowBack, stringResource(Res.string.back), tint = colors.onPrimaryContainer) }
+                TextButton(onClick = onPeriod) { Text(stringResource(Res.string.recap_title), color = colors.onPrimaryContainer) }
             }
         }
     }
