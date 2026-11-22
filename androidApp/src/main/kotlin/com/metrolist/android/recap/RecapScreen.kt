@@ -34,7 +34,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import android.graphics.Bitmap
+import android.widget.Toast
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.layer.drawLayer
+import androidx.compose.ui.graphics.rememberGraphicsLayer
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.rememberCoroutineScope
+import com.metrolist.android.utils.shareImage
+import kotlinx.coroutines.launch
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.ContentScale
@@ -56,6 +67,8 @@ import com.metrolist.shared.generated.resources.recap_title
 import com.metrolist.shared.generated.resources.recap_top_artists
 import com.metrolist.shared.generated.resources.recap_top_songs
 import com.metrolist.shared.generated.resources.recap_year_filter
+import com.metrolist.shared.generated.resources.share
+import com.metrolist.shared.generated.resources.statistics_share_failed
 import com.metrolist.shared.generated.resources.story_intro
 import com.metrolist.shared.generated.resources.story_plays
 import com.metrolist.shared.generated.resources.story_repeat
@@ -149,9 +162,14 @@ private fun RecapStory(data: RecapData, onBack: () -> Unit, onPeriod: () -> Unit
         if (!pressed && !paused && progress >= 1f && page < pages.lastIndex) page++
     }
     val colors = MaterialTheme.colorScheme
+    val graphicsLayer = rememberGraphicsLayer()
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val shareLabel = stringResource(Res.string.share)
+    val shareError = stringResource(Res.string.statistics_share_failed)
+    var sharing by remember { mutableStateOf(false) }
     Box(
         Modifier.fillMaxWidth().aspectRatio(9f / 16f)
-            .background(Brush.linearGradient(listOf(colors.surface, if (page % 2 == 0) colors.primaryContainer else colors.secondaryContainer)))
             .pointerInput(page) {
                 detectTapGestures(
                     onPress = { pressed = true; tryAwaitRelease(); pressed = false },
@@ -169,6 +187,12 @@ private fun RecapStory(data: RecapData, onBack: () -> Unit, onPeriod: () -> Unit
                 })
             },
     ) {
+        Box(
+            Modifier.fillMaxSize().drawWithContent {
+                graphicsLayer.record { this@drawWithContent.drawContent() }
+                drawLayer(graphicsLayer)
+            }.background(Brush.linearGradient(listOf(colors.surface, if (page % 2 == 0) colors.primaryContainer else colors.secondaryContainer))),
+        ) {
         AnimatedContent(targetState = pages[page], modifier = Modifier.align(Alignment.Center).padding(28.dp), label = "recapSlide") { slide ->
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 when (slide) {
@@ -208,6 +232,7 @@ private fun RecapStory(data: RecapData, onBack: () -> Unit, onPeriod: () -> Unit
                 }
             }
         }
+        }
         Column(Modifier.align(Alignment.TopCenter).fillMaxWidth().padding(12.dp)) {
             Row(horizontalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.fillMaxWidth()) {
                 pages.forEachIndexed { index, _ ->
@@ -219,6 +244,24 @@ private fun RecapStory(data: RecapData, onBack: () -> Unit, onPeriod: () -> Unit
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 IconButton(onClick = onBack) { Icon(MetrolistIcons.AutoMirrored.Filled.ArrowBack, stringResource(Res.string.back), tint = colors.onPrimaryContainer) }
                 TextButton(onClick = onPeriod) { Text(stringResource(Res.string.story_change_period), color = colors.onPrimaryContainer) }
+                IconButton(onClick = {
+                    sharing = true
+                    pressed = true
+                    scope.launch {
+                        try {
+                            val captured = graphicsLayer.toImageBitmap().asAndroidBitmap()
+                            val bitmap = Bitmap.createScaledBitmap(captured, 1080, 1920, true).asImageBitmap()
+                            shareImage(context, bitmap, shareLabel)
+                        } catch (error: CancellationException) {
+                            throw error
+                        } catch (error: Exception) {
+                            Toast.makeText(context, shareError, Toast.LENGTH_SHORT).show()
+                        } finally {
+                            sharing = false
+                            pressed = false
+                        }
+                    }
+                }, enabled = !sharing) { Icon(MetrolistIcons.Outlined.Share, shareLabel, tint = colors.onPrimaryContainer) }
             }
         }
     }
