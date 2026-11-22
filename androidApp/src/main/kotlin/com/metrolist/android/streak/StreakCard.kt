@@ -19,6 +19,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.currentStateAsState
+import com.metrolist.shared.ui.navigation.LocalRootContentActive
+import com.metrolist.shared.ui.navigation.LocalContentObscured
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.metrolist.shared.ui.components.glassCardBorder
 import com.metrolist.shared.ui.components.glassCardColor
@@ -36,53 +41,66 @@ import com.metrolist.shared.generated.resources.Res
 import com.metrolist.shared.generated.resources.streak_active
 import com.metrolist.shared.generated.resources.streak_days
 import com.metrolist.shared.generated.resources.streak_inactive
-import com.metrolist.shared.generated.resources.streak_level_middle
-import com.metrolist.shared.generated.resources.streak_level_start
-import com.metrolist.shared.generated.resources.streak_level_top
+import com.metrolist.shared.generated.resources.streak_extinguished
+import com.metrolist.shared.generated.resources.streak_previous
 import com.metrolist.shared.generated.resources.streak_longest
 import com.metrolist.shared.generated.resources.streak_next
 import org.jetbrains.compose.resources.stringResource
 
+data class StreakCardState(val streak: ListeningStreak, val lastStreak: Int)
+
 @Composable
-fun rememberListeningStreak(database: MusicDatabase): ListeningStreak {
+fun rememberListeningStreak(database: MusicDatabase): StreakCardState {
     val timestamps by remember(database) { database.dao().qualifyingStreakTimestamps() }
         .collectAsStateWithLifecycle(initialValue = emptyList())
     var now by remember { mutableStateOf(Instant.now()) }
-    LaunchedEffect(Unit) {
-        while (true) {
+    val lifecycle by LocalLifecycleOwner.current.lifecycle.currentStateAsState()
+    val active = lifecycle == Lifecycle.State.RESUMED && LocalRootContentActive.current && !LocalContentObscured.current
+    LaunchedEffect(active) {
+        while (active) {
             now = Instant.now()
             delay(60_000)
         }
     }
     val recoveryJson = Settings.shared.streakRecoveryJson
     val restoredDays = remember(recoveryJson) { decodeStreakRecovery(recoveryJson)?.recoveredDays.orEmpty() }
-    return remember(timestamps, now, restoredDays) { calculateListeningStreak(timestamps, now, ZoneId.systemDefault(), restoredDays) }
+    return remember(timestamps, now, restoredDays) {
+        val zone = ZoneId.systemDefault()
+        StreakCardState(
+            calculateListeningStreak(timestamps, now, zone, restoredDays),
+            lastListeningStreak(timestamps, now, zone, restoredDays),
+        )
+    }
 }
 
 @Composable
-fun StreakCard(streak: ListeningStreak, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    val currentLevel = streakLevel(streak.current)
-    val nextLevel = streakLevels.firstOrNull { it.minimumDays > streak.current }
+fun StreakCard(state: StreakCardState, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    val streak = state.streak
+    val extinguished = state.lastStreak > 0 && streak.current == 0
+    val flameTint = if (extinguished) MaterialTheme.colorScheme.outline else streakLevel(streak.current).color
+    val currentLevel = streakLevel(if (extinguished) state.lastStreak else streak.current)
+    val nextLevel = if (extinguished) null else streakLevels.firstOrNull { it.minimumDays > streak.current }
     val level = stringResource(currentLevel.title)
-    val progress = if (nextLevel == null) 1f else
+    val progress = if (extinguished) 0f else if (nextLevel == null) 1f else
         ((streak.current - currentLevel.minimumDays).toFloat() / (nextLevel.minimumDays - currentLevel.minimumDays)).coerceIn(0f, 1f)
     Card(onClick = onClick, modifier = modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp), colors = CardDefaults.cardColors(containerColor = glassCardColor(MaterialTheme.colorScheme.surfaceContainerHigh)), border = glassCardBorder()) {
         Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Icon(painterResource(R.drawable.ic_streak_flame), contentDescription = null, modifier = Modifier.size(40.dp), tint = MaterialTheme.colorScheme.primary)
+                Icon(painterResource(R.drawable.ic_streak_flame), contentDescription = null, modifier = Modifier.size(40.dp), tint = flameTint)
                 Column {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         Text(streak.current.toString(), style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.onSurface)
                         Text(stringResource(Res.string.streak_days), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
                     }
-                    Text(level, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+                    Text(level, style = MaterialTheme.typography.labelLarge, color = flameTint)
                 }
             }
-            Text(stringResource(if (streak.todayCounted) Res.string.streak_active else Res.string.streak_inactive), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
+            Text(stringResource(when { extinguished -> Res.string.streak_extinguished; streak.todayCounted -> Res.string.streak_active; else -> Res.string.streak_inactive }), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
+            if (extinguished) Text(stringResource(Res.string.streak_previous, state.lastStreak), style = MaterialTheme.typography.bodySmall)
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 if (nextLevel != null) Text(stringResource(Res.string.streak_next, stringResource(nextLevel.title)), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            LinearProgressIndicator(progress = { progress }, modifier = Modifier.fillMaxWidth(), color = MaterialTheme.colorScheme.primary, trackColor = MaterialTheme.colorScheme.surfaceVariant)
+            LinearProgressIndicator(progress = { progress }, modifier = Modifier.fillMaxWidth(), color = flameTint, trackColor = MaterialTheme.colorScheme.surfaceVariant)
             Text(stringResource(Res.string.streak_longest, streak.longest), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }

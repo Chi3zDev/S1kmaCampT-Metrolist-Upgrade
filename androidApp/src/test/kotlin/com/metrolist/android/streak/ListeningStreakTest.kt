@@ -116,6 +116,16 @@ class ListeningStreakTest {
     }
 
     @Test
+    fun lastRunIsRetainedWhenCurrentStreakIsExtinguished() {
+        val plays = listOf(ms("2026-01-01T12:00:00Z"), ms("2026-01-02T12:00:00Z"), ms("2026-01-07T12:00:00Z"))
+        val now = Instant.parse("2026-01-10T12:00:00Z")
+        assertEquals(0, calculateListeningStreak(plays, now, ZoneId.of("UTC")).current)
+        assertEquals(1, lastListeningStreak(plays, now, ZoneId.of("UTC")))
+        assertEquals(2, lastListeningStreak(plays, now, ZoneId.of("UTC"), setOf(LocalDate.parse("2026-01-08"))))
+        assertEquals(0, lastListeningStreak(emptyList(), now, ZoneId.of("UTC")))
+    }
+
+    @Test
     fun recoveryLedgerRoundTripsAndCorruptionIsRejected() {
         val ledger = StreakRecoveryLedger(setOf(LocalDate.parse("2026-01-05")), YearMonth.of(2026, 1), 1)
         assertEquals(ledger, decodeStreakRecovery(encodeStreakRecovery(ledger)))

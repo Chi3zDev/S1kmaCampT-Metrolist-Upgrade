@@ -73,19 +73,14 @@ fun StreakScreen(onBack: () -> Unit) {
     val allDays = (listened + restored).filter { !it.isAfter(today) }.toSet()
     val latest = allDays.maxOrNull()
     val extinguished = latest != null && latest.isBefore(today.minusDays(1))
-    val previousLength = remember(allDays, latest) {
-        var day = latest
-        var count = 0
-        while (day != null && day in allDays) { count++; day = day.minusDays(1) }
-        count
-    }
+    val previousLength = remember(timestamps, now, zone, restored) { lastListeningStreak(timestamps, now, zone, restored) }
     val shownLevel = streakLevel(if (extinguished) previousLength else streak.current)
     val targetFlameColor = if (extinguished) MaterialTheme.colorScheme.outline else shownLevel.color
     val flameColor = if (screenActive && streakMotionEnabled()) {
         animateColorAsState(targetFlameColor, animationSpec = tween(500), label = "streakFlameColor").value
     } else targetFlameColor
-    val next = streakLevels.firstOrNull { it.minimumDays > streak.current }
-    val progress = if (next == null) 1f else ((streak.current - shownLevel.minimumDays).toFloat() / (next.minimumDays - shownLevel.minimumDays)).coerceIn(0f, 1f)
+    val next = if (extinguished) null else streakLevels.firstOrNull { it.minimumDays > streak.current }
+    val progress = if (extinguished) 0f else if (next == null) 1f else ((streak.current - shownLevel.minimumDays).toFloat() / (next.minimumDays - shownLevel.minimumDays)).coerceIn(0f, 1f)
     val scope = rememberCoroutineScope()
     var confirmation by remember { mutableStateOf(false) }
     var restoreFailed by remember { mutableStateOf(false) }

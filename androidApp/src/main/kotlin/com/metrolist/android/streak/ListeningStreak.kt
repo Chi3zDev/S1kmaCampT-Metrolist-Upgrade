@@ -128,3 +128,22 @@ fun firstPlayStreak(
     val count = if (provisional) previousCount + 1 else calculateListeningStreak(timestamps, now, zone, restoredDays).current
     return FirstPlayStreak(broken, provisional, count, previousCount)
 }
+
+/** Length of the most recent completed or active run, even when it is now extinguished. */
+fun lastListeningStreak(
+    timestamps: List<Long>,
+    now: Instant,
+    zone: ZoneId,
+    restoredDays: Set<LocalDate> = emptySet(),
+): Int {
+    val today = now.atZone(zone).toLocalDate()
+    val days = (timestamps.map { Instant.ofEpochMilli(it).atZone(zone).toLocalDate() } + restoredDays)
+        .filter { !it.isAfter(today) }.toSet()
+    var day = days.maxOrNull() ?: return 0
+    var length = 0
+    while (day in days) {
+        length++
+        day = day.minusDays(1)
+    }
+    return length
+}
