@@ -96,6 +96,26 @@ class ListeningStreakTest {
     }
 
     @Test
+    fun firstPlayPreviewIncludesTodayWithoutAddingHistory() {
+        val plays = listOf(ms("2026-01-01T12:00:00Z"), ms("2026-01-02T12:00:00Z"))
+        val preview = firstPlayStreak(plays, Instant.parse("2026-01-03T08:00:00Z"), ZoneId.of("UTC"))
+        assertEquals(FirstPlayStreak(false, true, 3, 2), preview)
+        assertEquals(2, plays.size)
+    }
+
+    @Test
+    fun firstPlayAfterGapOffersRecoveryInsteadOfCelebration() {
+        val plays = listOf(ms("2026-01-01T12:00:00Z"))
+        assertEquals(FirstPlayStreak(true, true, 1, 0), firstPlayStreak(plays, Instant.parse("2026-01-04T08:00:00Z"), ZoneId.of("UTC")))
+    }
+
+    @Test
+    fun firstPlayAlreadyQualifiedIsNotProvisional() {
+        val plays = listOf(ms("2026-01-02T12:00:00Z"), ms("2026-01-03T01:00:00Z"))
+        assertEquals(FirstPlayStreak(false, false, 2, 1), firstPlayStreak(plays, Instant.parse("2026-01-03T08:00:00Z"), ZoneId.of("UTC")))
+    }
+
+    @Test
     fun recoveryLedgerRoundTripsAndCorruptionIsRejected() {
         val ledger = StreakRecoveryLedger(setOf(LocalDate.parse("2026-01-05")), YearMonth.of(2026, 1), 1)
         assertEquals(ledger, decodeStreakRecovery(encodeStreakRecovery(ledger)))

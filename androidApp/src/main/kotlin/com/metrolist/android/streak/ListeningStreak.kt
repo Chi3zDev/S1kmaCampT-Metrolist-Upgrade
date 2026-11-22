@@ -102,3 +102,29 @@ fun applyStreakRecovery(
     val used = if (ledger.usageMonth == month) ledger.usedThisMonth.coerceIn(0, MONTHLY_STREAK_RECOVERIES) else 0
     return ledger.copy(recoveredDays = ledger.recoveredDays + plan.missingDays, usageMonth = month, usedThisMonth = used + plan.missingDays.size)
 }
+
+/** Preview the first play without inserting an artificial history entry. */
+data class FirstPlayStreak(
+    val broken: Boolean,
+    val provisional: Boolean,
+    val count: Int,
+    val previousCount: Int,
+)
+
+fun firstPlayStreak(
+    timestamps: List<Long>,
+    now: Instant,
+    zone: ZoneId,
+    restoredDays: Set<LocalDate> = emptySet(),
+): FirstPlayStreak {
+    val today = now.atZone(zone).toLocalDate()
+    val listened = timestamps.map { Instant.ofEpochMilli(it).atZone(zone).toLocalDate() }
+        .filter { !it.isAfter(today) }.toSet()
+    val last = (listened + restoredDays).filter { it < today }.maxOrNull()
+    val broken = last != null && last < today.minusDays(1)
+    val yesterdayNoon = today.minusDays(1).atTime(12, 0).atZone(zone).toInstant()
+    val previousCount = calculateListeningStreak(timestamps, yesterdayNoon, zone, restoredDays).current
+    val provisional = today !in listened
+    val count = if (provisional) previousCount + 1 else calculateListeningStreak(timestamps, now, zone, restoredDays).current
+    return FirstPlayStreak(broken, provisional, count, previousCount)
+}

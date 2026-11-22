@@ -61,20 +61,15 @@ fun BoxScope.StreakCelebrationPresenter(
         if (Settings.shared.streakCelebrationShownDate == today.toString()) return@LaunchedEffect
         val ledger = decodeStreakRecovery(recoveryJson) ?: return@LaunchedEffect
         val listened = plays.map { Instant.ofEpochMilli(it).atZone(zone).toLocalDate() }.filter { !it.isAfter(today) }.toSet()
-        val previous = (listened + ledger.recoveredDays).filter { it < today }.maxOrNull()
-        val broken = previous != null && previous < today.minusDays(1)
+        val firstPlay = firstPlayStreak(plays, now, zone, ledger.recoveredDays)
         Settings.shared.streakCelebrationShownDate = today.toString()
-        if (broken) {
+        if (firstPlay.broken) {
             // No dialog or playback operation: a transient action merely opens the recovery page.
             scope.launch {
                 if (snackbarHostState.showSnackbar(banner, actionLabel = action, duration = SnackbarDuration.Short) == SnackbarResult.ActionPerformed) onOpenStreak()
             }
         } else if (celebrationEnabled) {
-            val yesterdayNoon = today.minusDays(1).atTime(12, 0).atZone(zone).toInstant()
-            val previousCount = calculateListeningStreak(plays, yesterdayNoon, zone, ledger.recoveredDays).current
-            val provisional = today !in listened
-            val count = if (provisional) previousCount + 1 else calculateListeningStreak(plays, now, zone, ledger.recoveredDays).current
-            celebration = Celebration(today, count, streakLevel(count).minimumDays > streakLevel(previousCount).minimumDays, provisional, listened, ledger.recoveredDays)
+            celebration = Celebration(today, firstPlay.count, streakLevel(firstPlay.count).minimumDays > streakLevel(firstPlay.previousCount).minimumDays, firstPlay.provisional, listened, ledger.recoveredDays)
         }
     }
     LaunchedEffect(celebration) {
