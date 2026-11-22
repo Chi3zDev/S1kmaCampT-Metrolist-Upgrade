@@ -1,6 +1,8 @@
 package com.metrolist.android.recap
 
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,6 +13,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Card
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.CardDefaults
@@ -36,6 +40,7 @@ import com.metrolist.android.utils.shareImage
 import kotlinx.coroutines.launch
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import com.metrolist.shared.db.MusicDatabase
 import com.metrolist.shared.generated.resources.Res
 import com.metrolist.shared.generated.resources.back
@@ -46,6 +51,8 @@ import com.metrolist.shared.generated.resources.recap_share_story
 import com.metrolist.shared.generated.resources.recap_all_filter
 import com.metrolist.shared.generated.resources.recap_artists_count
 import com.metrolist.shared.generated.resources.recap_empty
+import com.metrolist.shared.generated.resources.recap_continue
+import com.metrolist.shared.generated.resources.recap_watch
 import com.metrolist.shared.generated.resources.recap_error
 import com.metrolist.shared.generated.resources.recap_minutes
 import com.metrolist.shared.generated.resources.recap_month_filter
@@ -72,6 +79,7 @@ fun RecapScreen(onBack: () -> Unit) {
     var data by remember { mutableStateOf<RecapData?>(null) }
     var failed by remember { mutableStateOf(false) }
     var showShare by remember { mutableStateOf(false) }
+    var showSlides by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val colors = MaterialTheme.colorScheme
@@ -91,6 +99,9 @@ fun RecapScreen(onBack: () -> Unit) {
         } catch (error: Exception) {
             failed = true
         }
+    }
+    if (showSlides && data != null) {
+        RecapSlides(data!!, onDismiss = { showSlides = false })
     }
     if (showShare && data != null) {
         AlertDialog(
@@ -166,6 +177,16 @@ fun RecapScreen(onBack: () -> Unit) {
                     }
                 }
             }
+            item {
+                Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Button(onClick = { showSlides = true }, enabled = data != null, modifier = Modifier.fillMaxWidth()) {
+                        Text(stringResource(Res.string.recap_continue))
+                    }
+                    OutlinedButton(onClick = { showSlides = true }, enabled = data != null, modifier = Modifier.fillMaxWidth()) {
+                        Text(stringResource(Res.string.recap_watch))
+                    }
+                }
+            }
             if (failed) item { Text(stringResource(Res.string.recap_error), Modifier.padding(16.dp)) }
             else if (data == null) item { CircularProgressIndicator(Modifier.padding(16.dp)) }
             else {
@@ -184,5 +205,36 @@ private fun RecapList(title: String, names: List<String>) {
     Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(title, style = MaterialTheme.typography.titleLarge)
         names.forEach { Text(it, style = MaterialTheme.typography.bodyLarge) }
+    }
+}
+
+@Composable
+private fun RecapSlides(data: RecapData, onDismiss: () -> Unit) {
+    val pager = rememberPagerState(pageCount = { 3 })
+    Dialog(onDismissRequest = onDismiss) {
+        Card(shape = RoundedCornerShape(28.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh)) {
+            Column(Modifier.fillMaxWidth().padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                HorizontalPager(state = pager, modifier = Modifier.fillMaxWidth()) { page ->
+                    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        when (page) {
+                            0 -> {
+                                Text(data.minutes.toString(), style = MaterialTheme.typography.displayLarge, color = MaterialTheme.colorScheme.primary)
+                                Text(stringResource(Res.string.recap_minutes), style = MaterialTheme.typography.titleMedium)
+                            }
+                            1 -> {
+                                Text(stringResource(Res.string.recap_top_songs), style = MaterialTheme.typography.headlineSmall)
+                                data.songs.take(3).forEach { Text(it.title, style = MaterialTheme.typography.bodyLarge) }
+                            }
+                            else -> {
+                                Text(stringResource(Res.string.recap_top_artists), style = MaterialTheme.typography.headlineSmall)
+                                data.artists.take(3).forEach { Text(it.name, style = MaterialTheme.typography.bodyLarge) }
+                            }
+                        }
+                    }
+                }
+                Text("${pager.currentPage + 1} / 3", style = MaterialTheme.typography.labelMedium)
+                TextButton(onClick = onDismiss) { Text(stringResource(Res.string.cancel)) }
+            }
+        }
     }
 }
