@@ -2587,4 +2587,9 @@
     <string name="glass_navbar_motion_full">Penuh</string>
     <string name="glass_navbar_motion_light">Ringan, tanpa gelembung</string>
     <string name="glass_navbar_motion_off">Mati</string>
+    <string name="streak_celebration_setting">Perayaan streak</string>
+    <string name="streak_celebration_title">Terus dengarkan!</string>
+    <string name="streak_level_up">Naik level!</string>
+    <string name="streak_celebration_continue">Lanjut</string>
+    <string name="streak_first_play_provisional">Hari ini dihitung setelah 30 detik mendengarkan.</string>
 </resources>

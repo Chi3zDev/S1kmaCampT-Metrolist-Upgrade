@@ -1,7 +1,5 @@
 package com.metrolist.android.streak
 
-import android.animation.ValueAnimator
-import android.os.Build
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -18,6 +16,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.text.style.TextAlign
@@ -41,6 +40,8 @@ import java.time.YearMonth
 import java.time.ZoneId
 import java.time.format.TextStyle
 import java.util.Locale
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -91,7 +92,7 @@ fun StreakScreen(onBack: () -> Unit) {
         item {
             StreakPanel {
                 Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Flame(flameColor, animate = !extinguished && screenActive && (Build.VERSION.SDK_INT < 26 || ValueAnimator.areAnimatorsEnabled()))
+                    Flame(flameColor, animate = !extinguished && screenActive && streakMotionEnabled())
                     Text(streak.current.toString(), style = MaterialTheme.typography.displayMedium)
                     Text(stringResource(shownLevel.title), color = flameColor, style = MaterialTheme.typography.titleLarge)
                     Text(stringResource(when { extinguished -> Res.string.streak_extinguished; streak.todayCounted -> Res.string.streak_active; else -> Res.string.streak_waiting }), textAlign = TextAlign.Center)
@@ -162,7 +163,9 @@ fun StreakScreen(onBack: () -> Unit) {
                 confirmation = false
                 scope.launch {
                     val freshTimestamps = database.dao().qualifyingStreakTimestamps().first()
-                    restoreFailed = !persistStreakRecovery(freshTimestamps, Instant.now(), ZoneId.systemDefault())
+                    restoreFailed = !withContext(Dispatchers.IO) {
+                        runCatching { persistStreakRecovery(freshTimestamps, Instant.now(), ZoneId.systemDefault()) }.getOrDefault(false)
+                    }
                 }
             }) { Text(stringResource(Res.string.streak_restore)) } },
             dismissButton = { TextButton(onClick = { confirmation = false }) { Text(stringResource(Res.string.cancel)) } })
@@ -177,7 +180,7 @@ private fun StreakPanel(content: @Composable ColumnScope.() -> Unit) {
 }
 
 @Composable
-private fun DayDot(day: LocalDate, today: LocalDate, listened: Set<LocalDate>, restored: Set<LocalDate>) {
+internal fun DayDot(day: LocalDate, today: LocalDate, listened: Set<LocalDate>, restored: Set<LocalDate>) {
     val c = MaterialTheme.colorScheme
     val background = when { day in listened -> c.primary; day in restored -> c.tertiary; day == today -> c.secondaryContainer; else -> c.surfaceVariant }
     val foreground = when { day in listened -> c.onPrimary; day in restored -> c.onTertiary; else -> c.onSurfaceVariant }
@@ -188,10 +191,10 @@ private fun DayDot(day: LocalDate, today: LocalDate, listened: Set<LocalDate>, r
 }
 
 @Composable
-private fun Flame(color: Color, animate: Boolean) {
+internal fun Flame(color: Color, animate: Boolean, levelUp: Boolean = false) {
     val scale = if (animate) {
         val transition = rememberInfiniteTransition(label = "flame")
-        val value by transition.animateFloat(0.94f, 1.04f, infiniteRepeatable(tween(1200), RepeatMode.Reverse), label = "flicker")
+        val value by transition.animateFloat(if (levelUp) 0.86f else 0.94f, if (levelUp) 1.14f else 1.04f, infiniteRepeatable(tween(if (levelUp) 800 else 1200), RepeatMode.Reverse), label = "flicker")
         value
     } else 1f
     Canvas(Modifier.size(100.dp)) {
@@ -213,4 +216,10 @@ private fun Flame(color: Color, animate: Boolean) {
         }
         drawPath(inner, Color.White.copy(alpha = .55f))
     }
+}
+
+@Composable
+internal fun streakMotionEnabled(): Boolean {
+    val context = LocalContext.current
+    return android.provider.Settings.Global.getFloat(context.contentResolver, android.provider.Settings.Global.ANIMATOR_DURATION_SCALE, 1f) > 0f
 }

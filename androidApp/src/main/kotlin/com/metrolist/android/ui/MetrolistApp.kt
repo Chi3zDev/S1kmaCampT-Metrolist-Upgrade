@@ -208,6 +208,7 @@ import com.metrolist.android.ui.screens.DownloadsScreen
 import com.metrolist.android.ui.screens.HistoryScreen
 import com.metrolist.android.recap.RecapScreen
 import com.metrolist.android.streak.StreakScreen
+import com.metrolist.android.streak.StreakCelebrationPresenter
 import com.metrolist.android.ui.screens.ProfileScreen
 import com.metrolist.android.ui.screens.HomeScreen
 import com.metrolist.android.ui.screens.HomeSectionScreen
@@ -2030,6 +2031,14 @@ fun MetrolistApp(
                             )
                         }
                     }
+
+                    StreakCelebrationPresenter(
+                        database = database,
+                        isPlaying = isPlaying && hasMedia,
+                        visible = !isInPipMode,
+                        snackbarHostState = snackbarHostState,
+                        onOpenStreak = { navigator.navigate(Screen.Streak) },
+                    )
 
                     SnackbarHost(
                         hostState = snackbarHostState,

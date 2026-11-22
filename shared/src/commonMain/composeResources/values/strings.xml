@@ -5665,4 +5665,9 @@
     <string name="glass_navbar_motion_full">Full</string>
     <string name="glass_navbar_motion_light">Light, without bubble</string>
     <string name="glass_navbar_motion_off">Off</string>
+    <string name="streak_celebration_setting">Streak celebration</string>
+    <string name="streak_celebration_title">Keep listening!</string>
+    <string name="streak_level_up">Level up!</string>
+    <string name="streak_celebration_continue">Continue</string>
+    <string name="streak_first_play_provisional">Today counts after 30 seconds of listening.</string>
 </resources>
