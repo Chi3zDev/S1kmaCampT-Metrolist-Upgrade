@@ -404,6 +404,7 @@ fun SpeedDialGridItem(
             is PodcastItem -> Res.string.view_podcast
             else -> null
         }
+    val glassBorder = glassCardBorder()
     Box(
         modifier =
             modifier
@@ -411,6 +412,7 @@ fun SpeedDialGridItem(
                 .graphicsLayer { alpha = if (enabled) 1f else 0.38f }
                 .clip(shape)
                 .focusedItemBorder(shape)
+                .then(if (glassBorder != null) Modifier.border(glassBorder, shape) else Modifier)
                 .onPreviewKeyEvent { event ->
                     if (enabled && event.type == KeyEventType.KeyDown &&
                         (event.key == Key.Menu || (event.key == Key.F10 && event.isShiftPressed)) &&

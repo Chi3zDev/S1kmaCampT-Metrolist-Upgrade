@@ -51,16 +51,23 @@ jobs:
       - name: Assemble debug APK
         run: ./gradlew assembleDebug --no-daemon -Dorg.gradle.java.installations.paths="$JAVA_HOME_25_X64"
 
+      - name: Assemble optimized benchmark APK
+        run: ./gradlew :androidApp:assembleBenchmark --no-daemon -Dorg.gradle.java.installations.paths="$JAVA_HOME_25_X64"
+
       - name: Prepare universal APK
         run: |
           test -f androidApp/build/outputs/apk/debug/androidApp-debug.apk
           cp androidApp/build/outputs/apk/debug/androidApp-debug.apk Metrolist-fork-debug-universal.apk
+          test -f androidApp/build/outputs/apk/benchmark/androidApp-benchmark.apk
+          cp androidApp/build/outputs/apk/benchmark/androidApp-benchmark.apk Metrolist-fork-release-test-universal.apk
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: Metrolist-fork-debug-universal
-          path: Metrolist-fork-debug-universal.apk
+          path: |
+            Metrolist-fork-debug-universal.apk
+            Metrolist-fork-release-test-universal.apk
           if-no-files-found: error
 
       - name: Publish latest-build release
@@ -75,4 +82,4 @@ jobs:
           else
             gh release create latest-build --title latest-build --target "$GITHUB_SHA" --notes 'Latest successful fork debug build.'
           fi
-          gh release upload latest-build Metrolist-fork-debug-universal.apk --clobber
+          gh release upload latest-build Metrolist-fork-debug-universal.apk Metrolist-fork-release-test-universal.apk --clobber

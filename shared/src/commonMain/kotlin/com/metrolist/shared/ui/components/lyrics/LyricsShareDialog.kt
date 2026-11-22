@@ -159,7 +159,15 @@ fun LyricsShareDialog(
     var palette by remember { mutableStateOf(emptyList<Color>()) }
     var loadingArtwork by remember { mutableStateOf(artworkUrl != null) }
     var artworkFailed by remember { mutableStateOf(false) }
-    LaunchedEffect(artworkUrl) {
+    val glassEnabled = Settings.shared.glassNavigation && Settings.shared.glassLyricsPoster
+    val glassVariant = Settings.shared.glassStyle
+    val glassStrength = Settings.shared.glassBlurStrength.coerceIn(0f, 100f)
+    val artworkBlurRadius = if (glassEnabled && style.background == LyricsImageBackground.GLASS) {
+        (glassStrength / 100f * when (glassVariant) { "FROSTED" -> 9f; "CLEAR" -> 2f; else -> 6f }).roundToInt().coerceIn(0, 9)
+    } else 6
+    LaunchedEffect(artworkUrl, artworkBlurRadius) {
+        loadingArtwork = artworkUrl != null
+        artworkFailed = false
         try {
             if (artworkUrl != null) {
                 val result =
@@ -172,7 +180,7 @@ fun LyricsShareDialog(
                     )
                 val image = result.image?.toImageBitmap()
                 if (image != null) {
-                    val prepared = withContext(Dispatchers.Default) { prepareLyricsArtwork(image) }
+                    val prepared = withContext(Dispatchers.Default) { prepareLyricsArtwork(image, artworkBlurRadius) }
                     artwork = image
                     palette = prepared.first
                     blurredArtwork = prepared.second
@@ -194,8 +202,17 @@ fun LyricsShareDialog(
     val appName = stringResource(Res.string.app_name)
     val direction = LocalLayoutDirection.current
     val posterBackground = palette.firstOrNull() ?: MaterialTheme.colorScheme.surface
-    val posterText = if ((style.background == LyricsImageBackground.SOLID || artwork == null) && posterBackground.luminance() > 0.4f) Color.Black else Color.White
-    val renderStyle = style.copy(backgroundColor = posterBackground, textColor = posterText, secondaryColor = posterText.copy(alpha = 0.8f))
+    val effectiveBackground = if (Settings.shared.glassNavigation && !Settings.shared.glassLyricsPoster && style.background == LyricsImageBackground.GLASS) LyricsImageBackground.SOLID else style.background
+    val posterText = if ((effectiveBackground == LyricsImageBackground.SOLID || artwork == null) && posterBackground.luminance() > 0.4f) Color.Black else Color.White
+    val renderStyle = style.copy(
+        background = effectiveBackground,
+        backgroundColor = posterBackground,
+        textColor = posterText,
+        secondaryColor = posterText.copy(alpha = 0.8f),
+        glassEnabled = glassEnabled,
+        glassStyle = glassVariant,
+        glassTint = Settings.shared.glassTintStrength.coerceIn(0f, 100f) / 100f,
+    )
     val storyBackgroundColor = MaterialTheme.colorScheme.surface
     val storyCardColor = MaterialTheme.colorScheme.surfaceContainerHigh
     val storyTextColor = MaterialTheme.colorScheme.onSurface

@@ -2541,4 +2541,23 @@
     <string name="lyrics_poster_font_handwriting">Tulisan tangan</string>
     <string name="appearance_glass_navigation">Bilah navigasi kaca cair</string>
     <string name="appearance_glass_navigation_description">Gunakan bilah navigasi dan pemutar mini transparan yang melayang. Efek buram dinonaktifkan di perangkat lama atau dengan memori rendah.</string>
+    <string name="glass_settings_title">Kaca cair</string>
+    <string name="glass_style">Gaya kaca</string>
+    <string name="glass_style_frosted">Frosted</string>
+    <string name="glass_style_clear">Clear</string>
+    <string name="glass_style_blur">Blur</string>
+    <string name="glass_blur_strength">Kekuatan buram</string>
+    <string name="glass_tint_strength">Kekuatan tint</string>
+    <string name="glass_corner_roundness">Kebulatan sudut</string>
+    <string name="glass_area_navbar">Bilah navigasi</string>
+    <string name="glass_area_mini_player">Pemutar mini</string>
+    <string name="glass_area_top_bar">Bilah atas</string>
+    <string name="glass_area_cards">Kartu dan tombol</string>
+    <string name="glass_area_poster">Poster lirik</string>
+    <string name="glass_light_mode">Mode ringan</string>
+    <string name="glass_light_mode_description">Gunakan tint transparan tanpa efek buram latar. Perangkat lama dan bermemori rendah menggunakannya otomatis.</string>
+    <string name="glass_show_labels">Tampilkan label navigasi</string>
+    <string name="glass_player_position">Posisi pemutar mini</string>
+    <string name="glass_player_above">Di atas bilah navigasi</string>
+    <string name="glass_player_below">Di bawah bilah navigasi</string>
 </resources>

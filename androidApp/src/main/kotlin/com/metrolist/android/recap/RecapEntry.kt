@@ -9,6 +9,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.metrolist.shared.settings.Settings
+import com.metrolist.shared.ui.components.glassCardBorder
+import com.metrolist.shared.ui.components.glassCardColor
 import com.metrolist.shared.generated.resources.Res
 import com.metrolist.shared.generated.resources.recap_title
 import org.jetbrains.compose.resources.stringResource
@@ -18,13 +21,14 @@ fun RecapEntry(onClick: () -> Unit, modifier: Modifier = Modifier) {
     Card(
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
+        colors = CardDefaults.cardColors(containerColor = glassCardColor(MaterialTheme.colorScheme.secondaryContainer)),
+        border = glassCardBorder(),
     ) {
         Text(
             text = stringResource(Res.string.recap_title),
             modifier = Modifier.padding(20.dp),
             style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSecondaryContainer,
+            color = if (Settings.shared.glassNavigation && Settings.shared.glassCards) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSecondaryContainer,
         )
     }
 }

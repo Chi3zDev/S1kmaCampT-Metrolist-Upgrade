@@ -39,6 +39,7 @@ import com.metrolist.shared.generated.resources.filter_library
 import com.metrolist.shared.generated.resources.home
 import com.metrolist.shared.generated.resources.listen_together
 import com.metrolist.shared.generated.resources.menu_history
+import com.metrolist.shared.generated.resources.profile
 import com.metrolist.shared.generated.resources.mysterious_fourth_tab
 import com.metrolist.shared.generated.resources.recognize_nearby_music
 import com.metrolist.shared.generated.resources.search
@@ -115,6 +116,8 @@ fun MetrolistNavigationScaffold(
     navigationVisible: Boolean,
     containerColor: Color,
     onSearchLongClick: () -> Unit,
+    onAccountClick: () -> Unit = {},
+    showAccountInBottomBar: Boolean = false,
     floatingNavigation: Boolean = false,
     onFloatingNavigationOccupiedHeightChanged: (Dp) -> Unit = {},
     modifier: Modifier = Modifier,
@@ -127,27 +130,28 @@ fun MetrolistNavigationScaffold(
     val useDesktopUi = LocalUseDesktopUi.current
     val isTv = LocalIsTv.current
     val useFloatingNavigation = floatingNavigation && !useDesktopUi && !isTv
+    val useBottomAccount = showAccountInBottomBar && navigationSuiteType.isNavigationBar
     val screens =
-        if (useDesktopUi) {
+        (if (useDesktopUi) {
             (visibleSidebarScreens(Settings.shared.sidebarNavItems) + Screen.Search + Screen.Settings).distinct()
         } else if (useFloatingNavigation) {
             floatingNavigationItems()
         } else {
             visibleNavigationItems()
-        }
+        }).let { if (useBottomAccount) it + Screen.Settings else it }
     val layoutDirection = LocalLayoutDirection.current
     val selectedScreen =
         (navigationState.currentRoute.takeIf { it in screens } ?: navigationState.topLevelRoute)
             .takeIf { it in screens } ?: screens.first()
     val items =
         screens.mapNotNull { screen ->
-            val label = screen.labelRes?.let { stringResource(it) } ?: return@mapNotNull null
-            val icon = screen.icon ?: screen.iconFilled ?: return@mapNotNull null
+            val label = if (screen == Screen.Settings && useBottomAccount) stringResource(Res.string.profile) else screen.labelRes?.let { stringResource(it) } ?: return@mapNotNull null
+            val icon = if (screen == Screen.Settings && useBottomAccount) MetrolistIcons.Outlined.AccountCircle else screen.icon ?: screen.iconFilled ?: return@mapNotNull null
             AdaptiveNavigationItem(
                 key = screen,
                 label = label,
                 icon = icon,
-                selectedIcon = screen.iconFilled ?: icon,
+                selectedIcon = if (screen == Screen.Settings && useBottomAccount) MetrolistIcons.Filled.AccountCircle else screen.iconFilled ?: icon,
             )
         }
     val hapticManager = rememberMetrolistHaptics()
@@ -191,7 +195,10 @@ fun MetrolistNavigationScaffold(
         items = items,
         selectedKey = selectedScreen,
         onSelect = { screen ->
-            if (screen == Screen.Search && suppressSearchClick) {
+            if (screen == Screen.Settings && useBottomAccount) {
+                hapticManager.perform(HapticEvent.PRESS)
+                onAccountClick()
+            } else if (screen == Screen.Search && suppressSearchClick) {
                 suppressSearchClick = false
             } else {
                 hapticManager.perform(HapticEvent.PRESS)

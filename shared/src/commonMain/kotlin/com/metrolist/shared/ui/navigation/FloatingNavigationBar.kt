@@ -18,6 +18,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -30,6 +31,7 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -53,6 +55,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.metrolist.shared.settings.Settings
 import com.metrolist.shared.ui.components.focusOutline
 import dev.chrisbanes.haze.HazeInput
 import dev.chrisbanes.haze.HazeState
@@ -60,6 +63,7 @@ import dev.chrisbanes.haze.blur.HazeBlurStyle
 import dev.chrisbanes.haze.blur.hazeBlur
 
 val LocalFloatingNavBar = compositionLocalOf { false }
+val LocalGlassNavbarBottomOffset = compositionLocalOf { 0.dp }
 val LocalGlassNavigationEnabled = compositionLocalOf { false }
 val LocalGlassNavigationState = compositionLocalOf<HazeState?> { null }
 val LocalGlassNavigationCollapsed = compositionLocalOf { false }
@@ -125,8 +129,12 @@ private fun <T> FloatingNavigationBar(
     val expand = LocalExpandGlassNavigation.current
     val pillItems = if (glassEnabled) items else items.filter { it.key != separateKey }
     val separateItem = if (glassEnabled) null else items.firstOrNull { it.key == separateKey }
-    val glassTint = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.58f)
-    val glassStyle = remember(glassTint) { HazeBlurStyle { blurRadius(20.dp) } }
+    val settings = Settings.shared
+    val radius = (settings.glassBlurStrength.coerceIn(0f, 100f) / 100f * when (settings.glassStyle) { "FROSTED" -> 24f; "CLEAR" -> 8f; else -> 20f }).dp
+    val tintAlpha = (settings.glassTintStrength.coerceIn(0f, 100f) / 100f * when (settings.glassStyle) { "FROSTED" -> 0.9f; "CLEAR" -> 0.45f; else -> 0.7f }).coerceIn(0.12f, 0.9f)
+    val glassTint = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = tintAlpha)
+    val glassShape = remember(settings.glassCornerRoundness) { RoundedCornerShape((12f + settings.glassCornerRoundness.coerceIn(0f, 100f) * 0.38f).toInt()) }
+    val glassStyle = remember(radius) { HazeBlurStyle { blurRadius(radius) } }
 
     Row(
         modifier =
@@ -139,9 +147,9 @@ private fun <T> FloatingNavigationBar(
     ) {
         Surface(
             modifier = Modifier.animateContentSize().then(if (glassEnabled && !collapsed) Modifier.fillMaxWidth() else Modifier.wrapContentWidth()).height(FloatingBarHeight).then(
-                if (glassState != null) Modifier.clip(CircleShape).hazeBlur(HazeInput.Backdrop(glassState), glassStyle) else Modifier,
+                if (glassState != null) Modifier.clip(glassShape).hazeBlur(HazeInput.Backdrop(glassState), glassStyle) else Modifier,
             ),
-            shape = CircleShape,
+            shape = if (glassEnabled) glassShape else CircleShape,
             color = if (glassEnabled) glassTint else MaterialTheme.colorScheme.surfaceContainer,
             border = if (glassEnabled) BorderStroke(1.dp, Brush.verticalGradient(listOf(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f), MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.15f)))) else null,
             contentColor = MaterialTheme.colorScheme.onSurface,
@@ -170,7 +178,12 @@ private fun <T> FloatingNavigationBar(
                                     .selectable(selected = selected, onClick = { onSelect(item.key) }, role = Role.Tab),
                                 contentAlignment = Alignment.Center,
                             ) {
-                                Icon(if (selected) item.selectedIcon else item.icon, contentDescription = item.label, tint = MaterialTheme.colorScheme.onSurface)
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Icon(if (selected) item.selectedIcon else item.icon, contentDescription = item.label, tint = MaterialTheme.colorScheme.onSurface)
+                                    if (settings.glassNavbarLabels) {
+                                        Text(item.label, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
+                                    }
+                                }
                             }
                         } else {
                             FloatingNavigationItem(
