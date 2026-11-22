@@ -67,6 +67,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.metrolist.android.streak.StreakCard
+import com.metrolist.android.streak.rememberListeningStreak
 import com.metrolist.android.LocalMiniPlayerBottomInset
 import com.metrolist.android.LocalStartupPresentation
 import com.metrolist.android.playback.LocalPlayerConnection
@@ -133,6 +135,7 @@ fun HomeScreen(
     onNavigateToVideoBrowse: (String, String?, String) -> Unit = onNavigateToBrowse,
     onNavigateToHomeSection: (HomeShelf) -> Unit = {},
     onNavigateToLibrary: (LibraryFilterType?) -> Unit = {},
+    onNavigateToStatistics: () -> Unit = {},
     floatingActionsBottomInset: State<Dp>,
     scrollToTopEvents: Flow<Long> = emptyFlow(),
     viewModel: HomeViewModel = koinViewModel<HomeViewModel>(),
@@ -150,6 +153,7 @@ fun HomeScreen(
     val currentSong = playerConnection?.currentSong?.collectAsStateWithLifecycle() ?: remember { mutableStateOf(null) }
     val isPlaying = playerConnection?.isPlaying?.collectAsStateWithLifecycle() ?: remember { mutableStateOf(false) }
     val database: MusicDatabase = koinInject()
+    val streak = rememberListeningStreak(database)
     val scope = rememberCoroutineScope()
     val networkState by PlaybackNetworkStateStore.state.collectAsStateWithLifecycle()
     val cachedSongIds by remember(database) {
@@ -291,6 +295,9 @@ fun HomeScreen(
                     }.focusGroup()
                     .focusRestorer(),
             header = {
+                item(key = "listening_streak") {
+                    StreakCard(streak, onNavigateToStatistics, Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
+                }
                 if (isTv) {
                     item(key = "tv_refresh") {
                         Button(

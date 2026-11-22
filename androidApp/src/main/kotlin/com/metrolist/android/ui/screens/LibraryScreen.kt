@@ -76,6 +76,8 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.metrolist.android.streak.StreakCard
+import com.metrolist.android.streak.rememberListeningStreak
 import com.metrolist.android.LocalMiniPlayerBottomInset
 import com.metrolist.android.extensions.isInternetConnected
 import com.metrolist.android.listentogether.AndroidListenTogetherManager
@@ -182,6 +184,7 @@ fun LibraryScreen(
     onNavigateToPodcast: (String) -> Unit = {},
     onNavigateToAutoPlaylist: ((String) -> Unit)? = null,
     onNavigateToPlaylistImport: () -> Unit = {},
+    onNavigateToStatistics: () -> Unit = {},
     floatingActionsBottomInset: State<Dp>,
     scrollToTopEvents: Flow<Long> = emptyFlow(),
     viewModel: LibraryViewModel = koinViewModel(),
@@ -202,6 +205,7 @@ fun LibraryScreen(
     val navigationScope = key(rootActive) { rememberCoroutineScope() }
     val context = LocalContext.current
     val database: MusicDatabase = koinInject()
+    val streak = rememberListeningStreak(database)
     val scope = rememberCoroutineScope()
     var searchQuery by remember { mutableStateOf("") }
     val libraryGridState = rememberLazyGridState()
@@ -450,28 +454,27 @@ fun LibraryScreen(
 
     val content: @Composable () -> Unit = {
         if (selectedFilter == LibraryFilter.PODCASTS && !Settings.shared.hidePodcasts) {
-            Column(
-                modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .padding(top = topPadding),
-            ) {
-                val text = libraryContentText()
-                ChipShelf(
-                    options = LibraryFilter.entries,
-                    selectedOption = selectedFilter,
-                    onSelectionChange = onFilterChange,
-                    label = { text.filterLabels.getValue(it) },
-                    modifier = Modifier.padding(top = 1.dp),
-                )
-                PodcastLibraryScreen(
-                    onNavigateToPodcast = onNavigateToPodcast,
-                    onNavigateToArtist = onNavigateToArtist,
-                    onNavigateToAutoPlaylist = onNavigateToAutoPlaylist ?: {},
-                )
-            }
+            PodcastLibraryScreen(
+                onNavigateToPodcast = onNavigateToPodcast,
+                onNavigateToArtist = onNavigateToArtist,
+                onNavigateToAutoPlaylist = onNavigateToAutoPlaylist ?: {},
+                headerContent = {
+                    Column(Modifier.padding(top = topPadding)) {
+                        StreakCard(streak, onNavigateToStatistics, Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
+                        val text = libraryContentText()
+                        ChipShelf(
+                            options = LibraryFilter.entries,
+                            selectedOption = selectedFilter,
+                            onSelectionChange = onFilterChange,
+                            label = { text.filterLabels.getValue(it) },
+                            modifier = Modifier.padding(top = 1.dp),
+                        )
+                    }
+                },
+            )
         } else {
             LibraryContent(
+                headerContent = { StreakCard(streak, onNavigateToStatistics) },
                 presentation = viewModel.presentation,
                 text = libraryContentText(),
                 items = uiState.items,

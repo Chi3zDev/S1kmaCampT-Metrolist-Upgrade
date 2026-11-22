@@ -253,6 +253,7 @@ fun LibraryContent(
     onSearchDescendingChange: (Boolean) -> Unit = {},
     onPlayAlbum: ((AlbumItem) -> Unit)? = null,
     presentation: LibraryPresentation = remember { LibraryPresentation() },
+    headerContent: (@Composable () -> Unit)? = null,
 ) {
     val currentSongIdState = rememberUpdatedState(currentSongId)
     val isPlayingState = rememberUpdatedState(isPlaying)
@@ -457,6 +458,9 @@ fun LibraryContent(
                     horizontalArrangement = Arrangement.spacedBy(horizontalGap),
                     verticalArrangement = Arrangement.spacedBy(verticalGap),
                 ) {
+                    if (headerContent != null) {
+                        item(key = "library_extra_header", span = { GridItemSpan(maxLineSpan) }) { headerContent() }
+                    }
                     item(key = "library_header", contentType = "header", span = { GridItemSpan(maxLineSpan) }) {
                         LibraryHeader(
                             text = text,

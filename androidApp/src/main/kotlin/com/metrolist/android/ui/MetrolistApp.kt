@@ -2468,6 +2468,7 @@ fun getEntryProvider(
     entryProvider<NavKey> {
         entry<Screen.Home>(metadata = navTabMetadata) {
             HomeScreen(
+                onNavigateToStatistics = { navigator.navigate(Screen.Statistics) },
                 floatingActionsBottomInset = floatingActionsBottomInset,
                 onNavigateToAlbum = { albumId -> navigator.navigate(Screen.Album(albumId)) },
                 onNavigateToArtist = { artistId -> navigator.navigate(Screen.Artist(artistId)) },
@@ -2532,6 +2533,7 @@ fun getEntryProvider(
 
         entry<Screen.Library>(metadata = navTabMetadata) {
             LibraryScreen(
+                onNavigateToStatistics = { navigator.navigate(Screen.Statistics) },
                 viewModel = libraryViewModel,
                 floatingActionsBottomInset = floatingActionsBottomInset,
                 scrollToTopEvents = libraryScrollToTopEvents,

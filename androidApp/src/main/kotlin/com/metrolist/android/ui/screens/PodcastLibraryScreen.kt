@@ -115,6 +115,7 @@ fun PodcastLibraryScreen(
     onNavigateToPodcast: (String) -> Unit,
     onNavigateToArtist: (String) -> Unit,
     onNavigateToAutoPlaylist: (String) -> Unit = {},
+    headerContent: (@Composable () -> Unit)? = null,
 ) {
     val database: MusicDatabase = koinInject()
     val playerConnection = LocalPlayerConnection.current
@@ -192,6 +193,9 @@ fun PodcastLibraryScreen(
                 androidx.compose.foundation.layout
                     .PaddingValues(bottom = bottomInset + 96.dp),
         ) {
+            if (headerContent != null) {
+                item(key = "library_extra_header") { headerContent() }
+            }
             item(key = "podcast_filters") {
                 PodcastFilterChips(
                     selectedTab = selectedTab,
