@@ -2581,4 +2581,6 @@
     <string name="streak_week">Minggu ini</string>
     <string name="streak_calendar_legend">Warna utama: mendengarkan · Aksen: dipulihkan · Lingkaran: hari ini</string>
     <string name="streak_restore_failed">Streak tidak dapat dipulihkan. Periksa jeda dan jatah saat ini.</string>
+    <string name="streak_level_glowing">Berpendar</string>
+    <string name="streak_level_luminous">Bercahaya</string>
 </resources>
