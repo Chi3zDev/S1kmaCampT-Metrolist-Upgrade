@@ -87,4 +87,12 @@ class ListeningStreakTest {
         assertEquals(StreakRecoveryFailure.NO_BREAK, planStreakRecovery(plays, before, zone, StreakRecoveryLedger()).failure)
         assertEquals(listOf(LocalDate.parse("2026-01-02")), planStreakRecovery(plays, after, zone, StreakRecoveryLedger()).missingDays)
     }
+
+    @Test
+    fun recoveryLedgerRoundTripsAndCorruptionIsRejected() {
+        val ledger = StreakRecoveryLedger(setOf(LocalDate.parse("2026-01-05")), YearMonth.of(2026, 1), 1)
+        assertEquals(ledger, decodeStreakRecovery(encodeStreakRecovery(ledger)))
+        assertNull(decodeStreakRecovery("not valid json"))
+        assertNull(decodeStreakRecovery("{\"used\":7}"))
+    }
 }

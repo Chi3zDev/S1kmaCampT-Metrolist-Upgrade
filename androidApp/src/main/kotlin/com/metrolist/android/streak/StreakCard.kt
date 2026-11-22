@@ -23,6 +23,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.metrolist.shared.ui.components.glassCardBorder
 import com.metrolist.shared.ui.components.glassCardColor
 import com.metrolist.shared.db.MusicDatabase
+import com.metrolist.shared.settings.Settings
 import java.time.Instant
 import java.time.ZoneId
 import kotlinx.coroutines.delay
@@ -53,7 +54,9 @@ fun rememberListeningStreak(database: MusicDatabase): ListeningStreak {
             delay(60_000)
         }
     }
-    return remember(timestamps, now) { calculateListeningStreak(timestamps, now, ZoneId.systemDefault()) }
+    val recoveryJson = Settings.shared.streakRecoveryJson
+    val restoredDays = remember(recoveryJson) { decodeStreakRecovery(recoveryJson)?.recoveredDays.orEmpty() }
+    return remember(timestamps, now, restoredDays) { calculateListeningStreak(timestamps, now, ZoneId.systemDefault(), restoredDays) }
 }
 
 @Composable

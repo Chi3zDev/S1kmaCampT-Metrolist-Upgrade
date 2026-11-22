@@ -430,6 +430,7 @@ class Settings(
     var glassLightMode by preference(false)
     var glassNavbarLabels by preference(false)
     var glassPlayerBelow by preference(false)
+    var streakRecoveryJson by preference("")
     var floatingTopBar by preference(FloatingTopBarKey, false)
     var floatingSearch by preference(false)
     var voiceSearchEnabled by preference(VoiceSearchEnabledKey, true)
