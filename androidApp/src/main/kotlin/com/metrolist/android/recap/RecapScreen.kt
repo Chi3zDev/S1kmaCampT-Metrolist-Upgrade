@@ -154,7 +154,10 @@ fun RecapScreen(onBack: () -> Unit) {
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
                 ) {
                     Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text(stringResource(Res.string.recap_year, year), style = MaterialTheme.typography.headlineSmall)
+                        Text(
+                            if (period == RecapPeriod.YEAR) stringResource(Res.string.recap_year, year) else titleText,
+                            style = MaterialTheme.typography.headlineSmall,
+                        )
                         Text((data?.minutes ?: 0).toString(), style = MaterialTheme.typography.displayLarge, color = MaterialTheme.colorScheme.primary)
                         Text(stringResource(Res.string.recap_minutes), style = MaterialTheme.typography.bodyLarge)
                         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {

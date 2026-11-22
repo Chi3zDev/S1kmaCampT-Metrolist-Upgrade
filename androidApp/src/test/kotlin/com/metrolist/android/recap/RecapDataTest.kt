@@ -36,6 +36,13 @@ class RecapDataTest {
     }
 
     @Test
+    fun previousYearRangeExcludesEarlierYears() {
+        val (start, end) = recapRange(RecapPeriod.YEAR, Instant.parse("2025-12-31T10:00:00Z"), ZoneId.of("UTC"))
+        assertEquals(Instant.parse("2025-01-01T00:00:00Z").toEpochMilli(), start)
+        assertEquals(Instant.parse("2025-12-31T10:00:00Z").toEpochMilli(), end)
+    }
+
+    @Test
     fun newYearUsesLocalMidnight() {
         val (start, end) = recapRange(RecapPeriod.YEAR, Instant.parse("2026-12-31T17:30:00Z"), ZoneId.of("Asia/Pontianak"))
         assertEquals(Instant.parse("2026-12-31T17:00:00Z").toEpochMilli(), start)
