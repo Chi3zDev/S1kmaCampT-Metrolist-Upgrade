@@ -96,6 +96,20 @@ class ListeningStreakTest {
     }
 
     @Test
+    fun monthlyQuotaResetsExactlyAtLocalMidnight() {
+        val zone = ZoneId.of("Asia/Pontianak")
+        val plays = listOf(ms("2026-01-29T05:00:00Z"))
+        val ledger = StreakRecoveryLedger(usageMonth = YearMonth.of(2026, 1), usedThisMonth = 5)
+        val before = planStreakRecovery(plays, Instant.parse("2026-01-31T16:59:59Z"), zone, ledger)
+        val after = planStreakRecovery(plays, Instant.parse("2026-01-31T17:00:00Z"), zone, ledger)
+        assertEquals(StreakRecoveryFailure.INSUFFICIENT_QUOTA, before.failure)
+        assertEquals(0, before.remaining)
+        assertEquals(null, after.failure)
+        assertEquals(5, after.remaining)
+        assertEquals(listOf(LocalDate.parse("2026-01-30"), LocalDate.parse("2026-01-31")), after.missingDays)
+    }
+
+    @Test
     fun firstPlayPreviewIncludesTodayWithoutAddingHistory() {
         val plays = listOf(ms("2026-01-01T12:00:00Z"), ms("2026-01-02T12:00:00Z"))
         val preview = firstPlayStreak(plays, Instant.parse("2026-01-03T08:00:00Z"), ZoneId.of("UTC"))
