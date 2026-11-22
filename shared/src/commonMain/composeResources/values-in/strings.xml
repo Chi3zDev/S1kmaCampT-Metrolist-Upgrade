@@ -2533,4 +2533,10 @@
     <string name="lyrics_poster_selection_rule">Pilih hingga enam baris yang berurutan.</string>
     <string name="lyrics_poster_partial_only">Pilih kutipan, bukan seluruh lirik lagu.</string>
     <string name="lyrics_poster_glass">Kaca</string>
+    <string name="lyrics_poster_format">Format</string>
+    <string name="lyrics_poster_font">Huruf</string>
+    <string name="lyrics_poster_font_sans">Sans tebal</string>
+    <string name="lyrics_poster_font_serif">Serif</string>
+    <string name="lyrics_poster_font_mono">Mono</string>
+    <string name="lyrics_poster_font_handwriting">Tulisan tangan</string>
 </resources>

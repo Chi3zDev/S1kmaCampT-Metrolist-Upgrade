@@ -154,6 +154,7 @@ private data class StoredLyricsImageStyle(
     val secondaryColor: Int,
     val textScale: Float,
     val contentScale: Float,
+    val font: String = "SANS",
 )
 
 internal fun LyricsImageStyle.encodeForStorage(): String =
@@ -165,6 +166,7 @@ internal fun LyricsImageStyle.encodeForStorage(): String =
             secondaryColor.toArgb(),
             textScale,
             contentScale,
+            font.name,
         ),
     )
 
@@ -182,5 +184,6 @@ internal fun decodeLyricsImageStyle(
             alignment = alignment,
             textScale = style.textScale.takeIf { it.isFinite() }?.coerceIn(0.5f, 2f) ?: 1f,
             contentScale = style.contentScale.takeIf { it.isFinite() }?.coerceIn(0.6f, 1.35f) ?: 1f,
+            font = LyricsPosterFont.entries.firstOrNull { it.name == style.font } ?: LyricsPosterFont.SANS,
         )
     }.getOrDefault(LyricsImageStyle(alignment = alignment))

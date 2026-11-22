@@ -30,6 +30,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
@@ -43,6 +44,10 @@ import com.metrolist.shared.ui.theme.getGradientColors
 
 internal enum class LyricsImageBackground { GLASS, SOLID, BLUR, GRADIENT }
 
+internal enum class LyricsPosterFont(val family: FontFamily) {
+    SANS(FontFamily.SansSerif), SERIF(FontFamily.Serif), MONO(FontFamily.Monospace), HANDWRITING(FontFamily.Cursive),
+}
+
 internal data class LyricsImageStyle(
     val background: LyricsImageBackground = LyricsImageBackground.SOLID,
     val backgroundColor: Color = Color(0xFF242424),
@@ -51,6 +56,7 @@ internal data class LyricsImageStyle(
     val alignment: TextAlign = TextAlign.Center,
     val textScale: Float = 1f,
     val contentScale: Float = 1f,
+    val font: LyricsPosterFont = LyricsPosterFont.SANS,
 )
 
 private fun DrawScope.drawCover(
@@ -125,6 +131,7 @@ internal fun renderLyricsImage(
         TextStyle(
             color = style.textColor,
             fontWeight = FontWeight.Bold,
+            fontFamily = style.font.family,
             textAlign = style.alignment,
         )
 

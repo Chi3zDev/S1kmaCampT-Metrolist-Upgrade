@@ -73,6 +73,12 @@ import com.metrolist.shared.generated.resources.customize_colors
 import com.metrolist.shared.generated.resources.gradient
 import com.metrolist.shared.generated.resources.logo
 import com.metrolist.shared.generated.resources.lyrics_poster_glass
+import com.metrolist.shared.generated.resources.lyrics_poster_format
+import com.metrolist.shared.generated.resources.lyrics_poster_font
+import com.metrolist.shared.generated.resources.lyrics_poster_font_sans
+import com.metrolist.shared.generated.resources.lyrics_poster_font_serif
+import com.metrolist.shared.generated.resources.lyrics_poster_font_mono
+import com.metrolist.shared.generated.resources.lyrics_poster_font_handwriting
 import com.metrolist.shared.generated.resources.lyrics_share_artwork_failed
 import com.metrolist.shared.generated.resources.lyrics_share_auto_fit
 import com.metrolist.shared.generated.resources.lyrics_share_color
@@ -284,24 +290,6 @@ fun LyricsShareDialog(
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                         modifier = Modifier.fillMaxSize().padding(end = 16.dp),
                     ) {
-                        if (storyMode) {
-                            item {
-                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    ExpressiveFilterChip(
-                                        selected = !useStoryLayout,
-                                        enabled = !busy,
-                                        onClick = { useStoryLayout = false },
-                                        label = { Text(stringResource(Res.string.lyrics_share_square_image)) },
-                                    )
-                                    ExpressiveFilterChip(
-                                        selected = useStoryLayout,
-                                        enabled = !busy,
-                                        onClick = { useStoryLayout = true },
-                                        label = { Text(stringResource(Res.string.lyrics_share_story_image)) },
-                                    )
-                                }
-                            }
-                        }
                         item {
                             Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                                 Box(
@@ -369,6 +357,29 @@ fun LyricsShareDialog(
                                             },
                                         )
                                     }
+                                }
+                            }
+                        }
+
+                        item {
+                            Text(stringResource(Res.string.lyrics_poster_format))
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                ExpressiveFilterChip(selected = !useStoryLayout, enabled = !busy, onClick = { useStoryLayout = false }, label = { Text(stringResource(Res.string.lyrics_share_square_image)) })
+                                ExpressiveFilterChip(selected = useStoryLayout, enabled = !busy, onClick = { useStoryLayout = true }, label = { Text(stringResource(Res.string.lyrics_share_story_image)) })
+                            }
+                        }
+                        item {
+                            Text(stringResource(Res.string.lyrics_poster_font))
+                            val fontScroll = rememberScrollState()
+                            Row(Modifier.fillMaxWidth().carouselScroll(fontScroll).horizontalScroll(fontScroll), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                LyricsPosterFont.entries.forEach { font ->
+                                    val label = when (font) {
+                                        LyricsPosterFont.SANS -> Res.string.lyrics_poster_font_sans
+                                        LyricsPosterFont.SERIF -> Res.string.lyrics_poster_font_serif
+                                        LyricsPosterFont.MONO -> Res.string.lyrics_poster_font_mono
+                                        LyricsPosterFont.HANDWRITING -> Res.string.lyrics_poster_font_handwriting
+                                    }
+                                    ExpressiveFilterChip(selected = style.font == font, enabled = !busy, onClick = { style = style.copy(font = font) }, label = { Text(stringResource(label), maxLines = 1) })
                                 }
                             }
                         }
