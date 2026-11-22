@@ -52,6 +52,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.alpha
@@ -231,7 +232,7 @@ private fun <T> FloatingNavigationBar(
                                 onDragCancel = { dragX = null; dragIndex = -1; stretch = 1f },
                             )
                         },
-                    contentAlignment = Alignment.CenterLeft,
+                    contentAlignment = AbsoluteAlignment.CenterLeft,
                 ) {
                     if (bubbleEnabled && rowWidth > 0) {
                         val center = dragX ?: animatedCenter
