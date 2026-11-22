@@ -1,5 +1,6 @@
 package com.metrolist.android.streak
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -79,7 +80,10 @@ fun StreakScreen(onBack: () -> Unit) {
         count
     }
     val shownLevel = streakLevel(if (extinguished) previousLength else streak.current)
-    val flameColor = if (extinguished) MaterialTheme.colorScheme.outline else shownLevel.color
+    val targetFlameColor = if (extinguished) MaterialTheme.colorScheme.outline else shownLevel.color
+    val flameColor = if (screenActive && streakMotionEnabled()) {
+        animateColorAsState(targetFlameColor, animationSpec = tween(500), label = "streakFlameColor").value
+    } else targetFlameColor
     val next = streakLevels.firstOrNull { it.minimumDays > streak.current }
     val progress = if (next == null) 1f else ((streak.current - shownLevel.minimumDays).toFloat() / (next.minimumDays - shownLevel.minimumDays)).coerceIn(0f, 1f)
     val scope = rememberCoroutineScope()
@@ -162,9 +166,11 @@ fun StreakScreen(onBack: () -> Unit) {
             confirmButton = { TextButton(onClick = {
                 confirmation = false
                 scope.launch {
-                    val freshTimestamps = database.dao().qualifyingStreakTimestamps().first()
                     restoreFailed = !withContext(Dispatchers.IO) {
-                        runCatching { persistStreakRecovery(freshTimestamps, Instant.now(), ZoneId.systemDefault()) }.getOrDefault(false)
+                        runCatching {
+                            val freshTimestamps = database.dao().qualifyingStreakTimestamps().first()
+                            persistStreakRecovery(freshTimestamps, Instant.now(), ZoneId.systemDefault())
+                        }.getOrDefault(false)
                     }
                 }
             }) { Text(stringResource(Res.string.streak_restore)) } },
