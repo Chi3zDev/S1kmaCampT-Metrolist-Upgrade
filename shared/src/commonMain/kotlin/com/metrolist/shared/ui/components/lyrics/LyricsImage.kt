@@ -15,17 +15,20 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
-internal const val LYRICS_SHARE_LINE_LIMIT = 5
+internal const val LYRICS_SHARE_LINE_LIMIT = 6
 
 internal fun toggleLyricsShareLine(
     selected: Set<Int>,
     index: Int,
 ): Set<Int> =
     when {
-        index in selected -> selected - index
-        selected.size < LYRICS_SHARE_LINE_LIMIT -> selected + index
+        selected.isEmpty() -> setOf(index)
+        index in selected && (index == selected.minOrNull() || index == selected.maxOrNull()) -> selected - index
+        index !in selected && selected.size < LYRICS_SHARE_LINE_LIMIT &&
+            (index == selected.minOrNull()!! - 1 || index == selected.maxOrNull()!! + 1) -> selected + index
         else -> selected
     }
+
 
 internal fun selectedLyricsText(
     lyrics: List<LyricsEntry>,

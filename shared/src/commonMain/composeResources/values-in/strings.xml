@@ -2530,4 +2530,6 @@
     <string name="story_change_period">Pilih periode</string>
     <string name="story_previous_month">Bulan sebelumnya</string>
     <string name="story_next_month">Bulan berikutnya</string>
+    <string name="lyrics_poster_selection_rule">Pilih hingga enam baris yang berurutan.</string>
+    <string name="lyrics_poster_partial_only">Pilih kutipan, bukan seluruh lirik lagu.</string>
 </resources>

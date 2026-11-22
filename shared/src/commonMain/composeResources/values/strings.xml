@@ -5608,4 +5608,6 @@
     <string name="story_change_period">Choose period</string>
     <string name="story_previous_month">Previous month</string>
     <string name="story_next_month">Next month</string>
+    <string name="lyrics_poster_selection_rule">Select up to six consecutive lines.</string>
+    <string name="lyrics_poster_partial_only">Choose an excerpt, not the entire song.</string>
 </resources>

@@ -115,7 +115,8 @@ import com.metrolist.shared.api.lyrics.LyricsUtils.lyricsSeekPositionForOffset
 import com.metrolist.shared.generated.resources.Res
 import com.metrolist.shared.generated.resources.cancel
 import com.metrolist.shared.generated.resources.lyrics_curated_by
-import com.metrolist.shared.generated.resources.lyrics_share_limit
+import com.metrolist.shared.generated.resources.lyrics_poster_selection_rule
+import com.metrolist.shared.generated.resources.lyrics_poster_partial_only
 import com.metrolist.shared.generated.resources.lyrics_share_selected_count
 import com.metrolist.shared.generated.resources.lyrics_written_by
 import com.metrolist.shared.generated.resources.share
@@ -339,6 +340,9 @@ fun LyricsView(
             }
 
     val displayLyrics = remember(lyrics) { mergeBackgroundLyricsEntries(lyrics) }
+    val shareableLineCount = remember(displayLyrics) {
+        displayLyrics.indices.count { selectedLyricsText(displayLyrics, setOf(it)).isNotBlank() }
+    }
     val unsyncedDisplayLyrics =
         remember(displayLyrics) {
             displayLyrics.mapIndexedNotNull { index, entry ->
@@ -1668,10 +1672,13 @@ fun LyricsView(
                 Column(Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
                     if (selection.limitReached) {
                         Text(
-                            stringResource(Res.string.lyrics_share_limit, LYRICS_SHARE_LINE_LIMIT),
+                            stringResource(Res.string.lyrics_poster_selection_rule),
                             color = MaterialTheme.colorScheme.error,
                             modifier = Modifier.semantics { liveRegion = LiveRegionMode.Assertive },
                         )
+                    }
+                    if (selectedIndices.size >= shareableLineCount) {
+                        Text(stringResource(Res.string.lyrics_poster_partial_only), color = MaterialTheme.colorScheme.error)
                     }
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
@@ -1684,6 +1691,7 @@ fun LyricsView(
                         )
                         TextButton(onClick = selection::clear, shapes = ButtonDefaults.shapes()) { Text(stringResource(Res.string.cancel)) }
                         TextButton(
+                            enabled = selectedIndices.isNotEmpty() && selectedIndices.size < shareableLineCount,
                             onClick = {
                                 onShareSelection?.invoke(
                                     selectedLyricsText(
