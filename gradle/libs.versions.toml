@@ -53,6 +53,8 @@ jmdns = "3.6.5"
 ktlintGradle = "14.2.0"
 
 [libraries]
+haze = { module = "dev.chrisbanes.haze:haze", version = "2.1.0" }
+haze-blur = { module = "dev.chrisbanes.haze:haze-blur", version = "2.1.0" }
 kotlin-annotations-jvm = { module = "org.jetbrains.kotlin:kotlin-annotations-jvm", version.ref = "kotlin" }
 robolectric = { module = "org.robolectric:robolectric", version = "4.18" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutines" }

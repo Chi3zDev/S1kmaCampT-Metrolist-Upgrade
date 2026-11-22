@@ -11,6 +11,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -49,8 +50,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.metrolist.shared.ui.components.focusOutline
+import dev.chrisbanes.haze.HazeInput
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.blur.HazeBlurStyle
+import dev.chrisbanes.haze.blur.hazeBlur
 
 val LocalFloatingNavBar = compositionLocalOf { false }
+val LocalGlassNavigationState = compositionLocalOf<HazeState?> { null }
 
 private val FloatingBarHeight = 64.dp
 private val FloatingItemHeight = 48.dp
@@ -106,8 +112,11 @@ private fun <T> FloatingNavigationBar(
     itemModifier: @Composable (T) -> Modifier,
     modifier: Modifier = Modifier,
 ) {
-    val pillItems = items.filter { it.key != separateKey }
-    val separateItem = items.firstOrNull { it.key == separateKey }
+    val glassState = LocalGlassNavigationState.current
+    val pillItems = if (glassState != null) items else items.filter { it.key != separateKey }
+    val separateItem = if (glassState != null) null else items.firstOrNull { it.key == separateKey }
+    val glassTint = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.65f)
+    val glassStyle = remember(glassTint) { HazeBlurStyle { blurRadius(24.dp) } }
 
     Row(
         modifier =
@@ -119,9 +128,12 @@ private fun <T> FloatingNavigationBar(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Surface(
-            modifier = Modifier.wrapContentWidth().height(FloatingBarHeight),
+            modifier = Modifier.wrapContentWidth().height(FloatingBarHeight).then(
+                if (glassState != null) Modifier.clip(CircleShape).hazeBlur(HazeInput.Backdrop(glassState), glassStyle) else Modifier,
+            ),
             shape = CircleShape,
-            color = MaterialTheme.colorScheme.surfaceContainer,
+            color = if (glassState != null) glassTint else MaterialTheme.colorScheme.surfaceContainer,
+            border = if (glassState != null) BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)) else null,
             contentColor = MaterialTheme.colorScheme.onSurface,
             shadowElevation = FloatingBarShadow,
         ) {

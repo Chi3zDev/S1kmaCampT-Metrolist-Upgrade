@@ -329,6 +329,8 @@ kotlin {
                 api("com.github.MetrolistGroup.innertubex:innertubex:$innerTubeXVersion")
                 api(libs.runtime)
                 api(libs.foundation)
+                api(libs.haze)
+                api(libs.haze.blur)
                 api(libs.androidx.navigationevent.compose)
                 api(libs.material3)
                 api(libs.material3.adaptive)
