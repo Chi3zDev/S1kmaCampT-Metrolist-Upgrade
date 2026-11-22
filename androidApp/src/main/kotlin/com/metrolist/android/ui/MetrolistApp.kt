@@ -385,6 +385,7 @@ import com.metrolist.shared.utils.parseYouTubeStartPositionMs
 import com.metrolist.shared.utils.parseYouTubeUrl
 import com.metrolist.shared.viewmodels.PlayerViewModel
 import com.metrolist.shared.youtube.playback.PlaybackNetworkStateStore
+import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
@@ -833,7 +834,8 @@ fun MetrolistApp(
         val shouldShowTopBar =
             navigationState.topLevelRoute in topLevelScreens && currentRoute in topLevelScreens
 
-        val useFloatingTopBar = Settings.shared.floatingTopBar && !hasDesktopCaption
+        val useGlassTopBar = useGlass && Settings.shared.glassTopBar && !hasDesktopCaption
+        val useFloatingTopBar = (Settings.shared.floatingTopBar || useGlassTopBar) && !hasDesktopCaption
         val topAppBarScrollBehavior = appBarScrollBehavior()
         val selectedRailFocusRequester = remember { FocusRequester() }
         val contentFocusRequester = remember { FocusRequester() }
@@ -1573,6 +1575,7 @@ fun MetrolistApp(
                                                     if (navigationState.topLevelRoute == Screen.Home && Screen.History !in railScreens) {
                                                         TopBarIconButton(
                                                             floating = useFloatingTopBar,
+                                                            glass = useGlassTopBar,
                                                             onClick = { navigator.navigate(Screen.History) },
                                                             modifier =
                                                                 Modifier.tvFocusHighlight(
@@ -1593,6 +1596,7 @@ fun MetrolistApp(
                                                     ) {
                                                         TopBarIconButton(
                                                             floating = useFloatingTopBar,
+                                                            glass = useGlassTopBar,
                                                             onClick = { navigator.navigate(Screen.Downloads) },
                                                         ) {
                                                             Icon(
@@ -1604,6 +1608,7 @@ fun MetrolistApp(
                                                     if (Settings.shared.devtoolsUnlocked) {
                                                         TopBarIconButton(
                                                             floating = useFloatingTopBar,
+                                                            glass = useGlassTopBar,
                                                             onClick = { navigator.navigate(Screen.Devtools) },
                                                             modifier =
                                                                 Modifier.tvFocusHighlight(
@@ -1622,6 +1627,7 @@ fun MetrolistApp(
                                                     if (Settings.shared.listenTogetherEnabled && Screen.ListenTogether !in railScreens) {
                                                         TopBarIconButton(
                                                             floating = useFloatingTopBar,
+                                                            glass = useGlassTopBar,
                                                             onClick = { navigator.navigate(Screen.ListenTogether) },
                                                             modifier =
                                                                 Modifier.tvFocusHighlight(
@@ -1643,6 +1649,7 @@ fun MetrolistApp(
                                                 }
                                                 if (useFloatingTopBar) {
                                                     FloatingTopAppBar(
+                                                        glass = useGlassTopBar,
                                                         title = topBarTitle,
                                                         subtitle = topBarSubtitle,
                                                         actions = topBarActions,
@@ -1686,6 +1693,7 @@ fun MetrolistApp(
                                         Box(
                                             Modifier
                                                 .fillMaxSize()
+                                                .then(if (glassBackdrop != null) Modifier.hazeSource(glassBackdrop) else Modifier)
                                                 .consumeWindowInsets(scaffoldPadding)
                                                 .consumeWindowInsets(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)),
                                         ) {

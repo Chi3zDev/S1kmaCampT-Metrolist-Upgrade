@@ -1067,7 +1067,7 @@ fun GridCard(
 ) {
     val isArtist = artistId != null
     Column(
-        Modifier.fillMaxWidth(),
+        Modifier.fillMaxWidth().glassListCard(),
         horizontalAlignment = if (isArtist) Alignment.CenterHorizontally else Alignment.Start,
     ) {
         Box(Modifier.fillMaxWidth().aspectRatio(1f), contentAlignment = Alignment.Center) {
@@ -1134,7 +1134,7 @@ fun ListCard(
     isPlaying: Boolean = false,
 ) {
     Row(
-        Modifier.fillMaxWidth().height(48.dp),
+        Modifier.fillMaxWidth().height(48.dp).glassListCard(),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Artwork(

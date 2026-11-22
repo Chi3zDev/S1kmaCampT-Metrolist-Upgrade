@@ -15,7 +15,6 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.togetherWith
-import dev.chrisbanes.haze.hazeSource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -393,8 +392,7 @@ fun <T> AdaptiveNavigationScaffold(
                         .fillMaxWidth()
                         .then(if (desktopRail) Modifier.background(MaterialTheme.colorScheme.surfaceContainer) else Modifier),
                 ) {
-                    val glassState = LocalGlassNavigationState.current
-                    Box(Modifier.fillMaxSize().then(if (glassState != null) Modifier.hazeSource(glassState) else Modifier).then(if (floatingBar || slimBar) Modifier.clipToBounds() else Modifier)) {
+                    Box(Modifier.fillMaxSize().then(if (floatingBar || slimBar) Modifier.clipToBounds() else Modifier)) {
                         // Custom navigation layouts use the same content color as a Material surface.
                         CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurface, content = content)
                     }

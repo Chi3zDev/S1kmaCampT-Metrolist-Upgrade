@@ -1,0 +1,39 @@
+package com.metrolist.shared.ui.components
+
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import com.metrolist.shared.settings.Settings
+
+/** Translucent decoration only: list items do not capture or blur the backdrop. */
+@Composable
+fun glassCardColor(fallback: Color): Color {
+    val settings = Settings.shared
+    if (!settings.glassNavigation || !settings.glassCards) return fallback
+    val multiplier = when (settings.glassStyle) { "FROSTED" -> 0.9f; "CLEAR" -> 0.45f; else -> 0.7f }
+    return MaterialTheme.colorScheme.surfaceContainer.copy(alpha = (settings.glassTintStrength / 100f * multiplier).coerceIn(0.22f, 0.9f))
+}
+
+@Composable
+fun glassCardBorder(): BorderStroke? {
+    val settings = Settings.shared
+    if (!settings.glassNavigation || !settings.glassCards) return null
+    val highlight = MaterialTheme.colorScheme.onSurface.copy(alpha = if (settings.glassStyle == "CLEAR") 0.38f else 0.25f)
+    val edge = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.15f)
+    return remember(highlight, edge) { BorderStroke(1.dp, Brush.verticalGradient(listOf(highlight, edge))) }
+}
+
+@Composable
+fun Modifier.glassListCard(): Modifier {
+    val border = glassCardBorder() ?: return this
+    val shape = RoundedCornerShape(12.dp)
+    return this.background(glassCardColor(Color.Transparent), shape).border(border, shape)
+}

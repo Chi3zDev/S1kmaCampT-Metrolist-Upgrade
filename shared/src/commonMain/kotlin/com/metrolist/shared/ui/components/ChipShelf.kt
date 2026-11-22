@@ -1,5 +1,6 @@
 package com.metrolist.shared.ui.components
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.horizontalScroll
@@ -138,6 +139,7 @@ fun ExpressiveFilterChip(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
 ) {
+    val glassBorder = glassCardBorder()
     ToggleButton(
         checked = selected,
         onCheckedChange = { onClick() },
@@ -145,7 +147,7 @@ fun ExpressiveFilterChip(
         shapes = ToggleButtonDefaults.shapesFor(ButtonDefaults.ExtraSmallContainerHeight),
         colors =
             ToggleButtonDefaults.colors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                containerColor = glassCardColor(MaterialTheme.colorScheme.surfaceContainer),
                 contentColor = MaterialTheme.colorScheme.onSurface,
                 checkedContainerColor = MaterialTheme.colorScheme.primaryContainer,
                 checkedContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -154,6 +156,7 @@ fun ExpressiveFilterChip(
         modifier =
             modifier
                 .height(ButtonDefaults.ExtraSmallContainerHeight)
+                .then(if (glassBorder != null) Modifier.border(glassBorder, ToggleButtonDefaults.shape) else Modifier)
                 .tvFocusHighlight(ToggleButtonDefaults.shape)
                 .semantics { this.selected = selected },
     ) {
