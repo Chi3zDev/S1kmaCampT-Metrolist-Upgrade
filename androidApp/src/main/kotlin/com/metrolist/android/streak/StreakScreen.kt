@@ -254,5 +254,8 @@ internal fun Flame(color: Color, animate: Boolean, levelUp: Boolean = false) {
 @Composable
 internal fun streakMotionEnabled(): Boolean {
     val context = LocalContext.current
-    return android.provider.Settings.Global.getFloat(context.contentResolver, android.provider.Settings.Global.ANIMATOR_DURATION_SCALE, 1f) > 0f
+    val lifecycle by LocalLifecycleOwner.current.lifecycle.currentStateAsState()
+    return remember(context, lifecycle) {
+        android.provider.Settings.Global.getFloat(context.contentResolver, android.provider.Settings.Global.ANIMATOR_DURATION_SCALE, 1f) > 0f
+    }
 }
