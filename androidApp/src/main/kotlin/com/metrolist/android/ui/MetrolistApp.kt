@@ -207,6 +207,7 @@ import com.metrolist.android.ui.screens.BrowseScreen
 import com.metrolist.android.ui.screens.DownloadsScreen
 import com.metrolist.android.ui.screens.HistoryScreen
 import com.metrolist.android.recap.RecapScreen
+import com.metrolist.android.ui.screens.ProfileScreen
 import com.metrolist.android.ui.screens.HomeScreen
 import com.metrolist.android.ui.screens.HomeSectionScreen
 import com.metrolist.android.ui.screens.IntegrationsScreen
@@ -495,7 +496,7 @@ fun MetrolistApp(
             onRejectPairing = AndroidDeviceConnect.manager::rejectPairing,
         )
         val initialStartRoute = remember { resolveAndPersistStartupScreen() }
-        val topLevelRoutes = remember { setOf(Screen.Home, Screen.Search, Screen.Library, Screen.EasterEgg) }
+        val topLevelRoutes = remember { setOf(Screen.Home, Screen.Search, Screen.Library, Screen.EasterEgg, Screen.Profile) }
         val navigationState =
             key(navigationSaveKey) {
                 rememberNavigationState(
@@ -830,7 +831,7 @@ fun MetrolistApp(
         val immersiveContent = remember { mutableStateOf(false) }
         val shouldRenderMiniPlayer = shouldShowMiniPlayer && !shouldHideMiniPlayerForIme
 
-        val topLevelScreens = remember { setOf(Screen.Home, Screen.Library, Screen.EasterEgg) }
+        val topLevelScreens = remember { setOf(Screen.Home, Screen.Library, Screen.EasterEgg, Screen.Profile) }
         val shouldShowTopBar =
             navigationState.topLevelRoute in topLevelScreens && currentRoute in topLevelScreens
 
@@ -1465,7 +1466,7 @@ fun MetrolistApp(
                                 navigationVisible = shouldShowNavigationBar,
                                 containerColor = if (pureBlack) Color.Black else MaterialTheme.colorScheme.surface,
                                 onSearchLongClick = { navigator.navigate(Screen.Recognition) },
-                                onAccountClick = { showAccountMenu = true },
+                                onAccountClick = { navigator.navigate(Screen.Profile) },
                                 showAccountInBottomBar = useBottomAccount,
                                 floatingNavigation = useFloatingNavBar,
                                 onFloatingNavigationOccupiedHeightChanged = {
@@ -1546,6 +1547,10 @@ fun MetrolistApp(
 
                                                                 Screen.EasterEgg -> {
                                                                     stringResource(Res.string.mysterious_fourth_tab)
+                                                                }
+
+                                                                Screen.Profile -> {
+                                                                    stringResource(Res.string.profile)
                                                                 }
 
                                                                 else -> {
@@ -2514,7 +2519,7 @@ fun resolveAndPersistStartupScreen(): Screen {
 
 fun NavKey.isVisibleNavigationScreen(): Boolean =
     when (this) {
-        Screen.Home, Screen.Search, Screen.Library, Screen.EasterEgg -> true
+        Screen.Home, Screen.Search, Screen.Library, Screen.EasterEgg, Screen.Profile -> true
         else -> false
     }
 
@@ -2534,6 +2539,27 @@ fun getEntryProvider(
     onSearchResultsVisible: (Boolean) -> Unit = {},
 ): (NavKey) -> NavEntry<NavKey> =
     entryProvider<NavKey> {
+        entry<Screen.Profile>(metadata = navTabMetadata) {
+            ProfileScreen(
+                authManager = authManager,
+                onLogin = { navigator.navigate(Screen.Login) },
+                onTokenLogin = { navigator.navigate(Screen.TokenLogin) },
+                onSwitchAccount = { navigator.navigate(Screen.SwitchChannel) },
+                onHistory = { navigator.navigate(Screen.History) },
+                onStatistics = { navigator.navigate(Screen.Statistics) },
+                onIntegrations = { navigator.navigate(Screen.Integrations) },
+                onSettings = { navigator.navigate(Screen.Settings) },
+                onLogout = {
+                    scope.launch {
+                        authManager.clearAllCredentials()
+                        context.packageManager.getLaunchIntentForPackage(context.packageName)
+                            ?.apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK) }
+                            ?.let(context::startActivitySafely)
+                    }
+                },
+            )
+        }
+
         entry<Screen.Home>(metadata = navTabMetadata) {
             HomeScreen(
                 onNavigateToRecap = { navigator.navigate(Screen.Recap) },

@@ -31,6 +31,9 @@ sealed class Screen : NavKey {
     data object EasterEgg : Screen()
 
     @Serializable
+    data object Profile : Screen()
+
+    @Serializable
     data object Settings : Screen()
 
     @Serializable
