@@ -343,6 +343,9 @@ fun LyricsView(
     val shareableLineCount = remember(displayLyrics) {
         displayLyrics.indices.count { selectedLyricsText(displayLyrics, setOf(it)).isNotBlank() }
     }
+    val selectedTextLineCount = remember(displayLyrics, selectedIndices) {
+        selectedLyricsText(displayLyrics, selectedIndices).lines().count { it.isNotBlank() }
+    }
     val unsyncedDisplayLyrics =
         remember(displayLyrics) {
             displayLyrics.mapIndexedNotNull { index, entry ->
@@ -1670,7 +1673,7 @@ fun LyricsView(
                 shadowElevation = 6.dp,
             ) {
                 Column(Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
-                    if (selection.limitReached) {
+                    if (selection.limitReached || selectedTextLineCount > LYRICS_SHARE_LINE_LIMIT) {
                         Text(
                             stringResource(Res.string.lyrics_poster_selection_rule),
                             color = MaterialTheme.colorScheme.error,
@@ -1691,7 +1694,8 @@ fun LyricsView(
                         )
                         TextButton(onClick = selection::clear, shapes = ButtonDefaults.shapes()) { Text(stringResource(Res.string.cancel)) }
                         TextButton(
-                            enabled = selectedIndices.isNotEmpty() && selectedIndices.size < shareableLineCount,
+                            enabled = selectedIndices.isNotEmpty() && selectedIndices.size < shareableLineCount &&
+                                selectedTextLineCount in 1..LYRICS_SHARE_LINE_LIMIT,
                             onClick = {
                                 onShareSelection?.invoke(
                                     selectedLyricsText(

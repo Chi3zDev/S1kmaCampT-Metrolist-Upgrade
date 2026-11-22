@@ -320,7 +320,7 @@ internal fun renderLyricsImage(
                 with(logo) {
                     draw(
                         Size((if (story) 20 else 38) * footerScale, (if (story) 20 else 38) * footerScale),
-                        colorFilter = ColorFilter.tint(if (story) storyCardColor else style.backgroundColor),
+                        colorFilter = ColorFilter.tint(style.backgroundColor),
                     )
                 }
             }
@@ -338,7 +338,7 @@ internal fun renderLyricsImage(
                     layout.padding + 44f * contentScale,
                     footerTop + verticalOffset + 20f * contentScale,
                     7f * contentScale,
-                    storySecondaryColor,
+                    style.secondaryColor,
                     layout.lyricsWidth - 62f * contentScale,
                     shrinkToFit = true,
                 )

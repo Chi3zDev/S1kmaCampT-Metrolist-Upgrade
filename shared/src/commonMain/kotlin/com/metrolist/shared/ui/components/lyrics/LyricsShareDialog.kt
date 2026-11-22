@@ -251,7 +251,7 @@ fun LyricsShareDialog(
                                 storyCardColor = storyCardColor,
                                 storyTextColor = storyTextColor,
                                 storySecondaryColor = storySecondaryColor,
-                                shareUrl = shareUrl,
+                                shareUrl = null,
                             )
                         }
                     }
@@ -434,7 +434,7 @@ fun LyricsShareDialog(
                                                     storyCardColor = storyCardColor,
                                                     storyTextColor = storyTextColor,
                                                     storySecondaryColor = storySecondaryColor,
-                                                    shareUrl = shareUrl,
+                                                    shareUrl = null,
                                                 )
                                             }
                                         }
