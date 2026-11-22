@@ -2560,4 +2560,5 @@
     <string name="glass_player_position">Posisi pemutar mini</string>
     <string name="glass_player_above">Di atas bilah navigasi</string>
     <string name="glass_player_below">Di bawah bilah navigasi</string>
+    <string name="glass_area_floating_actions">Tombol aksi melayang</string>
 </resources>

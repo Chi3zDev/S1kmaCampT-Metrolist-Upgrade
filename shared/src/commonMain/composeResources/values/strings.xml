@@ -5638,4 +5638,5 @@
     <string name="glass_player_position">Mini player position</string>
     <string name="glass_player_above">Above navigation bar</string>
     <string name="glass_player_below">Below navigation bar</string>
+    <string name="glass_area_floating_actions">Floating action buttons</string>
 </resources>

@@ -425,6 +425,7 @@ class Settings(
     var glassMiniPlayer by preference(true)
     var glassTopBar by preference(true)
     var glassCards by preference(true)
+    var glassFloatingActions by preference(true)
     var glassLyricsPoster by preference(true)
     var glassLightMode by preference(false)
     var glassNavbarLabels by preference(false)

@@ -14,6 +14,8 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusGroup
@@ -58,6 +60,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -99,6 +102,7 @@ import com.metrolist.shared.model.SongItem
 import com.metrolist.shared.model.YTItem
 import com.metrolist.shared.model.isAvailableOffline
 import com.metrolist.shared.settings.LibraryFilterType
+import com.metrolist.shared.settings.Settings
 import com.metrolist.shared.ui.LocalIsTv
 import com.metrolist.shared.ui.components.ChipShelf
 import com.metrolist.shared.ui.components.HomeLoadingPlaceholder
@@ -188,6 +192,13 @@ fun HomeScreen(
     var isRefreshing by remember { mutableStateOf(false) }
     val showTopRefreshIndicator = isRefreshing || uiState.isRefreshing
     val isTv = LocalIsTv.current
+    val glassActions = Settings.shared.glassNavigation && Settings.shared.glassFloatingActions
+    val glassActionColor = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = (Settings.shared.glassTintStrength / 100f * 0.7f).coerceIn(0.25f, 0.85f))
+    val glassActionHighlight = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f)
+    val glassActionEdge = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.15f)
+    val glassActionBorder = remember(glassActionHighlight, glassActionEdge) {
+        BorderStroke(1.dp, Brush.verticalGradient(listOf(glassActionHighlight, glassActionEdge)))
+    }
     var showFloatingActions by remember { mutableStateOf(true) }
     val fabNestedScrollConnection =
         remember {
@@ -287,7 +298,7 @@ fun HomeScreen(
             contentPadding =
                 PaddingValues(
                     top = topPadding,
-                    bottom = miniPlayerInset + 16.dp,
+                    bottom = miniPlayerInset + 16.dp + if (glassActions && !isTv) 148.dp else 0.dp,
                 ),
             modifier =
                 Modifier
@@ -414,9 +425,10 @@ fun HomeScreen(
                 ) {
                     SmallFloatingActionButton(
                         onClick = onNavigateToRecognition,
-                        shape = RoundedCornerShape(8.dp),
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                        modifier = if (glassActions) Modifier.border(glassActionBorder, RoundedCornerShape(16.dp)) else Modifier,
+                        shape = RoundedCornerShape(if (glassActions) 16.dp else 8.dp),
+                        containerColor = if (glassActions) glassActionColor else MaterialTheme.colorScheme.primaryContainer,
+                        contentColor = if (glassActions) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onPrimaryContainer,
                     ) {
                         Icon(
                             imageVector = MetrolistIcons.Outlined.AudioCapture,
@@ -425,7 +437,10 @@ fun HomeScreen(
                     }
                     FloatingActionButton(
                         onClick = ::shuffleHomeContent,
-                        shape = RoundedCornerShape(12.dp),
+                        modifier = if (glassActions) Modifier.border(glassActionBorder, RoundedCornerShape(16.dp)) else Modifier,
+                        shape = RoundedCornerShape(if (glassActions) 16.dp else 12.dp),
+                        containerColor = if (glassActions) glassActionColor else MaterialTheme.colorScheme.primaryContainer,
+                        contentColor = if (glassActions) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onPrimaryContainer,
                     ) {
                         Icon(
                             imageVector = MetrolistIcons.Rounded.Shuffle,
