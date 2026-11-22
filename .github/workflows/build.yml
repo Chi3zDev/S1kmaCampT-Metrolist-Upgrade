@@ -51,6 +51,9 @@ jobs:
       - name: Assemble debug APK
         run: ./gradlew assembleDebug --no-daemon -Dorg.gradle.java.installations.paths="$JAVA_HOME_25_X64"
 
+      - name: Test streak recovery
+        run: ./gradlew :androidApp:testDebugUnitTest --tests com.metrolist.android.streak.ListeningStreakTest --no-daemon -Dorg.gradle.java.installations.paths="$JAVA_HOME_25_X64"
+
       - name: Assemble optimized benchmark APK
         run: ./gradlew :androidApp:assembleBenchmark --no-daemon -Dorg.gradle.java.installations.paths="$JAVA_HOME_25_X64"
 
