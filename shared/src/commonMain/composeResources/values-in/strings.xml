@@ -2497,4 +2497,12 @@
     <string name="desktop_minimize_to_tray_desc">Menutup jendela akan memperkecil Metrolist ke tray</string>
     <string name="desktop_tray_toggle_on_click">Sembunyikan atau tampilkan saat klik di tray</string>
     <string name="desktop_tray_toggle_on_click_desc">Klik kiri ikon tray akan membuka atau menutup jendela Metrolist</string>
+    <string name="streak_days">hari berturut-turut</string>
+    <string name="streak_active">Menyala! Balik lagi besok biar tidak putus</string>
+    <string name="streak_inactive">Dengarkan hari ini agar streak tetap menyala</string>
+    <string name="streak_longest">Terpanjang: %1$d hari</string>
+    <string name="streak_level_start">Berkobar</string>
+    <string name="streak_level_middle">Menyala</string>
+    <string name="streak_level_top">Membara</string>
+    <string name="streak_next">Level berikutnya: %1$s</string>
 </resources>

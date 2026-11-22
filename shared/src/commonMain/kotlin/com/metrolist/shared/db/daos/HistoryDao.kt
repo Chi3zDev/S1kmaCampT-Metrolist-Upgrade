@@ -93,6 +93,9 @@ interface HistoryDao {
         untilMs: Long,
     ): List<HistoryCatalogNames>
 
+    @Query("SELECT DISTINCT timestamp FROM event WHERE playTimeKnown = 1 AND playTime >= 30000 ORDER BY timestamp")
+    fun qualifyingStreakTimestamps(): Flow<List<Long>>
+
     @Transaction
     @Query("SELECT * FROM event ORDER BY rowId DESC")
     fun events(): Flow<List<EventWithSong>>

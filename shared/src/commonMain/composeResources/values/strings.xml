@@ -5575,4 +5575,12 @@
     <string name="ai_setup_key_limits">Review key limits</string>
     <string name="lyrics_share_square_image">Square image</string>
     <string name="lyrics_share_story_image">Story image</string>
+    <string name="streak_days">consecutive days</string>
+    <string name="streak_active">On fire! Come back tomorrow to keep it going</string>
+    <string name="streak_inactive">Listen today to keep your streak going</string>
+    <string name="streak_longest">Longest: %1$d days</string>
+    <string name="streak_level_start">Berkobar</string>
+    <string name="streak_level_middle">Menyala</string>
+    <string name="streak_level_top">Membara</string>
+    <string name="streak_next">Next level: %1$s</string>
 </resources>
