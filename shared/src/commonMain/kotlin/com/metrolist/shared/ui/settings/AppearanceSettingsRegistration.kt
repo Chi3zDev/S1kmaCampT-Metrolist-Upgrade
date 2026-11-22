@@ -455,6 +455,12 @@ internal fun SettingsUiRegistryBuilder.registerAppearanceSettings(host: SharedSe
                 ) { settings.floatingNavBar = it }
                 if (host.platform == SettingsPlatform.ANDROID) {
                     switch(
+                        id = "glassNavigation",
+                        title = stringResource(Res.string.appearance_glass_navigation),
+                        description = stringResource(Res.string.appearance_glass_navigation_description),
+                        checked = settings.glassNavigation,
+                    ) { settings.glassNavigation = it }
+                    switch(
                         id = "floatingTopBar",
                         title = stringResource(Res.string.appearance_floating_top_bar),
                         description = stringResource(Res.string.appearance_floating_top_bar_description),

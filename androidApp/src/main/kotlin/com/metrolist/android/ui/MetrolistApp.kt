@@ -2,6 +2,7 @@
 
 package com.metrolist.android.ui
 
+import android.app.ActivityManager
 import android.app.SearchManager
 import android.content.Context
 import android.content.Intent
@@ -343,6 +344,8 @@ import com.metrolist.shared.ui.navigation.DesktopContentMaxWidth
 import com.metrolist.shared.ui.navigation.LocalAlbumArtworkSource
 import com.metrolist.shared.ui.navigation.LocalContentObscured
 import com.metrolist.shared.ui.navigation.LocalFloatingNavBar
+import com.metrolist.shared.ui.navigation.LocalGlassNavigationEnabled
+import com.metrolist.shared.ui.navigation.LocalGlassNavigationState
 import com.metrolist.shared.ui.navigation.LocalNavVisibilityScope
 import com.metrolist.shared.ui.navigation.LocalNavigationContainerState
 import com.metrolist.shared.ui.navigation.LocalNavigator
@@ -377,6 +380,7 @@ import com.metrolist.shared.utils.parseYouTubeStartPositionMs
 import com.metrolist.shared.utils.parseYouTubeUrl
 import com.metrolist.shared.viewmodels.PlayerViewModel
 import com.metrolist.shared.youtube.playback.PlaybackNetworkStateStore
+import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -801,9 +805,17 @@ fun MetrolistApp(
             }
         val useNavigationRail = !navigationSuiteType.isNavigationBar
         // Hiding navigation must not move the retained lookahead tree between scaffolds.
+        val useGlassNavigation =
+            Settings.shared.glassNavigation && !useDesktopUi && !usesDirectionalNavigation && navigationSuiteType.isNavigationBar
         val useFloatingNavBar =
-            Settings.shared.floatingNavBar && !useDesktopUi && !usesDirectionalNavigation &&
+            (Settings.shared.floatingNavBar || useGlassNavigation) && !useDesktopUi && !usesDirectionalNavigation &&
                 navigationSuiteType.isNavigationBar
+        val hazeState = rememberHazeState()
+        val canBlurGlass = remember(context) {
+            Build.VERSION.SDK_INT > Build.VERSION_CODES.S_V2 &&
+                !(context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager).isLowRamDevice
+        }
+        val glassBackdrop = if (useGlassNavigation && canBlurGlass) hazeState else null
         val isImeVisible = WindowInsets.ime.asPaddingValues().calculateBottomPadding() > 0.dp
         val shouldHideMiniPlayerForIme = isLandscape && isImeVisible
         val shouldShowMiniPlayer = hasMedia
@@ -858,8 +870,8 @@ fun MetrolistApp(
                 label = "navigationVisibility",
             )
         val hasBottomNavigation = navigationSuiteType.isNavigationBar
-        val isExpressiveMiniPlayer = Settings.shared.miniPlayerType == MiniPlayerType.EXPRESSIVE && !useDesktopMiniPlayer
-        val isModernMiniPlayer = Settings.shared.miniPlayerType == MiniPlayerType.MODERN && !useDesktopMiniPlayer
+        val isExpressiveMiniPlayer = !useGlassNavigation && Settings.shared.miniPlayerType == MiniPlayerType.EXPRESSIVE && !useDesktopMiniPlayer
+        val isModernMiniPlayer = (useGlassNavigation || Settings.shared.miniPlayerType == MiniPlayerType.MODERN) && !useDesktopMiniPlayer
         val miniPlayerBottomSpacing =
             when {
                 isExpressiveMiniPlayer -> ModernMiniPlayerBottomSpacing
@@ -1403,6 +1415,8 @@ fun MetrolistApp(
                         CompositionLocalProvider(
                             LocalContentObscured provides (isInPipMode || contentObscured),
                             LocalFloatingNavBar provides useFloatingNavBar,
+                            LocalGlassNavigationEnabled provides useGlassNavigation,
+                            LocalGlassNavigationState provides glassBackdrop,
                             LocalPlayerExpanded provides isPlayerExpanded,
                             LocalPlayerExpandedOrExpanding provides isPlayerExpandedOrExpanding,
                             LocalImmersiveContent provides immersiveContent,
@@ -1871,11 +1885,13 @@ fun MetrolistApp(
                             isExpandable = true,
                             isDraggableWhenCollapsed = true,
                             preserveContentWhenCollapsed = true,
-                            morphCollapsedContainer = true,
+                            morphCollapsedContainer = !useGlassNavigation,
                             collapsedContent = {
                                 if (shouldRenderMiniPlayer) {
                                     MiniPlayer(
                                         useDesktopLayout = useDesktopMiniPlayer,
+                                        glassEnabled = useGlassNavigation,
+                                        glassState = glassBackdrop,
                                         onExpand = {
                                             focusManager.clearFocus(force = true)
                                             keyboardController?.hide()

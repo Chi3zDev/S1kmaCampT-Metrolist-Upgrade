@@ -5617,4 +5617,6 @@
     <string name="lyrics_poster_font_serif">Serif</string>
     <string name="lyrics_poster_font_mono">Mono</string>
     <string name="lyrics_poster_font_handwriting">Handwriting</string>
+    <string name="appearance_glass_navigation">Navbar liquid glass</string>
+    <string name="appearance_glass_navigation_description">Use a translucent floating navigation bar and mini player. Blur is disabled on older or low-memory devices.</string>
 </resources>

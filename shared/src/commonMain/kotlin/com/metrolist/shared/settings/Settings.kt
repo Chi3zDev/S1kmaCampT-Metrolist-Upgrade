@@ -416,6 +416,7 @@ class Settings(
     var forceBottomNavBar by preference(ForceBottomNavBarKey, false)
     var slimNavBar by preference(SlimNavBarKey, false)
     var floatingNavBar by preference(FloatingNavBarKey, false)
+    var glassNavigation by preference(false)
     var floatingTopBar by preference(FloatingTopBarKey, false)
     var floatingSearch by preference(false)
     var voiceSearchEnabled by preference(VoiceSearchEnabledKey, true)

@@ -44,6 +44,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
@@ -58,6 +60,7 @@ import dev.chrisbanes.haze.blur.HazeBlurStyle
 import dev.chrisbanes.haze.blur.hazeBlur
 
 val LocalFloatingNavBar = compositionLocalOf { false }
+val LocalGlassNavigationEnabled = compositionLocalOf { false }
 val LocalGlassNavigationState = compositionLocalOf<HazeState?> { null }
 val LocalGlassNavigationCollapsed = compositionLocalOf { false }
 val LocalExpandGlassNavigation = compositionLocalOf<() -> Unit> { {} }
@@ -117,35 +120,36 @@ private fun <T> FloatingNavigationBar(
     modifier: Modifier = Modifier,
 ) {
     val glassState = LocalGlassNavigationState.current
-    val collapsed = glassState != null && LocalGlassNavigationCollapsed.current
+    val glassEnabled = LocalGlassNavigationEnabled.current
+    val collapsed = glassEnabled && LocalGlassNavigationCollapsed.current
     val expand = LocalExpandGlassNavigation.current
-    val pillItems = if (glassState != null) items else items.filter { it.key != separateKey }
-    val separateItem = if (glassState != null) null else items.firstOrNull { it.key == separateKey }
-    val glassTint = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.65f)
-    val glassStyle = remember(glassTint) { HazeBlurStyle { blurRadius(24.dp) } }
+    val pillItems = if (glassEnabled) items else items.filter { it.key != separateKey }
+    val separateItem = if (glassEnabled) null else items.firstOrNull { it.key == separateKey }
+    val glassTint = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.58f)
+    val glassStyle = remember(glassTint) { HazeBlurStyle { blurRadius(20.dp) } }
 
     Row(
         modifier =
             modifier
-                .wrapContentWidth()
+                .then(if (glassEnabled && !collapsed) Modifier.fillMaxWidth() else Modifier.wrapContentWidth())
                 .windowInsetsPadding(ShortNavigationBarDefaults.windowInsets)
                 .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Surface(
-            modifier = Modifier.animateContentSize().wrapContentWidth().height(FloatingBarHeight).then(
+            modifier = Modifier.animateContentSize().then(if (glassEnabled && !collapsed) Modifier.fillMaxWidth() else Modifier.wrapContentWidth()).height(FloatingBarHeight).then(
                 if (glassState != null) Modifier.clip(CircleShape).hazeBlur(HazeInput.Backdrop(glassState), glassStyle) else Modifier,
             ),
             shape = CircleShape,
-            color = if (glassState != null) glassTint else MaterialTheme.colorScheme.surfaceContainer,
-            border = if (glassState != null) BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)) else null,
+            color = if (glassEnabled) glassTint else MaterialTheme.colorScheme.surfaceContainer,
+            border = if (glassEnabled) BorderStroke(1.dp, Brush.verticalGradient(listOf(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f), MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.15f)))) else null,
             contentColor = MaterialTheme.colorScheme.onSurface,
             shadowElevation = FloatingBarShadow,
         ) {
             Row(
-                modifier = Modifier.wrapContentWidth().padding(horizontal = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = (if (glassEnabled && !collapsed) Modifier.fillMaxWidth() else Modifier.wrapContentWidth()).padding(horizontal = 8.dp),
+                horizontalArrangement = if (glassEnabled) Arrangement.SpaceEvenly else Arrangement.spacedBy(4.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 if (collapsed) {
@@ -157,12 +161,25 @@ private fun <T> FloatingNavigationBar(
                     }
                 } else {
                     pillItems.forEach { item ->
-                        FloatingNavigationItem(
-                            item = item,
-                            selected = item.key == selectedKey,
-                            onClick = { onSelect(item.key) },
-                            modifier = itemModifier(item.key),
-                        )
+                        if (glassEnabled) {
+                            val selected = item.key == selectedKey
+                            Box(
+                                modifier = itemModifier(item.key).weight(1f).height(FloatingItemHeight)
+                                    .clip(CircleShape)
+                                    .background(if (selected) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.14f) else Color.Transparent)
+                                    .selectable(selected = selected, onClick = { onSelect(item.key) }, role = Role.Tab),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                Icon(if (selected) item.selectedIcon else item.icon, contentDescription = item.label, tint = MaterialTheme.colorScheme.onSurface)
+                            }
+                        } else {
+                            FloatingNavigationItem(
+                                item = item,
+                                selected = item.key == selectedKey,
+                                onClick = { onSelect(item.key) },
+                                modifier = itemModifier(item.key),
+                            )
+                        }
                     }
                 }
             }

@@ -78,6 +78,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
@@ -193,6 +194,7 @@ fun MiniPlayer(
     bottomSheetState: BottomSheetState? = null,
     cardFocusRequester: FocusRequester? = null,
     glassState: HazeState? = null,
+    glassEnabled: Boolean = false,
 ) {
     val playerConnection = LocalPlayerConnection.current ?: return
 
@@ -211,8 +213,8 @@ fun MiniPlayer(
     val isLive = currentSong?.isLive == true || playbackResource?.isLive == true
     val lifecycleState by LocalLifecycleOwner.current.lifecycle.currentStateAsState()
     val miniPlayerActive = bottomSheetState?.isCollapsed != false && lifecycleState == Lifecycle.State.RESUMED
-    val isExpressiveMiniPlayer = Settings.shared.miniPlayerType == MiniPlayerType.EXPRESSIVE && !useDesktopLayout
-    val isModern = Settings.shared.miniPlayerType == MiniPlayerType.MODERN && !useDesktopLayout
+    val isExpressiveMiniPlayer = !glassEnabled && Settings.shared.miniPlayerType == MiniPlayerType.EXPRESSIVE && !useDesktopLayout
+    val isModern = (glassEnabled || Settings.shared.miniPlayerType == MiniPlayerType.MODERN) && !useDesktopLayout
     val expressiveProgressEnabled = isExpressiveMiniPlayer && Settings.shared.showExpressiveMiniPlayerProgress
     val progressActive = miniPlayerActive && (!isExpressiveMiniPlayer || expressiveProgressEnabled) && !useDesktopLayout && !isLive
     var progressWidthPx by remember { mutableIntStateOf(0) }
@@ -472,6 +474,7 @@ fun MiniPlayer(
         MiniPlayerCard(
             useDesktopLayout = useDesktopLayout,
             glassState = glassState,
+            glassEnabled = glassEnabled,
             currentSong = song,
             isLive = isLive,
             modifier = Modifier.onSizeChanged { progressWidthPx = it.width },
@@ -611,6 +614,7 @@ private fun onHorizontalDragEnd(
 internal fun MiniPlayerCard(
     useDesktopLayout: Boolean,
     glassState: HazeState? = null,
+    glassEnabled: Boolean = false,
     currentSong: SongItem,
     isLive: Boolean = false,
     modifier: Modifier = Modifier,
@@ -644,10 +648,10 @@ internal fun MiniPlayerCard(
     val isTv = LocalIsTv.current
     val artworkUrl = currentSong.previewThumbnailUrl
     val useBlurMiniPlayer =
-        glassState == null && Settings.shared.miniPlayerBackgroundStyle == "BLURRED_ARTWORK" && artworkUrl != null
+        !glassEnabled && Settings.shared.miniPlayerBackgroundStyle == "BLURRED_ARTWORK" && artworkUrl != null
     val useGradientMiniPlayer =
-        glassState == null && Settings.shared.miniPlayerBackgroundStyle == "GRADIENT" && artworkUrl != null
-    val useSolidBlackMiniPlayer = glassState == null && Settings.shared.miniPlayerBackgroundStyle == "SOLID_BLACK"
+        !glassEnabled && Settings.shared.miniPlayerBackgroundStyle == "GRADIENT" && artworkUrl != null
+    val useSolidBlackMiniPlayer = !glassEnabled && Settings.shared.miniPlayerBackgroundStyle == "SOLID_BLACK"
     val context = LocalContext.current
     var gradientColors by remember(artworkUrl) { mutableStateOf<List<Color>>(emptyList()) }
     LaunchedEffect(artworkUrl, useGradientMiniPlayer, active) {
@@ -664,8 +668,25 @@ internal fun MiniPlayerCard(
                 }
         }
     }
-    val backgroundColor = if (glassState != null) MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.65f) else if (useSolidBlackMiniPlayer) Color.Black else MaterialTheme.colorScheme.surfaceContainer
-    val glassStyle = remember { HazeBlurStyle { blurRadius(24.dp) } }
+    val surfaceColor = MaterialTheme.colorScheme.surfaceContainer
+    var dominantColor by remember(artworkUrl) { mutableStateOf<Color?>(null) }
+    LaunchedEffect(artworkUrl, glassEnabled, active) {
+        if (glassEnabled && active && artworkUrl != null && dominantColor == null) {
+            dominantColor = try {
+                PlayerColorExtractor.extractColors(context, context.imageLoader, artworkUrl, surfaceColor)?.dominant
+            } catch (error: CancellationException) {
+                throw error
+            } catch (_: Exception) {
+                null
+            }
+        }
+    }
+    val backgroundColor = when {
+        glassEnabled -> (dominantColor?.copy(alpha = 0.28f)?.compositeOver(surfaceColor) ?: surfaceColor).copy(alpha = 0.62f)
+        useSolidBlackMiniPlayer -> Color.Black
+        else -> surfaceColor
+    }
+    val glassStyle = remember { HazeBlurStyle { blurRadius(20.dp) } }
     val contentColor =
         if (useSolidBlackMiniPlayer || useGradientMiniPlayer || useBlurMiniPlayer) Color.White else MaterialTheme.colorScheme.onSurface
     val secondaryContentColor = contentColor.copy(alpha = 0.7f)
@@ -674,7 +695,7 @@ internal fun MiniPlayerCard(
     val isFocused by interactionSource.collectIsFocusedAsState()
     val isPressed by interactionSource.collectIsPressedAsState()
 
-    val miniPlayerType = Settings.shared.miniPlayerType
+    val miniPlayerType = if (glassEnabled) MiniPlayerType.MODERN else Settings.shared.miniPlayerType
     val isModern = miniPlayerType == MiniPlayerType.MODERN && !useDesktopLayout
 
     val animatedScale =
@@ -752,7 +773,9 @@ internal fun MiniPlayerCard(
         elevation = 8.dp,
         color = backgroundColor,
         border =
-            if (isModern || glassState != null) {
+            if (glassEnabled) {
+                BorderStroke(1.dp, Brush.verticalGradient(listOf(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f), MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.15f))))
+            } else if (isModern) {
                 BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
             } else {
                 null

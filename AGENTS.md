@@ -137,3 +137,10 @@ If a change breaks an existing test that falls outside the list, delete that tes
 - Do not approve or merge a PR with a missing or incomplete AI disclosure; ask the author to add it to the PR body. The PR disclosure workflow comments on missing declarations; reviewers must still check that the declared models are specific and accurate.
 - Reference a fixed issue in the PR body with `fixes: #<issue>` or `resolves: #<issue>`. Use `related to: #<issue>` when it is not resolved.
 - Keep issue references in the PR body, not the commit message. Only when pushing without a PR, put the reference in the commit message using the same keywords.
+
+## UI dan performa
+
+- Batasi blur pada komponen kecil dan gunakan satu sumber blur bersama untuk efek yang berbagi latar.
+- Cache hasil perhitungan berat, termasuk ekstraksi warna artwork.
+- Selalu sediakan fallback tanpa blur untuk perangkat lama atau berkemampuan rendah.
+- Sediakan toggle untuk efek visual yang berat.
