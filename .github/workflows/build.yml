@@ -147,9 +147,10 @@ jobs:
           expected=$(sha256sum "$RUNNER_TEMP/release-cert.der" | cut -d' ' -f1)
           actual=$(sed -n 's/^Signer #1 certificate SHA-256 digest: //p' "$RUNNER_TEMP/apk-signature.txt")
           echo "Comparing certificate fingerprints"
-          test "$actual" = "$expected" || { echo "ERROR: certificate fingerprint mismatch or unavailable"; exit 1; }
+          test "$actual" = "$expected" || { echo "ERROR: certificate fingerprint mismatch or unavailable"; echo "Expected public certificate SHA-256: $expected"; cat "$RUNNER_TEMP/apk-signature.txt"; exit 1; }
           echo "Checking application ID"
-          "$tools/aapt" dump badging "$apk" | grep -q "package: name='com.chi3zdev.metrolist'"
+          "$tools/aapt" dump badging "$apk" > "$RUNNER_TEMP/apk-badging.txt"
+          grep -q "package: name='com.chi3zdev.metrolist'" "$RUNNER_TEMP/apk-badging.txt"
           cp "$apk" Metrolist-fork-release-universal.apk
           sha256sum Metrolist-fork-release-universal.apk > Metrolist-fork-release-universal.apk.sha256
           echo 'Signature and application ID verified.'
