@@ -135,15 +135,20 @@ jobs:
           test -n "$KEYSTORE_BASE64" && test -n "$KEYSTORE_PASSWORD" && test -n "$KEY_ALIAS" && test -n "$KEY_PASSWORD"
           printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$KEYSTORE_PATH"
           unset KEYSTORE_BASE64
-          ./gradlew :androidApp:assembleRelease --no-daemon -Dorg.gradle.java.installations.paths="$JAVA_HOME_25_X64"
+          ./gradlew :androidApp:assembleRelease --no-daemon --no-configuration-cache -Dorg.gradle.java.installations.paths="$JAVA_HOME_25_X64"
           apk=androidApp/build/outputs/apk/release/androidApp-release.apk
-          test -f "$apk"
+          echo "Checking APK output path"
+          test -f "$apk" || { echo "ERROR: APK not found at expected path"; find androidApp/build/outputs/apk/release -type f; exit 1; }
           tools=$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -n 1)
+          echo "Checking APK signature"
           "$tools/apksigner" verify --verbose --print-certs "$apk" > "$RUNNER_TEMP/apk-signature.txt"
+          echo "Reading signing certificate"
           keytool -exportcert -keystore "$KEYSTORE_PATH" -storetype PKCS12 -alias "$KEY_ALIAS" -storepass:env KEYSTORE_PASSWORD -file "$RUNNER_TEMP/release-cert.der" >/dev/null 2>&1
           expected=$(sha256sum "$RUNNER_TEMP/release-cert.der" | cut -d' ' -f1)
           actual=$(sed -n 's/^Signer #1 certificate SHA-256 digest: //p' "$RUNNER_TEMP/apk-signature.txt")
-          test "$actual" = "$expected"
+          echo "Comparing certificate fingerprints"
+          test "$actual" = "$expected" || { echo "ERROR: certificate fingerprint mismatch or unavailable"; exit 1; }
+          echo "Checking application ID"
           "$tools/aapt" dump badging "$apk" | grep -q "package: name='com.chi3zdev.metrolist'"
           cp "$apk" Metrolist-fork-release-universal.apk
           sha256sum Metrolist-fork-release-universal.apk > Metrolist-fork-release-universal.apk.sha256
