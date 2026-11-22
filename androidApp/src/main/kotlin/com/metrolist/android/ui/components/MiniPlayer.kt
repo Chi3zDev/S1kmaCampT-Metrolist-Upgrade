@@ -7,6 +7,10 @@
 
 package com.metrolist.android.ui.components
 
+import dev.chrisbanes.haze.HazeInput
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.blur.HazeBlurStyle
+import dev.chrisbanes.haze.blur.hazeBlur
 import android.widget.Toast
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
@@ -188,6 +192,7 @@ fun MiniPlayer(
     onDpadExpand: () -> Unit = onExpand,
     bottomSheetState: BottomSheetState? = null,
     cardFocusRequester: FocusRequester? = null,
+    glassState: HazeState? = null,
 ) {
     val playerConnection = LocalPlayerConnection.current ?: return
 
@@ -466,6 +471,7 @@ fun MiniPlayer(
         }
         MiniPlayerCard(
             useDesktopLayout = useDesktopLayout,
+            glassState = glassState,
             currentSong = song,
             isLive = isLive,
             modifier = Modifier.onSizeChanged { progressWidthPx = it.width },
@@ -604,6 +610,7 @@ private fun onHorizontalDragEnd(
 @Composable
 internal fun MiniPlayerCard(
     useDesktopLayout: Boolean,
+    glassState: HazeState? = null,
     currentSong: SongItem,
     isLive: Boolean = false,
     modifier: Modifier = Modifier,
@@ -637,10 +644,10 @@ internal fun MiniPlayerCard(
     val isTv = LocalIsTv.current
     val artworkUrl = currentSong.previewThumbnailUrl
     val useBlurMiniPlayer =
-        Settings.shared.miniPlayerBackgroundStyle == "BLURRED_ARTWORK" && artworkUrl != null
+        glassState == null && Settings.shared.miniPlayerBackgroundStyle == "BLURRED_ARTWORK" && artworkUrl != null
     val useGradientMiniPlayer =
-        Settings.shared.miniPlayerBackgroundStyle == "GRADIENT" && artworkUrl != null
-    val useSolidBlackMiniPlayer = Settings.shared.miniPlayerBackgroundStyle == "SOLID_BLACK"
+        glassState == null && Settings.shared.miniPlayerBackgroundStyle == "GRADIENT" && artworkUrl != null
+    val useSolidBlackMiniPlayer = glassState == null && Settings.shared.miniPlayerBackgroundStyle == "SOLID_BLACK"
     val context = LocalContext.current
     var gradientColors by remember(artworkUrl) { mutableStateOf<List<Color>>(emptyList()) }
     LaunchedEffect(artworkUrl, useGradientMiniPlayer, active) {
@@ -657,7 +664,8 @@ internal fun MiniPlayerCard(
                 }
         }
     }
-    val backgroundColor = if (useSolidBlackMiniPlayer) Color.Black else MaterialTheme.colorScheme.surfaceContainer
+    val backgroundColor = if (glassState != null) MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.65f) else if (useSolidBlackMiniPlayer) Color.Black else MaterialTheme.colorScheme.surfaceContainer
+    val glassStyle = remember { HazeBlurStyle { blurRadius(24.dp) } }
     val contentColor =
         if (useSolidBlackMiniPlayer || useGradientMiniPlayer || useBlurMiniPlayer) Color.White else MaterialTheme.colorScheme.onSurface
     val secondaryContentColor = contentColor.copy(alpha = 0.7f)
@@ -702,6 +710,7 @@ internal fun MiniPlayerCard(
                     scaleX = animatedScale.value
                     scaleY = animatedScale.value
                 }.clip(RoundedCornerShape(cornerRadius))
+                .then(if (glassState != null) Modifier.hazeBlur(HazeInput.Backdrop(glassState), glassStyle) else Modifier)
                 .then(if (!isTv && focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier)
                 .focusProperties { canFocus = !isTv }
                 .testTag("mini_player_card")
@@ -743,7 +752,7 @@ internal fun MiniPlayerCard(
         elevation = 8.dp,
         color = backgroundColor,
         border =
-            if (isModern) {
+            if (isModern || glassState != null) {
                 BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
             } else {
                 null
