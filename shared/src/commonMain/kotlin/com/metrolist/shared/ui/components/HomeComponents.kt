@@ -49,7 +49,9 @@ fun GenreCard(
         onClick = onClick,
         modifier = modifier.height(52.dp),
         shape = shape,
-        color = MaterialTheme.colorScheme.secondaryContainer,
+        color = glassCardColor(MaterialTheme.colorScheme.secondaryContainer),
+        contentColor = if (glassCardBorder() != null) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSecondaryContainer,
+        border = glassCardBorder(),
         tonalElevation = 1.dp,
     ) {
         Box(
