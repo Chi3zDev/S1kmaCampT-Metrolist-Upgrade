@@ -101,14 +101,14 @@ internal fun SettingsUiRegistryBuilder.registerAppearanceSettings(host: SharedSe
                 slider(id = "glassCornerRoundness", title = stringResource(Res.string.glass_corner_roundness), value = settings.glassCornerRoundness, range = 0f..100f, steps = 0, enabled = settings.glassNavigation) { settings.glassCornerRoundness = it }
                 switch(id = "glassNavbar", title = stringResource(Res.string.glass_area_navbar), checked = settings.glassNavbar, enabled = settings.glassNavigation) { settings.glassNavbar = it }
                 switch(id = "glassMiniPlayer", title = stringResource(Res.string.glass_area_mini_player), checked = settings.glassMiniPlayer, enabled = settings.glassNavigation) { settings.glassMiniPlayer = it }
-                switch(id = "glassTopBar", title = stringResource(Res.string.glass_area_top_bar), checked = settings.glassTopBar, enabled = settings.glassNavigation) { settings.glassTopBar = it }
-                switch(id = "glassCards", title = stringResource(Res.string.glass_area_cards), checked = settings.glassCards, enabled = settings.glassNavigation) { settings.glassCards = it }
-                switch(id = "glassLyricsPoster", title = stringResource(Res.string.glass_area_poster), checked = settings.glassLyricsPoster, enabled = settings.glassNavigation) { settings.glassLyricsPoster = it }
+                switch(id = "glassTopBar", title = stringResource(Res.string.glass_area_top_bar), checked = settings.glassTopBar, enabled = false) { settings.glassTopBar = it }
+                switch(id = "glassCards", title = stringResource(Res.string.glass_area_cards), checked = settings.glassCards, enabled = false) { settings.glassCards = it }
+                switch(id = "glassLyricsPoster", title = stringResource(Res.string.glass_area_poster), checked = settings.glassLyricsPoster, enabled = false) { settings.glassLyricsPoster = it }
                 switch(id = "glassLightMode", title = stringResource(Res.string.glass_light_mode), description = stringResource(Res.string.glass_light_mode_description), checked = settings.glassLightMode, enabled = settings.glassNavigation) { settings.glassLightMode = it }
                 switch(id = "glassNavbarLabels", title = stringResource(Res.string.glass_show_labels), checked = settings.glassNavbarLabels, enabled = settings.glassNavigation) { settings.glassNavbarLabels = it }
                 val positions = listOf(SettingsChoice("ABOVE", stringResource(Res.string.glass_player_above)), SettingsChoice("BELOW", stringResource(Res.string.glass_player_below)))
                 val position = if (settings.glassPlayerBelow) "BELOW" else "ABOVE"
-                choice(id = "glassPlayerPosition", title = stringResource(Res.string.glass_player_position), valueLabel = positions.first { it.id == position }.label, choices = positions, selectedChoiceId = position, enabled = settings.glassNavigation) { settings.glassPlayerBelow = it == "BELOW" }
+                choice(id = "glassPlayerPosition", title = stringResource(Res.string.glass_player_position), valueLabel = positions.first { it.id == position }.label, choices = positions, selectedChoiceId = position, enabled = false) { settings.glassPlayerBelow = it == "BELOW" }
             }
         }
         group("theme", stringResource(Res.string.appearance_theme)) {
