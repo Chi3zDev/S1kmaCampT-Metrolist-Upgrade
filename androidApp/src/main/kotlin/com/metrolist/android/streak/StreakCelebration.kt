@@ -86,7 +86,7 @@ fun BoxScope.StreakCelebrationPresenter(
         ) {
             Column(Modifier.fillMaxWidth().padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text(stringResource(if (event.levelUp) Res.string.streak_level_up else Res.string.streak_celebration_title), style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center)
-                Flame(level.color, animate = streakMotionEnabled(), levelUp = event.levelUp)
+                Flame(level.color, animate = streakMotionEnabled(), levelUp = event.levelUp, particles = event.count >= 100)
                 Text("${event.count} ${stringResource(Res.string.streak_days)}", style = MaterialTheme.typography.titleLarge)
                 if (event.provisional) Text(stringResource(Res.string.streak_first_play_provisional), style = MaterialTheme.typography.bodySmall, textAlign = TextAlign.Center)
                 val start = event.today.minusDays((event.today.dayOfWeek.value - 1).toLong())

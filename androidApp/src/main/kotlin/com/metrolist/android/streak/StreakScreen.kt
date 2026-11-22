@@ -19,6 +19,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.text.style.TextAlign
@@ -123,7 +124,7 @@ fun StreakScreen(onBack: () -> Unit) {
         item {
             StreakPanel {
                 Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Flame(flameColor, animate = !extinguished && screenActive && streakMotionEnabled())
+                    Flame(flameColor, animate = !extinguished && screenActive && streakMotionEnabled(), particles = !extinguished && streak.current >= 100)
                     Text(streak.current.toString(), style = MaterialTheme.typography.displayMedium)
                     Text(stringResource(shownLevel.title), color = flameColor, style = MaterialTheme.typography.titleLarge)
                     Text(stringResource(when { extinguished -> Res.string.streak_extinguished; streak.todayCounted -> Res.string.streak_active; else -> Res.string.streak_waiting }), textAlign = TextAlign.Center)
@@ -224,7 +225,7 @@ internal fun DayDot(day: LocalDate, today: LocalDate, listened: Set<LocalDate>, 
 }
 
 @Composable
-internal fun Flame(color: Color, animate: Boolean, levelUp: Boolean = false) {
+internal fun Flame(color: Color, animate: Boolean, levelUp: Boolean = false, particles: Boolean = false) {
     val scale = if (animate) {
         val transition = rememberInfiniteTransition(label = "flame")
         val value by transition.animateFloat(if (levelUp) 0.86f else 0.94f, if (levelUp) 1.14f else 1.04f, infiniteRepeatable(tween(if (levelUp) 800 else 1200), RepeatMode.Reverse), label = "flicker")
@@ -232,6 +233,14 @@ internal fun Flame(color: Color, animate: Boolean, levelUp: Boolean = false) {
     } else 1f
     Canvas(Modifier.size(100.dp)) {
         val w = size.width; val h = size.height
+        // A few simple translucent circles share the existing flicker; no blur or second animation.
+        drawCircle(color.copy(alpha = if (animate) .09f else .04f), radius = w * .46f, center = Offset(w * .5f, h * .55f))
+        if (particles && animate) {
+            val drift = (scale - .94f) * h
+            drawCircle(color.copy(alpha = .7f), radius = w * .025f, center = Offset(w * .22f, h * .3f - drift))
+            drawCircle(color.copy(alpha = .5f), radius = w * .018f, center = Offset(w * .78f, h * .22f + drift))
+            drawCircle(Color.White.copy(alpha = .65f), radius = w * .015f, center = Offset(w * .68f, h * .07f - drift))
+        }
         val path = Path().apply {
             moveTo(w * .5f, h * (1f - scale) * .2f)
             cubicTo(w * .35f, h * .28f, w * .82f, h * .32f, w * .78f, h * .63f)
