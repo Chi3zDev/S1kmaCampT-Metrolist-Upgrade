@@ -72,7 +72,9 @@ fun planStreakRecovery(
         previous = days.last()
         next = today
     } else {
-        if (start == 0) return StreakRecoveryPlan(emptyList(), remaining, StreakRecoveryFailure.NO_BREAK)
+        // Reconnect only the fresh streak started today. Older gaps must not be
+        // recoverable indefinitely after a new streak has already continued.
+        if (start == 0 || days[start] != today) return StreakRecoveryPlan(emptyList(), remaining, StreakRecoveryFailure.NO_BREAK)
         previous = days[start - 1]
         next = days[start]
     }

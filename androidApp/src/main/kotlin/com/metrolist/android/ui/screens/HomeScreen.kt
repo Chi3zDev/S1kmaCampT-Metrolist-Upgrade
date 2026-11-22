@@ -140,7 +140,7 @@ fun HomeScreen(
     onNavigateToVideoBrowse: (String, String?, String) -> Unit = onNavigateToBrowse,
     onNavigateToHomeSection: (HomeShelf) -> Unit = {},
     onNavigateToLibrary: (LibraryFilterType?) -> Unit = {},
-    onNavigateToStatistics: () -> Unit = {},
+    onNavigateToStreak: () -> Unit = {},
     onNavigateToRecap: () -> Unit = {},
     floatingActionsBottomInset: State<Dp>,
     scrollToTopEvents: Flow<Long> = emptyFlow(),
@@ -309,7 +309,7 @@ fun HomeScreen(
                     .focusRestorer(),
             header = {
                 item(key = "listening_streak") {
-                    StreakCard(streak, onNavigateToStatistics, Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
+                    StreakCard(streak, onNavigateToStreak, Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
                 }
                 item(key = "recap_entry") {
                     RecapEntry(onNavigateToRecap, Modifier.padding(horizontal = 16.dp))

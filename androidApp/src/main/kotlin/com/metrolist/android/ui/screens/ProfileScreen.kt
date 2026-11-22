@@ -48,6 +48,7 @@ import com.metrolist.shared.generated.resources.menu_history
 import com.metrolist.shared.generated.resources.menu_switch_account
 import com.metrolist.shared.generated.resources.settings
 import com.metrolist.shared.generated.resources.statistics
+import com.metrolist.shared.generated.resources.streak_page_title
 import com.metrolist.shared.settings.Settings
 import com.metrolist.shared.ui.components.images.AsyncImage
 import com.metrolist.shared.ui.icons.MetrolistIcons
@@ -62,6 +63,7 @@ fun ProfileScreen(
     onLogout: () -> Unit,
     onHistory: () -> Unit,
     onStatistics: () -> Unit,
+    onStreak: () -> Unit,
     onIntegrations: () -> Unit,
     onSettings: () -> Unit,
 ) {
@@ -104,6 +106,7 @@ fun ProfileScreen(
         }
         item { ProfileRow(stringResource(Res.string.menu_history), onHistory, color, border) }
         item { ProfileRow(stringResource(Res.string.statistics), onStatistics, color, border) }
+        item { ProfileRow(stringResource(Res.string.streak_page_title), onStreak, color, border) }
         item { ProfileRow(stringResource(Res.string.integrations), onIntegrations, color, border) }
         item { ProfileRow(stringResource(Res.string.settings), onSettings, color, border) }
         item {

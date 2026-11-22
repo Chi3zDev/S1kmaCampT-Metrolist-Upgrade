@@ -89,6 +89,13 @@ class ListeningStreakTest {
     }
 
     @Test
+    fun oldBreakCannotBeRepairedAfterNewStreakHasContinued() {
+        val plays = listOf(ms("2026-01-01T12:00:00Z"), ms("2026-01-05T12:00:00Z"), ms("2026-01-06T12:00:00Z"))
+        val plan = planStreakRecovery(plays, Instant.parse("2026-01-06T15:00:00Z"), ZoneId.of("UTC"), StreakRecoveryLedger())
+        assertEquals(StreakRecoveryFailure.NO_BREAK, plan.failure)
+    }
+
+    @Test
     fun recoveryLedgerRoundTripsAndCorruptionIsRejected() {
         val ledger = StreakRecoveryLedger(setOf(LocalDate.parse("2026-01-05")), YearMonth.of(2026, 1), 1)
         assertEquals(ledger, decodeStreakRecovery(encodeStreakRecovery(ledger)))

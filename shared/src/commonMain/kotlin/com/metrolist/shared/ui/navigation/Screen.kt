@@ -45,6 +45,9 @@ sealed class Screen : NavKey {
     data object Statistics : Screen()
 
     @Serializable
+    data object Streak : Screen()
+
+    @Serializable
     data object Recap : Screen()
 
     @Serializable

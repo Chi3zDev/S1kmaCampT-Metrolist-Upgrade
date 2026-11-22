@@ -184,7 +184,7 @@ fun LibraryScreen(
     onNavigateToPodcast: (String) -> Unit = {},
     onNavigateToAutoPlaylist: ((String) -> Unit)? = null,
     onNavigateToPlaylistImport: () -> Unit = {},
-    onNavigateToStatistics: () -> Unit = {},
+    onNavigateToStreak: () -> Unit = {},
     floatingActionsBottomInset: State<Dp>,
     scrollToTopEvents: Flow<Long> = emptyFlow(),
     viewModel: LibraryViewModel = koinViewModel(),
@@ -460,7 +460,7 @@ fun LibraryScreen(
                 onNavigateToAutoPlaylist = onNavigateToAutoPlaylist ?: {},
                 headerContent = {
                     Column(Modifier.padding(top = topPadding)) {
-                        StreakCard(streak, onNavigateToStatistics, Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
+                        StreakCard(streak, onNavigateToStreak, Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
                         val text = libraryContentText()
                         ChipShelf(
                             options = LibraryFilter.entries,
@@ -474,7 +474,7 @@ fun LibraryScreen(
             )
         } else {
             LibraryContent(
-                headerContent = { StreakCard(streak, onNavigateToStatistics) },
+                headerContent = { StreakCard(streak, onNavigateToStreak) },
                 presentation = viewModel.presentation,
                 text = libraryContentText(),
                 items = uiState.items,

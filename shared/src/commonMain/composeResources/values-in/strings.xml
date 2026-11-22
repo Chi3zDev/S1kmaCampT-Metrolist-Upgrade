@@ -2563,4 +2563,22 @@
     <string name="glass_area_floating_actions">Tombol aksi melayang</string>
     <string name="glass_area_profile">Profil</string>
     <string name="glass_profile_signed_out">Belum masuk</string>
+    <string name="streak_level_turquoise">Api toska</string>
+    <string name="streak_level_radiant">Api cemerlang</string>
+    <string name="streak_page_title">Streak mendengarkan</string>
+    <string name="streak_extinguished">Streakmu padam.</string>
+    <string name="streak_recovery_invitation">Streakmu padam. Ketuk untuk menghidupkan kembali.</string>
+    <string name="streak_waiting">Dengarkan hari ini agar streak tetap menyala.</string>
+    <string name="streak_total_days">Total hari mendengar: %1$d</string>
+    <string name="streak_previous">Streak terakhir: %1$d hari</string>
+    <string name="streak_recovery_remaining">Pemulihan bulan ini: %1$d dari %2$d</string>
+    <string name="streak_restore">Hidupkan kembali</string>
+    <string name="streak_restore_confirm">Pulihkan %1$d hari yang terlewat? Jatah bulan ini akan tersisa %2$d.</string>
+    <string name="streak_restore_too_long">Jeda terakhir melebihi batas pemulihan.</string>
+    <string name="streak_restore_no_quota">Jatah tidak cukup untuk memulihkan seluruh jeda.</string>
+    <string name="streak_restore_corrupt">Data pemulihan tidak dapat dibaca. Pulihkan dari cadangan.</string>
+    <string name="streak_calendar">Kalender mendengarkan</string>
+    <string name="streak_week">Minggu ini</string>
+    <string name="streak_calendar_legend">Warna utama: mendengarkan · Aksen: dipulihkan · Sorotan: hari ini</string>
+    <string name="streak_restore_failed">Streak tidak dapat dipulihkan. Periksa jeda dan jatah saat ini.</string>
 </resources>

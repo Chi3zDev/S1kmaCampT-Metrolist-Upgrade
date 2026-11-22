@@ -5641,4 +5641,22 @@
     <string name="glass_area_floating_actions">Floating action buttons</string>
     <string name="glass_area_profile">Profile</string>
     <string name="glass_profile_signed_out">Not signed in</string>
+    <string name="streak_level_turquoise">Turquoise flame</string>
+    <string name="streak_level_radiant">Radiant flame</string>
+    <string name="streak_page_title">Listening streak</string>
+    <string name="streak_extinguished">Your streak has gone out.</string>
+    <string name="streak_recovery_invitation">Your streak has gone out. Tap to restore it.</string>
+    <string name="streak_waiting">Listen today to keep your streak alive.</string>
+    <string name="streak_total_days">Listening days: %1$d</string>
+    <string name="streak_previous">Last streak: %1$d days</string>
+    <string name="streak_recovery_remaining">Recoveries this month: %1$d of %2$d</string>
+    <string name="streak_restore">Restore streak</string>
+    <string name="streak_restore_confirm">Restore %1$d missed days? You will have %2$d recoveries left this month.</string>
+    <string name="streak_restore_too_long">The last gap is longer than the recovery limit.</string>
+    <string name="streak_restore_no_quota">Not enough recoveries to cover the whole gap.</string>
+    <string name="streak_restore_corrupt">Recovery data could not be read. Restore it from a backup.</string>
+    <string name="streak_calendar">Listening calendar</string>
+    <string name="streak_week">This week</string>
+    <string name="streak_calendar_legend">Primary: listened · Accent: restored · Highlight: today</string>
+    <string name="streak_restore_failed">Could not restore the streak. Please check the current gap and quota.</string>
 </resources>

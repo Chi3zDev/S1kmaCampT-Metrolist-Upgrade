@@ -61,17 +61,11 @@ fun rememberListeningStreak(database: MusicDatabase): ListeningStreak {
 
 @Composable
 fun StreakCard(streak: ListeningStreak, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    val level = when {
-        streak.current >= 30 -> stringResource(Res.string.streak_level_top)
-        streak.current >= 7 -> stringResource(Res.string.streak_level_middle)
-        else -> stringResource(Res.string.streak_level_start)
-    }
-    val next = if (streak.current < 7) stringResource(Res.string.streak_level_middle) else stringResource(Res.string.streak_level_top)
-    val progress = when {
-        streak.current >= 30 -> 1f
-        streak.current >= 7 -> (streak.current - 7) / 23f
-        else -> streak.current / 7f
-    }
+    val currentLevel = streakLevel(streak.current)
+    val nextLevel = streakLevels.firstOrNull { it.minimumDays > streak.current }
+    val level = stringResource(currentLevel.title)
+    val progress = if (nextLevel == null) 1f else
+        ((streak.current - currentLevel.minimumDays).toFloat() / (nextLevel.minimumDays - currentLevel.minimumDays)).coerceIn(0f, 1f)
     Card(onClick = onClick, modifier = modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp), colors = CardDefaults.cardColors(containerColor = glassCardColor(MaterialTheme.colorScheme.surfaceContainerHigh)), border = glassCardBorder()) {
         Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -86,7 +80,7 @@ fun StreakCard(streak: ListeningStreak, onClick: () -> Unit, modifier: Modifier 
             }
             Text(stringResource(if (streak.todayCounted) Res.string.streak_active else Res.string.streak_inactive), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                if (streak.current < 30) Text(stringResource(Res.string.streak_next, next), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                if (nextLevel != null) Text(stringResource(Res.string.streak_next, stringResource(nextLevel.title)), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             LinearProgressIndicator(progress = { progress }, modifier = Modifier.fillMaxWidth(), color = MaterialTheme.colorScheme.primary, trackColor = MaterialTheme.colorScheme.surfaceVariant)
             Text(stringResource(Res.string.streak_longest, streak.longest), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)

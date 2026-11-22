@@ -207,6 +207,7 @@ import com.metrolist.android.ui.screens.BrowseScreen
 import com.metrolist.android.ui.screens.DownloadsScreen
 import com.metrolist.android.ui.screens.HistoryScreen
 import com.metrolist.android.recap.RecapScreen
+import com.metrolist.android.streak.StreakScreen
 import com.metrolist.android.ui.screens.ProfileScreen
 import com.metrolist.android.ui.screens.HomeScreen
 import com.metrolist.android.ui.screens.HomeSectionScreen
@@ -2547,6 +2548,7 @@ fun getEntryProvider(
                 onSwitchAccount = { navigator.navigate(Screen.SwitchChannel) },
                 onHistory = { navigator.navigate(Screen.History) },
                 onStatistics = { navigator.navigate(Screen.Statistics) },
+                onStreak = { navigator.navigate(Screen.Streak) },
                 onIntegrations = { navigator.navigate(Screen.Integrations) },
                 onSettings = { navigator.navigate(Screen.Settings) },
                 onLogout = {
@@ -2563,7 +2565,7 @@ fun getEntryProvider(
         entry<Screen.Home>(metadata = navTabMetadata) {
             HomeScreen(
                 onNavigateToRecap = { navigator.navigate(Screen.Recap) },
-                onNavigateToStatistics = { navigator.navigate(Screen.Statistics) },
+                onNavigateToStreak = { navigator.navigate(Screen.Streak) },
                 floatingActionsBottomInset = floatingActionsBottomInset,
                 onNavigateToAlbum = { albumId -> navigator.navigate(Screen.Album(albumId)) },
                 onNavigateToArtist = { artistId -> navigator.navigate(Screen.Artist(artistId)) },
@@ -2628,7 +2630,7 @@ fun getEntryProvider(
 
         entry<Screen.Library>(metadata = navTabMetadata) {
             LibraryScreen(
-                onNavigateToStatistics = { navigator.navigate(Screen.Statistics) },
+                onNavigateToStreak = { navigator.navigate(Screen.Streak) },
                 viewModel = libraryViewModel,
                 floatingActionsBottomInset = floatingActionsBottomInset,
                 scrollToTopEvents = libraryScrollToTopEvents,
@@ -2914,6 +2916,10 @@ fun getEntryProvider(
 
         entry<Screen.Recap>(metadata = navTabMetadata) {
             RecapScreen(onBack = { navigator.goBack() })
+        }
+
+        entry<Screen.Streak>(metadata = navTabMetadata) {
+            StreakScreen(onBack = { navigator.goBack() })
         }
 
         entry<Screen.Statistics>(metadata = navTabMetadata) {
