@@ -112,6 +112,8 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layout
@@ -345,6 +347,8 @@ import com.metrolist.shared.ui.navigation.LocalAlbumArtworkSource
 import com.metrolist.shared.ui.navigation.LocalContentObscured
 import com.metrolist.shared.ui.navigation.LocalFloatingNavBar
 import com.metrolist.shared.ui.navigation.LocalGlassNavbarBottomOffset
+import com.metrolist.shared.ui.navigation.LocalExpandGlassNavigation
+import com.metrolist.shared.ui.navigation.LocalGlassNavigationCollapsed
 import com.metrolist.shared.ui.navigation.LocalGlassNavigationEnabled
 import com.metrolist.shared.ui.navigation.LocalGlassNavigationState
 import com.metrolist.shared.ui.navigation.LocalNavVisibilityScope
@@ -858,6 +862,25 @@ fun MetrolistApp(
         // Reserve navigation space while system bars return from immersive playback.
         val navigationBarBottomPadding = WindowInsets.navigationBarsIgnoringVisibility.asPaddingValues().calculateBottomPadding()
         val density = LocalDensity.current
+        var glassNavigationCollapsed by remember { mutableStateOf(false) }
+        val glassScrollThreshold = with(density) { 24.dp.toPx() }
+        val glassScrollConnection = remember(useGlassNavigation, glassScrollThreshold) {
+            object : NestedScrollConnection {
+                private var accumulated = 0f
+                override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                    if (!useGlassNavigation || source != NestedScrollSource.UserInput) return Offset.Zero
+                    if (available.y == 0f) return Offset.Zero
+                    if (accumulated * available.y < 0f) accumulated = 0f
+                    accumulated += available.y
+                    if (kotlin.math.abs(accumulated) >= glassScrollThreshold) {
+                        glassNavigationCollapsed = accumulated < 0f
+                        accumulated = 0f
+                    }
+                    return Offset.Zero
+                }
+            }
+        }
+        LaunchedEffect(useGlassNavigation, currentRoute) { glassNavigationCollapsed = false }
         var navigationBarContentInset by remember(navigationSuiteType, useFloatingNavBar) { mutableStateOf(0.dp) }
         var floatingNavBarHeight by remember(navigationSuiteType, useFloatingNavBar) { mutableStateOf(0.dp) }
         val safeBottomPadding =
@@ -977,10 +1000,43 @@ fun MetrolistApp(
             LocalMouseScrollFactors provides rememberMouseScrollFactors(),
             LocalPlaylistAdder provides addToPlaylist,
         ) {
+            var showAccountMenu by remember { mutableStateOf(false) }
+            val useBottomAccount = !useDesktopUi && !usesDirectionalNavigation && navigationSuiteType.isNavigationBar && !hasDesktopCaption
+            val accountMenu: @Composable () -> Unit = {
+                AccountMenu(
+                    onClose = { showAccountMenu = false },
+                    onNavigateToLogin = { navigator.navigate(Screen.Login) },
+                    onNavigateToTokenLogin = { navigator.navigate(Screen.TokenLogin) },
+                    onNavigateToSwitchChannel = {
+                        navigator.navigate(Screen.SwitchChannel)
+                    },
+                    onNavigateToHistory =
+                        if (navigationState.topLevelRoute == Screen.Library) {
+                            { navigator.navigate(Screen.History) }
+                        } else {
+                            null
+                        },
+                    onNavigateToStatistics = { navigator.navigate(Screen.Statistics) },
+                    onNavigateToIntegrations = { navigator.navigate(Screen.Integrations) },
+                    onNavigateToSettings = { navigator.navigate(Screen.Settings) },
+                    onLogout = {
+                        coroutineScope.launch {
+                            authManager.clearAllCredentials()
+                            context.packageManager
+                                .getLaunchIntentForPackage(context.packageName)
+                                ?.apply {
+                                    addFlags(
+                                        Intent.FLAG_ACTIVITY_NEW_TASK or
+                                            Intent.FLAG_ACTIVITY_CLEAR_TASK,
+                                    )
+                                }?.let(context::startActivitySafely)
+                        }
+                    },
+                )
+            }
             val appAccountButton: @Composable (Modifier) -> Unit = { buttonModifier ->
                 val accountName = authManager.accountName
                 val accountThumbnail = authManager.accountThumbnail
-                var showAccountMenu by remember { mutableStateOf(false) }
                 val updatePending = stringResource(Res.string.update_pending)
                 Box {
                     IconButton(
@@ -1005,37 +1061,8 @@ fun MetrolistApp(
                             hasPendingUpdate = hasPendingUpdate,
                         )
                     }
-                    if (showAccountMenu) {
-                        AccountMenu(
-                            onClose = { showAccountMenu = false },
-                            onNavigateToLogin = { navigator.navigate(Screen.Login) },
-                            onNavigateToTokenLogin = { navigator.navigate(Screen.TokenLogin) },
-                            onNavigateToSwitchChannel = {
-                                navigator.navigate(Screen.SwitchChannel)
-                            },
-                            onNavigateToHistory =
-                                if (navigationState.topLevelRoute == Screen.Library) {
-                                    { navigator.navigate(Screen.History) }
-                                } else {
-                                    null
-                                },
-                            onNavigateToStatistics = { navigator.navigate(Screen.Statistics) },
-                            onNavigateToIntegrations = { navigator.navigate(Screen.Integrations) },
-                            onNavigateToSettings = { navigator.navigate(Screen.Settings) },
-                            onLogout = {
-                                coroutineScope.launch {
-                                    authManager.clearAllCredentials()
-                                    context.packageManager
-                                        .getLaunchIntentForPackage(context.packageName)
-                                        ?.apply {
-                                            addFlags(
-                                                Intent.FLAG_ACTIVITY_NEW_TASK or
-                                                    Intent.FLAG_ACTIVITY_CLEAR_TASK,
-                                            )
-                                        }?.let(context::startActivitySafely)
-                                }
-                            },
-                        )
+                    if (showAccountMenu && !useBottomAccount) {
+                        accountMenu()
                     }
                 }
             }
@@ -1421,6 +1448,8 @@ fun MetrolistApp(
                             LocalFloatingNavBar provides useFloatingNavBar,
                             LocalGlassNavbarBottomOffset provides (if (glassPlayerBelow) miniPlayerHeight + miniPlayerBottomSpacing else 0.dp),
                             LocalGlassNavigationEnabled provides useGlassNavigation,
+                            LocalGlassNavigationCollapsed provides glassNavigationCollapsed,
+                            LocalExpandGlassNavigation provides { glassNavigationCollapsed = false },
                             LocalGlassNavigationState provides glassBackdrop,
                             LocalPlayerExpanded provides isPlayerExpanded,
                             LocalPlayerExpandedOrExpanding provides isPlayerExpandedOrExpanding,
@@ -1434,6 +1463,8 @@ fun MetrolistApp(
                                 navigationVisible = shouldShowNavigationBar,
                                 containerColor = if (pureBlack) Color.Black else MaterialTheme.colorScheme.surface,
                                 onSearchLongClick = { navigator.navigate(Screen.Recognition) },
+                                onAccountClick = { showAccountMenu = true },
+                                showAccountInBottomBar = useBottomAccount,
                                 floatingNavigation = useFloatingNavBar,
                                 onFloatingNavigationOccupiedHeightChanged = {
                                     floatingNavBarHeight = it
@@ -1606,7 +1637,7 @@ fun MetrolistApp(
                                                             )
                                                         }
                                                     }
-                                                    if (!hasDesktopCaption) {
+                                                    if (!hasDesktopCaption && !useBottomAccount) {
                                                         appAccountButton(if (useFloatingTopBar) Modifier.floatingBarCircle() else Modifier)
                                                     }
                                                 }
@@ -1649,7 +1680,8 @@ fun MetrolistApp(
                                         },
                                         modifier =
                                             Modifier
-                                                .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection),
+                                                .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection)
+                                                .nestedScroll(glassScrollConnection),
                                     ) { scaffoldPadding ->
                                         Box(
                                             Modifier
@@ -1830,6 +1862,12 @@ fun MetrolistApp(
                                         }
                                     }
                                 }
+                            }
+                        }
+
+                        if (showAccountMenu && useBottomAccount) {
+                            Box(Modifier.align(Alignment.BottomEnd).padding(end = 16.dp, bottom = navigationBottomInset)) {
+                                accountMenu()
                             }
                         }
 
