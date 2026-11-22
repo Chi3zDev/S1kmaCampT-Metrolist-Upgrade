@@ -108,7 +108,7 @@ internal fun SettingsUiRegistryBuilder.registerAppearanceSettings(host: SharedSe
                 switch(id = "glassNavbarLabels", title = stringResource(Res.string.glass_show_labels), checked = settings.glassNavbarLabels, enabled = settings.glassNavigation) { settings.glassNavbarLabels = it }
                 val positions = listOf(SettingsChoice("ABOVE", stringResource(Res.string.glass_player_above)), SettingsChoice("BELOW", stringResource(Res.string.glass_player_below)))
                 val position = if (settings.glassPlayerBelow) "BELOW" else "ABOVE"
-                choice(id = "glassPlayerPosition", title = stringResource(Res.string.glass_player_position), valueLabel = positions.first { it.id == position }.label, choices = positions, selectedChoiceId = position, enabled = false) { settings.glassPlayerBelow = it == "BELOW" }
+                choice(id = "glassPlayerPosition", title = stringResource(Res.string.glass_player_position), valueLabel = positions.first { it.id == position }.label, choices = positions, selectedChoiceId = position, enabled = settings.glassNavigation && settings.glassNavbar && settings.glassMiniPlayer) { settings.glassPlayerBelow = it == "BELOW" }
             }
         }
         group("theme", stringResource(Res.string.appearance_theme)) {

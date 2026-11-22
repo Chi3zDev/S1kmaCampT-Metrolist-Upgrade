@@ -63,6 +63,7 @@ import dev.chrisbanes.haze.blur.HazeBlurStyle
 import dev.chrisbanes.haze.blur.hazeBlur
 
 val LocalFloatingNavBar = compositionLocalOf { false }
+val LocalGlassNavbarBottomOffset = compositionLocalOf { 0.dp }
 val LocalGlassNavigationEnabled = compositionLocalOf { false }
 val LocalGlassNavigationState = compositionLocalOf<HazeState?> { null }
 val LocalGlassNavigationCollapsed = compositionLocalOf { false }

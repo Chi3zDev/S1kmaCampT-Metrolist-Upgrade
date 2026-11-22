@@ -344,6 +344,7 @@ import com.metrolist.shared.ui.navigation.DesktopContentMaxWidth
 import com.metrolist.shared.ui.navigation.LocalAlbumArtworkSource
 import com.metrolist.shared.ui.navigation.LocalContentObscured
 import com.metrolist.shared.ui.navigation.LocalFloatingNavBar
+import com.metrolist.shared.ui.navigation.LocalGlassNavbarBottomOffset
 import com.metrolist.shared.ui.navigation.LocalGlassNavigationEnabled
 import com.metrolist.shared.ui.navigation.LocalGlassNavigationState
 import com.metrolist.shared.ui.navigation.LocalNavVisibilityScope
@@ -898,10 +899,11 @@ fun MetrolistApp(
             } else {
                 MiniPlayerHeight
             }
+        val glassPlayerBelow = useGlassNavigation && useGlassMiniPlayer && Settings.shared.glassPlayerBelow && shouldRenderMiniPlayer && shouldShowNavigationBar
         val miniPlayerInsets =
             calculateMiniPlayerInsets(
                 systemBottomInset = if (shouldRenderMiniPlayer) safeBottomPadding else navigationBarBottomPadding,
-                navigationBottomInset = navigationBottomInset,
+                navigationBottomInset = if (glassPlayerBelow) 0.dp else navigationBottomInset,
                 navigationConsumesSpace = navigationConsumesSpace,
                 playerHeight = if (shouldRenderMiniPlayer) miniPlayerHeight else 0.dp,
                 playerBottomSpacing = if (shouldRenderMiniPlayer) miniPlayerBottomSpacing else 0.dp,
@@ -1417,6 +1419,7 @@ fun MetrolistApp(
                         CompositionLocalProvider(
                             LocalContentObscured provides (isInPipMode || contentObscured),
                             LocalFloatingNavBar provides useFloatingNavBar,
+                            LocalGlassNavbarBottomOffset provides (if (glassPlayerBelow) miniPlayerHeight + miniPlayerBottomSpacing else 0.dp),
                             LocalGlassNavigationEnabled provides useGlassNavigation,
                             LocalGlassNavigationState provides glassBackdrop,
                             LocalPlayerExpanded provides isPlayerExpanded,
@@ -1837,7 +1840,7 @@ fun MetrolistApp(
                                     .fillMaxSize()
                                     .drawWithContent {
                                         val bottomInset =
-                                            if (playerBottomSheetState.progress <= 0f) {
+                                            if (playerBottomSheetState.progress <= 0f && !glassPlayerBelow) {
                                                 navigationBottomInset.toPx()
                                             } else {
                                                 0f

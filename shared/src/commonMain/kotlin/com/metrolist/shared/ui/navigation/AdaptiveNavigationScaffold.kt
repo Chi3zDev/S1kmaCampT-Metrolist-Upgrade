@@ -404,7 +404,7 @@ fun <T> AdaptiveNavigationScaffold(
                             modifier =
                                 Modifier.align(Alignment.BottomCenter).onSizeChanged { size ->
                                     onFloatingNavigationOccupiedHeightChanged(with(density) { size.height.toDp() })
-                                },
+                                }.padding(bottom = LocalGlassNavbarBottomOffset.current),
                         ) {
                             FloatingNavigation(
                                 items = visibleItems,
