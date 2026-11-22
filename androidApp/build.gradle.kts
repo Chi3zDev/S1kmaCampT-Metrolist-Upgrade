@@ -261,7 +261,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.metrolist.music"
+        applicationId = "com.chi3zdev.metrolist"
         minSdk = 24
         targetSdk = 37
         versionCode = 155
@@ -271,7 +271,7 @@ android {
         vectorDrawables.useSupportLibrary = true
 
         buildConfigField("Long", "DISCORD_APP_ID", "1447278780795064401L")
-        buildConfigField("Boolean", "UPDATER_ENABLED", "true")
+        buildConfigField("Boolean", "UPDATER_ENABLED", "false")
         buildConfigField("String", "BUNDLED_LANGUAGE_TAGS", "\"${bundledLanguageTags.joinToString(",")}\"")
     }
 

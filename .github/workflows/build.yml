@@ -86,3 +86,74 @@ jobs:
             gh release create latest-build --title latest-build --target "$GITHUB_SHA" --notes 'Latest successful fork debug build.'
           fi
           gh release upload latest-build Metrolist-fork-debug-universal.apk Metrolist-fork-release-test-universal.apk --clobber
+
+  signed_release:
+    if: github.event_name == 'workflow_dispatch' && github.repository == 'Chi3zDev/S1kmaCampT-Metrolist-Upgrade' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feature/permanent-release')
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Check out source and submodules
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          submodules: recursive
+          persist-credentials: false
+
+      - name: Install JDK 25 toolchain
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6
+        with:
+          distribution: temurin
+          java-version: '25'
+
+      - name: Run Gradle with JDK 21
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd # v4
+        with:
+          packages: platform-tools
+
+      - name: Set up Gradle cache
+        uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6
+
+      - name: Test streak recovery and glass geometry
+        run: ./gradlew :androidApp:testDebugUnitTest --tests com.metrolist.android.streak.ListeningStreakTest --tests com.metrolist.android.ui.GlassMorphGeometryTest --no-daemon -Dorg.gradle.java.installations.paths="$JAVA_HOME_25_X64"
+
+      - name: Build and verify signed APK
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          umask 077
+          export KEYSTORE_PATH="$RUNNER_TEMP/metrolist-release.p12"
+          trap 'rm -f "$KEYSTORE_PATH" "$RUNNER_TEMP/release-cert.der"' EXIT
+          test -n "$KEYSTORE_BASE64" && test -n "$KEYSTORE_PASSWORD" && test -n "$KEY_ALIAS" && test -n "$KEY_PASSWORD"
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$KEYSTORE_PATH"
+          unset KEYSTORE_BASE64
+          ./gradlew :androidApp:assembleRelease --no-daemon -Dorg.gradle.java.installations.paths="$JAVA_HOME_25_X64"
+          apk=androidApp/build/outputs/apk/release/androidApp-release.apk
+          test -f "$apk"
+          tools=$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -n 1)
+          "$tools/apksigner" verify --verbose --print-certs "$apk" > "$RUNNER_TEMP/apk-signature.txt"
+          keytool -exportcert -keystore "$KEYSTORE_PATH" -storetype PKCS12 -alias "$KEY_ALIAS" -storepass:env KEYSTORE_PASSWORD -file "$RUNNER_TEMP/release-cert.der" >/dev/null 2>&1
+          expected=$(sha256sum "$RUNNER_TEMP/release-cert.der" | cut -d' ' -f1)
+          actual=$(sed -n 's/^Signer #1 certificate SHA-256 digest: //p' "$RUNNER_TEMP/apk-signature.txt")
+          test "$actual" = "$expected"
+          "$tools/aapt" dump badging "$apk" | grep -q "package: name='com.chi3zdev.metrolist'"
+          cp "$apk" Metrolist-fork-release-universal.apk
+          sha256sum Metrolist-fork-release-universal.apk > Metrolist-fork-release-universal.apk.sha256
+          echo 'Signature and application ID verified.'
+
+      - name: Upload signed release artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Metrolist-fork-signed-release
+          path: |
+            Metrolist-fork-release-universal.apk
+            Metrolist-fork-release-universal.apk.sha256
+          if-no-files-found: error
