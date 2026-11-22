@@ -5657,6 +5657,6 @@
     <string name="streak_restore_corrupt">Recovery data could not be read. Restore it from a backup.</string>
     <string name="streak_calendar">Listening calendar</string>
     <string name="streak_week">This week</string>
-    <string name="streak_calendar_legend">Primary: listened · Accent: restored · Highlight: today</string>
+    <string name="streak_calendar_legend">Primary: listened · Accent: restored · Ring: today</string>
     <string name="streak_restore_failed">Could not restore the streak. Please check the current gap and quota.</string>
 </resources>

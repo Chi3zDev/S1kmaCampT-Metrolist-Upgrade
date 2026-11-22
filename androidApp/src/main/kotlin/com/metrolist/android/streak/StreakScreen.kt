@@ -9,6 +9,7 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
@@ -41,6 +42,8 @@ import java.time.ZoneId
 import java.time.format.TextStyle
 import java.util.Locale
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
@@ -78,6 +81,7 @@ fun StreakScreen(onBack: () -> Unit) {
     val flameColor = if (extinguished) MaterialTheme.colorScheme.outline else shownLevel.color
     val next = streakLevels.firstOrNull { it.minimumDays > streak.current }
     val progress = if (next == null) 1f else ((streak.current - shownLevel.minimumDays).toFloat() / (next.minimumDays - shownLevel.minimumDays)).coerceIn(0f, 1f)
+    val scope = rememberCoroutineScope()
     var confirmation by remember { mutableStateOf(false) }
     var restoreFailed by remember { mutableStateOf(false) }
 
@@ -104,7 +108,13 @@ fun StreakScreen(onBack: () -> Unit) {
                 Spacer(Modifier.height(12.dp))
                 val start = today.minusDays((today.dayOfWeek.value - 1).toLong())
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    repeat(7) { offset -> DayDot(start.plusDays(offset.toLong()), today, listened, restored) }
+                    repeat(7) { offset ->
+                        val day = start.plusDays(offset.toLong())
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(day.dayOfWeek.getDisplayName(TextStyle.NARROW_STANDALONE, Locale.getDefault()), style = MaterialTheme.typography.labelSmall)
+                            DayDot(day, today, listened, restored)
+                        }
+                    }
                 }
             }
         }
@@ -148,7 +158,13 @@ fun StreakScreen(onBack: () -> Unit) {
     if (confirmation && plan != null) {
         AlertDialog(onDismissRequest = { confirmation = false }, title = { Text(stringResource(Res.string.streak_restore)) },
             text = { Text(stringResource(Res.string.streak_restore_confirm, plan.missingDays.size, plan.remaining - plan.missingDays.size)) },
-            confirmButton = { TextButton(onClick = { restoreFailed = !persistStreakRecovery(timestamps, Instant.now(), ZoneId.systemDefault()); confirmation = false }) { Text(stringResource(Res.string.streak_restore)) } },
+            confirmButton = { TextButton(onClick = {
+                confirmation = false
+                scope.launch {
+                    val freshTimestamps = database.dao().qualifyingStreakTimestamps().first()
+                    restoreFailed = !persistStreakRecovery(freshTimestamps, Instant.now(), ZoneId.systemDefault())
+                }
+            }) { Text(stringResource(Res.string.streak_restore)) } },
             dismissButton = { TextButton(onClick = { confirmation = false }) { Text(stringResource(Res.string.cancel)) } })
     }
 }
@@ -165,7 +181,8 @@ private fun DayDot(day: LocalDate, today: LocalDate, listened: Set<LocalDate>, r
     val c = MaterialTheme.colorScheme
     val background = when { day in listened -> c.primary; day in restored -> c.tertiary; day == today -> c.secondaryContainer; else -> c.surfaceVariant }
     val foreground = when { day in listened -> c.onPrimary; day in restored -> c.onTertiary; else -> c.onSurfaceVariant }
-    Box(Modifier.size(36.dp).padding(2.dp).background(background, CircleShape), contentAlignment = Alignment.Center) {
+    Box(Modifier.size(36.dp).padding(2.dp).background(background, CircleShape)
+        .then(if (day == today) Modifier.border(2.dp, c.outline, CircleShape) else Modifier), contentAlignment = Alignment.Center) {
         Text(day.dayOfMonth.toString(), color = foreground, style = MaterialTheme.typography.labelSmall)
     }
 }
