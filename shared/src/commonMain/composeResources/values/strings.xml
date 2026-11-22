@@ -5670,4 +5670,8 @@
     <string name="streak_level_up">Level up!</string>
     <string name="streak_celebration_continue">Continue</string>
     <string name="streak_first_play_provisional">Today counts after 30 seconds of listening.</string>
+    <string name="streak_debug_title">Debug date simulator</string>
+    <string name="streak_debug_date">Simulated date: %1$s (offset %2$d days)</string>
+    <string name="streak_debug_read_only">Read-only simulation; recovery is disabled until reset.</string>
+    <string name="streak_debug_reset">Reset</string>
 </resources>

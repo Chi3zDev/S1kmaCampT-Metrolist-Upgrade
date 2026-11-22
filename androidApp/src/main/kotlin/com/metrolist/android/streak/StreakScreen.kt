@@ -7,6 +7,7 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -26,6 +27,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.compose.currentStateAsState
+import com.metrolist.android.BuildConfig
 import com.metrolist.android.LocalMiniPlayerBottomInset
 import com.metrolist.android.ui.component.tabContentTopPadding
 import com.metrolist.shared.db.MusicDatabase
@@ -63,17 +65,23 @@ fun StreakScreen(onBack: () -> Unit) {
         }
     }
     val zone = ZoneId.systemDefault()
-    val today = now.atZone(zone).toLocalDate()
+    var debugTaps by remember { mutableIntStateOf(0) }
+    var showDebug by remember { mutableStateOf(false) }
+    var debugDays by remember { mutableIntStateOf(0) }
+    // The simulator only changes what this page displays. It never writes listening or recovery data.
+    val effectiveNow = if (BuildConfig.DEBUG) now.atZone(zone).plusDays(debugDays.toLong()).toInstant() else now
+    val simulated = BuildConfig.DEBUG && debugDays != 0
+    val today = effectiveNow.atZone(zone).toLocalDate()
     val recoveryJson = Settings.shared.streakRecoveryJson
     val ledger = remember(recoveryJson) { decodeStreakRecovery(recoveryJson) }
     val restored = ledger?.recoveredDays.orEmpty()
     val listened = remember(timestamps, zone, today) { timestamps.map { Instant.ofEpochMilli(it).atZone(zone).toLocalDate() }.filter { !it.isAfter(today) }.toSet() }
-    val streak = remember(timestamps, now, zone, restored) { calculateListeningStreak(timestamps, now, zone, restored) }
-    val plan = remember(timestamps, now, zone, ledger) { ledger?.let { planStreakRecovery(timestamps, now, zone, it) } }
+    val streak = remember(timestamps, effectiveNow, zone, restored) { calculateListeningStreak(timestamps, effectiveNow, zone, restored) }
+    val plan = remember(timestamps, effectiveNow, zone, ledger) { ledger?.let { planStreakRecovery(timestamps, effectiveNow, zone, it) } }
     val allDays = (listened + restored).filter { !it.isAfter(today) }.toSet()
     val latest = allDays.maxOrNull()
     val extinguished = latest != null && latest.isBefore(today.minusDays(1))
-    val previousLength = remember(timestamps, now, zone, restored) { lastListeningStreak(timestamps, now, zone, restored) }
+    val previousLength = remember(timestamps, effectiveNow, zone, restored) { lastListeningStreak(timestamps, effectiveNow, zone, restored) }
     val shownLevel = streakLevel(if (extinguished) previousLength else streak.current)
     val targetFlameColor = if (extinguished) MaterialTheme.colorScheme.outline else shownLevel.color
     val flameColor = if (screenActive && streakMotionEnabled()) {
@@ -87,7 +95,31 @@ fun StreakScreen(onBack: () -> Unit) {
 
     LazyColumn(contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = tabContentTopPadding(), bottom = LocalMiniPlayerBottomInset.current + 32.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         item { TextButton(onClick = onBack) { Text("‹  " + stringResource(Res.string.back)) } }
-        item { Text(stringResource(Res.string.streak_page_title), style = MaterialTheme.typography.headlineMedium) }
+        item {
+            Text(stringResource(Res.string.streak_page_title), style = MaterialTheme.typography.headlineMedium,
+                modifier = if (BuildConfig.DEBUG) Modifier.clickable {
+                    debugTaps++
+                    if (debugTaps >= 7) {
+                        showDebug = !showDebug
+                        if (!showDebug) debugDays = 0
+                        debugTaps = 0
+                    }
+                } else Modifier)
+        }
+        if (BuildConfig.DEBUG && showDebug) {
+            item {
+                StreakPanel {
+                    Text(stringResource(Res.string.streak_debug_title), style = MaterialTheme.typography.titleMedium)
+                    Text(stringResource(Res.string.streak_debug_date, today.toString(), debugDays))
+                    Text(stringResource(Res.string.streak_debug_read_only), style = MaterialTheme.typography.bodySmall)
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        TextButton(onClick = { debugDays = (debugDays - 1).coerceAtLeast(-366) }) { Text("−1") }
+                        TextButton(onClick = { debugDays = 0 }) { Text(stringResource(Res.string.streak_debug_reset)) }
+                        TextButton(onClick = { debugDays = (debugDays + 1).coerceAtMost(366) }) { Text("+1") }
+                    }
+                }
+            }
+        }
         item {
             StreakPanel {
                 Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -150,12 +182,12 @@ fun StreakScreen(onBack: () -> Unit) {
                         StreakRecoveryFailure.INSUFFICIENT_QUOTA -> Text(stringResource(Res.string.streak_restore_no_quota))
                         else -> Unit
                     }
-                    if (plan?.canRecover == true) Button(onClick = { confirmation = true }) { Text(stringResource(Res.string.streak_restore)) }
+                    if (plan?.canRecover == true) Button(onClick = { confirmation = true }, enabled = !simulated) { Text(stringResource(Res.string.streak_restore)) }
                 }
             }
         }
     }
-    if (confirmation && plan != null) {
+    if (confirmation && plan != null && !simulated) {
         AlertDialog(onDismissRequest = { confirmation = false }, title = { Text(stringResource(Res.string.streak_restore)) },
             text = { Text(stringResource(Res.string.streak_restore_confirm, plan.missingDays.size, plan.remaining - plan.missingDays.size)) },
             confirmButton = { TextButton(onClick = {

@@ -2592,4 +2592,8 @@
     <string name="streak_level_up">Naik level!</string>
     <string name="streak_celebration_continue">Lanjut</string>
     <string name="streak_first_play_provisional">Hari ini dihitung setelah 30 detik mendengarkan.</string>
+    <string name="streak_debug_title">Simulator tanggal debug</string>
+    <string name="streak_debug_date">Tanggal simulasi: %1$s (selisih %2$d hari)</string>
+    <string name="streak_debug_read_only">Simulasi hanya-baca; pemulihan dinonaktifkan sampai direset.</string>
+    <string name="streak_debug_reset">Reset</string>
 </resources>
