@@ -1,5 +1,7 @@
 package com.metrolist.shared.ui.components
 
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.border
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.focusGroup
@@ -19,6 +21,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.ToggleButton
 import androidx.compose.material3.ToggleButtonDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
@@ -59,6 +63,7 @@ fun <T> ChipShelf(
             modifier
                 .fillMaxWidth()
                 .height(ChipShelfHeight)
+                .padding(horizontal = 4.dp)
                 .clipToBounds()
                 .focusGroup()
                 .selectableGroup()
@@ -107,11 +112,15 @@ private fun ShelfChip(
 ) {
     val containerHeight = ButtonDefaults.ExtraSmallContainerHeight
     val chipDescription = stringResource(Res.string.chip_content_description, text)
+    val bringIntoViewRequester = remember { BringIntoViewRequester() }
+    LaunchedEffect(selected) {
+        if (selected) bringIntoViewRequester.bringIntoView()
+    }
     ExpressiveFilterChip(
         selected = selected,
         onClick = onClick,
         modifier =
-            Modifier.height(containerHeight).clearAndSetSemantics {
+            Modifier.height(containerHeight).bringIntoViewRequester(bringIntoViewRequester).clearAndSetSemantics {
                 contentDescription = chipDescription
                 role = Role.Button
                 this.selected = selected
