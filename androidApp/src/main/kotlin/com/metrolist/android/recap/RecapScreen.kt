@@ -10,7 +10,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -27,11 +29,20 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
+import com.metrolist.android.utils.shareImage
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.metrolist.shared.db.MusicDatabase
 import com.metrolist.shared.generated.resources.Res
 import com.metrolist.shared.generated.resources.back
+import com.metrolist.shared.generated.resources.cancel
+import com.metrolist.shared.generated.resources.share
+import com.metrolist.shared.generated.resources.recap_share_square
+import com.metrolist.shared.generated.resources.recap_share_story
 import com.metrolist.shared.generated.resources.recap_all_filter
 import com.metrolist.shared.generated.resources.recap_artists_count
 import com.metrolist.shared.generated.resources.recap_empty
@@ -60,6 +71,15 @@ fun RecapScreen(onBack: () -> Unit) {
     var period by remember { mutableStateOf(RecapPeriod.YEAR) }
     var data by remember { mutableStateOf<RecapData?>(null) }
     var failed by remember { mutableStateOf(false) }
+    var showShare by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val colors = MaterialTheme.colorScheme
+    val titleText = stringResource(Res.string.recap_title)
+    val minutesText = stringResource(Res.string.recap_minutes)
+    val songsText = stringResource(Res.string.recap_top_songs)
+    val artistsText = stringResource(Res.string.recap_top_artists)
+    val shareText = stringResource(Res.string.share)
     val year = remember { Instant.now().atZone(ZoneId.systemDefault()).year }
     LaunchedEffect(database, period) {
         data = null
@@ -72,9 +92,39 @@ fun RecapScreen(onBack: () -> Unit) {
             failed = true
         }
     }
+    if (showShare && data != null) {
+        AlertDialog(
+            onDismissRequest = { showShare = false },
+            title = { Text(shareText) },
+            text = {
+                Column {
+                    listOf(false, true).forEach { story ->
+                        TextButton(onClick = {
+                            val recap = data ?: return@TextButton
+                            showShare = false
+                            scope.launch {
+                                val image = renderRecapShare(recap, titleText, minutesText, songsText, artistsText,
+                                    colors.surface.toArgb(), colors.onSurface.toArgb(), colors.primary.toArgb(), story)
+                                shareImage(context, image, shareText)
+                            }
+                        }) {
+                            Text(stringResource(if (story) Res.string.recap_share_story else Res.string.recap_share_square))
+                        }
+                    }
+                }
+            },
+            confirmButton = {},
+            dismissButton = { TextButton(onClick = { showShare = false }) { Text(stringResource(Res.string.cancel)) } },
+        )
+    }
     Scaffold(topBar = {
         TopAppBar(
             title = { Text(stringResource(Res.string.recap_title)) },
+            actions = {
+                IconButton(onClick = { showShare = true }, enabled = data != null) {
+                    Icon(MetrolistIcons.Outlined.Share, shareText)
+                }
+            },
             navigationIcon = {
                 IconButton(onClick = onBack) {
                     Icon(MetrolistIcons.AutoMirrored.Filled.ArrowBack, stringResource(Res.string.back))
