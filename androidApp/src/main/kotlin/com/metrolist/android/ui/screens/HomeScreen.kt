@@ -67,6 +67,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.metrolist.android.recap.RecapEntry
 import com.metrolist.android.streak.StreakCard
 import com.metrolist.android.streak.rememberListeningStreak
 import com.metrolist.android.LocalMiniPlayerBottomInset
@@ -136,6 +137,7 @@ fun HomeScreen(
     onNavigateToHomeSection: (HomeShelf) -> Unit = {},
     onNavigateToLibrary: (LibraryFilterType?) -> Unit = {},
     onNavigateToStatistics: () -> Unit = {},
+    onNavigateToRecap: () -> Unit = {},
     floatingActionsBottomInset: State<Dp>,
     scrollToTopEvents: Flow<Long> = emptyFlow(),
     viewModel: HomeViewModel = koinViewModel<HomeViewModel>(),
@@ -297,6 +299,9 @@ fun HomeScreen(
             header = {
                 item(key = "listening_streak") {
                     StreakCard(streak, onNavigateToStatistics, Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
+                }
+                item(key = "recap_entry") {
+                    RecapEntry(onNavigateToRecap, Modifier.padding(horizontal = 16.dp))
                 }
                 if (isTv) {
                     item(key = "tv_refresh") {

@@ -228,6 +228,7 @@ fun StatisticsScreen(
     bottomContentPadding: Dp = 0.dp,
     onArtistVisible: (suspend (StatisticsItem) -> Unit)? = null,
     artistLookupGeneration: Int = 0,
+    headerContent: (@Composable () -> Unit)? = null,
 ) {
     var detail by remember { mutableStateOf<StatisticsDetail?>(null) }
     val openDetail: (StatisticsDetail) -> Unit = onOpenDetail ?: { detail = it }
@@ -376,6 +377,9 @@ fun StatisticsScreen(
                                             }
                                             HorizontalDivider(Modifier.padding(top = 8.dp))
                                         }
+                                    }
+                                    if (headerContent != null) {
+                                        item { headerContent() }
                                     }
                                     item { PeriodButtons(state, onPeriodSelected, onModeSelected, onDateRangeSelected) }
                                     if (state.isLoading && !state.hasLoaded) {

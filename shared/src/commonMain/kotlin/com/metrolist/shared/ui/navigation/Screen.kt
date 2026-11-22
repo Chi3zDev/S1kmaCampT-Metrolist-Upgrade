@@ -42,6 +42,9 @@ sealed class Screen : NavKey {
     data object Statistics : Screen()
 
     @Serializable
+    data object Recap : Screen()
+
+    @Serializable
     data class StatisticsDetail(
         val detail: String,
         val period: String,

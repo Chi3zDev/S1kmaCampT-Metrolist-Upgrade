@@ -11,6 +11,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.Modifier
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.unit.dp
+import com.metrolist.android.recap.RecapEntry
 import com.metrolist.android.LocalMiniPlayerBottomInset
 import com.metrolist.android.playback.LocalPlayerConnection
 import com.metrolist.android.ui.menu.AlbumMenu
@@ -54,6 +58,7 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun StatsScreen(
     onNavigateBack: () -> Unit,
+    onNavigateToRecap: () -> Unit,
     onOpenDetail: (detail: String, period: String, dateRange: StatisticsDateRange?, mode: StatisticsPeriodMode) -> Unit,
     viewModel: StatsViewModel = koinViewModel(),
 ) {
@@ -63,6 +68,7 @@ fun StatsScreen(
     val playItem = rememberStatisticsPlaybackAction()
     val openItemMenu = rememberStatisticsItemMenu(uiState, viewModel)
     StatisticsScreen(
+        headerContent = { RecapEntry(onNavigateToRecap, Modifier.padding(horizontal = 16.dp)) },
         exportLabel = shareLabel,
         onExport = { shareImage(context, it, shareLabel) },
         state =

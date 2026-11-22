@@ -203,6 +203,7 @@ import com.metrolist.android.ui.screens.AutoPlaylistScreen
 import com.metrolist.android.ui.screens.BrowseScreen
 import com.metrolist.android.ui.screens.DownloadsScreen
 import com.metrolist.android.ui.screens.HistoryScreen
+import com.metrolist.android.recap.RecapScreen
 import com.metrolist.android.ui.screens.HomeScreen
 import com.metrolist.android.ui.screens.HomeSectionScreen
 import com.metrolist.android.ui.screens.IntegrationsScreen
@@ -2468,6 +2469,7 @@ fun getEntryProvider(
     entryProvider<NavKey> {
         entry<Screen.Home>(metadata = navTabMetadata) {
             HomeScreen(
+                onNavigateToRecap = { navigator.navigate(Screen.Recap) },
                 onNavigateToStatistics = { navigator.navigate(Screen.Statistics) },
                 floatingActionsBottomInset = floatingActionsBottomInset,
                 onNavigateToAlbum = { albumId -> navigator.navigate(Screen.Album(albumId)) },
@@ -2817,8 +2819,13 @@ fun getEntryProvider(
             )
         }
 
+        entry<Screen.Recap>(metadata = navTabMetadata) {
+            RecapScreen(onBack = { navigator.goBack() })
+        }
+
         entry<Screen.Statistics>(metadata = navTabMetadata) {
             StatsScreen(
+                onNavigateToRecap = { navigator.navigate(Screen.Recap) },
                 onNavigateBack = { navigator.goBack() },
                 onOpenDetail = {
                     detail,
