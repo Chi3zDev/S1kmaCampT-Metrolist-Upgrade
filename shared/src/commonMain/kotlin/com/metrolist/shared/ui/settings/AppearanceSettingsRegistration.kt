@@ -103,7 +103,7 @@ internal fun SettingsUiRegistryBuilder.registerAppearanceSettings(host: SharedSe
                 switch(id = "glassMiniPlayer", title = stringResource(Res.string.glass_area_mini_player), checked = settings.glassMiniPlayer, enabled = settings.glassNavigation) { settings.glassMiniPlayer = it }
                 switch(id = "glassTopBar", title = stringResource(Res.string.glass_area_top_bar), checked = settings.glassTopBar, enabled = false) { settings.glassTopBar = it }
                 switch(id = "glassCards", title = stringResource(Res.string.glass_area_cards), checked = settings.glassCards, enabled = false) { settings.glassCards = it }
-                switch(id = "glassLyricsPoster", title = stringResource(Res.string.glass_area_poster), checked = settings.glassLyricsPoster, enabled = false) { settings.glassLyricsPoster = it }
+                switch(id = "glassLyricsPoster", title = stringResource(Res.string.glass_area_poster), checked = settings.glassLyricsPoster, enabled = settings.glassNavigation) { settings.glassLyricsPoster = it }
                 switch(id = "glassLightMode", title = stringResource(Res.string.glass_light_mode), description = stringResource(Res.string.glass_light_mode_description), checked = settings.glassLightMode, enabled = settings.glassNavigation) { settings.glassLightMode = it }
                 switch(id = "glassNavbarLabels", title = stringResource(Res.string.glass_show_labels), checked = settings.glassNavbarLabels, enabled = settings.glassNavigation) { settings.glassNavbarLabels = it }
                 val positions = listOf(SettingsChoice("ABOVE", stringResource(Res.string.glass_player_above)), SettingsChoice("BELOW", stringResource(Res.string.glass_player_below)))

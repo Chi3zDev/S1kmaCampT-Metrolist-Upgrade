@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.CanvasDrawScope
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.drawscope.scale
@@ -57,6 +58,9 @@ internal data class LyricsImageStyle(
     val textScale: Float = 1f,
     val contentScale: Float = 1f,
     val font: LyricsPosterFont = LyricsPosterFont.SANS,
+    val glassEnabled: Boolean = false,
+    val glassStyle: String = "BLUR",
+    val glassTint: Float = 0.55f,
 )
 
 private fun DrawScope.drawCover(
@@ -75,7 +79,7 @@ private fun DrawScope.drawCover(
     )
 }
 
-internal fun prepareLyricsArtwork(image: ImageBitmap): Pair<List<Color>, ImageBitmap> {
+internal fun prepareLyricsArtwork(image: ImageBitmap, blurRadius: Int = 6): Pair<List<Color>, ImageBitmap> {
     val sample = ImageBitmap(64, 64)
     CanvasDrawScope().draw(Density(1f), LayoutDirection.Ltr, Canvas(sample), Size(64f, 64f)) {
         drawRect(Color.Black)
@@ -84,7 +88,7 @@ internal fun prepareLyricsArtwork(image: ImageBitmap): Pair<List<Color>, ImageBi
     val pixels = IntArray(64 * 64)
     sample.readPixels(pixels)
     val palette = lyricsArtworkPalette(pixels)
-    val blurred = blurLyricsArtwork(pixels, 64, 64, 6)
+    val blurred = blurLyricsArtwork(pixels, 64, 64, blurRadius.coerceIn(0, 9))
     CanvasDrawScope().draw(Density(1f), LayoutDirection.Ltr, Canvas(sample), Size(64f, 64f)) {
         blurred.forEachIndexed { index, pixel ->
             drawRect(Color(pixel), Offset((index % 64).toFloat(), (index / 64).toFloat()), Size(1f, 1f))
@@ -187,7 +191,18 @@ internal fun renderLyricsImage(
                 LyricsImageBackground.BLUR, LyricsImageBackground.GLASS -> {
                     blurredArtwork?.let {
                         drawImage(it, dstSize = IntSize(size.width.toInt(), size.height.toInt()), filterQuality = FilterQuality.High)
-                        drawRect(Color.Black.copy(alpha = if (style.background == LyricsImageBackground.GLASS) 0.65f else 0.55f))
+                        if (style.background == LyricsImageBackground.GLASS && style.glassEnabled) {
+                            val styleTint = when (style.glassStyle) { "FROSTED" -> 0.65f; "CLEAR" -> 0.22f; else -> 0.42f }
+                            drawRect(style.backgroundColor.copy(alpha = (styleTint * style.glassTint).coerceIn(0f, 0.65f)))
+                            drawRect(Color.Black.copy(alpha = if (style.glassStyle == "CLEAR") 0.48f else 0.55f))
+                            val inset = 4f * scale
+                            val edgeSize = Size(size.width - 2 * inset, size.height - 2 * inset)
+                            val corner = CornerRadius(16f * scale)
+                            drawRoundRect(Color.Black.copy(alpha = 0.18f), topLeft = Offset(inset, inset + 2f * scale), size = edgeSize, cornerRadius = corner, style = Stroke(3f * scale))
+                            drawRoundRect(Brush.verticalGradient(listOf(Color.White.copy(alpha = if (style.glassStyle == "CLEAR") 0.65f else 0.35f), Color.White.copy(alpha = 0.06f))), topLeft = Offset(inset, inset), size = edgeSize, cornerRadius = corner, style = Stroke(scale))
+                        } else {
+                            drawRect(Color.Black.copy(alpha = if (style.background == LyricsImageBackground.GLASS) 0.65f else 0.55f))
+                        }
                     }
                 }
                 LyricsImageBackground.GRADIENT -> {
