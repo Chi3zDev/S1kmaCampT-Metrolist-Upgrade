@@ -54,6 +54,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -81,7 +82,7 @@ val LocalFloatingNavBar = compositionLocalOf { false }
 val LocalGlassNavbarBottomOffset = compositionLocalOf { 0.dp }
 val LocalGlassNavigationEnabled = compositionLocalOf { false }
 val LocalGlassNavigationState = compositionLocalOf<HazeState?> { null }
-val LocalGlassNavigationCollapsed = compositionLocalOf { false }
+val LocalGlassNavigationMorphProgress = compositionLocalOf { 0f }
 val LocalGlassMotionAllowed = compositionLocalOf { true }
 val LocalGlassBubbleAllowed = compositionLocalOf { true }
 val LocalExpandGlassNavigation = compositionLocalOf<() -> Unit> { {} }
@@ -142,7 +143,8 @@ private fun <T> FloatingNavigationBar(
 ) {
     val glassState = LocalGlassNavigationState.current
     val glassEnabled = LocalGlassNavigationEnabled.current
-    val collapsed = glassEnabled && LocalGlassNavigationCollapsed.current
+    val morphProgress = if (glassEnabled) LocalGlassNavigationMorphProgress.current.coerceIn(0f, 1f) else 0f
+    val collapsed = glassEnabled && morphProgress >= 0.5f
     val expand = LocalExpandGlassNavigation.current
     val pillItems = if (glassEnabled) items else items.filter { it.key != separateKey }
     val separateItem = if (glassEnabled) null else items.firstOrNull { it.key == separateKey }
@@ -165,20 +167,21 @@ private fun <T> FloatingNavigationBar(
     val radius = (settings.glassBlurStrength.coerceIn(0f, 100f) / 100f * when (settings.glassStyle) { "FROSTED" -> 24f; "CLEAR" -> 8f; else -> 20f }).dp
     val tintAlpha = (settings.glassTintStrength.coerceIn(0f, 100f) / 100f * when (settings.glassStyle) { "FROSTED" -> 0.9f; "CLEAR" -> 0.45f; else -> 0.7f }).coerceIn(0.12f, 0.9f)
     val glassTint = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = tintAlpha)
-    val glassShape = remember(settings.glassCornerRoundness) { RoundedCornerShape((12f + settings.glassCornerRoundness.coerceIn(0f, 100f) * 0.38f).toInt()) }
+    val cornerPercent = 12f + settings.glassCornerRoundness.coerceIn(0f, 100f) * 0.38f
+    val glassShape = remember(cornerPercent, morphProgress) { RoundedCornerShape((cornerPercent + (50f - cornerPercent) * morphProgress).toInt()) }
     val glassStyle = remember(radius) { HazeBlurStyle { blurRadius(radius) } }
 
     Row(
         modifier =
             modifier
-                .then(if (glassEnabled && !collapsed) Modifier.fillMaxWidth() else Modifier.wrapContentWidth())
+                .then(if (glassEnabled) Modifier.fillMaxWidth() else Modifier.wrapContentWidth())
                 .windowInsetsPadding(ShortNavigationBarDefaults.windowInsets)
                 .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Surface(
-            modifier = (if (motionAllowed) Modifier.animateContentSize() else Modifier).then(if (glassEnabled && !collapsed) Modifier.fillMaxWidth() else Modifier.wrapContentWidth()).height(FloatingBarHeight).then(
+            modifier = (if (!glassEnabled) Modifier.animateContentSize() else Modifier).then(if (glassEnabled) Modifier.fillMaxWidth() else Modifier.wrapContentWidth()).height(FloatingBarHeight).then(
                 if (glassState != null) Modifier.clip(glassShape).hazeBlur(HazeInput.Backdrop(glassState), glassStyle) else Modifier,
             ),
             shape = if (glassEnabled) glassShape else CircleShape,
@@ -201,7 +204,7 @@ private fun <T> FloatingNavigationBar(
                 } else targetCenter
                 val cellWidth = if (pillItems.isEmpty()) 0f else rowWidth.toFloat() / pillItems.size
                 Box(
-                    Modifier.fillMaxWidth().padding(horizontal = 8.dp)
+                    Modifier.fillMaxWidth().alpha((1f - morphProgress * 2f).coerceIn(0f, 1f)).padding(horizontal = 8.dp)
                         .onSizeChanged { rowWidth = it.width }
                         .pointerInput(pillItems.map { it.key }, rowWidth, layoutDirection) {
                             detectHorizontalDragGestures(
@@ -259,14 +262,14 @@ private fun <T> FloatingNavigationBar(
                 }
             } else {
                 Row(
-                    modifier = Modifier.wrapContentWidth().padding(horizontal = 8.dp),
-                    horizontalArrangement = if (glassEnabled) Arrangement.SpaceEvenly else Arrangement.spacedBy(4.dp),
+                    modifier = (if (glassEnabled) Modifier.fillMaxWidth() else Modifier.wrapContentWidth()).padding(horizontal = 8.dp),
+                    horizontalArrangement = if (glassEnabled) Arrangement.Center else Arrangement.spacedBy(4.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     if (collapsed) {
                         val selectedItem = items.firstOrNull { it.key == selectedKey }
                         if (selectedItem != null) {
-                            Box(Modifier.size(48.dp).clip(CircleShape).clickable(onClick = expand), contentAlignment = Alignment.Center) {
+                            Box(Modifier.size(48.dp).alpha(((morphProgress - 0.5f) * 2f).coerceIn(0f, 1f)).clip(CircleShape).clickable(onClick = expand), contentAlignment = Alignment.Center) {
                                 Icon(selectedItem.selectedIcon, contentDescription = selectedItem.label, tint = MaterialTheme.colorScheme.onSurface)
                             }
                         }

@@ -353,7 +353,10 @@ import com.metrolist.shared.ui.navigation.LocalGlassNavbarBottomOffset
 import com.metrolist.shared.ui.navigation.LocalExpandGlassNavigation
 import com.metrolist.shared.ui.navigation.LocalGlassMotionAllowed
 import com.metrolist.shared.ui.navigation.LocalGlassBubbleAllowed
-import com.metrolist.shared.ui.navigation.LocalGlassNavigationCollapsed
+import com.metrolist.shared.ui.navigation.glassMorphNavbarBottomOffset
+import com.metrolist.shared.ui.navigation.glassMorphPlayerDown
+import com.metrolist.shared.ui.navigation.glassMorphPlayerStart
+import com.metrolist.shared.ui.navigation.LocalGlassNavigationMorphProgress
 import com.metrolist.shared.ui.navigation.LocalGlassNavigationEnabled
 import com.metrolist.shared.ui.navigation.LocalGlassNavigationState
 import com.metrolist.shared.ui.navigation.LocalNavVisibilityScope
@@ -888,6 +891,16 @@ fun MetrolistApp(
             }
         }
         LaunchedEffect(useGlassNavigation, currentRoute) { glassNavigationCollapsed = false }
+        val appLifecycleState by lifecycleOwner.lifecycle.currentStateAsState()
+        val glassSystemMotionAllowed = remember(context, appLifecycleState) {
+            android.provider.Settings.Global.getFloat(
+                context.contentResolver, android.provider.Settings.Global.ANIMATOR_DURATION_SCALE, 1f,
+            ) > 0f
+        }
+        val glassMorphTarget = if (useGlassNavigation && shouldShowNavigationBar && glassNavigationCollapsed) 1f else 0f
+        val glassMorphProgress = if (glassSystemMotionAllowed && Settings.shared.glassNavbarMotion != "OFF") {
+            animateFloatAsState(glassMorphTarget, spring(dampingRatio = 0.9f, stiffness = 700f), label = "glassNavigationMorph").value.coerceIn(0f, 1f)
+        } else glassMorphTarget
         var navigationBarContentInset by remember(navigationSuiteType, useFloatingNavBar) { mutableStateOf(0.dp) }
         var floatingNavBarHeight by remember(navigationSuiteType, useFloatingNavBar) { mutableStateOf(0.dp) }
         val safeBottomPadding =
@@ -930,6 +943,11 @@ fun MetrolistApp(
                 MiniPlayerHeight
             }
         val glassPlayerBelow = useGlassNavigation && useGlassMiniPlayer && Settings.shared.glassPlayerBelow && shouldRenderMiniPlayer && shouldShowNavigationBar
+        val glassMorphPlayer = useGlassNavigation && useGlassMiniPlayer && shouldRenderMiniPlayer && shouldShowNavigationBar && LocalConfiguration.current.screenWidthDp >= 280
+        // Keep the bottom-sheet anchor fixed; move only its collapsed header with the same progress as the nav.
+        val glassPlayerMorphDown = if (glassMorphPlayer && !glassPlayerBelow) {
+            glassMorphPlayerDown(navigationBottomInset.value, safeBottomPadding.value, playerBelow = false, progress = glassMorphProgress).dp
+        } else 0.dp
         val miniPlayerInsets =
             calculateMiniPlayerInsets(
                 systemBottomInset = if (shouldRenderMiniPlayer) safeBottomPadding else navigationBarBottomPadding,
@@ -1453,10 +1471,13 @@ fun MetrolistApp(
                         CompositionLocalProvider(
                             LocalContentObscured provides (isInPipMode || contentObscured),
                             LocalFloatingNavBar provides useFloatingNavBar,
-                            LocalGlassNavbarBottomOffset provides (if (glassPlayerBelow) miniPlayerHeight + miniPlayerBottomSpacing else 0.dp),
+                            LocalGlassNavbarBottomOffset provides glassMorphNavbarBottomOffset(
+                                miniPlayerHeight.value, miniPlayerBottomSpacing.value, glassPlayerBelow,
+                                if (glassMorphPlayer) glassMorphProgress else 0f,
+                            ).dp,
                             LocalGlassNavigationEnabled provides useGlassNavigation,
-                            LocalGlassNavigationCollapsed provides glassNavigationCollapsed,
-                            LocalGlassMotionAllowed provides (android.provider.Settings.Global.getFloat(context.contentResolver, android.provider.Settings.Global.ANIMATOR_DURATION_SCALE, 1f) > 0f),
+                            LocalGlassNavigationMorphProgress provides glassMorphProgress,
+                            LocalGlassMotionAllowed provides glassSystemMotionAllowed,
                             LocalGlassBubbleAllowed provides (Build.VERSION.SDK_INT > Build.VERSION_CODES.R),
                             LocalExpandGlassNavigation provides { glassNavigationCollapsed = false },
                             LocalGlassNavigationState provides glassBackdrop,
@@ -1898,7 +1919,7 @@ fun MetrolistApp(
                                     .drawWithContent {
                                         val bottomInset =
                                             if (playerBottomSheetState.progress <= 0f && !glassPlayerBelow) {
-                                                navigationBottomInset.toPx()
+                                                (navigationBottomInset * (if (glassMorphPlayer) 1f - glassMorphProgress else 1f)).toPx()
                                             } else {
                                                 0f
                                             }
@@ -1920,7 +1941,7 @@ fun MetrolistApp(
                                             1f
                                         },
                                     ),
-                            collapsedHeaderHeight = miniPlayerHeight,
+                            collapsedHeaderHeight = miniPlayerHeight + glassPlayerMorphDown,
                             background = {
                                 if (hasMedia && !playerBottomSheetState.isCollapsed) {
                                     Box(
@@ -1945,7 +1966,8 @@ fun MetrolistApp(
                             },
                             isCollapsedContentClickable = false,
                             isExpandable = true,
-                            isDraggableWhenCollapsed = true,
+                            // Avoid an invisible full-width sheet hit target covering the collapsed nav button.
+                            isDraggableWhenCollapsed = !(glassMorphPlayer && glassMorphProgress > 0f),
                             preserveContentWhenCollapsed = true,
                             morphCollapsedContainer = !useGlassMiniPlayer,
                             collapsedContent = {
@@ -1987,9 +2009,12 @@ fun MetrolistApp(
                                                         false
                                                     }
                                                 }.layout { measurable, constraints ->
-                                                    val start = miniPlayerRailPadding().roundToPx()
+                                                    val availableDp = with(density) { constraints.maxWidth.toDp().value }
+                                                    val morphInset = if (glassMorphPlayer) glassMorphPlayerStart(availableDp, glassMorphProgress).dp else 0.dp
+                                                    val start = (miniPlayerRailPadding() + morphInset).roundToPx()
+                                                    val down = glassPlayerMorphDown.roundToPx()
                                                     val child = measurable.measure(constraints.offset(horizontal = -start))
-                                                    layout(child.width + start, child.height) { child.placeRelative(start, 0) }
+                                                    layout(child.width + start, child.height + down) { child.placeRelative(start, down) }
                                                 },
                                     )
                                 }

@@ -21,6 +21,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
@@ -398,12 +399,17 @@ fun <T> AdaptiveNavigationScaffold(
                     }
                     if (floatingBar) {
                         // Keep reporting zero height after the exit removes the animated bar.
-                        Box(
+                        val glass = LocalGlassNavigationEnabled.current
+                        val morph = if (glass) LocalGlassNavigationMorphProgress.current.coerceIn(0f, 1f) else 0f
+                        BoxWithConstraints(
                             modifier =
-                                Modifier.align(Alignment.BottomCenter).onSizeChanged { size ->
-                                    onFloatingNavigationOccupiedHeightChanged(with(density) { size.height.toDp() })
-                                }.padding(bottom = LocalGlassNavbarBottomOffset.current),
+                                Modifier.align(if (glass) Alignment.BottomStart else Alignment.BottomCenter)
+                                    .then(if (glass) Modifier.fillMaxWidth() else Modifier)
+                                    .onSizeChanged { size ->
+                                        onFloatingNavigationOccupiedHeightChanged(with(density) { size.height.toDp() })
+                                    }.padding(bottom = LocalGlassNavbarBottomOffset.current),
                         ) {
+                            val width = if (glass) glassMorphNavWidth(maxWidth.value, morph).dp else maxWidth
                             FloatingNavigation(
                                 items = visibleItems,
                                 selectedKey = selectedKey,
@@ -412,6 +418,7 @@ fun <T> AdaptiveNavigationScaffold(
                                 separateKey = floatingSeparateKey,
                                 itemModifier = itemModifier,
                                 onBarHeightChanged = onFloatingNavigationHeightChanged,
+                                modifier = if (glass) Modifier.width(width) else Modifier,
                             )
                         }
                     }
