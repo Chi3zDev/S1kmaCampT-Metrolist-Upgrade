@@ -1,5 +1,8 @@
 package com.metrolist.android.recap
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
@@ -11,6 +14,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
@@ -32,6 +36,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import coil3.compose.AsyncImage
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import com.metrolist.shared.db.MusicDatabase
@@ -47,9 +56,18 @@ import com.metrolist.shared.generated.resources.recap_title
 import com.metrolist.shared.generated.resources.recap_top_artists
 import com.metrolist.shared.generated.resources.recap_top_songs
 import com.metrolist.shared.generated.resources.recap_year_filter
+import com.metrolist.shared.generated.resources.story_intro
+import com.metrolist.shared.generated.resources.story_plays
+import com.metrolist.shared.generated.resources.story_repeat
+import com.metrolist.shared.generated.resources.story_summary
+import com.metrolist.shared.generated.resources.story_change_period
+import com.metrolist.shared.generated.resources.story_previous_month
+import com.metrolist.shared.generated.resources.story_next_month
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import java.time.Instant
 import java.time.ZoneId
+import java.time.YearMonth
+import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
@@ -62,11 +80,12 @@ fun RecapScreen(onBack: () -> Unit) {
     var data by remember { mutableStateOf<RecapData?>(null) }
     var failed by remember { mutableStateOf(false) }
     var showPeriods by remember { mutableStateOf(false) }
-    LaunchedEffect(database, period) {
+    var month by remember { mutableStateOf(YearMonth.now()) }
+    LaunchedEffect(database, period, month) {
         data = null
         failed = false
         try {
-            data = database.loadRecap(period, Instant.now(), ZoneId.systemDefault())
+            data = database.loadRecap(period, Instant.now(), ZoneId.systemDefault(), month.takeIf { period == RecapPeriod.MONTH })
         } catch (error: CancellationException) {
             throw error
         } catch (error: Exception) {
@@ -87,6 +106,15 @@ fun RecapScreen(onBack: () -> Unit) {
                         }
                         TextButton(onClick = { period = choice; showPeriods = false }) { Text(stringResource(label)) }
                     }
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        TextButton(onClick = { month = month.minusMonths(1); period = RecapPeriod.MONTH }) {
+                            Text(stringResource(Res.string.story_previous_month))
+                        }
+                        Text(month.format(DateTimeFormatter.ofPattern("MMM yyyy")))
+                        TextButton(onClick = { month = month.plusMonths(1); period = RecapPeriod.MONTH }, enabled = month < YearMonth.now()) {
+                            Text(stringResource(Res.string.story_next_month))
+                        }
+                    }
                 }
             },
             confirmButton = {},
@@ -102,28 +130,28 @@ fun RecapScreen(onBack: () -> Unit) {
                 TextButton(onClick = { showPeriods = true }) { Text(stringResource(Res.string.recap_title)) }
                 TextButton(onClick = onBack) { Text(stringResource(Res.string.back)) }
             }
-            else -> RecapStory(recap, onBack, { showPeriods = true })
+            else -> RecapStory(recap, onBack, { showPeriods = true }, showPeriods)
         }
     }
 }
 
 @Composable
-private fun RecapStory(data: RecapData, onBack: () -> Unit, onPeriod: () -> Unit) {
-    val pages = listOf(0, 1, 2)
+private fun RecapStory(data: RecapData, onBack: () -> Unit, onPeriod: () -> Unit, paused: Boolean) {
+    val pages = buildList { add(0); add(1); if (data.artists.isNotEmpty()) add(2); add(3); if (data.songs.any { it.playCount > 1 }) add(4); add(5) }
     var page by remember(data) { mutableIntStateOf(0) }
     var progress by remember(data, page) { mutableFloatStateOf(0f) }
     var pressed by remember { mutableStateOf(false) }
-    LaunchedEffect(page, pressed) {
-        while (!pressed && progress < 1f) {
+    LaunchedEffect(page, pressed, paused) {
+        while (!pressed && !paused && progress < 1f) {
             delay(50)
             progress = (progress + 1f / 120f).coerceAtMost(1f)
         }
-        if (!pressed && progress >= 1f && page < pages.lastIndex) page++
+        if (!pressed && !paused && progress >= 1f && page < pages.lastIndex) page++
     }
     val colors = MaterialTheme.colorScheme
     Box(
         Modifier.fillMaxWidth().aspectRatio(9f / 16f)
-            .background(colors.primaryContainer)
+            .background(Brush.linearGradient(listOf(colors.surface, if (page % 2 == 0) colors.primaryContainer else colors.secondaryContainer)))
             .pointerInput(page) {
                 detectTapGestures(
                     onPress = { pressed = true; tryAwaitRelease(); pressed = false },
@@ -141,11 +169,43 @@ private fun RecapStory(data: RecapData, onBack: () -> Unit, onPeriod: () -> Unit
                 })
             },
     ) {
-        Column(Modifier.align(Alignment.Center).padding(28.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            when (pages[page]) {
-                0 -> { Text(data.songCount.toString(), style = MaterialTheme.typography.displayLarge); Text(stringResource(Res.string.recap_songs_count, data.songCount)) }
-                1 -> { Text(data.minutes.toString(), style = MaterialTheme.typography.displayLarge); Text(stringResource(Res.string.recap_minutes)) }
-                else -> { Text(stringResource(Res.string.recap_top_songs), style = MaterialTheme.typography.headlineLarge); data.songs.take(5).forEach { Text(it.title) } }
+        AnimatedContent(targetState = pages[page], modifier = Modifier.align(Alignment.Center).padding(28.dp), label = "recapSlide") { slide ->
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                when (slide) {
+                    0 -> {
+                        CountingNumber(data.playCount.toLong())
+                        Text(stringResource(Res.string.story_intro, data.playCount), style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+                    }
+                    1 -> {
+                        Text(stringResource(Res.string.recap_minutes), style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+                        CountingNumber(data.minutes)
+                    }
+                    2 -> {
+                        Text(stringResource(Res.string.recap_top_artists), style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold)
+                        data.artists.take(5).forEachIndexed { index, artist ->
+                            StoryRow(index + 1, artist.name, null, artist.thumbnailUrl)
+                        }
+                    }
+                    3 -> {
+                        Text(stringResource(Res.string.recap_top_songs), style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold)
+                        data.songs.take(5).forEachIndexed { index, song -> StoryRow(index + 1, song.title, song.artists, song.thumbnailUrl) }
+                    }
+                    4 -> {
+                        Text(stringResource(Res.string.story_repeat), style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold)
+                        data.songs.filter { it.playCount > 1 }.sortedByDescending { it.playCount }.take(5).forEachIndexed { index, song ->
+                            StoryRow(index + 1, song.title, stringResource(Res.string.story_plays, song.playCount), song.thumbnailUrl)
+                        }
+                    }
+                    else -> {
+                        Text(stringResource(Res.string.story_summary), style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold)
+                        Text(stringResource(Res.string.story_plays, data.playCount), style = MaterialTheme.typography.titleLarge)
+                        Text("${data.minutes} ${stringResource(Res.string.recap_minutes)}", style = MaterialTheme.typography.titleLarge)
+                        Text(stringResource(Res.string.recap_top_songs), style = MaterialTheme.typography.titleLarge)
+                        data.songs.take(3).forEach { Text(it.title) }
+                        if (data.artists.isNotEmpty()) Text(stringResource(Res.string.recap_top_artists), style = MaterialTheme.typography.titleLarge)
+                        data.artists.take(3).forEach { Text(it.name) }
+                    }
+                }
             }
         }
         Column(Modifier.align(Alignment.TopCenter).fillMaxWidth().padding(12.dp)) {
@@ -158,8 +218,28 @@ private fun RecapStory(data: RecapData, onBack: () -> Unit, onPeriod: () -> Unit
             }
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 IconButton(onClick = onBack) { Icon(MetrolistIcons.AutoMirrored.Filled.ArrowBack, stringResource(Res.string.back), tint = colors.onPrimaryContainer) }
-                TextButton(onClick = onPeriod) { Text(stringResource(Res.string.recap_title), color = colors.onPrimaryContainer) }
+                TextButton(onClick = onPeriod) { Text(stringResource(Res.string.story_change_period), color = colors.onPrimaryContainer) }
             }
+        }
+    }
+}
+
+@Composable
+private fun CountingNumber(value: Long) {
+    var started by remember(value) { mutableStateOf(false) }
+    LaunchedEffect(value) { started = true }
+    val fraction by animateFloatAsState(if (started) 1f else 0f, animationSpec = tween(900), label = "recapNumber")
+    Text((value * fraction).toLong().toString(), style = MaterialTheme.typography.displayLarge, fontWeight = FontWeight.Black, color = MaterialTheme.colorScheme.primary)
+}
+
+@Composable
+private fun StoryRow(rank: Int, title: String, subtitle: String?, artwork: String?) {
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Text(rank.toString(), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+        AsyncImage(model = artwork, contentDescription = null, modifier = Modifier.size(48.dp).clip(RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.surfaceVariant), contentScale = ContentScale.Crop)
+        Column(Modifier.weight(1f)) {
+            Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.titleMedium)
+            if (!subtitle.isNullOrBlank()) Text(subtitle, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodySmall)
         }
     }
 }

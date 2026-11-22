@@ -5601,4 +5601,11 @@
     <string name="recap_watch">Watch recap</string>
     <string name="recap_share_square">Share square</string>
     <string name="recap_share_story">Share story</string>
+    <string name="story_intro">You played %1$d songs</string>
+    <string name="story_plays">%1$d plays</string>
+    <string name="story_repeat">On repeat</string>
+    <string name="story_summary">Your recap</string>
+    <string name="story_change_period">Choose period</string>
+    <string name="story_previous_month">Previous month</string>
+    <string name="story_next_month">Next month</string>
 </resources>
