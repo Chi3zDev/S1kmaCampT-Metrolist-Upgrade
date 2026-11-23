@@ -193,6 +193,7 @@ java {
 
 val sentryAuthToken = providers.environmentVariable("SENTRY_AUTH_TOKEN").filter(String::isNotBlank)
 val appVersion = providers.gradleProperty("appVersion").get()
+val upgradeNumber = providers.gradleProperty("upgradeNumber").get().toInt()
 val bundledLanguageParser =
     DocumentBuilderFactory
         .newInstance()
@@ -264,12 +265,13 @@ android {
         applicationId = "com.chi3zdev.metrolist"
         minSdk = 24
         targetSdk = 37
-        versionCode = 155
-        versionName = appVersion
+        versionCode = 156
+        versionName = "$appVersion-upgrade.$upgradeNumber"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
 
+        buildConfigField("Int", "UPGRADE_NUMBER", upgradeNumber.toString())
         buildConfigField("Long", "DISCORD_APP_ID", "1447278780795064401L")
         buildConfigField("Boolean", "UPDATER_ENABLED", "false")
         buildConfigField("String", "BUNDLED_LANGUAGE_TAGS", "\"${bundledLanguageTags.joinToString(",")}\"")
