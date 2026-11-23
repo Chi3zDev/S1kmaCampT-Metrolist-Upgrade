@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.CanvasDrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipPath
+import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.TextMeasurer
@@ -71,7 +72,7 @@ internal fun renderGlassLyricsPoster(
     )
     val fit = fitLyricsImageText(maxTextHeight, style.textScale, maxFontSize = 32f) { measureText(it).size.height.toFloat() }
     val measured = measureText(fit.fontSize)
-    val renderedHeight = measured.size.height.toFloat()
+    val renderedHeight = measured.size.height * fit.drawScale
     val footerHeight = 82f * scale
     val cardHeight = (inner + renderedHeight + inner + footerHeight).coerceAtMost(height * 0.9f)
     val cardLeft = (width - cardWidth) / 2f
@@ -98,7 +99,9 @@ internal fun renderGlassLyricsPoster(
             drawRect(Color(0xFF191412).copy(alpha = 0.67f), topLeft = Offset(cardLeft, cardTop), size = Size(cardWidth, cardHeight))
             drawRect(Color.Black.copy(alpha = 0.23f), topLeft = Offset(cardLeft, footerTop), size = Size(cardWidth, footerHeight))
             drawLine(Color.White.copy(alpha = 0.14f), Offset(cardLeft, footerTop), Offset(cardLeft + cardWidth, footerTop), strokeWidth = scale * 0.7f)
-            drawText(measured, topLeft = Offset(cardLeft + inner, cardTop + inner))
+            translate(cardLeft + inner, cardTop + inner) {
+                scale(fit.drawScale, pivot = Offset.Zero) { drawText(measured) }
+            }
             val artSize = 50f * scale
             val artX = cardLeft + inner
             val artY = footerTop + (footerHeight - artSize) / 2f
