@@ -398,7 +398,7 @@ internal fun TabletPlayerContent(
                                         contentColor = textBackgroundColor,
                                     )
                                 }
-                            } else if (currentSong?.displayThumbnail != null || showVideoSurface) {
+                            } else if (currentSong?.displayThumbnail != null || showVideoSurface || playerType == PlayerType.VINYL) {
                                 Box(
                                     contentAlignment = Alignment.Center,
                                     modifier =
@@ -427,6 +427,18 @@ internal fun TabletPlayerContent(
                                             useSurfaceView = false,
                                             onFullscreenClick = onToggleFullscreen,
                                             onPiPClick = { platform.enterPictureInPicture(isPlaying = isPlaying, hasVideo = true) },
+                                        )
+                                    } else if (playerType == PlayerType.VINYL) {
+                                        PlayerVinylArtwork(
+                                            viewModel = viewModel,
+                                            duration = duration,
+                                            displaysPlayingSong = currentSong?.id == uiState.currentSong?.id,
+                                            isPlaying = isPlaying,
+                                            currentUrl = currentSong?.displayThumbnail,
+                                            nextUrl = crossfadeNextArtworkUrl,
+                                            artworkProgress = artworkCrossfadeProgress,
+                                            visible = true,
+                                            modifier = Modifier.requiredSize(artworkSize),
                                         )
                                     } else {
                                         CrossfadeArtwork(
@@ -530,7 +542,7 @@ internal fun TabletPlayerContent(
                                 Spacer(modifier = Modifier.height(if (compactHeight) 4.dp else 8.dp))
 
                                 if (!isListenTogetherGuest) {
-                                    if (playerType == PlayerType.VINTAGE || playerType == PlayerType.CLASSIC) {
+                                    if (playerType == PlayerType.VINTAGE || playerType == PlayerType.CLASSIC || playerType == PlayerType.VINYL) {
                                         VintagePlayerControls(
                                             playPauseFocusRequester = playPauseFocusRequester,
                                             text = vintagePlayerControlsText(),
@@ -926,7 +938,7 @@ internal fun LandscapePlayerContent(
             }
         val rightPaneWidth = maxWidth / 2 - LandscapeRightPaneStartGap - LandscapeRightPaneEndGap
         val isClassic = playerType == PlayerType.CLASSIC
-        val isVintage = playerType == PlayerType.VINTAGE
+        val isVintage = playerType == PlayerType.VINTAGE || playerType == PlayerType.VINYL
 
         val overflowButton: @Composable () -> Unit = {
             FilledIconButton(
@@ -1209,7 +1221,7 @@ internal fun LandscapePlayerContent(
                                     isCasting = castState.isConnected,
                                     isBuffering = castState.isBuffering,
                                 )
-                            } else if (showVideoSurface || currentSong?.displayThumbnail != null) {
+                            } else if (showVideoSurface || currentSong?.displayThumbnail != null || playerType == PlayerType.VINYL) {
                                 Box(
                                     contentAlignment = Alignment.Center,
                                     modifier =
@@ -1256,6 +1268,18 @@ internal fun LandscapePlayerContent(
                                             useSurfaceView = false,
                                             onFullscreenClick = onToggleFullscreen,
                                             onPiPClick = { platform.enterPictureInPicture(isPlaying = isPlaying, hasVideo = true) },
+                                        )
+                                    } else if (playerType == PlayerType.VINYL) {
+                                        PlayerVinylArtwork(
+                                            viewModel = viewModel,
+                                            duration = duration,
+                                            displaysPlayingSong = currentSong?.id == uiState.currentSong?.id,
+                                            isPlaying = isPlaying,
+                                            currentUrl = currentSong?.displayThumbnail,
+                                            nextUrl = crossfadeNextArtworkUrl,
+                                            artworkProgress = artworkCrossfadeProgress,
+                                            visible = !uiState.isLyricsVisible,
+                                            modifier = Modifier.requiredSize(artworkSize),
                                         )
                                     } else if (!usesFullscreenThumbnail && !usesCanvasThumbnail) {
                                         CrossfadeArtwork(

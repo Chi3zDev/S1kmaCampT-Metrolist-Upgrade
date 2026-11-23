@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -23,10 +24,18 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.layout.ContentScale
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import com.metrolist.shared.ui.components.LocalVisualWorkActive
+import com.metrolist.shared.ui.components.CrossfadeArtwork
+import com.metrolist.shared.ui.LocalPlayerEffectsAllowed
+import com.metrolist.shared.settings.Settings
+import com.metrolist.shared.viewmodels.PlayerViewModel
+import com.metrolist.shared.generated.resources.Res
+import com.metrolist.shared.generated.resources.album_art
+import org.jetbrains.compose.resources.stringResource
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlin.time.TimeSource
@@ -105,5 +114,40 @@ internal fun VinylRecord(
             drawCircle(Color(0xFF333338), size.minDimension * 0.017f, pivot)
             drawCircle(Color(0xFF38383B), size.minDimension * 0.016f, end)
         }
+    }
+}
+
+/** The view model is sampled only while the player is active; controls remain in the host layout. */
+@Composable
+internal fun PlayerVinylArtwork(
+    viewModel: PlayerViewModel,
+    duration: Long,
+    displaysPlayingSong: Boolean,
+    isPlaying: Boolean,
+    currentUrl: String?,
+    nextUrl: String?,
+    artworkProgress: () -> Float,
+    visible: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    val contentActive = LocalPlayerContentActive.current
+    val positionActive = LocalPlayerPositionActive.current
+    val position by viewModel.currentPosition.collectWhilePlayerActive(positionActive)
+    val loading by viewModel.isPlaybackLoading.collectWhilePlayerActive(contentActive)
+    VinylRecord(
+        progress = if (duration > 0 && displaysPlayingSong) position.toFloat() / duration else 0f,
+        isPlaying = isPlaying && !loading,
+        visible = visible && contentActive && positionActive && LocalPlayerEffectsAllowed.current && !Settings.shared.glassLightMode,
+        modifier = modifier,
+    ) {
+        CrossfadeArtwork(
+            animate = contentActive,
+            currentUrl = currentUrl,
+            nextUrl = nextUrl,
+            progress = artworkProgress,
+            contentDescription = stringResource(Res.string.album_art),
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop,
+        )
     }
 }

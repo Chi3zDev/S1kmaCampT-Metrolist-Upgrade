@@ -1820,24 +1820,17 @@ fun PlayerScreen(
                                                                 Modifier.requiredWidthIn(max = windowWidth),
                                                         )
                                                     } else if (playerType == PlayerType.VINYL && !artworkBesideTitle) {
-                                                        val recordPosition by viewModel.currentPosition.collectWhilePlayerActive(LocalPlayerPositionActive.current)
-                                                        VinylRecord(
-                                                            progress = if (duration > 0 && displaysPlayingSong) recordPosition.toFloat() / duration else 0f,
-                                                            isPlaying = isPlaying && !isPlaybackLoading,
-                                                            visible = contentActive && !queueCoversPlayer &&
-                                                                LocalPlayerEffectsAllowed.current && !Settings.shared.glassLightMode,
+                                                        PlayerVinylArtwork(
+                                                            viewModel = viewModel,
+                                                            duration = duration,
+                                                            displaysPlayingSong = displaysPlayingSong,
+                                                            isPlaying = isPlaying,
+                                                            currentUrl = currentSong?.displayThumbnail,
+                                                            nextUrl = crossfadeNextArtworkUrl,
+                                                            artworkProgress = artworkCrossfadeProgress,
+                                                            visible = !queueCoversPlayer,
                                                             modifier = Modifier.fillMaxWidth(),
-                                                        ) {
-                                                            CrossfadeArtwork(
-                                                                animate = contentActive,
-                                                                currentUrl = currentSong?.displayThumbnail,
-                                                                nextUrl = crossfadeNextArtworkUrl,
-                                                                progress = artworkCrossfadeProgress,
-                                                                contentDescription = stringResource(Res.string.album_art),
-                                                                modifier = Modifier.fillMaxSize(),
-                                                                contentScale = ContentScale.Crop,
-                                                            )
-                                                        }
+                                                        )
                                                     } else if (
                                                         !usesFullscreenThumbnail &&
                                                         !usesCanvasThumbnail &&
