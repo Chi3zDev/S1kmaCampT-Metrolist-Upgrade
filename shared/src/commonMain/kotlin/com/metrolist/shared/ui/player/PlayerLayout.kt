@@ -304,7 +304,12 @@ internal fun TabletPlayerContent(
                     contentAlignment = Alignment.Center,
                 ) {
                     Box(Modifier.widthIn(max = contentMaxWidth).fillMaxWidth(), contentAlignment = Alignment.Center) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Column(
+                            modifier = if (playerType == PlayerType.GLASS_CARD && Settings.shared.glassNavigation && Settings.shared.glassPlayer) {
+                                Modifier.playerGlassCard(textBackgroundColor).padding(16.dp)
+                            } else Modifier,
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                        ) {
                             Row(
                                 modifier =
                                     Modifier
@@ -601,6 +606,9 @@ internal fun TabletPlayerContent(
                                             playPauseFocusRequester = playPauseFocusRequester,
                                         )
                                     }
+                                }
+                                if (playerType == PlayerType.GLASS_CARD && !castState.isConnected && !isListenTogetherGuest) {
+                                    platform.SystemMusicVolume(Modifier.fillMaxWidth(), textBackgroundColor, LocalPlayerContentActive.current)
                                 }
                             }
                         }
@@ -1331,7 +1339,14 @@ internal fun LandscapePlayerContent(
                 BoxWithConstraints(modifier = Modifier.weight(1f).fillMaxWidth()) {
                     val contentHeight = maxHeight
                     Column(
-                        modifier = Modifier.fillMaxWidth().verticalScrollWithDrag(rememberScrollState()).heightIn(min = contentHeight),
+                        modifier = Modifier.fillMaxWidth()
+                            .verticalScrollWithDrag(rememberScrollState())
+                            .heightIn(min = contentHeight)
+                            .then(
+                                if (playerType == PlayerType.GLASS_CARD && Settings.shared.glassNavigation && Settings.shared.glassPlayer) {
+                                    Modifier.playerGlassCard(controlsColor).padding(horizontal = 12.dp, vertical = 8.dp)
+                                } else Modifier,
+                            ),
                         verticalArrangement =
                             if (isTv) {
                                 Arrangement.spacedBy(if (compactHeight) 4.dp else 16.dp, Alignment.CenterVertically)
@@ -1342,6 +1357,15 @@ internal fun LandscapePlayerContent(
                             },
                     ) {
                         Column(modifier = Modifier.fillMaxWidth()) {
+                            if (playerType == PlayerType.GLASS_CARD) {
+                                Text(
+                                    text = uiState.queueTitle?.takeIf { it.isNotBlank() } ?: stringResource(Res.string.now_playing),
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = controlsColor.copy(alpha = 0.8f),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                            }
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -1602,6 +1626,9 @@ internal fun LandscapePlayerContent(
                                         }
                                     }
                                 }
+                            }
+                            if (playerType == PlayerType.GLASS_CARD && !castState.isConnected && !isListenTogetherGuest) {
+                                platform.SystemMusicVolume(Modifier.fillMaxWidth(), controlsColor, LocalPlayerContentActive.current)
                             }
                             if (!isTv && !centerControls) Spacer(Modifier.weight(1f))
                         }

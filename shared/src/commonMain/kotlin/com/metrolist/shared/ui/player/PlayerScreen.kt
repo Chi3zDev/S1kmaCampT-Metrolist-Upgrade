@@ -33,7 +33,6 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.focusable
@@ -1419,12 +1418,7 @@ fun PlayerScreen(
                                         ).padding(horizontal = 24.dp)
                                         .then(
                                             if (playerType == PlayerType.GLASS_CARD && Settings.shared.glassNavigation && Settings.shared.glassPlayer) {
-                                                val shape = RoundedCornerShape(28.dp)
-                                                val base = if (textBackgroundColor.luminance() > 0.5f) Color.Black else Color.White
-                                                Modifier
-                                                    .background(Brush.verticalGradient(listOf(base.copy(alpha = 0.62f), base.copy(alpha = 0.48f))), shape)
-                                                    .border(1.dp, Brush.verticalGradient(listOf(textBackgroundColor.copy(alpha = 0.3f), textBackgroundColor.copy(alpha = 0.06f))), shape)
-                                                    .padding(horizontal = 16.dp)
+                                                Modifier.playerGlassCard(textBackgroundColor).padding(horizontal = 16.dp)
                                             } else Modifier,
                                         )
                                         .padding(top = 16.dp),
