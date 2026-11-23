@@ -36,6 +36,9 @@ import com.metrolist.shared.generated.resources.Res
 import com.metrolist.shared.generated.resources.cd_playback_position
 import com.metrolist.shared.generated.resources.live
 import com.metrolist.shared.generated.resources.playback_position_time
+import com.metrolist.shared.settings.Settings
+import com.metrolist.shared.settings.SliderStyle
+import com.metrolist.shared.ui.LocalPlayerEffectsAllowed
 import com.metrolist.shared.playback.PendingSeekPosition
 import com.metrolist.shared.playback.interpolatePlaybackPosition
 import com.metrolist.shared.ui.components.LiveBadge
@@ -49,6 +52,17 @@ import com.metrolist.shared.utils.Logger
 import com.metrolist.shared.utils.formatDuration
 import com.metrolist.shared.viewmodels.PlayerViewModel
 import org.jetbrains.compose.resources.stringResource
+
+/** Select a lightweight track without changing the user's stored slider choice. */
+internal fun effectivePlayerSliderStyle(
+    selected: SliderStyle,
+    waveEnabled: Boolean,
+    lightMode: Boolean,
+    deviceAllowed: Boolean,
+): SliderStyle =
+    if ((!waveEnabled || lightMode || !deviceAllowed) &&
+        (selected == SliderStyle.WAVY || selected == SliderStyle.LINEAR_WAVY || selected == SliderStyle.SQUIGGLY)
+    ) SliderStyle.SLIM else selected
 
 @Composable
 internal fun PlayerProgressSlider(
@@ -192,6 +206,12 @@ internal fun PlayerProgressSlider(
             },
             enabled = canSeek && !isLive && duration > 0L,
             showThumb = true,
+            style = effectivePlayerSliderStyle(
+                Settings.shared.sliderStyle,
+                Settings.shared.playerWaveEnabled,
+                Settings.shared.glassLightMode,
+                LocalPlayerEffectsAllowed.current,
+            ),
             isPlaying = isPlaying && !isPlaybackLoading,
             bufferedFraction = if (isLive) 1f else bufferedProgress,
             animate = active,

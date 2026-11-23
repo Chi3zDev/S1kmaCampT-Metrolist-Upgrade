@@ -39,7 +39,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.structuralEqualityPolicy
-import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -74,6 +73,7 @@ import com.metrolist.shared.api.lyrics.LyricsUtils
 import com.metrolist.shared.model.LyricsEntry
 import com.metrolist.shared.model.WordTimestamp
 import com.metrolist.shared.settings.Settings
+import com.metrolist.shared.ui.LocalPlayerEffectsAllowed
 import com.metrolist.shared.ui.components.lyrics.words.FixedMotionDurationScale
 import com.metrolist.shared.ui.components.lyrics.words.LyricsAnimationStyle
 import com.metrolist.shared.ui.components.lyrics.words.WordLevelLyrics
@@ -89,16 +89,13 @@ import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.roundToInt
 
-/** Allows a host to suppress expensive lyric effects on constrained devices. */
-val LocalLyricsEffectsAllowed = staticCompositionLocalOf { true }
-
 internal fun lyricGlowStrength(enabled: Boolean, lightMode: Boolean, deviceAllowed: Boolean, intensity: Float): Float =
     if (!enabled || lightMode || !deviceAllowed || !intensity.isFinite()) 0f else (intensity / 100f).coerceIn(0f, 1f)
 
 @Composable
 internal fun currentLyricGlowStrength(): Float {
     val settings = Settings.shared
-    return lyricGlowStrength(settings.lyricsGlowEnabled, settings.glassLightMode, LocalLyricsEffectsAllowed.current, settings.lyricsGlowIntensity)
+    return lyricGlowStrength(settings.lyricsGlowEnabled, settings.glassLightMode, LocalPlayerEffectsAllowed.current, settings.lyricsGlowIntensity)
 }
 
 @Composable

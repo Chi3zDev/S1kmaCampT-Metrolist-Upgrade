@@ -329,7 +329,7 @@ import com.metrolist.shared.ui.components.PopupVisibility
 import com.metrolist.shared.ui.components.UnavailableSongSnackbar
 import com.metrolist.shared.ui.components.images.AsyncImage
 import com.metrolist.shared.ui.components.lyrics.LyricsTranslationSnackbar
-import com.metrolist.shared.ui.components.lyrics.LocalLyricsEffectsAllowed
+import com.metrolist.shared.ui.LocalPlayerEffectsAllowed
 import com.metrolist.shared.ui.components.rememberBottomSheetState
 import com.metrolist.shared.ui.design.expressive.components.ExpressiveMiniPlayerHeight
 import com.metrolist.shared.ui.haptics.HapticEvent
@@ -1480,7 +1480,7 @@ fun MetrolistApp(
                             LocalGlassNavigationMorphProgress provides glassMorphProgress,
                             LocalGlassMotionAllowed provides glassSystemMotionAllowed,
                             LocalGlassBubbleAllowed provides (Build.VERSION.SDK_INT > Build.VERSION_CODES.R),
-                            LocalLyricsEffectsAllowed provides (Build.VERSION.SDK_INT > Build.VERSION_CODES.R &&
+                            LocalPlayerEffectsAllowed provides (Build.VERSION.SDK_INT > Build.VERSION_CODES.R &&
                                 !(context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager).isLowRamDevice),
                             LocalExpandGlassNavigation provides { glassNavigationCollapsed = false },
                             LocalGlassNavigationState provides glassBackdrop,

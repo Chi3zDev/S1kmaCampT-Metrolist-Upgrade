@@ -5696,4 +5696,6 @@
     <string name="glass_area_player">Player</string>
     <string name="lyrics_glow">Active lyric glow</string>
     <string name="lyrics_glow_intensity">Lyric glow intensity</string>
+    <string name="player_wave_effect">Animated progress wave</string>
+    <string name="player_wave_effect_description">Use the selected wave slider; lightweight mode uses a slim track.</string>
 </resources>
