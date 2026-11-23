@@ -366,6 +366,9 @@ internal fun SettingsUiRegistryBuilder.registerAppearanceSettings(host: SharedSe
         }
         if (host.platform != SettingsPlatform.DESKTOP) {
             group("playerAppearance", stringResource(Res.string.appearance_player)) {
+                switch(id = "lyricsGlowEnabled", title = stringResource(Res.string.lyrics_glow), checked = settings.lyricsGlowEnabled) { settings.lyricsGlowEnabled = it }
+                slider(id = "lyricsGlowIntensity", title = stringResource(Res.string.lyrics_glow_intensity), value = settings.lyricsGlowIntensity, range = 0f..100f, steps = 0, enabled = settings.lyricsGlowEnabled && !settings.glassLightMode) { settings.lyricsGlowIntensity = it }
+
                 if (SettingsPageId.PLAYER_STYLE in host.availablePages) {
                     navigation(
                         id = "playerStyle",
@@ -513,6 +516,9 @@ internal fun SettingsUiRegistryBuilder.registerAppearanceSettings(host: SharedSe
         }
         if (host.platform == SettingsPlatform.DESKTOP) {
             group("playerAppearance", stringResource(Res.string.appearance_player)) {
+                switch(id = "lyricsGlowEnabled", title = stringResource(Res.string.lyrics_glow), checked = settings.lyricsGlowEnabled) { settings.lyricsGlowEnabled = it }
+                slider(id = "lyricsGlowIntensity", title = stringResource(Res.string.lyrics_glow_intensity), value = settings.lyricsGlowIntensity, range = 0f..100f, steps = 0, enabled = settings.lyricsGlowEnabled && !settings.glassLightMode) { settings.lyricsGlowIntensity = it }
+
                 if (SettingsPageId.PLAYER_STYLE in host.availablePages) {
                     navigation(
                         id = "playerStyle",

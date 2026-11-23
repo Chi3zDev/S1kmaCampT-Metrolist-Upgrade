@@ -5694,4 +5694,6 @@
     <string name="lyrics_poster_classic">Classic</string>
     <string name="lyrics_poster_glass_card">Glass Card</string>
     <string name="glass_area_player">Player</string>
+    <string name="lyrics_glow">Active lyric glow</string>
+    <string name="lyrics_glow_intensity">Lyric glow intensity</string>
 </resources>

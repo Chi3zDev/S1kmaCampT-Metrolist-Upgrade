@@ -39,12 +39,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.structuralEqualityPolicy
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorProducer
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
@@ -85,6 +88,19 @@ import kotlinx.coroutines.withContext
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.roundToInt
+
+/** Allows a host to suppress expensive lyric effects on constrained devices. */
+val LocalLyricsEffectsAllowed = staticCompositionLocalOf { true }
+
+@Composable
+private fun TextStyle.withActiveLyricGlow(isActive: Boolean, color: Color): TextStyle {
+    val settings = Settings.shared
+    if (!isActive || !settings.lyricsGlowEnabled || settings.glassLightMode || !LocalLyricsEffectsAllowed.current) return this
+    val strength = (settings.lyricsGlowIntensity / 100f).coerceIn(0f, 1f)
+    if (strength == 0f) return this
+    val radius = with(LocalDensity.current) { 8.dp.toPx() }
+    return copy(shadow = Shadow(color = color.copy(alpha = color.alpha * strength * 0.7f), offset = Offset.Zero, blurRadius = radius))
+}
 
 internal val LYRICS_LINE_HORIZONTAL_PADDING = 12.dp
 private const val MULTI_SINGER_PADDING_RATIO = 0.10f
@@ -336,7 +352,7 @@ fun ActiveLyricsLineContent(
     val secondaryText = prep.secondaryText
     val translation = prep.translation
     val displayText = prep.displayText
-    val mainStyle = prep.mainStyle
+    val mainStyle = prep.mainStyle.withActiveLyricGlow(isActive, textColor)
     val secondaryStyle = prep.secondaryStyle
     val showSyllableRomanization = prep.showSyllableRomanization
     val displayedSecondary = prep.displayedSecondary
@@ -1169,7 +1185,7 @@ internal fun InlineLyricsLine(
                     } else if (hasJoiningScript) {
                         AnimatedAlphaSafeText(
                             text = mainText,
-                            style = mainStyle,
+                            style = mainStyle.withActiveLyricGlow(isActive, textColor),
                             textColor = textColor,
                             alpha = { lineLook.alpha },
                             lineColor = lineColor,
@@ -1178,7 +1194,7 @@ internal fun InlineLyricsLine(
                     } else {
                         Text(
                             text = mainText,
-                            style = mainStyle,
+                            style = mainStyle.withActiveLyricGlow(isActive, textColor),
                             color = lineColor,
                             modifier = Modifier.fillMaxWidth(),
                         )

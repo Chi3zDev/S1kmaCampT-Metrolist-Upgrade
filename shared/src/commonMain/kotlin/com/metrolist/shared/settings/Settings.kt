@@ -362,6 +362,7 @@ class Settings(
         if (!settings.hasKey("miniPlayerBackgroundStyle")) miniPlayerBackgroundStyle = "BLURRED_ARTWORK"
         if (!settings.hasKey("glassNavigation")) glassNavigation = true
         if (!settings.hasKey("glassStyle")) glassStyle = "CLEAR"
+        if (!settings.hasKey("lyricsGlowEnabled")) lyricsGlowEnabled = true
     }
 
     var iosCustomFontFile by preference(IosCustomFontFileKey, "")
@@ -454,6 +455,8 @@ class Settings(
     var glassProfile by preference(true)
     var glassLyricsPoster by preference(true)
     var glassLightMode by preference(false)
+    var lyricsGlowEnabled by preference(false)
+    var lyricsGlowIntensity by preference(50f)
     var glassNavbarLabels by preference(false)
     var glassNavbarMotion by preference("FULL")
     var glassPlayerBelow by preference(false)

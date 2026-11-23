@@ -2616,4 +2616,6 @@
     <string name="lyrics_poster_classic">Klasik</string>
     <string name="lyrics_poster_glass_card">Kartu Kaca</string>
     <string name="glass_area_player">Pemutar</string>
+    <string name="lyrics_glow">Cahaya lirik aktif</string>
+    <string name="lyrics_glow_intensity">Intensitas cahaya lirik</string>
 </resources>
