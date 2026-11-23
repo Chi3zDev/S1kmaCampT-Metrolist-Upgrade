@@ -30,6 +30,7 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
@@ -82,6 +83,9 @@ internal fun AppleWordAnimation(
     val currentPositionProvider by rememberUpdatedState(positionProvider)
     val density = LocalDensity.current
     val fontSizePx = remember(lyricStyle) { with(density) { lyricStyle.fontSize.toPx() } }
+    val activeGlowShadow = remember(glowStrength, expressiveAccent, fontSizePx) {
+        Shadow(expressiveAccent.copy(alpha = expressiveAccent.alpha * glowStrength), Offset.Zero, (fontSizePx * 0.24f).coerceAtLeast(1f))
+    }
     val gradientWidth = fontSizePx * 1f
     val elevationAmount = fontSizePx * 0.05f
     val extraPaddingPx = minOf(fontSizePx * 0.4f, with(density) { LYRICS_LINE_HORIZONTAL_PADDING.toPx() })
@@ -859,7 +863,7 @@ internal fun AppleWordAnimation(
                         rise = -emphasisRiseEm * fontSizePx * pulse
                         scale = 1f + emphasisScaleGain * pulse
                         shift = vc.normX * emphasisShiftEm * fontSizePx * pulse
-                        glowAlpha = (vc.charShadowIntensity * sample.glow * glowStrength).coerceIn(0f, 1f)
+                        glowAlpha = (maxOf(0.65f, vc.charShadowIntensity * sample.glow) * glowStrength).coerceIn(0f, 1f)
                     }
                 }
 
@@ -878,6 +882,17 @@ internal fun AppleWordAnimation(
                 clusterIsYMoving[idx] = isYMoving
                 clusterLastDrawY[idx] = drawY
                 if (isGlowing) anyGlow = true
+            }
+
+            if (isActiveLine && glowStrength > 0f) {
+                for (idx in 0 until n) {
+                    val vc = clusters[idx]
+                    if (isGlowingSyllable(vc.syllableIndex, vc.lastSyllableIndex, wipeSylIdx) &&
+                        (!clusterIsGlowing[idx] || clusterGlowAlphas[idx] <= 0f)
+                    ) {
+                        drawSyllableGlow(vc, Offset(clusterDrawX[idx] + extraPaddingPx, clusterDrawY[idx] + extraPaddingPx), activeGlowShadow)
+                    }
+                }
             }
 
             if (anyGlow) {

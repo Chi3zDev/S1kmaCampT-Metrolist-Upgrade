@@ -75,7 +75,7 @@ private const val SWIPE_EDGE = 0.1f
 private const val GLOW_RADIUS_REM = 0.8f
 private const val GLOW_DURATION_RATIO = 1.2f
 private const val GLOW_MIN_MS = 1200f
-private const val GLOW_COLOR_ALPHA = 0.5f
+private const val GLOW_COLOR_ALPHA = 0.85f
 
 private const val FADE_IN_MS = 330f
 private const val FADE_OUT_MS = 500f
@@ -700,9 +700,9 @@ internal fun BraccatoWordAnimation(
                         e0 = if (bst.lineSynced[i]) (letters + 2) / 2f else braccatoEdge(bst, i, e)
 
                         val ef = fxPos - bst.startMs[i]
-                        if (bst.longWord[i] && ef >= 0f && ef < bst.glowDur[i]) {
-                            val gp = BraccatoEase.transform(ef / bst.glowDur[i])
-                            glowR = glowRadiusPx * (1f - gp)
+                        val activeGlowDuration = if (bst.durMs[i] > 0f) bst.durMs[i] else bst.glowDur[i]
+                        if (isActiveLine && ef >= 0f && ef < activeGlowDuration) {
+                            glowR = glowRadiusPx * 0.7f
                             glowStrength = 1f
                         }
 

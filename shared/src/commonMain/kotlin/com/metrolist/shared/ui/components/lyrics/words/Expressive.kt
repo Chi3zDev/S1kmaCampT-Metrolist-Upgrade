@@ -537,14 +537,14 @@ internal fun ExpressiveWordAnimation(
             }
 
         // Android combines text shadows with paint shaders, causing ghost glyphs; draw a separate Alpha8 mask.
-        val glowBlurPx = remember(fontSizePx, extraPaddingPx) { minOf(fontSizePx * 0.1f, extraPaddingPx * 0.5f).coerceAtLeast(1f) }
+        val glowBlurPx = remember(fontSizePx, extraPaddingPx) { minOf(fontSizePx * 0.22f, extraPaddingPx * 0.8f).coerceAtLeast(1f) }
         val glowMaskCache = remember(letterLayouts, extraPaddingPx) { ClusterMaskCache(clusterCount, extraPaddingPx) }
         val glowCapable =
             remember(clusterStatics, charToWordData, effWordImpactBase, graphemeClusters) {
                 val (wordIdxMapForGlow, _, _) = charToWordData
                 BooleanArray(clusterCount) { i ->
                     val w = wordIdxMapForGlow[i]
-                    clusterStatics.visible[i] && w != -1 && effWordImpactBase[w] > 0.01f && graphemeClusters[i].isNotBlank()
+                    clusterStatics.visible[i] && w != -1 && graphemeClusters[i].isNotBlank()
                 }
             }
         val glowTintCache = remember { TintFilterCache() }
@@ -740,7 +740,7 @@ internal fun ExpressiveWordAnimation(
                 if (!isSung && factor > 0.001f) {
                     val fadeFactor = (factor * 5f).coerceIn(0f, 1f) * ((1f - factor) * 8f).coerceIn(0f, 1f)
                     val impactFactor = effWordImpactBase[wIdx] * fadeFactor
-                    wordGlowAlphas[wIdx] = if (impactFactor > 0.01f) (impactFactor * 0.6f).coerceIn(0f, 0.6f) else 0f
+                    wordGlowAlphas[wIdx] = if (isActiveLine && isAct) maxOf(0.7f, impactFactor * 0.8f).coerceIn(0f, 1f) else 0f
                 } else {
                     wordGlowAlphas[wIdx] = 0f
                 }
@@ -1043,7 +1043,7 @@ private fun OgRtlExpressiveWordAnimation(
     val density = LocalDensity.current
     val fontSizePx = remember(lyricStyle) { with(density) { lyricStyle.fontSize.toPx() } }
     val glowShadow = remember(glowStrength, expressiveAccent, fontSizePx) {
-        Shadow(expressiveAccent.copy(alpha = expressiveAccent.alpha * glowStrength * 0.7f), Offset.Zero, (fontSizePx * 0.16f).coerceAtLeast(1f))
+        Shadow(expressiveAccent.copy(alpha = expressiveAccent.alpha * glowStrength), Offset.Zero, (fontSizePx * 0.24f).coerceAtLeast(1f))
     }
     val gradientWidth = fontSizePx * 0.4f
     val extraPaddingPx = minOf(fontSizePx * 0.4f, with(density) { LYRICS_LINE_HORIZONTAL_PADDING.toPx() })

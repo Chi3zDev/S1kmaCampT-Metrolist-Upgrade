@@ -52,7 +52,7 @@ internal fun SimpleWordAnimation(
     val density = LocalDensity.current
     val fontSizePx = remember(lyricStyle) { with(density) { lyricStyle.fontSize.toPx() } }
     val glowShadow = remember(glowStrength, expressiveAccent, fontSizePx) {
-        Shadow(expressiveAccent.copy(alpha = expressiveAccent.alpha * glowStrength * 0.7f), Offset.Zero, (fontSizePx * 0.16f).coerceAtLeast(1f))
+        Shadow(expressiveAccent.copy(alpha = expressiveAccent.alpha * glowStrength), Offset.Zero, (fontSizePx * 0.24f).coerceAtLeast(1f))
     }
     val gradientWidth = fontSizePx * 1.25f
     val extraPaddingPx = minOf(fontSizePx * 0.3f, with(density) { LYRICS_LINE_HORIZONTAL_PADDING.toPx() })

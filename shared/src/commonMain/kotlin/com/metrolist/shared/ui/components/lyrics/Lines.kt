@@ -102,8 +102,8 @@ internal fun currentLyricGlowStrength(): Float {
 private fun TextStyle.withActiveLyricGlow(isActive: Boolean, color: Color): TextStyle {
     val strength = currentLyricGlowStrength()
     if (!isActive || strength == 0f) return this
-    val radius = with(LocalDensity.current) { 8.dp.toPx() }
-    return copy(shadow = Shadow(color = color.copy(alpha = color.alpha * strength * 0.7f), offset = Offset.Zero, blurRadius = radius))
+    val radius = with(LocalDensity.current) { 12.dp.toPx() }
+    return copy(shadow = Shadow(color = color.copy(alpha = color.alpha * strength), offset = Offset.Zero, blurRadius = radius))
 }
 
 internal val LYRICS_LINE_HORIZONTAL_PADDING = 12.dp
