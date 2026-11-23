@@ -15,6 +15,10 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
+/** Glass cards always use a dark scrim; the classic poster follows its background. */
+internal fun lyricsPosterTextColor(posterStyle: LyricsPosterStyle, plainBackground: Boolean, luminance: Float): Color =
+    if (posterStyle != LyricsPosterStyle.GLASS_CARD && plainBackground && luminance > 0.4f) Color.Black else Color.White
+
 internal const val LYRICS_SHARE_LINE_LIMIT = 6
 
 internal fun toggleLyricsShareLine(

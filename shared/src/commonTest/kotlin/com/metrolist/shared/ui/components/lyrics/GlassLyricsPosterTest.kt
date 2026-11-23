@@ -1,6 +1,7 @@
 package com.metrolist.shared.ui.components.lyrics
 
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.graphics.Color
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -46,5 +47,11 @@ class GlassLyricsPosterTest {
         val restored = decodeLyricsImageStyle(stored, TextAlign.Center)
         assertEquals(LyricsPosterStyle.CLASSIC, restored.posterStyle)
         assertEquals(LyricsPosterFont.SANS, restored.font)
+    }
+    @Test
+    fun glassPosterKeepsLightTextOnItsDarkCard() {
+        assertEquals(Color.White, lyricsPosterTextColor(LyricsPosterStyle.GLASS_CARD, true, 0.95f))
+        assertEquals(Color.Black, lyricsPosterTextColor(LyricsPosterStyle.CLASSIC, true, 0.95f))
+        assertEquals(Color.White, lyricsPosterTextColor(LyricsPosterStyle.CLASSIC, true, 0.1f))
     }
 }

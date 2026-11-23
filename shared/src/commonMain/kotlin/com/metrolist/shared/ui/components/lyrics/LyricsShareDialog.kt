@@ -214,7 +214,11 @@ fun LyricsShareDialog(
     val direction = LocalLayoutDirection.current
     val posterBackground = palette.firstOrNull() ?: MaterialTheme.colorScheme.surface
     val effectiveBackground = if (Settings.shared.glassNavigation && !Settings.shared.glassLyricsPoster && style.background == LyricsImageBackground.GLASS) LyricsImageBackground.SOLID else style.background
-    val posterText = if ((effectiveBackground == LyricsImageBackground.SOLID || artwork == null) && posterBackground.luminance() > 0.4f) Color.Black else Color.White
+    val posterText = lyricsPosterTextColor(
+        style.posterStyle,
+        effectiveBackground == LyricsImageBackground.SOLID || artwork == null,
+        posterBackground.luminance(),
+    )
     val posterFont = when (style.font) {
         LyricsPosterFont.NUNITO_BOLD -> FontFamily(Font(Res.font.nunito_poster_bold))
         LyricsPosterFont.NUNITO_EXTRABOLD -> FontFamily(Font(Res.font.nunito_poster_extrabold))
@@ -234,13 +238,24 @@ fun LyricsShareDialog(
     val storyCardColor = MaterialTheme.colorScheme.surfaceContainerHigh
     val storyTextColor = MaterialTheme.colorScheme.onSurface
     val storySecondaryColor = MaterialTheme.colorScheme.onSurfaceVariant
+    // Invalidate immediately when any render input changes. Export is disabled until the
+    // corresponding preview is ready, so it cannot silently use a newer style than shown.
     var bitmap by remember(
         text,
-        style,
+        title,
+        artist,
+        appName,
+        renderStyle,
         artwork,
+        blurredArtwork,
+        palette,
+        loadingArtwork,
+        direction,
         useStoryLayout,
         storyBackgroundColor,
         storyCardColor,
+        storyTextColor,
+        storySecondaryColor,
     ) { mutableStateOf<ImageBitmap?>(null) }
     LaunchedEffect(
         text,
