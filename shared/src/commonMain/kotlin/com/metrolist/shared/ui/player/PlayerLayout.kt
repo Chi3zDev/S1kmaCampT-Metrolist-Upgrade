@@ -447,7 +447,7 @@ internal fun TabletPlayerContent(
                                         )
                                     } else {
                                         CrossfadeArtwork(
-                                            animate = LocalPlayerContentActive.current,
+                                            animate = LocalPlayerBackgroundAnimating.current && Settings.shared.playerArtworkTransitions,
                                             currentUrl = requireNotNull(currentSong?.displayThumbnail),
                                             nextUrl = crossfadeNextArtworkUrl,
                                             progress = artworkCrossfadeProgress,
@@ -1291,7 +1291,7 @@ internal fun LandscapePlayerContent(
                                         )
                                     } else if (!usesFullscreenThumbnail && !usesCanvasThumbnail) {
                                         CrossfadeArtwork(
-                                            animate = LocalPlayerContentActive.current,
+                                            animate = LocalPlayerBackgroundAnimating.current && Settings.shared.playerArtworkTransitions,
                                             currentUrl = requireNotNull(currentSong?.displayThumbnail),
                                             nextUrl = crossfadeNextArtworkUrl,
                                             progress = artworkCrossfadeProgress,
@@ -1378,7 +1378,7 @@ internal fun LandscapePlayerContent(
                                 ) {
                                     Row(verticalAlignment = Alignment.CenterVertically) {
                                         CrossfadeArtwork(
-                                            animate = LocalPlayerContentActive.current,
+                                            animate = LocalPlayerBackgroundAnimating.current && Settings.shared.playerArtworkTransitions,
                                             currentUrl = currentSong?.displayThumbnail,
                                             nextUrl = crossfadeNextArtworkUrl,
                                             progress = artworkCrossfadeProgress,

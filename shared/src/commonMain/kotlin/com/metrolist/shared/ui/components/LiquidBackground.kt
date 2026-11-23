@@ -29,6 +29,7 @@ import coil3.compose.LocalPlatformContext
 import coil3.compose.rememberAsyncImagePainter
 import coil3.request.ImageRequest
 import coil3.size.Precision
+import com.metrolist.shared.settings.Settings
 import com.metrolist.shared.ui.player.LocalPlayerTrackArtwork
 import kotlinx.coroutines.flow.collectLatest
 import kotlin.time.Duration.Companion.milliseconds
@@ -117,7 +118,8 @@ fun LiquidBackground(
             Animatable(if (activeArt != null && previousArt != null) 0f else 1f)
         }
 
-    LaunchedEffect(artworkUrl, painterState, prepared, incomingArt) {
+    val transitionAllowed = Settings.shared.playerArtworkTransitions && animate && isPlaying && visible
+    LaunchedEffect(artworkUrl, painterState, prepared, incomingArt, transitionAllowed) {
         if (artworkUrl.isNullOrBlank() || painterState is AsyncImagePainter.State.Error) {
             activeArt = null
             previousArt = null
@@ -131,7 +133,7 @@ fun LiquidBackground(
             }
 
             val prev = activeArt ?: previousArt
-            if (prev != null && (prev.painter != newArt.painter || prev.image != newArt.image)) {
+            if (transitionAllowed && prev != null && (prev.painter != newArt.painter || prev.image != newArt.image)) {
                 previousArt = prev
                 activeArt = newArt
                 crossfadeAlpha.snapTo(0f)

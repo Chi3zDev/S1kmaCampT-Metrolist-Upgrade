@@ -1005,7 +1005,9 @@ fun PlayerScreen(
                     !isFullscreen &&
                     (useLandscapeLayout || !uiState.isLyricsVisible) &&
                     !canvasMinimalUi
-            val artworkCrossfade = if (contentActive) platform.artworkCrossfade(currentSong?.id) else PlayerArtworkCrossfade()
+            val artworkCrossfade = if (contentActive && isPlaying && Settings.shared.playerArtworkTransitions &&
+                !Settings.shared.glassLightMode && LocalPlayerEffectsAllowed.current
+            ) platform.artworkCrossfade(currentSong?.id) else PlayerArtworkCrossfade()
             val crossfadeNextArtworkUrl = artworkCrossfade.nextArtworkUrl
             val artworkCrossfadeProgress = artworkCrossfade.progressProvider
 
@@ -1063,7 +1065,7 @@ fun PlayerScreen(
                 LocalPlayerArtworkPrefetchUrls provides if (isScreenVisible) artworkPrefetchUrls else emptyList(),
                 LocalPlayerContentActive provides contentActive,
                 LocalPlayerPositionActive provides (playerContentState.isPositionActive && !queueCoversPlayer),
-                LocalPlayerBackgroundAnimating provides (contentActive && isPlaying),
+                LocalPlayerBackgroundAnimating provides (contentActive && isPlaying && !Settings.shared.glassLightMode && LocalPlayerEffectsAllowed.current),
             ) {
                 Box(
                     modifier =
@@ -1865,7 +1867,7 @@ fun PlayerScreen(
                                                                         .clip(albumArtShape),
                                                             ) {
                                                                 CrossfadeArtwork(
-                                                                    animate = LocalPlayerContentActive.current,
+                                                                    animate = LocalPlayerBackgroundAnimating.current && Settings.shared.playerArtworkTransitions,
                                                                     currentUrl = currentSong.displayThumbnail,
                                                                     nextUrl = crossfadeNextArtworkUrl,
                                                                     progress = artworkCrossfadeProgress,
@@ -1940,7 +1942,7 @@ fun PlayerScreen(
                                             Row(verticalAlignment = Alignment.CenterVertically) {
                                                 if (usesFullscreenThumbnail) {
                                                     CrossfadeArtwork(
-                                                        animate = LocalPlayerContentActive.current,
+                                                        animate = LocalPlayerBackgroundAnimating.current && Settings.shared.playerArtworkTransitions,
                                                         currentUrl = currentSong?.displayThumbnail,
                                                         nextUrl = crossfadeNextArtworkUrl,
                                                         progress = artworkCrossfadeProgress,
@@ -1971,7 +1973,7 @@ fun PlayerScreen(
                                                                     .clip(smallAlbumArtShape),
                                                         ) {
                                                             CrossfadeArtwork(
-                                                                animate = LocalPlayerContentActive.current,
+                                                                animate = LocalPlayerBackgroundAnimating.current && Settings.shared.playerArtworkTransitions,
                                                                 currentUrl = currentSong?.displayThumbnail,
                                                                 nextUrl = crossfadeNextArtworkUrl,
                                                                 progress = artworkCrossfadeProgress,

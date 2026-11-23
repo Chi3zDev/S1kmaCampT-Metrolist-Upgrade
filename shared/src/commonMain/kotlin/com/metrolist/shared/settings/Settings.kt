@@ -456,6 +456,7 @@ class Settings(
     var glassProfile by preference(true)
     var glassLyricsPoster by preference(true)
     var glassLightMode by preference(false)
+    var playerArtworkTransitions by preference(true)
     var playerAuraEnabled by preference(false)
     var playerWaveEnabled by preference(true)
     var lyricsGlowEnabled by preference(false)

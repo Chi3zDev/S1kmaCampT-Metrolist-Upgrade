@@ -141,7 +141,7 @@ internal fun PlayerVinylArtwork(
         modifier = modifier,
     ) {
         CrossfadeArtwork(
-            animate = contentActive,
+            animate = LocalPlayerBackgroundAnimating.current && Settings.shared.playerArtworkTransitions,
             currentUrl = currentUrl,
             nextUrl = nextUrl,
             progress = artworkProgress,

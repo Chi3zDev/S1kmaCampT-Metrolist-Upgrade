@@ -366,6 +366,7 @@ internal fun SettingsUiRegistryBuilder.registerAppearanceSettings(host: SharedSe
         }
         if (host.platform != SettingsPlatform.DESKTOP) {
             group("playerAppearance", stringResource(Res.string.appearance_player)) {
+                switch(id = "playerArtworkTransitions", title = stringResource(Res.string.player_artwork_transitions), description = stringResource(Res.string.player_artwork_transitions_description), checked = settings.playerArtworkTransitions) { settings.playerArtworkTransitions = it }
                 switch(id = "playerAuraEnabled", title = stringResource(Res.string.player_aura_effect), description = stringResource(Res.string.player_aura_effect_description), checked = settings.playerAuraEnabled) { settings.playerAuraEnabled = it }
                 switch(id = "playerWaveEnabled", title = stringResource(Res.string.player_wave_effect), description = stringResource(Res.string.player_wave_effect_description), checked = settings.playerWaveEnabled) { settings.playerWaveEnabled = it }
                 switch(id = "lyricsGlowEnabled", title = stringResource(Res.string.lyrics_glow), checked = settings.lyricsGlowEnabled) { settings.lyricsGlowEnabled = it }
@@ -518,6 +519,7 @@ internal fun SettingsUiRegistryBuilder.registerAppearanceSettings(host: SharedSe
         }
         if (host.platform == SettingsPlatform.DESKTOP) {
             group("playerAppearance", stringResource(Res.string.appearance_player)) {
+                switch(id = "playerArtworkTransitions", title = stringResource(Res.string.player_artwork_transitions), description = stringResource(Res.string.player_artwork_transitions_description), checked = settings.playerArtworkTransitions) { settings.playerArtworkTransitions = it }
                 switch(id = "playerAuraEnabled", title = stringResource(Res.string.player_aura_effect), description = stringResource(Res.string.player_aura_effect_description), checked = settings.playerAuraEnabled) { settings.playerAuraEnabled = it }
                 switch(id = "playerWaveEnabled", title = stringResource(Res.string.player_wave_effect), description = stringResource(Res.string.player_wave_effect_description), checked = settings.playerWaveEnabled) { settings.playerWaveEnabled = it }
                 switch(id = "lyricsGlowEnabled", title = stringResource(Res.string.lyrics_glow), checked = settings.lyricsGlowEnabled) { settings.lyricsGlowEnabled = it }

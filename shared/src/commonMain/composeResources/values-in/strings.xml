@@ -2624,4 +2624,6 @@
     <string name="player_aura_effect_description">Cahaya warna sampul yang bergerak perlahan. Nonaktif dalam mode ringan.</string>
     <string name="player_type_vinyl">Piringan Hitam</string>
     <string name="player_type_glass_card">Kartu Kaca</string>
+    <string name="player_artwork_transitions">Transisi sampul</string>
+    <string name="player_artwork_transitions_description">Lembutkan pergantian sampul dan latar tanpa memengaruhi crossfade audio.</string>
 </resources>

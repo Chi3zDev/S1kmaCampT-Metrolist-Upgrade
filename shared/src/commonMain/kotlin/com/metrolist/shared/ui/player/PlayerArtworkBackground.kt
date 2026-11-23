@@ -13,6 +13,7 @@ import androidx.compose.animation.core.SeekableTransitionState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.rememberTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.snap
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -79,6 +80,7 @@ import coil3.request.SuccessResult
 import coil3.size.Scale
 import com.metrolist.shared.api.artwork.YouTubeCanvasClip
 import com.metrolist.shared.settings.PlayerBackgroundStyle
+import com.metrolist.shared.settings.Settings
 import com.metrolist.shared.ui.components.BlurredArtworkBackground
 import com.metrolist.shared.ui.components.LiquidBackground
 import com.metrolist.shared.ui.components.LocalVisualWorkActive
@@ -119,10 +121,11 @@ internal fun PlayerBackgroundArtwork(
     content: @Composable (String) -> Unit,
 ) {
     val prepared = LocalPlayerTrackArtwork.current
+    val transitionAllowed = Settings.shared.playerArtworkTransitions && LocalPlayerBackgroundAnimating.current
     val transitionState = remember { SeekableTransitionState(thumbnailUrl) }
     val transition = rememberTransition(transitionState)
-    LaunchedEffect(thumbnailUrl, artworkCrossfade.nextArtworkUrl, artworkCrossfade.progress) {
-        when (val next = playerBackgroundTransition(thumbnailUrl, transitionState.targetState, artworkCrossfade)) {
+    LaunchedEffect(thumbnailUrl, artworkCrossfade.nextArtworkUrl, artworkCrossfade.progress, transitionAllowed) {
+        when (val next = playerBackgroundTransition(thumbnailUrl, transitionState.targetState, artworkCrossfade, transitionAllowed)) {
             is PlayerBackgroundTransition.Animate -> transitionState.animateTo(next.artworkUrl)
             is PlayerBackgroundTransition.Snap -> transitionState.snapTo(next.artworkUrl)
             is PlayerBackgroundTransition.Seek -> transitionState.seekTo(next.fraction, next.artworkUrl)
@@ -1013,7 +1016,8 @@ internal fun rememberAnimatedGradientStops(
     val transitioningStops =
         gradientColorStops
             .map { (position, color) ->
-                val animatedColor by animateColorAsState(color, tween(500))
+                val transitionAllowed = Settings.shared.playerArtworkTransitions && LocalPlayerBackgroundAnimating.current
+                val animatedColor by animateColorAsState(color, if (transitionAllowed) tween(500) else snap())
                 position to animatedColor
             }.toTypedArray()
     if (!animate || transitioningStops.size < 2) return { transitioningStops }

@@ -5702,4 +5702,6 @@
     <string name="player_aura_effect_description">Slow artwork-colored light. Disabled in lightweight mode.</string>
     <string name="player_type_vinyl">Vinyl Record</string>
     <string name="player_type_glass_card">Glass Card</string>
+    <string name="player_artwork_transitions">Artwork transitions</string>
+    <string name="player_artwork_transitions_description">Fade between covers and backgrounds without affecting audio crossfade.</string>
 </resources>

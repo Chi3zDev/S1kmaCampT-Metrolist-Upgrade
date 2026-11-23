@@ -19,7 +19,9 @@ internal fun playerBackgroundTransition(
     thumbnailUrl: String,
     targetUrl: String,
     crossfade: PlayerArtworkCrossfade,
+    transitionsAllowed: Boolean = true,
 ): PlayerBackgroundTransition {
+    if (!transitionsAllowed) return PlayerBackgroundTransition.Snap(thumbnailUrl)
     val nextUrl = crossfade.nextArtworkUrl
     return when {
         nextUrl != null && nextUrl != thumbnailUrl -> PlayerBackgroundTransition.Seek(nextUrl, crossfade.progress.coerceIn(0f, 1f))
