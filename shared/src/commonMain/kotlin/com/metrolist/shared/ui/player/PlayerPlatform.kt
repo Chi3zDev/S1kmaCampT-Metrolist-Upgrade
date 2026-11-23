@@ -33,6 +33,10 @@ interface PlayerPlatform {
         quality: String,
     ): String? = null
 
+    /** Local system music volume, when supported by the host. */
+    @Composable
+    fun SystemMusicVolume(modifier: Modifier = Modifier) {}
+
     @Composable
     fun isListenTogetherGuest(): Boolean
 

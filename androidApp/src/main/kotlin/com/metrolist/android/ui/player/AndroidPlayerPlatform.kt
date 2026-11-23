@@ -96,6 +96,11 @@ class AndroidPlayerPlatform(
     override val supportsCasting = true
 
     @Composable
+    override fun SystemMusicVolume(modifier: Modifier) {
+        SystemMusicVolumeControl(modifier)
+    }
+
+    @Composable
     override fun isListenTogetherGuest(): Boolean {
         val manager = listenTogetherManager
         val role by manager?.role?.collectAsState() ?: remember { mutableStateOf(ListenTogetherRoomRole.NONE) }
