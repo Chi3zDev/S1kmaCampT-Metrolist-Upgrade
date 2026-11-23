@@ -8,6 +8,7 @@ package com.metrolist.shared.ui.components.lyrics
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.LayoutDirection
 import com.materialkolor.quantize.QuantizerCelebi
 import com.metrolist.shared.model.LyricsEntry
 import com.metrolist.shared.ui.theme.toHsv
@@ -18,6 +19,22 @@ import kotlinx.serialization.json.Json
 /** Glass cards always use a dark scrim; the classic poster follows its background. */
 internal fun lyricsPosterTextColor(posterStyle: LyricsPosterStyle, plainBackground: Boolean, luminance: Float): Color =
     if (posterStyle != LyricsPosterStyle.GLASS_CARD && plainBackground && luminance > 0.4f) Color.Black else Color.White
+
+internal fun lyricsPosterScaleOffset(
+    alignment: TextAlign,
+    direction: LayoutDirection,
+    width: Float,
+    drawScale: Float,
+): Float {
+    val remaining = (width * (1f - drawScale)).coerceAtLeast(0f)
+    return when (alignment) {
+        TextAlign.Left -> 0f
+        TextAlign.Right -> remaining
+        TextAlign.Start -> if (direction == LayoutDirection.Rtl) remaining else 0f
+        TextAlign.End -> if (direction == LayoutDirection.Rtl) 0f else remaining
+        else -> remaining / 2f
+    }
+}
 
 internal const val LYRICS_SHARE_LINE_LIMIT = 6
 

@@ -142,7 +142,7 @@ internal fun renderLyricsImage(
     val textStyle =
         TextStyle(
             color = style.textColor,
-            fontWeight = FontWeight.Bold,
+            fontWeight = if (style.font == LyricsPosterFont.NUNITO_EXTRABOLD) FontWeight.ExtraBold else FontWeight.Bold,
             fontFamily = style.fontFamilyOverride ?: style.font.family,
             textAlign = style.alignment,
         )
@@ -314,13 +314,7 @@ internal fun renderLyricsImage(
                 style.secondaryColor,
                 headerWidth,
             )
-            val textX =
-                textLeft +
-                    when (style.alignment) {
-                        TextAlign.Left -> 0f
-                        TextAlign.Right -> textWidth * (1f - fit.drawScale)
-                        else -> textWidth * (1f - fit.drawScale) / 2f
-                    }
+            val textX = textLeft + lyricsPosterScaleOffset(style.alignment, layoutDirection, textWidth, fit.drawScale)
             clipRect(textLeft, textTop, textLeft + textWidth, textTop + textClipHeight) {
                 translate(textX, textTop) {
                     scale(fit.drawScale, pivot = Offset.Zero) { drawText(lyricsLayout) }
