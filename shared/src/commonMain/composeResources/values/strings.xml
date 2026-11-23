@@ -5690,4 +5690,7 @@
     <string name="about_upgrade_note_about">An updated About page with fork and original project credits.</string>
     <string name="about_upgrade_note_fonts">Nunito ExtraBold and Bold font choices.</string>
     <string name="about_upgrade_note_defaults">New appearance defaults for fresh installations.</string>
+    <string name="lyrics_poster_style">Style</string>
+    <string name="lyrics_poster_classic">Classic</string>
+    <string name="lyrics_poster_glass_card">Glass Card</string>
 </resources>

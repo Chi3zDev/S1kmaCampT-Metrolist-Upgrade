@@ -155,6 +155,7 @@ private data class StoredLyricsImageStyle(
     val textScale: Float,
     val contentScale: Float,
     val font: String = "SANS",
+    val posterStyle: String = "CLASSIC",
 )
 
 internal fun LyricsImageStyle.encodeForStorage(): String =
@@ -167,6 +168,7 @@ internal fun LyricsImageStyle.encodeForStorage(): String =
             textScale,
             contentScale,
             font.name,
+            posterStyle.name,
         ),
     )
 
@@ -185,5 +187,6 @@ internal fun decodeLyricsImageStyle(
             textScale = style.textScale.takeIf { it.isFinite() }?.coerceIn(0.5f, 2f) ?: 1f,
             contentScale = style.contentScale.takeIf { it.isFinite() }?.coerceIn(0.6f, 1.35f) ?: 1f,
             font = LyricsPosterFont.entries.firstOrNull { it.name == style.font } ?: LyricsPosterFont.SANS,
+            posterStyle = LyricsPosterStyle.entries.firstOrNull { it.name == style.posterStyle } ?: LyricsPosterStyle.CLASSIC,
         )
     }.getOrDefault(LyricsImageStyle(alignment = alignment))

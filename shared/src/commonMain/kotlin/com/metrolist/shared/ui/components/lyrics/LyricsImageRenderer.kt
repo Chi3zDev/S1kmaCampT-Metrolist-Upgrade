@@ -43,6 +43,8 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.sp
 import com.metrolist.shared.ui.theme.getGradientColors
 
+internal enum class LyricsPosterStyle { CLASSIC, GLASS_CARD }
+
 internal enum class LyricsImageBackground { GLASS, SOLID, BLUR, GRADIENT }
 
 internal enum class LyricsPosterFont(val family: FontFamily) {
@@ -52,6 +54,7 @@ internal enum class LyricsPosterFont(val family: FontFamily) {
 
 internal data class LyricsImageStyle(
     val background: LyricsImageBackground = LyricsImageBackground.SOLID,
+    val posterStyle: LyricsPosterStyle = LyricsPosterStyle.CLASSIC,
     val backgroundColor: Color = Color(0xFF242424),
     val textColor: Color = Color.White,
     val secondaryColor: Color = Color.White.copy(alpha = 0.7f),
@@ -119,6 +122,9 @@ internal fun renderLyricsImage(
     storySecondaryColor: Color = style.secondaryColor,
     shareUrl: String? = null,
 ): ImageBitmap {
+    if (style.posterStyle == LyricsPosterStyle.GLASS_CARD) {
+        return renderGlassLyricsPoster(lyrics, title, artist, appName, artwork, blurredArtwork, palette, style, textMeasurer, logo, layoutDirection, sizePx, story)
+    }
     val bitmap = ImageBitmap(sizePx, if (story) sizePx * 16 / 9 else sizePx)
     val scale = sizePx / 340f
     val density = Density(scale, fontScale = 1f)

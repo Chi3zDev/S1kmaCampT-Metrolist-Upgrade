@@ -80,6 +80,9 @@ import com.metrolist.shared.generated.resources.logo
 import com.metrolist.shared.generated.resources.lyrics_poster_glass
 import com.metrolist.shared.generated.resources.lyrics_poster_format
 import com.metrolist.shared.generated.resources.lyrics_poster_font
+import com.metrolist.shared.generated.resources.lyrics_poster_style
+import com.metrolist.shared.generated.resources.lyrics_poster_classic
+import com.metrolist.shared.generated.resources.lyrics_poster_glass_card
 import com.metrolist.shared.generated.resources.lyrics_poster_font_sans
 import com.metrolist.shared.generated.resources.lyrics_poster_font_serif
 import com.metrolist.shared.generated.resources.lyrics_poster_font_mono
@@ -168,7 +171,9 @@ fun LyricsShareDialog(
     val glassEnabled = Settings.shared.glassNavigation && Settings.shared.glassLyricsPoster
     val glassVariant = Settings.shared.glassStyle
     val glassStrength = Settings.shared.glassBlurStrength.coerceIn(0f, 100f)
-    val artworkBlurRadius = if (glassEnabled && style.background == LyricsImageBackground.GLASS) {
+    val artworkBlurRadius = if (style.posterStyle == LyricsPosterStyle.GLASS_CARD) {
+        12
+    } else if (glassEnabled && style.background == LyricsImageBackground.GLASS) {
         (glassStrength / 100f * when (glassVariant) { "FROSTED" -> 9f; "CLEAR" -> 2f; else -> 6f }).roundToInt().coerceIn(0, 9)
     } else 6
     LaunchedEffect(artworkUrl, artworkBlurRadius) {
@@ -358,6 +363,17 @@ fun LyricsShareDialog(
                                 Text(stringResource(Res.string.lyrics_share_auto_fit))
                             }
                         }
+                        item {
+                            Text(stringResource(Res.string.lyrics_poster_style))
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                ExpressiveFilterChip(selected = style.posterStyle == LyricsPosterStyle.CLASSIC, enabled = !busy,
+                                    onClick = { style = style.copy(posterStyle = LyricsPosterStyle.CLASSIC) },
+                                    label = { Text(stringResource(Res.string.lyrics_poster_classic)) })
+                                ExpressiveFilterChip(selected = style.posterStyle == LyricsPosterStyle.GLASS_CARD, enabled = !busy,
+                                    onClick = { style = style.copy(posterStyle = LyricsPosterStyle.GLASS_CARD, background = if (artwork != null) LyricsImageBackground.BLUR else LyricsImageBackground.SOLID) },
+                                    label = { Text(stringResource(Res.string.lyrics_poster_glass_card)) })
+                            }
+                        }
                         run {
                             item {
                                 Text(stringResource(Res.string.player_background_style))
@@ -366,7 +382,7 @@ fun LyricsShareDialog(
                                     Modifier.fillMaxWidth().carouselScroll(scrollState).horizontalScroll(scrollState),
                                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                                 ) {
-                                    LyricsImageBackground.entries.forEach { background ->
+                                    LyricsImageBackground.entries.filter { style.posterStyle != LyricsPosterStyle.GLASS_CARD || it != LyricsImageBackground.GLASS }.forEach { background ->
                                         ExpressiveFilterChip(
                                             selected = style.background == background,
                                             enabled = !busy && (background == LyricsImageBackground.SOLID || artwork != null),

@@ -2612,4 +2612,7 @@
     <string name="about_upgrade_note_about">Halaman Tentang baru dengan kredit fork dan proyek asli.</string>
     <string name="about_upgrade_note_fonts">Pilihan font Nunito ExtraBold dan Bold.</string>
     <string name="about_upgrade_note_defaults">Pengaturan tampilan bawaan baru untuk pemasangan baru.</string>
+    <string name="lyrics_poster_style">Gaya</string>
+    <string name="lyrics_poster_classic">Klasik</string>
+    <string name="lyrics_poster_glass_card">Kartu Kaca</string>
 </resources>
