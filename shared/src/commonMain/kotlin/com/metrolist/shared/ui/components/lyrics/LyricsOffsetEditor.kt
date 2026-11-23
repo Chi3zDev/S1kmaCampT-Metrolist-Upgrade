@@ -69,6 +69,8 @@ import com.metrolist.shared.generated.resources.lyrics_offset_increase
 import com.metrolist.shared.generated.resources.lyrics_offset_later
 import com.metrolist.shared.generated.resources.milliseconds_unit
 import com.metrolist.shared.generated.resources.settings_reset_to_default
+import com.metrolist.shared.settings.Settings
+import com.metrolist.shared.ui.player.playerGlassCard
 import com.metrolist.shared.ui.LocalIsTv
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import com.metrolist.shared.ui.playback.retainPlaybackKeyFocus
@@ -126,7 +128,14 @@ fun LyricsOffsetEditor(
             containerColor = contentColor.copy(alpha = 0.12f),
             contentColor = contentColor,
         )
-    Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+    Column(
+        modifier = modifier.fillMaxWidth().then(
+            if (Settings.shared.glassNavigation && Settings.shared.glassPlayer) {
+                Modifier.playerGlassCard(contentColor).padding(12.dp)
+            } else Modifier,
+        ),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 text = title,
