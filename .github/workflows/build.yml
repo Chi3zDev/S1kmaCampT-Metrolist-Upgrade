@@ -145,9 +145,14 @@ jobs:
           echo "Reading signing certificate"
           keytool -exportcert -keystore "$KEYSTORE_PATH" -storetype PKCS12 -alias "$KEY_ALIAS" -storepass:env KEYSTORE_PASSWORD -file "$RUNNER_TEMP/release-cert.der" >/dev/null 2>&1
           expected=$(sha256sum "$RUNNER_TEMP/release-cert.der" | cut -d' ' -f1)
-          actual=$(sed -n 's/^Signer #1 certificate SHA-256 digest: //p' "$RUNNER_TEMP/apk-signature.txt")
           echo "Comparing certificate fingerprints"
-          test "$actual" = "$expected" || { echo "ERROR: certificate fingerprint mismatch or unavailable"; echo "Expected public certificate SHA-256: $expected"; cat "$RUNNER_TEMP/apk-signature.txt"; exit 1; }
+          awk -v expected="$expected" '
+            /^(Signer #1|V[123](\.[0-9]+)? Signer): certificate SHA-256 digest: / {
+              seen++
+              if ($NF != expected) mismatch = 1
+            }
+            END { if (seen == 0 || mismatch) exit 1 }
+          ' "$RUNNER_TEMP/apk-signature.txt" || { echo "ERROR: certificate fingerprint mismatch or unavailable"; exit 1; }
           echo "Checking application ID"
           "$tools/aapt" dump badging "$apk" > "$RUNNER_TEMP/apk-badging.txt"
           grep -q "package: name='com.chi3zdev.metrolist'" "$RUNNER_TEMP/apk-badging.txt"
