@@ -62,8 +62,8 @@ internal fun renderGlassLyricsPoster(
 
     fun measureText(fontSize: Float) = textMeasurer.measure(
         text,
-        style = TextStyle(color = Color.White, fontFamily = family, fontWeight = FontWeight.Bold,
-            fontSize = fontSize.sp, lineHeight = (fontSize * 1.15f).sp, textAlign = TextAlign.Start),
+        style = TextStyle(color = style.textColor, fontFamily = family, fontWeight = FontWeight.Bold,
+            fontSize = fontSize.sp, lineHeight = (fontSize * 1.15f).sp, textAlign = style.alignment),
         constraints = textConstraints,
         maxLines = 6,
         overflow = TextOverflow.Ellipsis,
@@ -99,7 +99,12 @@ internal fun renderGlassLyricsPoster(
             drawRect(Color(0xFF191412).copy(alpha = 0.67f), topLeft = Offset(cardLeft, cardTop), size = Size(cardWidth, cardHeight))
             drawRect(Color.Black.copy(alpha = 0.23f), topLeft = Offset(cardLeft, footerTop), size = Size(cardWidth, footerHeight))
             drawLine(Color.White.copy(alpha = 0.14f), Offset(cardLeft, footerTop), Offset(cardLeft + cardWidth, footerTop), strokeWidth = scale * 0.7f)
-            translate(cardLeft + inner, cardTop + inner) {
+            val alignmentOffset = when (style.alignment) {
+                TextAlign.Left -> 0f
+                TextAlign.Right -> textWidth * (1f - fit.drawScale)
+                else -> textWidth * (1f - fit.drawScale) / 2f
+            }
+            translate(cardLeft + inner + alignmentOffset, cardTop + inner) {
                 scale(fit.drawScale, pivot = Offset.Zero) { drawText(measured) }
             }
             val artSize = 50f * scale
@@ -120,12 +125,12 @@ internal fun renderGlassLyricsPoster(
                     maxLines = 1, overflow = TextOverflow.Ellipsis, constraints = Constraints(maxWidth = labelWidth), density = density, layoutDirection = layoutDirection)
                 drawText(layout, topLeft = Offset(labelX, y))
             }
-            label(title, 14f, artY, Color.White, FontWeight.Bold)
-            label(artist, 12f, artY + 19f * scale, Color.White.copy(alpha = 0.82f), FontWeight.Normal)
+            label(title, 14f, artY, style.textColor, FontWeight.Bold)
+            label(artist, 12f, artY + 19f * scale, style.secondaryColor, FontWeight.Normal)
             translate(labelX, artY + 36f * scale) {
-                with(logo) { draw(Size(10f * scale, 10f * scale), colorFilter = ColorFilter.tint(Color.White.copy(alpha = 0.7f))) }
+                with(logo) { draw(Size(10f * scale, 10f * scale), colorFilter = ColorFilter.tint(style.secondaryColor)) }
             }
-            val appLayout = textMeasurer.measure(appName, style = TextStyle(color = Color.White.copy(alpha = 0.7f), fontSize = 9f.sp),
+            val appLayout = textMeasurer.measure(appName, style = TextStyle(color = style.secondaryColor, fontSize = 9f.sp),
                 maxLines = 1, overflow = TextOverflow.Ellipsis, constraints = Constraints(maxWidth = (labelWidth - 12f * scale).toInt().coerceAtLeast(1)), density = density, layoutDirection = layoutDirection)
             drawText(appLayout, topLeft = Offset(labelX + 13f * scale, artY + 35f * scale))
         }
