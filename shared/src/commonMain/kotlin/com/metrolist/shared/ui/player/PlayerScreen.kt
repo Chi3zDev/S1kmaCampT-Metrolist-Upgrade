@@ -186,6 +186,7 @@ import com.metrolist.shared.generated.resources.video
 import com.metrolist.shared.playback.LocalPlayerSession
 import com.metrolist.shared.playback.SleepTimerState
 import com.metrolist.shared.settings.PlayerBackgroundStyle
+import com.metrolist.shared.ui.LocalPlayerEffectsAllowed
 import com.metrolist.shared.settings.PlayerThumbnailStyle
 import com.metrolist.shared.settings.PlayerType
 import com.metrolist.shared.settings.Settings
@@ -1228,6 +1229,18 @@ fun PlayerScreen(
                                         }
                                     }
                                 }
+                            }
+                            if (!showVideoSurface && playerAuraAllowed(
+                                    Settings.shared.playerAuraEnabled,
+                                    Settings.shared.glassLightMode,
+                                    LocalPlayerEffectsAllowed.current,
+                                )
+                            ) {
+                                PlayerAura(
+                                    colors = gradientColors,
+                                    fallback = palette.primary,
+                                    animate = contentActive && isPlaying && !queueCoversPlayer,
+                                )
                             }
                         }
                     }

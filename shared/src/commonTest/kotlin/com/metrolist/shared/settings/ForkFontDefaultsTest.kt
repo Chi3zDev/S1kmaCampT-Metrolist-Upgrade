@@ -39,15 +39,18 @@ class ForkFontDefaultsTest {
         assertEquals(true, fresh.glassNavigation)
         assertEquals("CLEAR", fresh.glassStyle)
         assertEquals(true, fresh.lyricsGlowEnabled)
+        assertEquals(true, fresh.playerAuraEnabled)
         assertEquals(ThemePaletteStyle.CONTENT, fresh.themePaletteStyle)
 
         fresh.playerType = PlayerType.CLASSIC
         fresh.glassStyle = "FROSTED"
         fresh.lyricsGlowEnabled = false
+        fresh.playerAuraEnabled = false
         fresh.applyFreshAndroidAppearanceDefaults(true)
         assertEquals(PlayerType.CLASSIC, fresh.playerType)
         assertEquals("FROSTED", fresh.glassStyle)
         assertEquals(false, fresh.lyricsGlowEnabled)
+        assertEquals(false, fresh.playerAuraEnabled)
         val existing = Settings(MapSettings())
         existing.applyFreshAndroidAppearanceDefaults(false)
         assertEquals(PlayerType.MODERN, existing.playerType)

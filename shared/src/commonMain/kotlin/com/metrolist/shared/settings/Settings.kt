@@ -363,6 +363,7 @@ class Settings(
         if (!settings.hasKey("glassNavigation")) glassNavigation = true
         if (!settings.hasKey("glassStyle")) glassStyle = "CLEAR"
         if (!settings.hasKey("lyricsGlowEnabled")) lyricsGlowEnabled = true
+        if (!settings.hasKey("playerAuraEnabled")) playerAuraEnabled = true
     }
 
     var iosCustomFontFile by preference(IosCustomFontFileKey, "")
@@ -455,6 +456,7 @@ class Settings(
     var glassProfile by preference(true)
     var glassLyricsPoster by preference(true)
     var glassLightMode by preference(false)
+    var playerAuraEnabled by preference(false)
     var playerWaveEnabled by preference(true)
     var lyricsGlowEnabled by preference(false)
     var lyricsGlowIntensity by preference(50f)

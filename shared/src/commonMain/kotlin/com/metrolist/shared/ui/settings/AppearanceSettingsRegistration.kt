@@ -366,6 +366,7 @@ internal fun SettingsUiRegistryBuilder.registerAppearanceSettings(host: SharedSe
         }
         if (host.platform != SettingsPlatform.DESKTOP) {
             group("playerAppearance", stringResource(Res.string.appearance_player)) {
+                switch(id = "playerAuraEnabled", title = stringResource(Res.string.player_aura_effect), description = stringResource(Res.string.player_aura_effect_description), checked = settings.playerAuraEnabled) { settings.playerAuraEnabled = it }
                 switch(id = "playerWaveEnabled", title = stringResource(Res.string.player_wave_effect), description = stringResource(Res.string.player_wave_effect_description), checked = settings.playerWaveEnabled) { settings.playerWaveEnabled = it }
                 switch(id = "lyricsGlowEnabled", title = stringResource(Res.string.lyrics_glow), checked = settings.lyricsGlowEnabled) { settings.lyricsGlowEnabled = it }
                 slider(id = "lyricsGlowIntensity", title = stringResource(Res.string.lyrics_glow_intensity), value = settings.lyricsGlowIntensity, range = 0f..100f, steps = 0, enabled = settings.lyricsGlowEnabled && !settings.glassLightMode) { settings.lyricsGlowIntensity = it }
@@ -517,6 +518,7 @@ internal fun SettingsUiRegistryBuilder.registerAppearanceSettings(host: SharedSe
         }
         if (host.platform == SettingsPlatform.DESKTOP) {
             group("playerAppearance", stringResource(Res.string.appearance_player)) {
+                switch(id = "playerAuraEnabled", title = stringResource(Res.string.player_aura_effect), description = stringResource(Res.string.player_aura_effect_description), checked = settings.playerAuraEnabled) { settings.playerAuraEnabled = it }
                 switch(id = "playerWaveEnabled", title = stringResource(Res.string.player_wave_effect), description = stringResource(Res.string.player_wave_effect_description), checked = settings.playerWaveEnabled) { settings.playerWaveEnabled = it }
                 switch(id = "lyricsGlowEnabled", title = stringResource(Res.string.lyrics_glow), checked = settings.lyricsGlowEnabled) { settings.lyricsGlowEnabled = it }
                 slider(id = "lyricsGlowIntensity", title = stringResource(Res.string.lyrics_glow_intensity), value = settings.lyricsGlowIntensity, range = 0f..100f, steps = 0, enabled = settings.lyricsGlowEnabled && !settings.glassLightMode) { settings.lyricsGlowIntensity = it }

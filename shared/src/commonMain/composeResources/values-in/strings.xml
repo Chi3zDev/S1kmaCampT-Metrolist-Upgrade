@@ -2620,4 +2620,6 @@
     <string name="lyrics_glow_intensity">Intensitas cahaya lirik</string>
     <string name="player_wave_effect">Gelombang progres animasi</string>
     <string name="player_wave_effect_description">Gunakan gaya penggeser gelombang yang dipilih; mode ringan memakai garis tipis.</string>
+    <string name="player_aura_effect">Aura warna pemutar</string>
+    <string name="player_aura_effect_description">Cahaya warna sampul yang bergerak perlahan. Nonaktif dalam mode ringan.</string>
 </resources>
