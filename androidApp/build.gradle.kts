@@ -271,7 +271,7 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
 
-        buildConfigField("Int", "UPGRADE_NUMBER", upgradeNumber.toString())
+        buildConfigField("int", "UPGRADE_NUMBER", upgradeNumber.toString())
         buildConfigField("Long", "DISCORD_APP_ID", "1447278780795064401L")
         buildConfigField("Boolean", "UPDATER_ENABLED", "false")
         buildConfigField("String", "BUNDLED_LANGUAGE_TAGS", "\"${bundledLanguageTags.joinToString(",")}\"")
