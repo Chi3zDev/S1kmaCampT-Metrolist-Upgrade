@@ -43,7 +43,7 @@ import kotlin.time.TimeSource
 /** Normalized arm contact point moves from the outer grooves toward the label. */
 internal fun vinylArmContact(progress: Float): Offset {
     val p = if (progress.isFinite()) progress.coerceIn(0f, 1f) else 0f
-    return Offset(0.72f - 0.16f * p, 0.62f - 0.06f * p)
+    return Offset(0.68f - 0.16f * p, 0.76f - 0.10f * p)
 }
 
 /** Original vector record; artwork is supplied by the player to retain its existing image pipeline. */
@@ -89,7 +89,10 @@ internal fun VinylRecord(
     }
 
     Box(modifier.fillMaxWidth().aspectRatio(1f), contentAlignment = Alignment.Center) {
-        Box(Modifier.fillMaxSize(0.88f).graphicsLayer { rotationZ = angle.floatValue }, contentAlignment = Alignment.Center) {
+        Box(Modifier.fillMaxSize().graphicsLayer {
+            translationX = -size.width * 0.24f
+            rotationZ = angle.floatValue
+        }, contentAlignment = Alignment.Center) {
             Canvas(Modifier.fillMaxSize()) {
                 val radius = size.minDimension / 2f
                 drawCircle(Color(0xFF101012), radius)
@@ -99,20 +102,20 @@ internal fun VinylRecord(
                 }
                 drawCircle(Brush.sweepGradient(listOf(Color.Transparent, Color.White.copy(alpha = 0.14f), Color.Transparent, Color.Transparent)), radius)
             }
-            Box(Modifier.fillMaxSize(0.37f).clip(CircleShape)) { artwork() }
+            Box(Modifier.fillMaxSize(0.47f).clip(CircleShape)) { artwork() }
             Canvas(Modifier.size(5.dp)) { drawCircle(Color(0xFFD9D9DB)) }
         }
         Canvas(Modifier.fillMaxSize()) {
-            val pivot = Offset(size.width * 0.88f, size.height * 0.12f)
+            val pivot = Offset(size.width * 0.87f, size.height * 0.12f)
             val end = vinylArmContact(progress).let { Offset(it.x * size.width, it.y * size.height) }
-            val elbow = Offset(pivot.x - size.width * 0.06f, end.y - size.height * 0.11f)
             val width = size.minDimension * 0.018f
-            drawLine(Color(0xFF242428), pivot, elbow, width * 1.55f, StrokeCap.Round)
-            drawLine(Color(0xFFBFC0C3), pivot, elbow, width, StrokeCap.Round)
-            drawLine(Color(0xFFBFC0C3), elbow, end, width * 1.1f, StrokeCap.Round)
-            drawCircle(Color(0xFF8C8D92), size.minDimension * 0.035f, pivot)
-            drawCircle(Color(0xFF333338), size.minDimension * 0.017f, pivot)
-            drawCircle(Color(0xFF38383B), size.minDimension * 0.016f, end)
+            val headStart = Offset(end.x + (pivot.x - end.x) * 0.16f, end.y + (pivot.y - end.y) * 0.16f)
+            drawCircle(Color(0xFF1B1B1E), size.minDimension * 0.07f, pivot)
+            drawCircle(Color(0xFF46464A), size.minDimension * 0.06f, pivot, style = Stroke(size.minDimension * 0.004f))
+            drawLine(Color(0xFF29292C), pivot, end, width * 1.5f, StrokeCap.Round)
+            drawLine(Color(0xFFD4D4D6), pivot, end, width, StrokeCap.Round)
+            drawLine(Color(0xFF222226), headStart, end, width * 3.1f, StrokeCap.Round)
+            drawCircle(Color(0xFF161618), size.minDimension * 0.035f, pivot)
         }
     }
 }
