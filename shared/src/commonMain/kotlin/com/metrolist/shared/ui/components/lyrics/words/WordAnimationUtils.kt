@@ -1041,6 +1041,15 @@ internal object FixedMotionDurationScale : MotionDurationScale {
 
 internal val LyricsClearShadow = Shadow(color = Color.Transparent, offset = Offset.Zero, blurRadius = 0f)
 
+internal fun isGlowingSyllable(first: Int, last: Int, active: Int): Boolean =
+    first >= 0 && active >= 0 && active in first..maxOf(first, last)
+
+/** A separate solid-color shadow pass avoids Android shader/shadow ghost glyphs. */
+internal fun DrawScope.drawSyllableGlow(vc: VisualCluster, topLeft: Offset, shadow: Shadow) {
+    drawText(textLayoutResult = vc.subLayout, topLeft = topLeft, color = Color.Transparent, shadow = shadow)
+}
+
+
 private val joiningLayerPaint by lazy { Paint() }
 
 private const val OPAQUE_EPS = 0.999f

@@ -17,6 +17,7 @@ import androidx.compose.runtime.structuralEqualityPolicy
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.AnnotatedString
@@ -27,6 +28,7 @@ import androidx.compose.ui.unit.Constraints
 import com.metrolist.shared.model.WordTimestamp
 import com.metrolist.shared.settings.Settings
 import com.metrolist.shared.ui.components.lyrics.LYRICS_LINE_HORIZONTAL_PADDING
+import com.metrolist.shared.ui.components.lyrics.currentLyricGlowStrength
 
 @Composable
 internal fun SimpleWordAnimation(
@@ -45,9 +47,13 @@ internal fun SimpleWordAnimation(
     romanizedText: String? = null,
     showSyllableRomanization: Boolean = false,
 ) {
+    val glowStrength = currentLyricGlowStrength()
     val currentPositionProvider by rememberUpdatedState(positionProvider)
     val density = LocalDensity.current
     val fontSizePx = remember(lyricStyle) { with(density) { lyricStyle.fontSize.toPx() } }
+    val glowShadow = remember(glowStrength, expressiveAccent, fontSizePx) {
+        Shadow(expressiveAccent.copy(alpha = expressiveAccent.alpha * glowStrength * 0.7f), Offset.Zero, (fontSizePx * 0.16f).coerceAtLeast(1f))
+    }
     val gradientWidth = fontSizePx * 1.25f
     val extraPaddingPx = minOf(fontSizePx * 0.3f, with(density) { LYRICS_LINE_HORIZONTAL_PADDING.toPx() })
 
@@ -319,6 +325,9 @@ internal fun SimpleWordAnimation(
                 val vc = clusters[idx]
                 val topLeft = Offset(statics.baseX[idx] + extraPaddingPx, statics.baseY[idx] + extraPaddingPx)
 
+                if (isActiveLine && glowStrength > 0f && isGlowingSyllable(vc.syllableIndex, vc.lastSyllableIndex, wipeSylIdx)) {
+                    drawSyllableGlow(vc, topLeft, glowShadow)
+                }
                 if (lineBrush != null) {
                     drawClusterText(
                         vc = vc,

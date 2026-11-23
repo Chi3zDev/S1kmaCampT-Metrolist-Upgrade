@@ -31,6 +31,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.Paint
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.scale
@@ -1037,9 +1038,13 @@ private fun OgRtlExpressiveWordAnimation(
     romanizedText: String? = null,
     showSyllableRomanization: Boolean = false,
 ) {
+    val glowStrength = currentLyricGlowStrength()
     val currentPositionProvider by rememberUpdatedState(positionProvider)
     val density = LocalDensity.current
     val fontSizePx = remember(lyricStyle) { with(density) { lyricStyle.fontSize.toPx() } }
+    val glowShadow = remember(glowStrength, expressiveAccent, fontSizePx) {
+        Shadow(expressiveAccent.copy(alpha = expressiveAccent.alpha * glowStrength * 0.7f), Offset.Zero, (fontSizePx * 0.16f).coerceAtLeast(1f))
+    }
     val gradientWidth = fontSizePx * 0.4f
     val extraPaddingPx = minOf(fontSizePx * 0.4f, with(density) { LYRICS_LINE_HORIZONTAL_PADDING.toPx() })
 
@@ -1386,6 +1391,9 @@ private fun OgRtlExpressiveWordAnimation(
                         else -> unlitColor
                     }
 
+                if (isActiveLine && glowStrength > 0f && isGlowingSyllable(vc.syllableIndex, vc.lastSyllableIndex, wipeSylIdx)) {
+                    drawSyllableGlow(vc, topLeft, glowShadow)
+                }
                 if (inactiveBrush != null) {
                     drawClusterText(
                         vc = vc,
