@@ -81,6 +81,8 @@ import com.metrolist.shared.generated.resources.app_font_downloading
 import com.metrolist.shared.generated.resources.app_font_import_custom
 import com.metrolist.shared.generated.resources.app_font_installed
 import com.metrolist.shared.generated.resources.app_font_invalid
+import com.metrolist.shared.generated.resources.app_font_nunito_bold
+import com.metrolist.shared.generated.resources.app_font_nunito_extrabold
 import com.metrolist.shared.generated.resources.app_font_reset
 import com.metrolist.shared.generated.resources.app_font_reset_confirm
 import com.metrolist.shared.generated.resources.app_font_reset_description
@@ -251,8 +253,22 @@ fun SettingsScreen(
                 },
             ),
         )
+    val bundledFontActions = listOf(
+        QuickFontManager.NUNITO_EXTRABOLD_ID to stringResource(Res.string.app_font_nunito_extrabold),
+        QuickFontManager.NUNITO_BOLD_ID to stringResource(Res.string.app_font_nunito_bold),
+    ).map { (id, label) ->
+        SettingsHostAction(
+            id = "bundledFont:$id",
+            title = label,
+            description = stringResource(if (activeFontId() == id) Res.string.app_font_active else Res.string.app_font_installed),
+            onClick = {
+                SharedPreferences.shared.appFont = FontOption.SYSTEM
+                SharedPreferences.shared.androidActiveFontId = id
+            },
+        )
+    }
     val fontDownloadActions =
-        QuickFontManager.fonts.map { font ->
+        bundledFontActions + QuickFontManager.fonts.map { font ->
             val fontName = stringResource(font.labelRes)
             val isDownloaded = font.id in installedFontIds.orEmpty()
             val isActive = activeFontId() == font.id && isDownloaded

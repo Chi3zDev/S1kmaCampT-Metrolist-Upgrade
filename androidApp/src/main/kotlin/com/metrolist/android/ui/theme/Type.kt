@@ -11,7 +11,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import com.metrolist.android.R
 import com.metrolist.android.utils.AppFontManager
 import com.metrolist.android.utils.QuickFontManager
 import com.metrolist.shared.settings.FontOption
@@ -58,6 +60,8 @@ private fun resolveFontFamily(
     activeFontId: String,
 ): FontFamily {
     when (activeFontId) {
+        QuickFontManager.NUNITO_EXTRABOLD_ID -> return FontFamily(Font(R.font.nunito_extrabold))
+        QuickFontManager.NUNITO_BOLD_ID -> return FontFamily(Font(R.font.nunito_bold))
         QuickFontManager.SYSTEM_ID -> {
             return FontFamily.Default
         }

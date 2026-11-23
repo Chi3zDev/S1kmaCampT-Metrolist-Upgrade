@@ -294,6 +294,13 @@ class App :
         onboardingManager = OnboardingManager(this)
         legacyInstallMigration = LegacyInstallMigration(this)
         hadLegacyInstallationAtStartup = legacyInstallMigration.hasLegacyInstallation()
+        val isFreshPackage = runCatching {
+            @Suppress("DEPRECATION")
+            packageManager.getPackageInfo(packageName, 0).let { it.firstInstallTime == it.lastUpdateTime }
+        }.getOrDefault(false)
+        Settings.shared.applyFreshAndroidFontDefault(
+            isFreshPackage && !onboardingManager.isComplete && !hadLegacyInstallationAtStartup,
+        )
         applyTvContinuePlaybackDefault()
         if (hadLegacyInstallationAtStartup) Settings.shared.migrateLegacyV13AccountSettings()
         setPlaybackServicesEnabled(onboardingManager.isComplete)

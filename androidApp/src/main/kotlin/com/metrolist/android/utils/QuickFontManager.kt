@@ -38,6 +38,8 @@ object QuickFontManager {
     const val ROBOTO_ID = "roboto"
     const val COMIC_NEUE_ID = "comic_neue"
     const val ATKINSON_HYPERLEGIBLE_NEXT_ID = "atkinson_hyperlegible_next"
+    const val NUNITO_EXTRABOLD_ID = "nunito_extrabold"
+    const val NUNITO_BOLD_ID = "nunito_bold"
     const val SYSTEM_ID = "SYSTEM"
     const val CUSTOM_ID = "CUSTOM"
 

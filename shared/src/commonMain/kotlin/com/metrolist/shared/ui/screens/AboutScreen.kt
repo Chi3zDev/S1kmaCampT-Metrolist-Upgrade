@@ -80,6 +80,7 @@ import com.metrolist.shared.generated.resources.Res
 import com.metrolist.shared.generated.resources.about_play_favorite_song
 import com.metrolist.shared.generated.resources.about_upgrade_developer
 import com.metrolist.shared.generated.resources.about_upgrade_version
+import com.metrolist.shared.generated.resources.about_nunito_credit
 import com.metrolist.shared.generated.resources.chi3zdev_avatar
 import com.metrolist.shared.generated.resources.app_name
 import com.metrolist.shared.generated.resources.back
@@ -271,6 +272,15 @@ fun AboutScreen(
                         .clickable(role = Role.Button, onClickLabel = text.license) { openCommunityLink(aboutLicenseLink) }
                         .padding(16.dp),
             )
+
+            if (upgradeNumber != null) {
+                Text(
+                    text = stringResource(Res.string.about_nunito_credit),
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center,
+                    color = colorScheme.onSurfaceVariant,
+                )
+            }
 
             Text(
                 text = stringResource(Res.string.stands_with_palestine),
