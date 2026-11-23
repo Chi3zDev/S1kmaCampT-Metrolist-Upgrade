@@ -298,7 +298,7 @@ class App :
             @Suppress("DEPRECATION")
             packageManager.getPackageInfo(packageName, 0).let { it.firstInstallTime == it.lastUpdateTime }
         }.getOrDefault(false)
-        Settings.shared.applyFreshAndroidFontDefault(
+        Settings.shared.applyFreshAndroidAppearanceDefaults(
             isFreshPackage && !onboardingManager.isComplete && !hadLegacyInstallationAtStartup,
         )
         applyTvContinuePlaybackDefault()

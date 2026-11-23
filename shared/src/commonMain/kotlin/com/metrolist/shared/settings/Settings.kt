@@ -348,6 +348,22 @@ class Settings(
         androidActiveFontId = "nunito_extrabold"
     }
 
+    /** Apply fork defaults only on a fresh Android install and only for absent keys. */
+    fun applyFreshAndroidAppearanceDefaults(isFreshInstall: Boolean) {
+        if (!isFreshInstall) return
+        applyFreshAndroidFontDefault(true)
+        if (!settings.hasKey("themePaletteStyle")) themePaletteStyle = ThemePaletteStyle.CONTENT
+        if (!settings.hasKey("playerType")) playerType = PlayerType.VINTAGE
+        if (!settings.hasKey("playerThumbnailStyle")) playerThumbnailStyle = PlayerThumbnailStyle.FULLSCREEN
+        if (!settings.hasKey("playerBackgroundStyle")) playerBackgroundStyle = PlayerBackgroundStyle.LIQUID
+        if (!settings.hasKey("sliderStyle")) sliderStyle = SliderStyle.SLIM
+        if (!settings.hasKey(SliderTrackThicknessDpKey)) sliderTrackThicknessDp = 3f
+        if (!settings.hasKey("miniPlayerType")) miniPlayerType = MiniPlayerType.MODERN
+        if (!settings.hasKey("miniPlayerBackgroundStyle")) miniPlayerBackgroundStyle = "BLURRED_ARTWORK"
+        if (!settings.hasKey("glassNavigation")) glassNavigation = true
+        if (!settings.hasKey("glassStyle")) glassStyle = "CLEAR"
+    }
+
     var iosCustomFontFile by preference(IosCustomFontFileKey, "")
     var iosCustomFontName by preference(IosCustomFontNameKey, "")
     var iosCustomFontRevision by preference(IosCustomFontRevisionKey, 0L)

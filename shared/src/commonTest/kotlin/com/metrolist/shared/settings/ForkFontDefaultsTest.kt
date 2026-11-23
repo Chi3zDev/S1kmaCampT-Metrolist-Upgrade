@@ -25,4 +25,29 @@ class ForkFontDefaultsTest {
         assertEquals("", imported.androidActiveFontId)
         assertEquals("font.ttf", imported.androidCustomFontFile)
     }
+    @Test
+    fun freshAppearanceDefaultsDoNotOverwriteStoredChoices() {
+        val fresh = Settings(MapSettings())
+        fresh.applyFreshAndroidAppearanceDefaults(true)
+        assertEquals(PlayerType.VINTAGE, fresh.playerType)
+        assertEquals(PlayerThumbnailStyle.FULLSCREEN, fresh.playerThumbnailStyle)
+        assertEquals(PlayerBackgroundStyle.LIQUID, fresh.playerBackgroundStyle)
+        assertEquals(SliderStyle.SLIM, fresh.sliderStyle)
+        assertEquals(3f, fresh.sliderTrackThicknessDp)
+        assertEquals(MiniPlayerType.MODERN, fresh.miniPlayerType)
+        assertEquals("BLURRED_ARTWORK", fresh.miniPlayerBackgroundStyle)
+        assertEquals(true, fresh.glassNavigation)
+        assertEquals("CLEAR", fresh.glassStyle)
+        assertEquals(ThemePaletteStyle.CONTENT, fresh.themePaletteStyle)
+
+        fresh.playerType = PlayerType.CLASSIC
+        fresh.glassStyle = "FROSTED"
+        fresh.applyFreshAndroidAppearanceDefaults(true)
+        assertEquals(PlayerType.CLASSIC, fresh.playerType)
+        assertEquals("FROSTED", fresh.glassStyle)
+        val existing = Settings(MapSettings())
+        existing.applyFreshAndroidAppearanceDefaults(false)
+        assertEquals(PlayerType.MODERN, existing.playerType)
+        assertEquals(false, existing.glassNavigation)
+    }
 }
