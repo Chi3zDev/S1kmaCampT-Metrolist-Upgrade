@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.Constraints
 import com.metrolist.shared.model.WordTimestamp
 import com.metrolist.shared.settings.Settings
 import com.metrolist.shared.ui.components.lyrics.LYRICS_LINE_HORIZONTAL_PADDING
+import com.metrolist.shared.ui.components.lyrics.currentLyricGlowStrength
 import com.metrolist.shared.ui.components.lyrics.nextLyricsDeadlineIndex
 import kotlinx.coroutines.withContext
 import kotlin.math.PI
@@ -77,6 +78,7 @@ internal fun AppleWordAnimation(
     showSyllableRomanization: Boolean = false,
     prewarmMasks: Boolean = isActiveLine,
 ) {
+    val glowStrength = currentLyricGlowStrength()
     val currentPositionProvider by rememberUpdatedState(positionProvider)
     val density = LocalDensity.current
     val fontSizePx = remember(lyricStyle) { with(density) { lyricStyle.fontSize.toPx() } }
@@ -681,7 +683,7 @@ internal fun AppleWordAnimation(
             remember(clusters, extraPaddingPx) {
                 ClusterMaskCache(clusters.size, extraPaddingPx)
             }
-        LaunchedEffect(maskCacheStore, prewarmMasks) {
+        LaunchedEffect(maskCacheStore, prewarmMasks, glowStrength > 0f) {
             if (!prewarmMasks) return@LaunchedEffect
             maskCacheStore.prewarmSliced(
                 count = clusters.size,
@@ -689,7 +691,7 @@ internal fun AppleWordAnimation(
                 layoutOf = { clusters[it].subLayout },
                 glowBlurOf = {
                     val vc = clusters[it]
-                    if (vc.isHeavy && !(isArabicOrRtl || vc.isRtl || vc.isJoiningScript)) fontSizePx * 0.1f else 0f
+                    if (glowStrength > 0f && vc.isHeavy && !(isArabicOrRtl || vc.isRtl || vc.isJoiningScript)) fontSizePx * 0.1f else 0f
                 },
             )
         }
@@ -857,7 +859,7 @@ internal fun AppleWordAnimation(
                         rise = -emphasisRiseEm * fontSizePx * pulse
                         scale = 1f + emphasisScaleGain * pulse
                         shift = vc.normX * emphasisShiftEm * fontSizePx * pulse
-                        glowAlpha = (vc.charShadowIntensity * sample.glow).coerceIn(0f, 1f)
+                        glowAlpha = (vc.charShadowIntensity * sample.glow * glowStrength).coerceIn(0f, 1f)
                     }
                 }
 

@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import com.metrolist.shared.model.WordTimestamp
 import com.metrolist.shared.settings.Settings
 import com.metrolist.shared.ui.components.lyrics.LYRICS_LINE_HORIZONTAL_PADDING
+import com.metrolist.shared.ui.components.lyrics.currentLyricGlowStrength
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.round
@@ -345,6 +346,7 @@ internal fun BraccatoWordAnimation(
     showSyllableRomanization: Boolean = false,
     prewarmMasks: Boolean = isActiveLine,
 ) {
+    val userGlowStrength = currentLyricGlowStrength()
     val latestPosition by rememberUpdatedState(positionProvider)
     val density = LocalDensity.current
     val fontSizePx = remember(lyricStyle, density) { with(density) { lyricStyle.fontSize.toPx() } }
@@ -663,7 +665,7 @@ internal fun BraccatoWordAnimation(
             var glowLayerOpen = false
             var glowLayerSyl = -1
             for (pass in 0..2) {
-                if (pass > 0 && mode == 0) continue
+                if ((pass > 0 && mode == 0) || (pass == 1 && userGlowStrength <= 0f)) continue
 
                 for (i in 0 until n) {
                     val kind = bst.kind[i]
@@ -766,14 +768,14 @@ internal fun BraccatoWordAnimation(
                     if (pass > 0 && litOpacity <= 0.001f) continue
                     val cov = if (pass == 1) braccatoCoverage(e0, edgeLen) else 0f
                     if (pass == 1) {
-                        val eligible = glowStrength > 0f && glowR > 0.05f && cov > 0f
+                        val eligible = userGlowStrength > 0f && glowStrength > 0f && glowR > 0.05f && cov > 0f
                         if (glowLayerOpen && (!eligible || vc.syllableIndex != glowLayerSyl)) {
                             drawContext.canvas.restore()
                             glowLayerOpen = false
                         }
                         if (!eligible) continue
                         if (!glowLayerOpen) {
-                            glowLayerPaint.alpha = (GLOW_COLOR_ALPHA * litOpacity).coerceIn(0f, 1f)
+                            glowLayerPaint.alpha = (GLOW_COLOR_ALPHA * litOpacity * userGlowStrength).coerceIn(0f, 1f)
                             drawContext.canvas.saveLayer(
                                 Rect(
                                     -glowRadiusPx * 3f,

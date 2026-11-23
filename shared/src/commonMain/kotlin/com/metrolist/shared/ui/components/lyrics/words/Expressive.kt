@@ -50,6 +50,7 @@ import androidx.compose.ui.unit.IntSize
 import com.metrolist.shared.model.WordTimestamp
 import com.metrolist.shared.settings.Settings
 import com.metrolist.shared.ui.components.lyrics.LYRICS_LINE_HORIZONTAL_PADDING
+import com.metrolist.shared.ui.components.lyrics.currentLyricGlowStrength
 import kotlinx.coroutines.withContext
 import kotlin.math.PI
 import kotlin.math.cos
@@ -183,6 +184,7 @@ internal fun ExpressiveWordAnimation(
     prewarmMasks: Boolean = isActiveLine,
     useFixedTone: Boolean = true,
 ) {
+    val userGlowStrength = currentLyricGlowStrength()
     val useOgRtlEngine = remember(mainText) { mainText.containsRtl() || mainText.containsJoinedIndic() }
     if (useOgRtlEngine) {
         OgRtlExpressiveWordAnimation(
@@ -545,7 +547,7 @@ internal fun ExpressiveWordAnimation(
                 }
             }
         val glowTintCache = remember { TintFilterCache() }
-        LaunchedEffect(glowMaskCache, glowCapable, clusterStatics, prewarmMasks) {
+        LaunchedEffect(glowMaskCache, glowCapable, clusterStatics, prewarmMasks, userGlowStrength > 0f) {
             if (!prewarmMasks) return@LaunchedEffect
             var mark = TimeSource.Monotonic.markNow()
             for (i in 0 until clusterCount) {
@@ -555,7 +557,7 @@ internal fun ExpressiveWordAnimation(
                     withFrameNanos { }
                     mark = TimeSource.Monotonic.markNow()
                 }
-                if (glowCapable[i] && !glowMaskCache.hasGlow(i)) {
+                if (userGlowStrength > 0f && glowCapable[i] && !glowMaskCache.hasGlow(i)) {
                     glowMaskCache.obtainGlow(i, letterLayouts[i], glowBlurPx, density)
                     if (mark.elapsedNow() >= PREWARM_FRAME_BUDGET) {
                         withFrameNanos { }
@@ -872,7 +874,7 @@ internal fun ExpressiveWordAnimation(
                         )
                     }
                 }) {
-                    val glowAlpha = if (wordIdx != -1) wordGlowAlphas[wordIdx] else 0f
+                    val glowAlpha = if (wordIdx != -1) wordGlowAlphas[wordIdx] * userGlowStrength else 0f
                     if (glowAlpha > 0.01f) {
                         val glowMask = glowMaskCache.peekGlow(i)
                         if (glowMask != null) {

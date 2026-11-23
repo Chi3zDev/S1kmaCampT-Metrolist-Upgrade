@@ -92,12 +92,19 @@ import kotlin.math.roundToInt
 /** Allows a host to suppress expensive lyric effects on constrained devices. */
 val LocalLyricsEffectsAllowed = staticCompositionLocalOf { true }
 
+internal fun lyricGlowStrength(enabled: Boolean, lightMode: Boolean, deviceAllowed: Boolean, intensity: Float): Float =
+    if (!enabled || lightMode || !deviceAllowed || !intensity.isFinite()) 0f else (intensity / 100f).coerceIn(0f, 1f)
+
+@Composable
+internal fun currentLyricGlowStrength(): Float {
+    val settings = Settings.shared
+    return lyricGlowStrength(settings.lyricsGlowEnabled, settings.glassLightMode, LocalLyricsEffectsAllowed.current, settings.lyricsGlowIntensity)
+}
+
 @Composable
 private fun TextStyle.withActiveLyricGlow(isActive: Boolean, color: Color): TextStyle {
-    val settings = Settings.shared
-    if (!isActive || !settings.lyricsGlowEnabled || settings.glassLightMode || !LocalLyricsEffectsAllowed.current) return this
-    val strength = (settings.lyricsGlowIntensity / 100f).coerceIn(0f, 1f)
-    if (strength == 0f) return this
+    val strength = currentLyricGlowStrength()
+    if (!isActive || strength == 0f) return this
     val radius = with(LocalDensity.current) { 8.dp.toPx() }
     return copy(shadow = Shadow(color = color.copy(alpha = color.alpha * strength * 0.7f), offset = Offset.Zero, blurRadius = radius))
 }
