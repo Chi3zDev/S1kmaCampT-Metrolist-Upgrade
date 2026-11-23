@@ -6,9 +6,9 @@ import android.os.Build
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.Slider
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Icon
 import androidx.compose.material3.SliderDefaults
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -25,6 +25,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
+import com.metrolist.shared.settings.SliderStyle
+import com.metrolist.shared.ui.components.sliders.PlaybackProgressSlider
+import com.metrolist.shared.ui.icons.MetrolistIcons
 import com.metrolist.shared.generated.resources.Res
 import com.metrolist.shared.generated.resources.volume
 import kotlinx.coroutines.delay
@@ -64,8 +67,8 @@ internal fun SystemMusicVolumeControl(modifier: Modifier = Modifier, contentColo
     }
     val label = stringResource(Res.string.volume)
     Row(modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text(label, color = contentColor)
-        Slider(
+        Icon(MetrolistIcons.AutoMirrored.Filled.VolumeDown, contentDescription = null, tint = contentColor.copy(alpha = 0.65f), modifier = Modifier.size(18.dp))
+        PlaybackProgressSlider(
             value = systemVolumeFraction(current, minimum, maximum),
             onValueChange = { fraction ->
                 val next = systemVolumeFromFraction(fraction, minimum, maximum)
@@ -74,9 +77,16 @@ internal fun SystemMusicVolumeControl(modifier: Modifier = Modifier, contentColo
                     current = manager.getStreamVolume(AudioManager.STREAM_MUSIC)
                 }
             },
+            onValueChangeFinished = {},
+            isPlaying = false,
             enabled = active && maximum > minimum,
+            style = SliderStyle.SLIM,
+            trackThicknessDp = 4f,
+            showThumb = false,
+            animate = false,
             colors = SliderDefaults.colors(thumbColor = contentColor, activeTrackColor = contentColor, inactiveTrackColor = contentColor.copy(alpha = 0.3f)),
             modifier = Modifier.weight(1f).semantics { contentDescription = label },
         )
+        Icon(MetrolistIcons.AutoMirrored.Filled.VolumeUp, contentDescription = null, tint = contentColor.copy(alpha = 0.65f), modifier = Modifier.size(18.dp))
     }
 }

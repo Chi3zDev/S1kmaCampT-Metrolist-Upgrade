@@ -156,6 +156,7 @@ import com.metrolist.shared.constants.QueuePeekHeight
 import com.metrolist.shared.generated.resources.Res
 import com.metrolist.shared.generated.resources.action_like
 import com.metrolist.shared.generated.resources.album_art
+import com.metrolist.shared.generated.resources.app_name
 import com.metrolist.shared.generated.resources.cast
 import com.metrolist.shared.generated.resources.collapse
 import com.metrolist.shared.generated.resources.expand
@@ -1420,7 +1421,7 @@ fun PlayerScreen(
                                         ).padding(horizontal = 24.dp)
                                         .then(
                                             if (playerType == PlayerType.GLASS_CARD && Settings.shared.glassNavigation && Settings.shared.glassPlayer) {
-                                                Modifier.playerGlassCard(textBackgroundColor).padding(horizontal = 16.dp)
+                                                Modifier.portraitPlayerGlassCard(textBackgroundColor, topInset = 64.dp, bottomInset = QueuePeekHeight + 26.dp).padding(horizontal = 16.dp)
                                             } else Modifier,
                                         )
                                         .padding(top = 16.dp),
@@ -1776,16 +1777,18 @@ fun PlayerScreen(
                                                 verticalArrangement =
                                                     if (usesFullscreenThumbnail) {
                                                         Arrangement.Bottom
+                                                    } else if (playerType == PlayerType.GLASS_CARD) {
+                                                        Arrangement.Top
                                                     } else {
                                                         Arrangement.Center
                                                     },
                                             ) {
                                                 Box(
-                                                    contentAlignment = Alignment.Center,
+                                                    contentAlignment = if (playerType == PlayerType.GLASS_CARD) Alignment.TopCenter else Alignment.Center,
                                                     modifier =
                                                         Modifier
                                                             .fillMaxWidth()
-                                                            .weight(1f, fill = usesCanvasThumbnail || usesFullscreenThumbnail)
+                                                            .weight(1f, fill = usesCanvasThumbnail || usesFullscreenThumbnail || playerType == PlayerType.GLASS_CARD)
                                                             .artworkSwipe(
                                                                 enabled = artworkSwipeEnabled,
                                                                 sensitivity = Settings.shared.swipeSensitivity,
@@ -1993,6 +1996,15 @@ fun PlayerScreen(
                                             modifier = Modifier.weight(1f),
                                             verticalArrangement = Arrangement.spacedBy(4.dp),
                                         ) {
+                                            if (playerType == PlayerType.GLASS_CARD) {
+                                                Text(
+                                                    text = uiState.queueTitle?.takeIf { it.isNotBlank() } ?: stringResource(Res.string.app_name),
+                                                    style = MaterialTheme.typography.labelMedium,
+                                                    color = textBackgroundColor.copy(alpha = 0.7f),
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis,
+                                                )
+                                            }
                                             val titleEffectsSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Float>()
                                             AnimatedContent(
                                                 targetState = currentSong,
@@ -2249,7 +2261,7 @@ fun PlayerScreen(
                                                     )
                                                 }
 
-                                                PlayerType.VINTAGE, PlayerType.VINYL -> {
+                                                PlayerType.VINTAGE, PlayerType.VINYL, PlayerType.GLASS_CARD -> {
                                                     VintagePlayerControls(
                                                         playPauseFocusRequester = playPauseFocusRequester,
                                                         text = vintagePlayerControlsText(),
@@ -2280,7 +2292,7 @@ fun PlayerScreen(
                                                     )
                                                 }
 
-                                                PlayerType.MODERN, PlayerType.GLASS_CARD -> {
+                                                PlayerType.MODERN -> {
                                                     PlayerPrimaryControls(
                                                         isPlaying = isPlaying,
                                                         isLoading = isPlaybackLoading && contentActive,
