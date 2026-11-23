@@ -21,6 +21,7 @@ import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
@@ -51,7 +52,7 @@ internal fun renderGlassLyricsPoster(
     val density = Density(scale, fontScale = 1f)
     val width = bitmap.width.toFloat()
     val height = bitmap.height.toFloat()
-    val cardWidth = width * (0.86f * style.contentScale.coerceIn(0.7f, 1.1f)).coerceAtMost(0.92f)
+    val cardWidth = width * (0.78f * style.contentScale.coerceIn(0.7f, 1.15f)).coerceAtMost(0.90f)
     val inner = 20f * scale
     val textWidth = cardWidth - 2 * inner
     val constrainedWidth = textWidth.toInt().coerceAtLeast(1)
@@ -63,10 +64,10 @@ internal fun renderGlassLyricsPoster(
     fun measureText(fontSize: Float) = textMeasurer.measure(
         text,
         style = TextStyle(color = style.textColor, fontFamily = family, fontWeight = if (style.font == LyricsPosterFont.NUNITO_EXTRABOLD) FontWeight.ExtraBold else FontWeight.Bold,
-            fontSize = fontSize.sp, lineHeight = (fontSize * 1.15f).sp, textAlign = style.alignment),
+            fontSize = fontSize.sp, lineHeight = (fontSize * 1.15f).sp, textAlign = TextAlign.Start),
         constraints = textConstraints,
-        maxLines = 6,
-        overflow = TextOverflow.Ellipsis,
+        maxLines = Int.MAX_VALUE,
+        overflow = TextOverflow.Clip,
         density = density,
         layoutDirection = layoutDirection,
     )
@@ -99,7 +100,7 @@ internal fun renderGlassLyricsPoster(
             drawRect(Color(0xFF191412).copy(alpha = 0.67f), topLeft = Offset(cardLeft, cardTop), size = Size(cardWidth, cardHeight))
             drawRect(Color.Black.copy(alpha = 0.23f), topLeft = Offset(cardLeft, footerTop), size = Size(cardWidth, footerHeight))
             drawLine(Color.White.copy(alpha = 0.14f), Offset(cardLeft, footerTop), Offset(cardLeft + cardWidth, footerTop), strokeWidth = scale * 0.7f)
-            val alignmentOffset = lyricsPosterScaleOffset(style.alignment, layoutDirection, textWidth, fit.drawScale)
+            val alignmentOffset = lyricsPosterScaleOffset(TextAlign.Start, layoutDirection, textWidth, fit.drawScale)
             translate(cardLeft + inner + alignmentOffset, cardTop + inner) {
                 scale(fit.drawScale, pivot = Offset.Zero) { drawText(measured) }
             }
