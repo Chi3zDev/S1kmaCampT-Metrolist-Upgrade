@@ -51,6 +51,13 @@ jobs:
       - name: Assemble debug APK
         run: ./gradlew assembleDebug --no-daemon -Dorg.gradle.java.installations.paths="$JAVA_HOME_25_X64"
 
+      - name: Upload visual-test debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Metrolist-visual-test-debug
+          path: androidApp/build/outputs/apk/debug/androidApp-debug.apk
+          if-no-files-found: error
+
       - name: Test streak recovery and glass geometry
         run: ./gradlew :androidApp:testDebugUnitTest --tests com.metrolist.android.streak.ListeningStreakTest --tests com.metrolist.android.ui.GlassMorphGeometryTest --tests com.metrolist.android.ui.player.SystemMusicVolumeControlTest --no-daemon -Dorg.gradle.java.installations.paths="$JAVA_HOME_25_X64"
 
