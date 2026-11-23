@@ -47,6 +47,7 @@ internal enum class LyricsImageBackground { GLASS, SOLID, BLUR, GRADIENT }
 
 internal enum class LyricsPosterFont(val family: FontFamily) {
     SANS(FontFamily.SansSerif), SERIF(FontFamily.Serif), MONO(FontFamily.Monospace), HANDWRITING(FontFamily.Cursive),
+    NUNITO_BOLD(FontFamily.SansSerif), NUNITO_EXTRABOLD(FontFamily.SansSerif),
 }
 
 internal data class LyricsImageStyle(
@@ -58,6 +59,7 @@ internal data class LyricsImageStyle(
     val textScale: Float = 1f,
     val contentScale: Float = 1f,
     val font: LyricsPosterFont = LyricsPosterFont.SANS,
+    val fontFamilyOverride: FontFamily? = null,
     val glassEnabled: Boolean = false,
     val glassStyle: String = "BLUR",
     val glassTint: Float = 0.55f,
@@ -135,7 +137,7 @@ internal fun renderLyricsImage(
         TextStyle(
             color = style.textColor,
             fontWeight = FontWeight.Bold,
-            fontFamily = style.font.family,
+            fontFamily = style.fontFamilyOverride ?: style.font.family,
             textAlign = style.alignment,
         )
 

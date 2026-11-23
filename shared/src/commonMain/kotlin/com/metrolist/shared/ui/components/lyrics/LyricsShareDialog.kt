@@ -57,6 +57,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -66,6 +67,10 @@ import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
 import com.metrolist.shared.generated.resources.Res
 import com.metrolist.shared.generated.resources.app_name
+import com.metrolist.shared.generated.resources.app_font_nunito_bold
+import com.metrolist.shared.generated.resources.app_font_nunito_extrabold
+import com.metrolist.shared.generated.resources.nunito_poster_bold
+import com.metrolist.shared.generated.resources.nunito_poster_extrabold
 import com.metrolist.shared.generated.resources.background_color
 import com.metrolist.shared.generated.resources.blurred_artwork
 import com.metrolist.shared.generated.resources.cancel
@@ -114,6 +119,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import org.jetbrains.compose.resources.Font
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.roundToInt
@@ -204,7 +210,13 @@ fun LyricsShareDialog(
     val posterBackground = palette.firstOrNull() ?: MaterialTheme.colorScheme.surface
     val effectiveBackground = if (Settings.shared.glassNavigation && !Settings.shared.glassLyricsPoster && style.background == LyricsImageBackground.GLASS) LyricsImageBackground.SOLID else style.background
     val posterText = if ((effectiveBackground == LyricsImageBackground.SOLID || artwork == null) && posterBackground.luminance() > 0.4f) Color.Black else Color.White
+    val posterFont = when (style.font) {
+        LyricsPosterFont.NUNITO_BOLD -> FontFamily(Font(Res.font.nunito_poster_bold))
+        LyricsPosterFont.NUNITO_EXTRABOLD -> FontFamily(Font(Res.font.nunito_poster_extrabold))
+        else -> null
+    }
     val renderStyle = style.copy(
+        fontFamilyOverride = posterFont,
         background = effectiveBackground,
         backgroundColor = posterBackground,
         textColor = posterText,
@@ -395,6 +407,8 @@ fun LyricsShareDialog(
                                         LyricsPosterFont.SERIF -> Res.string.lyrics_poster_font_serif
                                         LyricsPosterFont.MONO -> Res.string.lyrics_poster_font_mono
                                         LyricsPosterFont.HANDWRITING -> Res.string.lyrics_poster_font_handwriting
+                                        LyricsPosterFont.NUNITO_BOLD -> Res.string.app_font_nunito_bold
+                                        LyricsPosterFont.NUNITO_EXTRABOLD -> Res.string.app_font_nunito_extrabold
                                     }
                                     ExpressiveFilterChip(selected = style.font == font, enabled = !busy, onClick = { style = style.copy(font = font) }, label = { Text(stringResource(label), maxLines = 1) })
                                 }
