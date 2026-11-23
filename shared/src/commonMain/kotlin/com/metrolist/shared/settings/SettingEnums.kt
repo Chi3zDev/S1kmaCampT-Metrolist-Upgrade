@@ -165,6 +165,7 @@ enum class PlayerType {
     VINTAGE,
     CLASSIC,
     VINYL,
+    GLASS_CARD,
 }
 
 enum class MiniPlayerType {

@@ -33,6 +33,7 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.focusable
@@ -644,7 +645,8 @@ fun PlayerScreen(
             )
 
     val playerType = Settings.shared.playerType
-    val usesFullscreenThumbnail = playerThumbnailStyle == PlayerThumbnailStyle.FULLSCREEN && playerType != PlayerType.VINYL
+    val usesCompactStyleArtwork = playerType == PlayerType.VINYL || playerType == PlayerType.GLASS_CARD
+    val usesFullscreenThumbnail = playerThumbnailStyle == PlayerThumbnailStyle.FULLSCREEN && !usesCompactStyleArtwork
     val prefersTallCover = usesFullscreenThumbnail && !isLandscape
     val playbackNetwork by PlaybackNetworkStateStore.state.collectAsState()
     val artworkAllowedOnNetwork = Settings.shared.isAnimatedArtworkAllowedOnNetwork(playbackNetwork)
@@ -675,9 +677,9 @@ fun PlayerScreen(
             prefersTallCover,
         ) { if (artworkAllowedOnNetwork) canvasLayers.select(currentSong, platform, preferTall = prefersTallCover) else null }
     val canRenderCanvasThumbnail =
-        playerType != PlayerType.VINYL && Settings.shared.isCanvasEnabled && currentCanvasLayer != null && currentCanvasLayer.source != CanvasContentSource.APPLE_MUSIC
+        !usesCompactStyleArtwork && Settings.shared.isCanvasEnabled && currentCanvasLayer != null && currentCanvasLayer.source != CanvasContentSource.APPLE_MUSIC
     val isArtworkCover = currentCanvasLayer?.source == CanvasContentSource.APPLE_MUSIC
-    val renderAnimatedCover = playerType != PlayerType.VINYL && artworkAllowedOnNetwork && canvasLayers.shouldRender(currentCanvasLayer, playerContentState)
+    val renderAnimatedCover = !usesCompactStyleArtwork && artworkAllowedOnNetwork && canvasLayers.shouldRender(currentCanvasLayer, playerContentState)
     val artworkOverlayContent by rememberUpdatedState<@Composable (Modifier) -> Unit> { artworkModifier ->
         if (renderAnimatedCover && isArtworkCover && (!isTv || !uiState.isLyricsVisible)) {
             canvasLayers.Render(
@@ -1389,7 +1391,8 @@ fun PlayerScreen(
                         } else {
                             // Split-screen windows can be shorter than the controls; scroll instead of overlapping them.
                             val portraitScroll = rememberScrollState()
-                            val scrollsPortrait = maxHeight < MinPortraitPlayerHeight
+                            val minPortraitHeight = MinPortraitPlayerHeight + if (playerType == PlayerType.GLASS_CARD) 96.dp else 0.dp
+                            val scrollsPortrait = maxHeight < minPortraitHeight
                             // Open on the playback controls; the bottom bar would otherwise cover them.
                             LaunchedEffect(scrollsPortrait) {
                                 if (scrollsPortrait) {
@@ -1406,7 +1409,7 @@ fun PlayerScreen(
                                                 Modifier
                                                     .nestedScroll(bottomSheetState.preUpPostDownNestedScrollConnection)
                                                     .verticalScroll(portraitScroll)
-                                                    .height(MinPortraitPlayerHeight)
+                                                    .height(minPortraitHeight)
                                             } else {
                                                 Modifier.fillMaxHeight()
                                             },
@@ -1414,6 +1417,16 @@ fun PlayerScreen(
                                         .windowInsetsPadding(
                                             WindowInsets.mandatorySystemGestures.only(WindowInsetsSides.Bottom),
                                         ).padding(horizontal = 24.dp)
+                                        .then(
+                                            if (playerType == PlayerType.GLASS_CARD && Settings.shared.glassNavigation && Settings.shared.glassPlayer) {
+                                                val shape = RoundedCornerShape(28.dp)
+                                                val base = if (textBackgroundColor.luminance() > 0.5f) Color.Black else Color.White
+                                                Modifier
+                                                    .background(Brush.verticalGradient(listOf(base.copy(alpha = 0.62f), base.copy(alpha = 0.48f))), shape)
+                                                    .border(1.dp, Brush.verticalGradient(listOf(textBackgroundColor.copy(alpha = 0.3f), textBackgroundColor.copy(alpha = 0.06f))), shape)
+                                                    .padding(horizontal = 16.dp)
+                                            } else Modifier,
+                                        )
                                         .padding(top = 16.dp),
                             ) {
                                 AnimatedContent(
@@ -1662,7 +1675,7 @@ fun PlayerScreen(
                                                         }
                                                     }
 
-                                                    if (!showVideoButton && playerType == PlayerType.CLASSIC) {
+                                                    if (!showVideoButton && (playerType == PlayerType.CLASSIC || playerType == PlayerType.GLASS_CARD)) {
                                                         Column(
                                                             horizontalAlignment = Alignment.CenterHorizontally,
                                                             modifier = Modifier.align(Alignment.Center).padding(horizontal = 52.dp),
@@ -2271,7 +2284,7 @@ fun PlayerScreen(
                                                     )
                                                 }
 
-                                                PlayerType.MODERN -> {
+                                                PlayerType.MODERN, PlayerType.GLASS_CARD -> {
                                                     PlayerPrimaryControls(
                                                         isPlaying = isPlaying,
                                                         isLoading = isPlaybackLoading && contentActive,
@@ -2307,6 +2320,10 @@ fun PlayerScreen(
                                             }
                                         }
                                     }
+                                }
+
+                                if (playerType == PlayerType.GLASS_CARD && !castState.isConnected && !isListenTogetherGuest && !canvasMinimalUi) {
+                                    platform.SystemMusicVolume(Modifier.fillMaxWidth(), textBackgroundColor, contentActive)
                                 }
 
                                 playerControlsTransition.AnimatedVisibility(

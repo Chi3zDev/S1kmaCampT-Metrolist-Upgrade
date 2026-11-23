@@ -636,7 +636,10 @@ internal fun SettingsUiRegistryBuilder.registerAppearanceSettings(host: SharedSe
                     SettingsChoice(PlayerType.VINTAGE.name, stringResource(Res.string.player_type_vintage)),
                     SettingsChoice(PlayerType.CLASSIC.name, stringResource(Res.string.player_type_classic)),
                 ) + if (host.platform == SettingsPlatform.ANDROID) {
-                    listOf(SettingsChoice(PlayerType.VINYL.name, stringResource(Res.string.player_type_vinyl)))
+                    listOf(
+                        SettingsChoice(PlayerType.VINYL.name, stringResource(Res.string.player_type_vinyl)),
+                        SettingsChoice(PlayerType.GLASS_CARD.name, stringResource(Res.string.player_type_glass_card)),
+                    )
                 } else emptyList()
             }
         val selectedPlayerType =

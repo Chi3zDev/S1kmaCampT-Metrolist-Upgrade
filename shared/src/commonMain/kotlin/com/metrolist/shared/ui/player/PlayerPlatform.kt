@@ -6,6 +6,7 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import com.metrolist.shared.api.artwork.CanvasContentSource
 import com.metrolist.shared.api.artwork.YouTubeCanvasClip
@@ -35,7 +36,7 @@ interface PlayerPlatform {
 
     /** Local system music volume, when supported by the host. */
     @Composable
-    fun SystemMusicVolume(modifier: Modifier = Modifier) {}
+    fun SystemMusicVolume(modifier: Modifier = Modifier, contentColor: Color = Color.Unspecified, active: Boolean = true) {}
 
     @Composable
     fun isListenTogetherGuest(): Boolean

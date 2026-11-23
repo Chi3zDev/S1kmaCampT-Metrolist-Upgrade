@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -16,6 +17,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -40,7 +42,7 @@ internal fun systemVolumeFromFraction(value: Float, minimum: Int, maximum: Int):
 
 /** Controls Android's local music stream, not the player's software gain or remote Cast volume. */
 @Composable
-internal fun SystemMusicVolumeControl(modifier: Modifier = Modifier) {
+internal fun SystemMusicVolumeControl(modifier: Modifier = Modifier, contentColor: Color, active: Boolean) {
     val context = LocalContext.current
     val manager = remember(context) { context.getSystemService(Context.AUDIO_SERVICE) as? AudioManager } ?: return
     val lifecycle = LocalLifecycleOwner.current.lifecycle
@@ -51,7 +53,8 @@ internal fun SystemMusicVolumeControl(modifier: Modifier = Modifier) {
     var current by remember(manager) { mutableIntStateOf(manager.getStreamVolume(AudioManager.STREAM_MUSIC)) }
     // The local hardware keys can change volume outside the app. Poll only while this control is visible
     // and the lifecycle is started; unchanged integer values do not trigger recomposition.
-    LaunchedEffect(manager, lifecycle) {
+    LaunchedEffect(manager, lifecycle, active) {
+        if (!active) return@LaunchedEffect
         lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
             while (true) {
                 current = manager.getStreamVolume(AudioManager.STREAM_MUSIC)
@@ -61,7 +64,7 @@ internal fun SystemMusicVolumeControl(modifier: Modifier = Modifier) {
     }
     val label = stringResource(Res.string.volume)
     Row(modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text(label)
+        Text(label, color = contentColor)
         Slider(
             value = systemVolumeFraction(current, minimum, maximum),
             onValueChange = { fraction ->
@@ -71,7 +74,8 @@ internal fun SystemMusicVolumeControl(modifier: Modifier = Modifier) {
                     current = manager.getStreamVolume(AudioManager.STREAM_MUSIC)
                 }
             },
-            enabled = maximum > minimum,
+            enabled = active && maximum > minimum,
+            colors = SliderDefaults.colors(thumbColor = contentColor, activeTrackColor = contentColor, inactiveTrackColor = contentColor.copy(alpha = 0.3f)),
             modifier = Modifier.weight(1f).semantics { contentDescription = label },
         )
     }

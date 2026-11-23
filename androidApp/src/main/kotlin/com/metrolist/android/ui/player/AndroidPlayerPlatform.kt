@@ -25,6 +25,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalView
@@ -96,8 +97,8 @@ class AndroidPlayerPlatform(
     override val supportsCasting = true
 
     @Composable
-    override fun SystemMusicVolume(modifier: Modifier) {
-        SystemMusicVolumeControl(modifier)
+    override fun SystemMusicVolume(modifier: Modifier, contentColor: Color, active: Boolean) {
+        SystemMusicVolumeControl(modifier, contentColor, active)
     }
 
     @Composable

@@ -5701,4 +5701,5 @@
     <string name="player_aura_effect">Player color aura</string>
     <string name="player_aura_effect_description">Slow artwork-colored light. Disabled in lightweight mode.</string>
     <string name="player_type_vinyl">Vinyl Record</string>
+    <string name="player_type_glass_card">Glass Card</string>
 </resources>
