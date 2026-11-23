@@ -81,6 +81,15 @@ import com.metrolist.shared.generated.resources.about_play_favorite_song
 import com.metrolist.shared.generated.resources.about_upgrade_developer
 import com.metrolist.shared.generated.resources.about_upgrade_version
 import com.metrolist.shared.generated.resources.about_nunito_credit
+import com.metrolist.shared.generated.resources.about_upgrade_whats_new
+import com.metrolist.shared.generated.resources.about_upgrade_note_streak
+import com.metrolist.shared.generated.resources.about_upgrade_note_recap
+import com.metrolist.shared.generated.resources.about_upgrade_note_poster
+import com.metrolist.shared.generated.resources.about_upgrade_note_glass
+import com.metrolist.shared.generated.resources.about_upgrade_note_profile
+import com.metrolist.shared.generated.resources.about_upgrade_note_about
+import com.metrolist.shared.generated.resources.about_upgrade_note_fonts
+import com.metrolist.shared.generated.resources.about_upgrade_note_defaults
 import com.metrolist.shared.generated.resources.chi3zdev_avatar
 import com.metrolist.shared.generated.resources.app_name
 import com.metrolist.shared.generated.resources.back
@@ -95,6 +104,7 @@ import com.metrolist.shared.ui.components.glassCardBorder
 import com.metrolist.shared.ui.components.glassCardColor
 import com.metrolist.shared.ui.components.images.AsyncImage
 import com.metrolist.shared.ui.icons.MetrolistIcons
+import com.metrolist.shared.ui.navigation.NavigationBackHandler
 import com.metrolist.shared.ui.utils.toPolygonShape
 import com.metrolist.shared.ui.utils.verticalScrollWithDrag
 import com.metrolist.shared.utils.getAppArchitecture
@@ -132,6 +142,12 @@ fun AboutScreen(
     val playLabel = stringResource(Res.string.play)
     val uriHandler = LocalUriHandler.current
     var selectedContributor by remember { mutableStateOf<AboutContributor?>(null) }
+    var showUpgradeNotes by rememberSaveable { mutableStateOf(false) }
+    if (showUpgradeNotes && upgradeNumber != null) {
+        NavigationBackHandler(onBack = { showUpgradeNotes = false })
+        UpgradeNotesScreen(bottomInset) { showUpgradeNotes = false }
+        return
+    }
     val openCommunityLink =
         onOpenCommunityLink ?: { link: AboutCommunityLink ->
             runCatching { uriHandler.openUri(link.url) }
@@ -229,6 +245,21 @@ fun AboutScreen(
             if (upgradeNumber != null) {
                 UpgradeDeveloperCard(upgradeNumber, colorScheme) {
                     runCatching { uriHandler.openUri("https://github.com/Chi3zDev") }
+                }
+            }
+
+            if (upgradeNumber != null) {
+                Surface(
+                    onClick = { showUpgradeNotes = true },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(20.dp),
+                    color = glassCardColor(colorScheme.surfaceContainer),
+                    border = glassCardBorder(),
+                ) {
+                    Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Text(stringResource(Res.string.about_upgrade_whats_new), Modifier.weight(1f), style = MaterialTheme.typography.titleMedium)
+                        Icon(MetrolistIcons.Outlined.ChevronRight, contentDescription = null)
+                    }
                 }
             }
 
@@ -433,6 +464,40 @@ private fun InfoBadge(
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
         )
+    }
+}
+
+// Add new version entries here; descriptions are localized resources.
+private val upgradeOneNotes = listOf(
+    Res.string.about_upgrade_note_streak,
+    Res.string.about_upgrade_note_recap,
+    Res.string.about_upgrade_note_poster,
+    Res.string.about_upgrade_note_glass,
+    Res.string.about_upgrade_note_profile,
+    Res.string.about_upgrade_note_about,
+    Res.string.about_upgrade_note_fonts,
+    Res.string.about_upgrade_note_defaults,
+)
+
+@Composable
+private fun UpgradeNotesScreen(bottomInset: Dp, onBack: () -> Unit) {
+    Column(
+        modifier = Modifier.fillMaxSize().verticalScrollWithDrag(rememberScrollState())
+            .padding(horizontal = 16.dp, vertical = 16.dp).padding(bottom = bottomInset),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            IconButton(onClick = onBack) {
+                Icon(MetrolistIcons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(Res.string.back))
+            }
+            Text(stringResource(Res.string.about_upgrade_whats_new), style = MaterialTheme.typography.headlineSmall)
+        }
+        Text(stringResource(Res.string.about_upgrade_version, 1), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+        upgradeOneNotes.forEach { note ->
+            Surface(shape = RoundedCornerShape(16.dp), color = glassCardColor(MaterialTheme.colorScheme.surfaceContainer), border = glassCardBorder(), modifier = Modifier.fillMaxWidth()) {
+                Text(stringResource(note), Modifier.padding(16.dp), style = MaterialTheme.typography.bodyLarge)
+            }
+        }
     }
 }
 

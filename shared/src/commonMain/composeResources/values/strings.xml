@@ -5681,4 +5681,13 @@
     <string name="app_font_nunito_extrabold">Nunito ExtraBold</string>
     <string name="app_font_nunito_bold">Nunito Bold</string>
     <string name="about_nunito_credit">Font: Nunito by The Nunito Project Authors (SIL OFL 1.1)</string>
+    <string name="about_upgrade_whats_new">What’s new in Upgrade</string>
+    <string name="about_upgrade_note_streak">Listening streaks, calendar, and recovery.</string>
+    <string name="about_upgrade_note_recap">Recap stories for your listening activity.</string>
+    <string name="about_upgrade_note_poster">Lyrics posters with customizable styles.</string>
+    <string name="about_upgrade_note_glass">Liquid glass controls and appearance settings.</string>
+    <string name="about_upgrade_note_profile">A dedicated profile page.</string>
+    <string name="about_upgrade_note_about">An updated About page with fork and original project credits.</string>
+    <string name="about_upgrade_note_fonts">Nunito ExtraBold and Bold font choices.</string>
+    <string name="about_upgrade_note_defaults">New appearance defaults for fresh installations.</string>
 </resources>
