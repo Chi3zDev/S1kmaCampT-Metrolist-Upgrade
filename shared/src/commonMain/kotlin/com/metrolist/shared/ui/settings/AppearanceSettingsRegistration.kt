@@ -635,14 +635,13 @@ internal fun SettingsUiRegistryBuilder.registerAppearanceSettings(host: SharedSe
                     SettingsChoice(PlayerType.MODERN.name, stringResource(Res.string.player_type_modern)),
                     SettingsChoice(PlayerType.VINTAGE.name, stringResource(Res.string.player_type_vintage)),
                     SettingsChoice(PlayerType.CLASSIC.name, stringResource(Res.string.player_type_classic)),
-                )
+                ) + if (host.platform == SettingsPlatform.ANDROID) {
+                    listOf(SettingsChoice(PlayerType.VINYL.name, stringResource(Res.string.player_type_vinyl)))
+                } else emptyList()
             }
         val selectedPlayerType =
-            if (host.platform == SettingsPlatform.DESKTOP && settings.playerType == PlayerType.CLASSIC) {
-                PlayerType.VINTAGE
-            } else {
-                settings.playerType
-            }
+            settings.playerType.takeIf { type -> playerTypeChoices.any { it.id == type.name } }
+                ?: PlayerType.VINTAGE
         val playerBackgroundChoices =
             buildList {
                 add(SettingsChoice(PlayerBackgroundStyle.BLURRED_ARTWORK.name, stringResource(Res.string.blurred_artwork)))

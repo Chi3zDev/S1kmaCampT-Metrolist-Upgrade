@@ -164,6 +164,7 @@ enum class PlayerType {
     MODERN,
     VINTAGE,
     CLASSIC,
+    VINYL,
 }
 
 enum class MiniPlayerType {

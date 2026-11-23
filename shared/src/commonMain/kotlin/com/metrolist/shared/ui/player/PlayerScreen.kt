@@ -644,7 +644,7 @@ fun PlayerScreen(
             )
 
     val playerType = Settings.shared.playerType
-    val usesFullscreenThumbnail = playerThumbnailStyle == PlayerThumbnailStyle.FULLSCREEN
+    val usesFullscreenThumbnail = playerThumbnailStyle == PlayerThumbnailStyle.FULLSCREEN && playerType != PlayerType.VINYL
     val prefersTallCover = usesFullscreenThumbnail && !isLandscape
     val playbackNetwork by PlaybackNetworkStateStore.state.collectAsState()
     val artworkAllowedOnNetwork = Settings.shared.isAnimatedArtworkAllowedOnNetwork(playbackNetwork)
@@ -675,9 +675,9 @@ fun PlayerScreen(
             prefersTallCover,
         ) { if (artworkAllowedOnNetwork) canvasLayers.select(currentSong, platform, preferTall = prefersTallCover) else null }
     val canRenderCanvasThumbnail =
-        Settings.shared.isCanvasEnabled && currentCanvasLayer != null && currentCanvasLayer.source != CanvasContentSource.APPLE_MUSIC
+        playerType != PlayerType.VINYL && Settings.shared.isCanvasEnabled && currentCanvasLayer != null && currentCanvasLayer.source != CanvasContentSource.APPLE_MUSIC
     val isArtworkCover = currentCanvasLayer?.source == CanvasContentSource.APPLE_MUSIC
-    val renderAnimatedCover = artworkAllowedOnNetwork && canvasLayers.shouldRender(currentCanvasLayer, playerContentState)
+    val renderAnimatedCover = playerType != PlayerType.VINYL && artworkAllowedOnNetwork && canvasLayers.shouldRender(currentCanvasLayer, playerContentState)
     val artworkOverlayContent by rememberUpdatedState<@Composable (Modifier) -> Unit> { artworkModifier ->
         if (renderAnimatedCover && isArtworkCover && (!isTv || !uiState.isLyricsVisible)) {
             canvasLayers.Render(
@@ -1819,6 +1819,25 @@ fun PlayerScreen(
                                                             modifier =
                                                                 Modifier.requiredWidthIn(max = windowWidth),
                                                         )
+                                                    } else if (playerType == PlayerType.VINYL && !artworkBesideTitle) {
+                                                        val recordPosition by viewModel.currentPosition.collectWhilePlayerActive(LocalPlayerPositionActive.current)
+                                                        VinylRecord(
+                                                            progress = if (duration > 0 && displaysPlayingSong) recordPosition.toFloat() / duration else 0f,
+                                                            isPlaying = isPlaying && !isPlaybackLoading,
+                                                            visible = contentActive && !queueCoversPlayer &&
+                                                                LocalPlayerEffectsAllowed.current && !Settings.shared.glassLightMode,
+                                                            modifier = Modifier.fillMaxWidth(),
+                                                        ) {
+                                                            CrossfadeArtwork(
+                                                                animate = contentActive,
+                                                                currentUrl = currentSong?.displayThumbnail,
+                                                                nextUrl = crossfadeNextArtworkUrl,
+                                                                progress = artworkCrossfadeProgress,
+                                                                contentDescription = stringResource(Res.string.album_art),
+                                                                modifier = Modifier.fillMaxSize(),
+                                                                contentScale = ContentScale.Crop,
+                                                            )
+                                                        }
                                                     } else if (
                                                         !usesFullscreenThumbnail &&
                                                         !usesCanvasThumbnail &&
@@ -2228,7 +2247,7 @@ fun PlayerScreen(
                                                     )
                                                 }
 
-                                                PlayerType.VINTAGE -> {
+                                                PlayerType.VINTAGE, PlayerType.VINYL -> {
                                                     VintagePlayerControls(
                                                         playPauseFocusRequester = playPauseFocusRequester,
                                                         text = vintagePlayerControlsText(),

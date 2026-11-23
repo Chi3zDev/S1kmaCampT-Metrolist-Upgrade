@@ -42,12 +42,12 @@ class ForkFontDefaultsTest {
         assertEquals(true, fresh.playerAuraEnabled)
         assertEquals(ThemePaletteStyle.CONTENT, fresh.themePaletteStyle)
 
-        fresh.playerType = PlayerType.CLASSIC
+        fresh.playerType = PlayerType.VINYL
         fresh.glassStyle = "FROSTED"
         fresh.lyricsGlowEnabled = false
         fresh.playerAuraEnabled = false
         fresh.applyFreshAndroidAppearanceDefaults(true)
-        assertEquals(PlayerType.CLASSIC, fresh.playerType)
+        assertEquals(PlayerType.VINYL, fresh.playerType)
         assertEquals("FROSTED", fresh.glassStyle)
         assertEquals(false, fresh.lyricsGlowEnabled)
         assertEquals(false, fresh.playerAuraEnabled)
