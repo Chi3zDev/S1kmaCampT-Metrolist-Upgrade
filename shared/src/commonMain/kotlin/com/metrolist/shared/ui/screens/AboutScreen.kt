@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -52,6 +53,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Size
@@ -76,6 +78,9 @@ import androidx.compose.ui.unit.dp
 import com.metrolist.shared.BuildConfig
 import com.metrolist.shared.generated.resources.Res
 import com.metrolist.shared.generated.resources.about_play_favorite_song
+import com.metrolist.shared.generated.resources.about_upgrade_developer
+import com.metrolist.shared.generated.resources.about_upgrade_version
+import com.metrolist.shared.generated.resources.chi3zdev_avatar
 import com.metrolist.shared.generated.resources.app_name
 import com.metrolist.shared.generated.resources.back
 import com.metrolist.shared.generated.resources.build_type_debug
@@ -85,12 +90,15 @@ import com.metrolist.shared.generated.resources.devtools_enabled
 import com.metrolist.shared.generated.resources.play
 import com.metrolist.shared.generated.resources.stands_with_palestine
 import com.metrolist.shared.settings.Settings
+import com.metrolist.shared.ui.components.glassCardBorder
+import com.metrolist.shared.ui.components.glassCardColor
 import com.metrolist.shared.ui.components.images.AsyncImage
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import com.metrolist.shared.ui.utils.toPolygonShape
 import com.metrolist.shared.ui.utils.verticalScrollWithDrag
 import com.metrolist.shared.utils.getAppArchitecture
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -102,6 +110,7 @@ fun AboutScreen(
     version: String = BuildConfig.APP_VERSION,
     architecture: String = remember { getAppArchitecture().uppercase() },
     isDebug: Boolean = BuildConfig.DEBUG,
+    upgradeNumber: Int? = null,
     colorScheme: ColorScheme = MaterialTheme.colorScheme,
     contentPadding: PaddingValues = PaddingValues(16.dp),
     bottomInset: Dp = 0.dp,
@@ -206,6 +215,7 @@ fun AboutScreen(
                 version = version,
                 architecture = architecture,
                 isDebug = isDebug,
+                upgradeNumber = upgradeNumber,
                 colorScheme = colorScheme,
                 onLogoClick = ::handleLogoClick,
             )
@@ -214,6 +224,12 @@ fun AboutScreen(
                 text = text,
                 onOpenLink = openCommunityLink,
             )
+
+            if (upgradeNumber != null) {
+                UpgradeDeveloperCard(upgradeNumber, colorScheme) {
+                    runCatching { uriHandler.openUri("https://github.com/Chi3zDev") }
+                }
+            }
 
             CollaboratorsList(
                 contributors = listOf(AboutContributors.lead),
@@ -296,6 +312,7 @@ private fun AppHeaderCard(
     version: String,
     architecture: String,
     isDebug: Boolean,
+    upgradeNumber: Int?,
     colorScheme: ColorScheme,
     onLogoClick: () -> Unit,
 ) {
@@ -349,6 +366,9 @@ private fun AppHeaderCard(
                     colorScheme.onSurfaceVariant,
                 )
                 InfoBadge(architecture, colorScheme.surfaceContainerHighest, colorScheme.onSurfaceVariant)
+                if (upgradeNumber != null) {
+                    InfoBadge(stringResource(Res.string.about_upgrade_version, upgradeNumber), colorScheme.secondaryContainer, colorScheme.onSecondaryContainer)
+                }
                 InfoBadge(
                     stringResource(if (isDebug) Res.string.build_type_debug else Res.string.build_type_release),
                     colorScheme.secondaryContainer,
@@ -407,12 +427,45 @@ private fun InfoBadge(
 }
 
 @Composable
+private fun UpgradeDeveloperCard(upgradeNumber: Int, colorScheme: ColorScheme, onClick: () -> Unit) {
+    Column(Modifier.fillMaxWidth()) {
+        Text(
+            text = stringResource(Res.string.about_upgrade_developer),
+            style = MaterialTheme.typography.titleSmall,
+            color = colorScheme.primary,
+            modifier = Modifier.padding(top = 8.dp, bottom = 12.dp).semantics { heading() },
+        )
+        Surface(
+            onClick = onClick,
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(20.dp),
+            color = glassCardColor(colorScheme.surfaceContainer),
+            border = glassCardBorder(),
+        ) {
+            Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Image(
+                    painter = painterResource(Res.drawable.chi3zdev_avatar),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.size(64.dp).clip(CircleShape),
+                )
+                Column(Modifier.weight(1f)) {
+                    Text("Chi3zDev", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                    Text(stringResource(Res.string.about_upgrade_developer), style = MaterialTheme.typography.bodyMedium)
+                    Text(stringResource(Res.string.about_upgrade_version, upgradeNumber), style = MaterialTheme.typography.labelMedium)
+                }
+            }
+        }
+    }
+}
+
+@Composable
 private fun ContributorAvatar(
     contributor: AboutContributor,
     size: Dp,
     colorScheme: ColorScheme,
 ) {
-    val shape = contributorShape(contributor)
+    val shape = CircleShape
     Surface(
         modifier = Modifier.size(size),
         shape = shape,
@@ -447,59 +500,33 @@ private fun CollaboratorsList(
                 modifier = Modifier.padding(top = 8.dp, bottom = 12.dp).semantics { heading() },
             )
         }
-        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            contributors.forEachIndexed { index, contributor ->
-                val shape =
-                    RoundedCornerShape(
-                        topStart = if (index == 0) 20.dp else 5.dp,
-                        topEnd = if (index == 0) 20.dp else 5.dp,
-                        bottomStart = if (index == contributors.lastIndex) 20.dp else 5.dp,
-                        bottomEnd = if (index == contributors.lastIndex) 20.dp else 5.dp,
-                    )
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = shape,
-                    color = colorScheme.surfaceContainer,
-                ) {
-                    Row(
-                        modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .combinedClickable(
-                                    onLongClick =
-                                        onContributorLongClick
-                                            ?.takeIf { contributor.favoriteSongVideoId != null }
-                                            ?.let { { it(contributor) } },
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            val columns = if (contributors.size == 1) 1 else 2
+            contributors.chunked(columns).forEach { row ->
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    row.forEach { contributor ->
+                        Surface(
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(20.dp),
+                            color = glassCardColor(colorScheme.surfaceContainer),
+                            border = glassCardBorder(),
+                        ) {
+                            Column(
+                                modifier = Modifier.fillMaxWidth().combinedClickable(
+                                    onLongClick = onContributorLongClick
+                                        ?.takeIf { contributor.favoriteSongVideoId != null }
+                                        ?.let { { it(contributor) } },
                                     onClick = { onContributorClick(contributor) },
-                                ).padding(horizontal = 12.dp, vertical = 10.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    ) {
-                        ContributorAvatar(
-                            contributor = contributor,
-                            size = avatarSize,
-                            colorScheme = colorScheme,
-                        )
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = contributor.name,
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.SemiBold,
-                                color = colorScheme.onSurface,
-                            )
-                            Text(
-                                text = text.roleLabel(contributor.role),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = colorScheme.onSurfaceVariant,
-                            )
+                                ).padding(12.dp),
+                                verticalArrangement = Arrangement.spacedBy(6.dp),
+                            ) {
+                                ContributorAvatar(contributor = contributor, size = avatarSize, colorScheme = colorScheme)
+                                Text(contributor.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, color = colorScheme.onSurface)
+                                Text(text.roleLabel(contributor.role), style = MaterialTheme.typography.bodyMedium, color = colorScheme.onSurfaceVariant)
+                            }
                         }
-                        Icon(
-                            imageVector = MetrolistIcons.Outlined.ChevronRight,
-                            contentDescription = null,
-                            tint = colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(20.dp),
-                        )
                     }
+                    if (row.size < columns) Spacer(Modifier.weight(1f))
                 }
             }
         }

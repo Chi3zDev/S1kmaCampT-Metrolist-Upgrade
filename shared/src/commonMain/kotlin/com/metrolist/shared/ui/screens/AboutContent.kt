@@ -35,6 +35,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.metrolist.shared.generated.resources.Res
 import com.metrolist.shared.generated.resources.about
+import com.metrolist.shared.generated.resources.about_github_upgrade
+import com.metrolist.shared.generated.resources.about_github_metrolist
 import com.metrolist.shared.generated.resources.brand_discord
 import com.metrolist.shared.generated.resources.brand_github
 import com.metrolist.shared.generated.resources.brand_telegram
@@ -243,9 +245,8 @@ data class AboutCommunityLink(
 
 val aboutCommunityLinks: List<AboutCommunityLink> =
     listOf(
-        AboutCommunityLink(AboutCommunityLinkKind.DISCORD, "https://discord.com/invite/zrdbeRG2Mt"),
-        AboutCommunityLink(AboutCommunityLinkKind.TELEGRAM, "https://t.me/metrolistapp"),
         AboutCommunityLink(AboutCommunityLinkKind.REPOSITORY, "https://github.com/MetrolistGroup/Metrolist"),
+        AboutCommunityLink(AboutCommunityLinkKind.REPOSITORY, "https://github.com/Chi3zDev/S1kmaCampT-Metrolist-Upgrade"),
     )
 
 val aboutLicenseLink: AboutCommunityLink =
@@ -315,7 +316,11 @@ internal fun CommunitySection(
                             AboutCommunityLinkKind.REPOSITORY -> MetrolistIconsBrand.Github
                             AboutCommunityLinkKind.LICENSE -> MetrolistIcons.Outlined.Info
                         },
-                    title = text.communityLabel(link.kind),
+                    title = if (link.url.endsWith("S1kmaCampT-Metrolist-Upgrade")) {
+                        sharedStringResource(Res.string.about_github_upgrade)
+                    } else {
+                        sharedStringResource(Res.string.about_github_metrolist)
+                    },
                     onClick = { onOpenLink(link) },
                 )
             },

@@ -2596,4 +2596,8 @@
     <string name="streak_debug_date">Tanggal simulasi: %1$s (selisih %2$d hari)</string>
     <string name="streak_debug_read_only">Simulasi hanya-baca; pemulihan dinonaktifkan sampai direset.</string>
     <string name="streak_debug_reset">Reset</string>
+    <string name="about_github_upgrade">GitHub Upgrade</string>
+    <string name="about_github_metrolist">GitHub Metrolist</string>
+    <string name="about_upgrade_developer">Pengembang Upgrade</string>
+    <string name="about_upgrade_version">Upgrade %1$d</string>
 </resources>

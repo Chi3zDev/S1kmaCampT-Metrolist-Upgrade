@@ -44,6 +44,7 @@ fun AndroidAboutScreen(
         logo = painterResource(Res.drawable.logo),
         appName = stringResource(Res.string.app_name),
         version = BuildConfig.VERSION_NAME,
+        upgradeNumber = BuildConfig.UPGRADE_NUMBER,
         isDebug = BuildConfig.DEBUG,
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 24.dp),
         bottomInset = miniPlayerInset,

@@ -5674,4 +5674,8 @@
     <string name="streak_debug_date">Simulated date: %1$s (offset %2$d days)</string>
     <string name="streak_debug_read_only">Read-only simulation; recovery is disabled until reset.</string>
     <string name="streak_debug_reset">Reset</string>
+    <string name="about_github_upgrade">GitHub Upgrade</string>
+    <string name="about_github_metrolist">GitHub Metrolist</string>
+    <string name="about_upgrade_developer">Upgrade developer</string>
+    <string name="about_upgrade_version">Upgrade %1$d</string>
 </resources>
