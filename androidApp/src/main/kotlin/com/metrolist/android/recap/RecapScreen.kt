@@ -4,6 +4,8 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.scaleIn
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.animation.core.animateFloatAsState
@@ -243,8 +245,12 @@ private fun RecapStory(data: RecapData, onBack: () -> Unit, onPeriod: () -> Unit
             transitionSpec = {
                 val duration = if (motionEnabled) PolishMotion.durationMillis else 0
                 val direction = if (targetState >= initialState) 1 else -1
-                (fadeIn(tween(duration)) + slideInHorizontally(tween(duration)) { direction * it / 7 })
-                    .togetherWith(fadeOut(tween(duration)) + slideOutHorizontally(tween(duration)) { -direction * it / 12 })
+                val entrance = when (targetState % 3) {
+                    0 -> fadeIn(tween(duration)) + slideInHorizontally(tween(duration)) { direction * it / 7 }
+                    1 -> fadeIn(tween(duration)) + slideInVertically(tween(duration)) { it / 10 }
+                    else -> fadeIn(tween(duration)) + scaleIn(tween(duration), initialScale = if (motionEnabled) .96f else 1f)
+                }
+                entrance.togetherWith(fadeOut(tween(duration)) + slideOutHorizontally(tween(duration)) { -direction * it / 12 })
             },
             label = "recapSlide",
         ) { slideIndex ->

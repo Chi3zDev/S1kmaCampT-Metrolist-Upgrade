@@ -11,12 +11,12 @@ Basis: `main` 70eb9763 (Upgrade 1 beta 1). Audit kode awal; bukan hasil uji visu
 - [x] P2 · Implementasi awal api berlapis, flicker, glow, percikan naik, keadaan abu-abu dan asap; ukuran dan animasi mengikuti visibilitas host. Re-ignition memakai transisi bentuk/warna; tidak mengubah data.
 - [x] P2 · Count-up, hari muncul berurutan, level-up memakai pegas dan perayaan bertahap; label kalender TalkBack dalam bahasa Indonesia/Inggris. Musik, riwayat dan penyimpanan tidak diubah.
 - [x] P1 · Durasi warna menggunakan spesifikasi bersama. Ditambahkan tes unit gerbang mode sistem/mode ringan/perangkat.
-- [ ] P1 · Verifikasi nyata: mode ringan, skala animasi nol, lifecycle, pemulihan/level-up, perayaan sekali per hari, TalkBack, ukuran font besar, abu-abu dan teks layar kecil. Build serta tes commit terakhir sedang berjalan; hasil visual belum dinilai di HP.
+- [ ] P1 · Verifikasi nyata: mode ringan, skala animasi nol, lifecycle, pemulihan/level-up, perayaan sekali per hari, TalkBack, ukuran font besar, abu-abu dan teks layar kecil. Build dan tes terpilih lulus pada Actions 45394915150; hasil visual belum dinilai di HP.
 - [ ] P1 · Profil GPU dan scroll untuk memastikan item list tersembunyi tidak terus beranimasi; risiko overdraw/jank belum diukur.
 
 ## 2. Recap (story)
-- [ ] P2 · `RecapScreen.kt:167–210` memakai tiga warna dengan dua lingkaran statis untuk semua slide dan `AnimatedContent` default; variasi masuk, mesh, geser/fade/parallax belum ada. Risiko: jank, efek bergerak di background, motion sickness.
-- [ ] P1 · `RecapScreen.kt:159` progress diperbarui setiap 50 ms selama tidak ditekan/dijeda; audit lifecycle, visibilitas, mode ringan dan timer tanpa mengubah semantik data. Pertimbangkan dampak aksesibilitas hit target dan navigasi gesture; uji TalkBack.
+- [x] P2 · Implementasi mesh berbasis warna tema, variasi masuk dan transisi geser/fade, serta pergeseran elemen latar; animasi berat digerbang oleh lifecycle, mode ringan dan sistem. Perlu uji visual dan performa perangkat.
+- [x] P1 · Timer Recap berhenti saat layar tertutup/background, dipegang atau dialog terbuka; logika gerbang punya unit test. Verifikasi TalkBack, gesture dan perhitungan waktu masih terbuka.
 - [x] P2 · Hari puncak/jam favorit memakai bucket harian dan per jam yang sudah tersedia dalam snapshot statistik; bucket jam tak presisi sudah difilter oleh statistik existing. Kosong atau tidak valid tidak ditampilkan. Pengguna mengizinkan pembacaan riwayat; tidak ada query baru atau perubahan skema.
 - [ ] P1 · `RecapScreen.kt` membagikan tangkapan graphics layer layar, sedangkan `RecapShare.kt` adalah renderer terpisah yang tidak ditemukan pemanggilnya dalam source. Verifikasi ekspor hasil tangkapan, resolusi, font dan pemotongan teks; jangan hapus renderer lama tanpa memeriksa pemakai lainnya.
 
@@ -45,5 +45,5 @@ Basis: `main` 70eb9763 (Upgrade 1 beta 1). Audit kode awal; bukan hasil uji visu
 
 ## Log pekerjaan
 - Audit kode awal dibuat; tidak ada kode aplikasi yang diubah pada tahap audit.
-- Streak: implementasi awal, tes gerbang dan label aksesibilitas dipush. Build debug dan tes terpilih lulus; benchmark dan pemeriksaan perangkat masih terbuka.
-- Recap: implementasi awal mesh berbasis tema, transisi, pembatasan lifecycle dan area teks bergulir. Slide hari puncak/jam favorit menggunakan bucket statistik existing dengan izin membaca riwayat; tidak ada perubahan database. Pengujian dan fitur lain masih terbuka.
+- Streak: implementasi awal, tes gerbang dan label aksesibilitas dipush. Build debug, benchmark dan tes terpilih pada Actions 45394915150 lulus; pemeriksaan perangkat masih terbuka.
+- Recap: implementasi awal mesh berbasis tema, transisi, pembatasan lifecycle dan area teks bergulir. Slide hari puncak/jam favorit menggunakan bucket statistik existing dengan izin membaca riwayat; tidak ada perubahan database. Build dan tes terpilih pada Actions 45397987013 lulus; tes khusus Recap baru tidak termasuk seleksi workflow tersebut. Pengujian perangkat dan fitur lain masih terbuka.
