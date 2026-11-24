@@ -89,6 +89,8 @@ import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.roundToInt
 
+internal fun lyricLineMotionAllowed(lightMode: Boolean, deviceAllowed: Boolean): Boolean = !lightMode && deviceAllowed
+
 internal fun lyricGlowStrength(enabled: Boolean, lightMode: Boolean, deviceAllowed: Boolean, intensity: Float): Float =
     if (!enabled || lightMode || !deviceAllowed || !intensity.isFinite()) 0f else (intensity / 100f).coerceIn(0f, 1f)
 
@@ -762,14 +764,19 @@ internal class LineLookState(
         target: LineLook,
         alphaMs: Int,
         scaleMs: Int,
+        motionAllowed: Boolean,
     ) {
+        if (!motionAllowed) {
+            // Only line appearance snaps; word timing and the playback clock are untouched.
+            segment = Segment(target, target, 1, 1, Animatable(0f))
+            return
+        }
         if (segment.to == target) return
         val clock = Animatable(0f)
         segment = Segment(current(), target, alphaMs, scaleMs, clock)
         val total = max(max(alphaMs, scaleMs), LINE_VISIBILITY_MS)
-        withContext(FixedMotionDurationScale) {
-            clock.animateTo(total.toFloat(), tween(total, easing = LinearEasing))
-        }
+        // Inherit the system animation scale instead of overriding it for decorative motion.
+        clock.animateTo(total.toFloat(), tween(total, easing = LinearEasing))
     }
 }
 
@@ -912,8 +919,9 @@ internal fun InlineLyricsLine(
             scale = targetScale,
         )
     val lineLook = remember(entry) { LineLookState(lineLookTarget) }
-    LaunchedEffect(lineLook, lineLookTarget) {
-        lineLook.animateTo(lineLookTarget, staggerDurationMs, scaleStaggerDurationMs)
+    val lineMotion = lyricLineMotionAllowed(Settings.shared.glassLightMode, LocalPlayerEffectsAllowed.current)
+    LaunchedEffect(lineLook, lineLookTarget, lineMotion) {
+        lineLook.animateTo(lineLookTarget, staggerDurationMs, scaleStaggerDurationMs, lineMotion)
     }
     val lineColor = remember(textColor, lineLook) { ColorProducer { textColor.copy(alpha = lineLook.alpha) } }
     val isWordSynced = isWordAnimEnabled && !mainWords.isNullOrEmpty()
