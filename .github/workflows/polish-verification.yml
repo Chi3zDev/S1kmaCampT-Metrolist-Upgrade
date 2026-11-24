@@ -2,6 +2,11 @@ name: Polish verification
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - feature/polish
+    paths:
+      - .github/workflows/polish-verification.yml
 
 permissions:
   contents: read
