@@ -24,12 +24,29 @@ fun renderRecapShare(
     val image = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
     val canvas = Canvas(image)
     canvas.drawColor(background)
-    val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = foreground; typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD) }
+    val paint =
+        Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = foreground
+            typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+        }
     val top = if (story) 330f else 100f
-    fun text(value: String, x: Float, y: Float, size: Float, color: Int, maxWidth: Float = 900f) {
+
+    fun text(
+        value: String,
+        x: Float,
+        y: Float,
+        size: Float,
+        color: Int,
+        maxWidth: Float = 900f,
+    ) {
         paint.textSize = size
         paint.color = color
-        canvas.drawText(TextUtils.ellipsize(value, android.text.TextPaint(paint), maxWidth, TextUtils.TruncateAt.END).toString(), x, y, paint)
+        canvas.drawText(
+            TextUtils.ellipsize(value, android.text.TextPaint(paint), maxWidth, TextUtils.TruncateAt.END).toString(),
+            x,
+            y,
+            paint,
+        )
     }
     text(title, 90f, top, 56f, foreground)
     text(recap.minutes.toString(), 90f, top + 130f, 116f, accent)

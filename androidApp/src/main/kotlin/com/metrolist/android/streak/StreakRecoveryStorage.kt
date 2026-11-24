@@ -1,14 +1,14 @@
 package com.metrolist.android.streak
 
 import com.metrolist.shared.settings.Settings
-import java.time.Instant
-import java.time.LocalDate
-import java.time.YearMonth
-import java.time.ZoneId
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import java.time.Instant
+import java.time.LocalDate
+import java.time.YearMonth
+import java.time.ZoneId
 
 @Serializable
 private data class StoredStreakRecovery(
@@ -42,7 +42,11 @@ fun encodeStreakRecovery(ledger: StreakRecoveryLedger): String =
 
 /** Update dates and quota together in one preference, without touching listening history. */
 @Synchronized
-fun persistStreakRecovery(timestamps: List<Long>, now: Instant, zone: ZoneId): Boolean {
+fun persistStreakRecovery(
+    timestamps: List<Long>,
+    now: Instant,
+    zone: ZoneId,
+): Boolean {
     val settings = Settings.shared
     val ledger = decodeStreakRecovery(settings.streakRecoveryJson) ?: return false
     val updated = applyStreakRecovery(timestamps, now, zone, ledger) ?: return false

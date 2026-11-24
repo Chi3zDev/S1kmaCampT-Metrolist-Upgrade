@@ -2,10 +2,14 @@ package com.metrolist.android.streak
 
 import java.time.Instant
 import java.time.LocalDate
-import java.time.ZoneId
 import java.time.YearMonth
+import java.time.ZoneId
 
-data class ListeningStreak(val current: Int, val longest: Int, val todayCounted: Boolean)
+data class ListeningStreak(
+    val current: Int,
+    val longest: Int,
+    val todayCounted: Boolean,
+)
 
 fun calculateListeningStreak(
     timestamps: List<Long>,
@@ -60,8 +64,11 @@ fun planStreakRecovery(
     ledger: StreakRecoveryLedger,
 ): StreakRecoveryPlan {
     val today = now.atZone(zone).toLocalDate()
-    val days = (timestamps.map { Instant.ofEpochMilli(it).atZone(zone).toLocalDate() } + ledger.recoveredDays)
-        .filter { !it.isAfter(today) }.distinct().sorted()
+    val days =
+        (timestamps.map { Instant.ofEpochMilli(it).atZone(zone).toLocalDate() } + ledger.recoveredDays)
+            .filter { !it.isAfter(today) }
+            .distinct()
+            .sorted()
     val remaining = ledger.remaining(today)
     if (days.isEmpty()) return StreakRecoveryPlan(emptyList(), remaining, StreakRecoveryFailure.NO_BREAK)
     var start = days.lastIndex
@@ -78,14 +85,17 @@ fun planStreakRecovery(
         previous = days[start - 1]
         next = days[start]
     }
-    val gap = java.time.temporal.ChronoUnit.DAYS.between(previous, next) - 1
+    val gap =
+        java.time.temporal.ChronoUnit.DAYS
+            .between(previous, next) - 1
     if (gap > MAX_STREAK_GAP_DAYS) return StreakRecoveryPlan(emptyList(), remaining, StreakRecoveryFailure.GAP_TOO_LARGE)
     val missing = (1..gap.toInt()).map { previous.plusDays(it.toLong()) }
-    val failure = when {
-        missing.isEmpty() -> StreakRecoveryFailure.NO_BREAK
-        missing.size > remaining -> StreakRecoveryFailure.INSUFFICIENT_QUOTA
-        else -> null
-    }
+    val failure =
+        when {
+            missing.isEmpty() -> StreakRecoveryFailure.NO_BREAK
+            missing.size > remaining -> StreakRecoveryFailure.INSUFFICIENT_QUOTA
+            else -> null
+        }
     return StreakRecoveryPlan(missing, remaining, failure)
 }
 
@@ -100,7 +110,12 @@ fun applyStreakRecovery(
     if (!plan.canRecover) return null
     val month = YearMonth.from(now.atZone(zone))
     val used = if (ledger.usageMonth == month) ledger.usedThisMonth.coerceIn(0, MONTHLY_STREAK_RECOVERIES) else 0
-    return ledger.copy(recoveredDays = ledger.recoveredDays + plan.missingDays, usageMonth = month, usedThisMonth = used + plan.missingDays.size)
+    return ledger.copy(
+        recoveredDays = ledger.recoveredDays + plan.missingDays,
+        usageMonth = month,
+        usedThisMonth =
+            used + plan.missingDays.size,
+    )
 }
 
 /** Preview the first play without inserting an artificial history entry. */
@@ -118,11 +133,19 @@ fun firstPlayStreak(
     restoredDays: Set<LocalDate> = emptySet(),
 ): FirstPlayStreak {
     val today = now.atZone(zone).toLocalDate()
-    val listened = timestamps.map { Instant.ofEpochMilli(it).atZone(zone).toLocalDate() }
-        .filter { !it.isAfter(today) }.toSet()
+    val listened =
+        timestamps
+            .map { Instant.ofEpochMilli(it).atZone(zone).toLocalDate() }
+            .filter { !it.isAfter(today) }
+            .toSet()
     val last = (listened + restoredDays).filter { it < today }.maxOrNull()
     val broken = last != null && last < today.minusDays(1)
-    val yesterdayNoon = today.minusDays(1).atTime(12, 0).atZone(zone).toInstant()
+    val yesterdayNoon =
+        today
+            .minusDays(1)
+            .atTime(12, 0)
+            .atZone(zone)
+            .toInstant()
     val previousCount = calculateListeningStreak(timestamps, yesterdayNoon, zone, restoredDays).current
     val provisional = today !in listened
     val count = if (provisional) previousCount + 1 else calculateListeningStreak(timestamps, now, zone, restoredDays).current
@@ -137,8 +160,10 @@ fun lastListeningStreak(
     restoredDays: Set<LocalDate> = emptySet(),
 ): Int {
     val today = now.atZone(zone).toLocalDate()
-    val days = (timestamps.map { Instant.ofEpochMilli(it).atZone(zone).toLocalDate() } + restoredDays)
-        .filter { !it.isAfter(today) }.toSet()
+    val days =
+        (timestamps.map { Instant.ofEpochMilli(it).atZone(zone).toLocalDate() } + restoredDays)
+            .filter { !it.isAfter(today) }
+            .toSet()
     var day = days.maxOrNull() ?: return 0
     var length = 0
     while (day in days) {

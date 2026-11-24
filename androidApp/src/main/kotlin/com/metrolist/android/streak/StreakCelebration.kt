@@ -1,8 +1,10 @@
+@file:Suppress("ktlint:standard:no-wildcard-imports")
+
 package com.metrolist.android.streak
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,12 +23,12 @@ import com.metrolist.shared.db.MusicDatabase
 import com.metrolist.shared.generated.resources.*
 import com.metrolist.shared.settings.Settings
 import com.metrolist.shared.ui.PolishMotion
-import java.time.Instant
-import java.time.LocalDate
-import java.time.ZoneId
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
 
 private data class Celebration(
     val today: LocalDate,
@@ -70,14 +72,29 @@ fun BoxScope.StreakCelebrationPresenter(
         if (firstPlay.broken) {
             // No dialog or playback operation: a transient action merely opens the recovery page.
             scope.launch {
-                if (snackbarHostState.showSnackbar(banner, actionLabel = action, duration = SnackbarDuration.Short) == SnackbarResult.ActionPerformed) onOpenStreak()
+                if (snackbarHostState.showSnackbar(banner, actionLabel = action, duration = SnackbarDuration.Short) ==
+                    SnackbarResult.ActionPerformed
+                ) {
+                    onOpenStreak()
+                }
             }
         } else if (celebrationEnabled) {
-            celebration = Celebration(today, firstPlay.count, streakLevel(firstPlay.count).minimumDays > streakLevel(firstPlay.previousCount).minimumDays, firstPlay.provisional, listened, ledger.recoveredDays)
+            celebration =
+                Celebration(
+                    today,
+                    firstPlay.count,
+                    streakLevel(firstPlay.count).minimumDays > streakLevel(firstPlay.previousCount).minimumDays,
+                    firstPlay.provisional,
+                    listened,
+                    ledger.recoveredDays,
+                )
         }
     }
     LaunchedEffect(celebration) {
-        if (celebration != null) { delay(8_000); celebration = null }
+        if (celebration != null) {
+            delay(8_000)
+            celebration = null
+        }
     }
     val event = celebration
     if (event != null && visible && lifecycle == Lifecycle.State.RESUMED) {
@@ -85,7 +102,10 @@ fun BoxScope.StreakCelebrationPresenter(
         val motionEnabled = streakMotionEnabled()
         var stage by remember(event) { mutableIntStateOf(if (motionEnabled) 0 else 3) }
         LaunchedEffect(event, motionEnabled) {
-            if (!motionEnabled) { stage = 3; return@LaunchedEffect }
+            if (!motionEnabled) {
+                stage = 3
+                return@LaunchedEffect
+            }
             stage = 1
             delay(PolishMotion.staggerMillis * 2)
             stage = 2
@@ -93,13 +113,32 @@ fun BoxScope.StreakCelebrationPresenter(
             stage = 3
         }
         Card(
-            modifier = Modifier.align(Alignment.TopCenter).statusBarsPadding().padding(horizontal = 20.dp, vertical = 12.dp).widthIn(max = 400.dp).zIndex(100f).clickable { celebration = null },
+            modifier =
+                Modifier
+                    .align(
+                        Alignment.TopCenter,
+                    ).statusBarsPadding()
+                    .padding(horizontal = 20.dp, vertical = 12.dp)
+                    .widthIn(max = 400.dp)
+                    .zIndex(100f)
+                    .clickable {
+                        celebration =
+                            null
+                    },
             shape = RoundedCornerShape(24.dp),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
             elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
         ) {
-            Column(Modifier.fillMaxWidth().padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text(stringResource(if (event.levelUp) Res.string.streak_level_up else Res.string.streak_celebration_title), style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center)
+            Column(
+                Modifier.fillMaxWidth().padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                Text(
+                    stringResource(if (event.levelUp) Res.string.streak_level_up else Res.string.streak_celebration_title),
+                    style = MaterialTheme.typography.titleMedium,
+                    textAlign = TextAlign.Center,
+                )
                 Flame(level.color, animate = motionEnabled, levelUp = event.levelUp, particles = true)
                 AnimatedVisibility(visible = stage >= 2, enter = fadeIn(tween(PolishMotion.durationMillis))) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -107,11 +146,19 @@ fun BoxScope.StreakCelebrationPresenter(
                         Text(stringResource(Res.string.streak_days), style = MaterialTheme.typography.titleLarge)
                     }
                 }
-                if (event.provisional) Text(stringResource(Res.string.streak_first_play_provisional), style = MaterialTheme.typography.bodySmall, textAlign = TextAlign.Center)
+                if (event.provisional) {
+                    Text(
+                        stringResource(Res.string.streak_first_play_provisional),
+                        style = MaterialTheme.typography.bodySmall,
+                        textAlign = TextAlign.Center,
+                    )
+                }
                 val start = event.today.minusDays((event.today.dayOfWeek.value - 1).toLong())
                 AnimatedVisibility(visible = stage >= 3, enter = fadeIn(tween(PolishMotion.durationMillis))) {
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                        repeat(7) { StaggeredDayDot(start.plusDays(it.toLong()), event.today, event.listened, event.restored, it, motionEnabled) }
+                        repeat(
+                            7,
+                        ) { StaggeredDayDot(start.plusDays(it.toLong()), event.today, event.listened, event.restored, it, motionEnabled) }
                     }
                 }
                 TextButton(onClick = { celebration = null }) { Text(stringResource(Res.string.streak_celebration_continue)) }
