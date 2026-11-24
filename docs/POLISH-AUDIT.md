@@ -40,7 +40,7 @@ Basis: `main` 70eb9763 (Upgrade 1 beta 1). Audit kode awal; bukan hasil uji visu
 
 ## 7. Performa, bug, dan rilis
 - [ ] P1 · Profil recomposition/frame dan animasi pada latar/tertutup, Android 11 ke bawah dan RAM rendah; audit sumber blur tunggal dan objek Canvas. Temuan jank saat ini belum diukur.
-- [ ] P2 · Ukur APK, audit kode dan lint; jangan hapus kode/kredit/aset tanpa bukti. Tambahkan tes untuk logika yang diubah dan jalankan unit test.
+- [ ] P2 · Ukuran APK diukur dari artefak build: baseline `70eb9763` debug 48.804.174 byte dan benchmark debug-signed 15.824.678 byte; `79eec772` debug 48.837.866 byte (+33.692) dan benchmark 15.834.118 byte (+9.440). Itu bukan APK release produksi; ukuran rilis final belum diukur. Audit kode dan lint masih terbuka; jangan hapus kode/kredit/aset tanpa bukti. Tambahkan tes untuk logika yang diubah dan jalankan unit test.
 - [ ] P1 · Build Actions, gabung tanpa force, perbarui `latest-build`, dan rilis `v14.0.1-upgrade.2` dengan signing yang ada hanya setelah area dan pemeriksaan selesai. CI umum/Nightly pada main sebelumnya masih mengantre; status perlu dicek lagi sebelum rilis.
 
 ## Log pekerjaan
@@ -51,3 +51,4 @@ Basis: `main` 70eb9763 (Upgrade 1 beta 1). Audit kode awal; bukan hasil uji visu
 - Pemutar/lirik: transisi, feedback visual gesture, marquee dan lapisan kaca potret diperbaiki tanpa mengubah callback atau ambang seek/swipe. Padding Kartu Kaca tetap stabil saat lirik terbuka. Build debug, benchmark dan tes terpilih Actions 45415688487 lulus pada `6e2aeaa4`; commit `6c22fe5b` mengubah padding setelahnya dan juga lulus build, benchmark, dan tes terpilih pada Actions 45419131376. Verifikasi visual HP, aksesibilitas dan perilaku animasi lirik masih terbuka.
 - Poster: slider ukuran, auto-fit judul/artis, tata letak footer RTL/tanpa sampul, dan center-crop latar diperbaiki. Actions 45495085664 dan 45495733327 lulus untuk commit sebelumnya; Actions 45500795290 untuk `aab22668` lulus build debug, tes terpilih dan benchmark. Verifikasi visual preview/ekspor tetap terbuka.
 - About/Settings: header About mengikuti gaya kartu dan badge Upgrade tidak lagi mengunci label beta; teks badge membungkus untuk font besar. Header Settings lebar dapat tumbuh dan penjelasan kaca/streak tersedia dalam bahasa Indonesia dan Inggris. Actions 45504306007 untuk `032f44ac` dan Actions 45505820889 untuk `79eec772` lulus. Kredit, lisensi, tautan dan navigasi tidak diubah.
+- Pengguna akan melakukan uji HP di tahap akhir. Ukuran APK baseline dan polish dicatat dari dua artefak Actions yang sejenis; tidak mengklaim hasil profil performa perangkat.
