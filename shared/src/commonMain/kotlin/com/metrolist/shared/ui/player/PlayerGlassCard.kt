@@ -12,6 +12,10 @@ import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.unit.dp
 import com.metrolist.shared.settings.Settings
 
+/** Lyrics draw their own surface, so the portrait player must not stack another underneath. */
+internal fun portraitPlayerGlassVisible(glassEnabled: Boolean, playerEnabled: Boolean, lyricsVisible: Boolean): Boolean =
+    glassEnabled && playerEnabled && !lyricsVisible
+
 /** A tinted surface with no additional backdrop capture or blur. */
 @Composable
 internal fun Modifier.playerGlassCard(contentColor: Color): Modifier {

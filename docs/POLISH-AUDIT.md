@@ -25,7 +25,7 @@ Basis: `main` 70eb9763 (Upgrade 1 beta 1). Audit kode awal; bukan hasil uji visu
 - [ ] P1 · Haze/navbar memakai sumber blur yang ada; pastikan tidak menambah capture/blur, tetap ringan pada Android lama/perangkat RAM rendah dan nonaktif saat mode ringan. Uji label, touch target dan kontras; belum diuji perangkat.
 
 ## 4. Pemutar dan lirik
-- [ ] P1 · Peralihan player/lirik potret dan lanskap kini memakai durasi bersama dan tanpa animasi pada mode ringan/perangkat terbatas. `PlayerScreen.kt`, `PlayerLayout.kt`, `PlayerGlassCard.kt`: audit pembukaan, Vintage/Kartu Kaca/Piringan, ruang kontrol dan teks panjang; cakupan kaca telah diperluas tetapi hasil visual belum diverifikasi. Risiko: overlay, pemotongan teks/kontras dan jank.
+- [ ] P1 · Peralihan player/lirik potret dan lanskap kini memakai durasi bersama dan tanpa animasi pada mode ringan/perangkat terbatas; permukaan kaca potret tidak ditumpuk dua kali saat lirik terbuka. `PlayerScreen.kt`, `PlayerLayout.kt`, `PlayerGlassCard.kt`: audit pembukaan, Vintage/Kartu Kaca/Piringan, ruang kontrol dan teks panjang; cakupan kaca telah diperluas tetapi hasil visual belum diverifikasi. Risiko: overlay, pemotongan teks/kontras dan jank.
 - [ ] P2 · `VinylRecord.kt` dan `PlayerAura.kt` sudah punya gerbang visibilitas/skala animasi; uji rotasi, perlambatan, tonearm, aura, seekbar dan glow di perangkat. Jangan ubah seek, queue, kontrol atau timing playback tanpa persetujuan.
 - [ ] P1 · Uji lirik kecil dan mode ringan/animasi nol; hindari blur tambahan serta recomposition per frame di luar area gambar.
 

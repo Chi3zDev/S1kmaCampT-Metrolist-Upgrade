@@ -15,6 +15,14 @@ class PlayerArtworkTransitionSettingTest {
     }
 
     @Test
+    fun portraitGlassDoesNotStackUnderLyricsOrIgnoreSettings() {
+        assertTrue(portraitPlayerGlassVisible(glassEnabled = true, playerEnabled = true, lyricsVisible = false))
+        assertFalse(portraitPlayerGlassVisible(glassEnabled = true, playerEnabled = true, lyricsVisible = true))
+        assertFalse(portraitPlayerGlassVisible(glassEnabled = false, playerEnabled = true, lyricsVisible = false))
+        assertFalse(portraitPlayerGlassVisible(glassEnabled = true, playerEnabled = false, lyricsVisible = false))
+    }
+
+    @Test
     fun disabledTransitionsSnapToCurrentArtworkEvenDuringAudioCrossfade() {
         val crossfade = PlayerArtworkCrossfade("next") { 0.4f }
         assertEquals(PlayerBackgroundTransition.Snap("current"), playerBackgroundTransition("current", "old", crossfade, false))

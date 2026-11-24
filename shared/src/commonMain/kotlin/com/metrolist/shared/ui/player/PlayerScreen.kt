@@ -1421,10 +1421,9 @@ fun PlayerScreen(
                                             WindowInsets.mandatorySystemGestures.only(WindowInsetsSides.Bottom),
                                         ).padding(horizontal = 24.dp)
                                         .then(
-                                            if (playerType == PlayerType.GLASS_CARD && Settings.shared.glassNavigation && Settings.shared.glassPlayer) {
-                                                Modifier.portraitPlayerGlassCard(textBackgroundColor, topInset = 64.dp, bottomInset = QueuePeekHeight + 26.dp).padding(horizontal = 16.dp)
-                                            } else if (Settings.shared.glassNavigation && Settings.shared.glassPlayer && !uiState.isLyricsVisible) {
+                                            if (portraitPlayerGlassVisible(Settings.shared.glassNavigation, Settings.shared.glassPlayer, uiState.isLyricsVisible)) {
                                                 Modifier.portraitPlayerGlassCard(textBackgroundColor, topInset = 64.dp, bottomInset = QueuePeekHeight + 26.dp)
+                                                    .then(if (playerType == PlayerType.GLASS_CARD) Modifier.padding(horizontal = 16.dp) else Modifier)
                                             } else Modifier,
                                         )
                                         .padding(top = 16.dp),
