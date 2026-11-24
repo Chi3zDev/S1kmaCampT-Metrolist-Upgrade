@@ -12,6 +12,10 @@ class PlayerArtworkTransitionSettingTest {
         assertFalse(playerLyricsMotionAllowed(visible = false, lightMode = false, deviceAllowed = true))
         assertFalse(playerLyricsMotionAllowed(visible = true, lightMode = true, deviceAllowed = true))
         assertFalse(playerLyricsMotionAllowed(visible = true, lightMode = false, deviceAllowed = false))
+        assertTrue(playerDecorativeMotionAllowed(visible = true, lightMode = false, deviceAllowed = true))
+        assertFalse(playerDecorativeMotionAllowed(visible = false, lightMode = false, deviceAllowed = true))
+        assertFalse(playerDecorativeMotionAllowed(visible = true, lightMode = true, deviceAllowed = true))
+        assertFalse(playerDecorativeMotionAllowed(visible = true, lightMode = false, deviceAllowed = false))
     }
 
     @Test

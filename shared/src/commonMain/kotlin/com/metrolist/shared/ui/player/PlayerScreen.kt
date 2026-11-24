@@ -9,6 +9,8 @@ package com.metrolist.shared.ui.player
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.BoundsTransform
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
@@ -261,18 +263,12 @@ internal fun Modifier.artworkSwipe(
     val currentOnNext by rememberUpdatedState(onNext)
     var totalDrag by remember { mutableFloatStateOf(0f) }
     var dragging by remember { mutableStateOf(false) }
+    val motionAllowed = playerDecorativeMotionAllowed(LocalPlayerContentActive.current, Settings.shared.glassLightMode, LocalPlayerEffectsAllowed.current)
     val offset =
         animateFloatAsState(
             targetValue = totalDrag,
             animationSpec =
-                if (dragging) {
-                    snap()
-                } else {
-                    spring(
-                        dampingRatio = Spring.DampingRatioNoBouncy,
-                        stiffness = Spring.StiffnessMedium,
-                    )
-                },
+                if (dragging || !motionAllowed) snap() else PolishMotion.interactiveSpring(),
             label = "artworkSwipe",
         )
     return graphicsLayer { translationX = offset.value }
@@ -384,7 +380,8 @@ internal fun SeekFeedbackOverlay(
     val seekDescription = stringResource(Res.string.seek_feedback_description, directionLabel, label)
     val density = LocalDensity.current
     val nudgeDistance = with(density) { 12.dp.toPx() }
-    val supportsBlur = supportsNativeBlur()
+    val motionAllowed = playerDecorativeMotionAllowed(visible && LocalPlayerContentActive.current, Settings.shared.glassLightMode, LocalPlayerEffectsAllowed.current)
+    val supportsBlur = supportsNativeBlur() && !Settings.shared.glassLightMode && LocalPlayerEffectsAllowed.current
     val labelShadow =
         remember(density) {
             Shadow(
@@ -395,16 +392,19 @@ internal fun SeekFeedbackOverlay(
         }
 
     val arrowNudge = remember { Animatable(0f) }
-    LaunchedEffect(feedback?.nonce) {
-        if (feedback == null) return@LaunchedEffect
+    LaunchedEffect(feedback?.nonce, motionAllowed) {
+        if (feedback == null || !motionAllowed) {
+            arrowNudge.snapTo(0f)
+            return@LaunchedEffect
+        }
         arrowNudge.snapTo(if (forward) nudgeDistance else -nudgeDistance)
         arrowNudge.animateTo(0f, animationSpec = spatialSpec)
     }
 
     AnimatedVisibility(
         visible = visible,
-        enter = scaleIn(initialScale = 0.7f, animationSpec = spatialSpec) + fadeIn(animationSpec = effectsSpec),
-        exit = scaleOut(targetScale = 0.9f, animationSpec = spatialSpec) + fadeOut(animationSpec = effectsSpec),
+        enter = if (motionAllowed) scaleIn(initialScale = 0.7f, animationSpec = spatialSpec) + fadeIn(animationSpec = effectsSpec) else EnterTransition.None,
+        exit = if (motionAllowed) scaleOut(targetScale = 0.9f, animationSpec = spatialSpec) + fadeOut(animationSpec = effectsSpec) else ExitTransition.None,
         modifier = modifier,
     ) {
         Column(

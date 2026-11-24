@@ -25,8 +25,11 @@ internal fun resolvePlayerContentState(
     return PlayerContentState(visible, settled, settled && isScreenVisible, visible && isScreenVisible)
 }
 
-internal fun playerLyricsMotionAllowed(visible: Boolean, lightMode: Boolean, deviceAllowed: Boolean): Boolean =
+internal fun playerDecorativeMotionAllowed(visible: Boolean, lightMode: Boolean, deviceAllowed: Boolean): Boolean =
     visible && !lightMode && deviceAllowed
+
+internal fun playerLyricsMotionAllowed(visible: Boolean, lightMode: Boolean, deviceAllowed: Boolean): Boolean =
+    playerDecorativeMotionAllowed(visible, lightMode, deviceAllowed)
 
 internal val LocalPlayerPositionActive = compositionLocalOf { true }
 internal val LocalPlayerContentActive = compositionLocalOf { true }
