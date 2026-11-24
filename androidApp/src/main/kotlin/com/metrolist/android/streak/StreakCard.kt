@@ -88,7 +88,7 @@ fun StreakCard(state: StreakCardState, onClick: () -> Unit, modifier: Modifier =
                 Flame(flameTint, animate = showMotion, particles = !extinguished, extinguished = extinguished, modifier = Modifier.size(40.dp))
                 Column {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text(streak.current.toString(), style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.onSurface)
+                        StreakCount(streak.current, showMotion, MaterialTheme.typography.headlineMedium)
                         Text(stringResource(Res.string.streak_days), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
                     }
                     Text(level, style = MaterialTheme.typography.labelLarge, color = flameTint)
