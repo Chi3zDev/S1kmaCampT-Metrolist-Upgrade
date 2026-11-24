@@ -91,9 +91,9 @@ jobs:
         run: |
           set -euo pipefail
           if gh release view latest-build >/dev/null 2>&1; then
-            gh release edit latest-build --title latest-build --target "$GITHUB_SHA"
+            gh release edit latest-build --title latest-build --prerelease --latest=false
           else
-            gh release create latest-build --title latest-build --target "$GITHUB_SHA" --notes 'Latest successful fork debug build.'
+            gh release create latest-build --title latest-build --target "$GITHUB_SHA" --prerelease --latest=false --notes 'Latest successful fork debug build.'
           fi
           gh release upload latest-build Metrolist-fork-debug-universal.apk Metrolist-fork-release-test-universal.apk --clobber
 
