@@ -61,8 +61,14 @@ private fun resolveFontFamily(
     activeFontId: String,
 ): FontFamily {
     when (activeFontId) {
-        QuickFontManager.NUNITO_EXTRABOLD_ID -> return FontFamily(Font(R.font.nunito_extrabold, weight = FontWeight.ExtraBold))
-        QuickFontManager.NUNITO_BOLD_ID -> return FontFamily(Font(R.font.nunito_bold, weight = FontWeight.Bold))
+        QuickFontManager.NUNITO_EXTRABOLD_ID -> {
+            return FontFamily(Font(R.font.nunito_extrabold, weight = FontWeight.ExtraBold))
+        }
+
+        QuickFontManager.NUNITO_BOLD_ID -> {
+            return FontFamily(Font(R.font.nunito_bold, weight = FontWeight.Bold))
+        }
+
         QuickFontManager.SYSTEM_ID -> {
             return FontFamily.Default
         }

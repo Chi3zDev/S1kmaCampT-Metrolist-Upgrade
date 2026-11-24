@@ -294,10 +294,11 @@ class App :
         onboardingManager = OnboardingManager(this)
         legacyInstallMigration = LegacyInstallMigration(this)
         hadLegacyInstallationAtStartup = legacyInstallMigration.hasLegacyInstallation()
-        val isFreshPackage = runCatching {
-            @Suppress("DEPRECATION")
-            packageManager.getPackageInfo(packageName, 0).let { it.firstInstallTime == it.lastUpdateTime }
-        }.getOrDefault(false)
+        val isFreshPackage =
+            runCatching {
+                @Suppress("DEPRECATION")
+                packageManager.getPackageInfo(packageName, 0).let { it.firstInstallTime == it.lastUpdateTime }
+            }.getOrDefault(false)
         Settings.shared.applyFreshAndroidAppearanceDefaults(
             isFreshPackage && !onboardingManager.isComplete && !hadLegacyInstallationAtStartup,
         )

@@ -39,8 +39,8 @@ import com.metrolist.shared.generated.resources.filter_library
 import com.metrolist.shared.generated.resources.home
 import com.metrolist.shared.generated.resources.listen_together
 import com.metrolist.shared.generated.resources.menu_history
-import com.metrolist.shared.generated.resources.profile
 import com.metrolist.shared.generated.resources.mysterious_fourth_tab
+import com.metrolist.shared.generated.resources.profile
 import com.metrolist.shared.generated.resources.recognize_nearby_music
 import com.metrolist.shared.generated.resources.search
 import com.metrolist.shared.generated.resources.settings
@@ -135,13 +135,15 @@ fun MetrolistNavigationScaffold(
     val useFloatingNavigation = floatingNavigation && !useDesktopUi && !isTv
     val useBottomAccount = showAccountInBottomBar && navigationSuiteType.isNavigationBar
     val screens =
-        (if (useDesktopUi) {
-            (visibleSidebarScreens(Settings.shared.sidebarNavItems) + Screen.Search + Screen.Settings).distinct()
-        } else if (useFloatingNavigation) {
-            floatingNavigationItems()
-        } else {
-            visibleNavigationItems()
-        }).let { if (useBottomAccount) it + Screen.Profile else it }
+        (
+            if (useDesktopUi) {
+                (visibleSidebarScreens(Settings.shared.sidebarNavItems) + Screen.Search + Screen.Settings).distinct()
+            } else if (useFloatingNavigation) {
+                floatingNavigationItems()
+            } else {
+                visibleNavigationItems()
+            }
+        ).let { if (useBottomAccount) it + Screen.Profile else it }
     val layoutDirection = LocalLayoutDirection.current
     val selectedScreen =
         (navigationState.currentRoute.takeIf { it in screens } ?: navigationState.topLevelRoute)

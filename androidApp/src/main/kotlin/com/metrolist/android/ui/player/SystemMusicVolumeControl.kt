@@ -25,19 +25,26 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
+import com.metrolist.shared.generated.resources.Res
+import com.metrolist.shared.generated.resources.volume
 import com.metrolist.shared.settings.SliderStyle
 import com.metrolist.shared.ui.components.sliders.PlaybackProgressSlider
 import com.metrolist.shared.ui.icons.MetrolistIcons
-import com.metrolist.shared.generated.resources.Res
-import com.metrolist.shared.generated.resources.volume
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.roundToInt
 
-internal fun systemVolumeFraction(value: Int, minimum: Int, maximum: Int): Float =
-    if (maximum <= minimum) 0f else ((value.coerceIn(minimum, maximum) - minimum).toFloat() / (maximum - minimum))
+internal fun systemVolumeFraction(
+    value: Int,
+    minimum: Int,
+    maximum: Int,
+): Float = if (maximum <= minimum) 0f else ((value.coerceIn(minimum, maximum) - minimum).toFloat() / (maximum - minimum))
 
-internal fun systemVolumeFromFraction(value: Float, minimum: Int, maximum: Int): Int {
+internal fun systemVolumeFromFraction(
+    value: Float,
+    minimum: Int,
+    maximum: Int,
+): Int {
     if (maximum <= minimum) return minimum
     val safe = if (value.isFinite()) value.coerceIn(0f, 1f) else 0f
     return minimum + (safe * (maximum - minimum)).roundToInt()
@@ -45,13 +52,18 @@ internal fun systemVolumeFromFraction(value: Float, minimum: Int, maximum: Int):
 
 /** Controls Android's local music stream, not the player's software gain or remote Cast volume. */
 @Composable
-internal fun SystemMusicVolumeControl(modifier: Modifier = Modifier, contentColor: Color, active: Boolean) {
+internal fun SystemMusicVolumeControl(
+    modifier: Modifier = Modifier,
+    contentColor: Color,
+    active: Boolean,
+) {
     val context = LocalContext.current
     val manager = remember(context) { context.getSystemService(Context.AUDIO_SERVICE) as? AudioManager } ?: return
     val lifecycle = LocalLifecycleOwner.current.lifecycle
-    val minimum = remember(manager) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) manager.getStreamMinVolume(AudioManager.STREAM_MUSIC) else 0
-    }
+    val minimum =
+        remember(manager) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) manager.getStreamMinVolume(AudioManager.STREAM_MUSIC) else 0
+        }
     val maximum = remember(manager) { manager.getStreamMaxVolume(AudioManager.STREAM_MUSIC).coerceAtLeast(minimum) }
     var current by remember(manager) { mutableIntStateOf(manager.getStreamVolume(AudioManager.STREAM_MUSIC)) }
     // The local hardware keys can change volume outside the app. Poll only while this control is visible
@@ -67,7 +79,12 @@ internal fun SystemMusicVolumeControl(modifier: Modifier = Modifier, contentColo
     }
     val label = stringResource(Res.string.volume)
     Row(modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        Icon(MetrolistIcons.AutoMirrored.Filled.VolumeDown, contentDescription = null, tint = contentColor.copy(alpha = 0.65f), modifier = Modifier.size(18.dp))
+        Icon(
+            MetrolistIcons.AutoMirrored.Filled.VolumeDown,
+            contentDescription = null,
+            tint = contentColor.copy(alpha = 0.65f),
+            modifier = Modifier.size(18.dp),
+        )
         PlaybackProgressSlider(
             value = systemVolumeFraction(current, minimum, maximum),
             onValueChange = { fraction ->
@@ -84,9 +101,19 @@ internal fun SystemMusicVolumeControl(modifier: Modifier = Modifier, contentColo
             trackThicknessDp = 4f,
             showThumb = false,
             animate = false,
-            colors = SliderDefaults.colors(thumbColor = contentColor, activeTrackColor = contentColor, inactiveTrackColor = contentColor.copy(alpha = 0.3f)),
+            colors =
+                SliderDefaults.colors(
+                    thumbColor = contentColor,
+                    activeTrackColor = contentColor,
+                    inactiveTrackColor = contentColor.copy(alpha = 0.3f),
+                ),
             modifier = Modifier.weight(1f).semantics { contentDescription = label },
         )
-        Icon(MetrolistIcons.AutoMirrored.Filled.VolumeUp, contentDescription = null, tint = contentColor.copy(alpha = 0.65f), modifier = Modifier.size(18.dp))
+        Icon(
+            MetrolistIcons.AutoMirrored.Filled.VolumeUp,
+            contentDescription = null,
+            tint = contentColor.copy(alpha = 0.65f),
+            modifier = Modifier.size(18.dp),
+        )
     }
 }

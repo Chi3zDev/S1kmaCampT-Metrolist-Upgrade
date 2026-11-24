@@ -7,10 +7,6 @@
 
 package com.metrolist.android.ui.components
 
-import dev.chrisbanes.haze.HazeInput
-import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.blur.HazeBlurStyle
-import dev.chrisbanes.haze.blur.hazeBlur
 import android.widget.Toast
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
@@ -78,8 +74,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.key.Key
@@ -170,6 +166,10 @@ import com.metrolist.shared.ui.player.shouldShowMusicVideoSurface
 import com.metrolist.shared.ui.tv.tvFocusHighlight
 import com.metrolist.shared.ui.utils.nativeBlurCompat
 import com.metrolist.shared.ui.utils.supportsNativeBlur
+import dev.chrisbanes.haze.HazeInput
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.blur.HazeBlurStyle
+import dev.chrisbanes.haze.blur.hazeBlur
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -672,23 +672,41 @@ internal fun MiniPlayerCard(
     var dominantColor by remember(artworkUrl) { mutableStateOf<Color?>(null) }
     LaunchedEffect(artworkUrl, glassEnabled, active) {
         if (glassEnabled && active && artworkUrl != null && dominantColor == null) {
-            dominantColor = try {
-                PlayerColorExtractor.extractColors(context, context.imageLoader, artworkUrl, surfaceColor)?.dominant
-            } catch (error: CancellationException) {
-                throw error
-            } catch (_: Exception) {
-                null
-            }
+            dominantColor =
+                try {
+                    PlayerColorExtractor.extractColors(context, context.imageLoader, artworkUrl, surfaceColor)?.dominant
+                } catch (error: CancellationException) {
+                    throw error
+                } catch (_: Exception) {
+                    null
+                }
         }
     }
     val glassSettings = Settings.shared
-    val glassTintAlpha = (glassSettings.glassTintStrength.coerceIn(0f, 100f) / 100f * when (glassSettings.glassStyle) { "FROSTED" -> 0.9f; "CLEAR" -> 0.45f; else -> 0.7f }).coerceIn(0.12f, 0.9f)
-    val backgroundColor = when {
-        glassEnabled -> (dominantColor?.copy(alpha = 0.28f)?.compositeOver(surfaceColor) ?: surfaceColor).copy(alpha = glassTintAlpha)
-        useSolidBlackMiniPlayer -> Color.Black
-        else -> surfaceColor
-    }
-    val glassRadius = (glassSettings.glassBlurStrength.coerceIn(0f, 100f) / 100f * when (glassSettings.glassStyle) { "FROSTED" -> 24f; "CLEAR" -> 8f; else -> 20f }).dp
+    val glassTintAlpha =
+        (
+            glassSettings.glassTintStrength.coerceIn(0f, 100f) / 100f *
+                when (glassSettings.glassStyle) {
+                    "FROSTED" -> 0.9f
+                    "CLEAR" -> 0.45f
+                    else -> 0.7f
+                }
+        ).coerceIn(0.12f, 0.9f)
+    val backgroundColor =
+        when {
+            glassEnabled -> (dominantColor?.copy(alpha = 0.28f)?.compositeOver(surfaceColor) ?: surfaceColor).copy(alpha = glassTintAlpha)
+            useSolidBlackMiniPlayer -> Color.Black
+            else -> surfaceColor
+        }
+    val glassRadius =
+        (
+            glassSettings.glassBlurStrength.coerceIn(0f, 100f) / 100f *
+                when (glassSettings.glassStyle) {
+                    "FROSTED" -> 24f
+                    "CLEAR" -> 8f
+                    else -> 20f
+                }
+        ).dp
     val glassStyle = remember(glassRadius) { HazeBlurStyle { blurRadius(glassRadius) } }
     val contentColor =
         if (useSolidBlackMiniPlayer || useGradientMiniPlayer || useBlurMiniPlayer) Color.White else MaterialTheme.colorScheme.onSurface
@@ -779,7 +797,15 @@ internal fun MiniPlayerCard(
         color = backgroundColor,
         border =
             if (glassEnabled) {
-                BorderStroke(1.dp, Brush.verticalGradient(listOf(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f), MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.15f))))
+                BorderStroke(
+                    1.dp,
+                    Brush.verticalGradient(
+                        listOf(
+                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+                            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.15f),
+                        ),
+                    ),
+                )
             } else if (isModern) {
                 BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
             } else {

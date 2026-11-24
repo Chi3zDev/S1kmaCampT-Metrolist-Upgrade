@@ -18,8 +18,8 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.border
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Arrangement
@@ -73,12 +73,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.metrolist.android.recap.RecapEntry
-import com.metrolist.android.streak.StreakCard
-import com.metrolist.android.streak.rememberListeningStreak
 import com.metrolist.android.LocalMiniPlayerBottomInset
 import com.metrolist.android.LocalStartupPresentation
 import com.metrolist.android.playback.LocalPlayerConnection
+import com.metrolist.android.recap.RecapEntry
+import com.metrolist.android.streak.StreakCard
+import com.metrolist.android.streak.rememberListeningStreak
 import com.metrolist.android.ui.component.AdaptiveModalBottomSheet
 import com.metrolist.android.ui.component.tabContentTopPadding
 import com.metrolist.android.ui.components.ErrorBox
@@ -106,9 +106,9 @@ import com.metrolist.shared.model.YTItem
 import com.metrolist.shared.model.isAvailableOffline
 import com.metrolist.shared.settings.LibraryFilterType
 import com.metrolist.shared.settings.Settings
+import com.metrolist.shared.ui.LocalIsTv
 import com.metrolist.shared.ui.LocalPlayerEffectsAllowed
 import com.metrolist.shared.ui.PolishMotion
-import com.metrolist.shared.ui.LocalIsTv
 import com.metrolist.shared.ui.components.ChipShelf
 import com.metrolist.shared.ui.components.HomeLoadingPlaceholder
 import com.metrolist.shared.ui.components.PopupVisibility
@@ -198,13 +198,26 @@ fun HomeScreen(
     val showTopRefreshIndicator = isRefreshing || uiState.isRefreshing
     val isTv = LocalIsTv.current
     val glassActions = Settings.shared.glassNavigation && Settings.shared.glassFloatingActions
-    val glassActionTint = when (Settings.shared.glassStyle) { "FROSTED" -> 0.9f; "CLEAR" -> 0.45f; else -> 0.7f }
-    val glassActionColor = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = (Settings.shared.glassTintStrength / 100f * glassActionTint).coerceIn(0.22f, 0.9f))
+    val glassActionTint =
+        when (Settings.shared.glassStyle) {
+            "FROSTED" -> 0.9f
+            "CLEAR" -> 0.45f
+            else -> 0.7f
+        }
+    val glassActionColor =
+        MaterialTheme.colorScheme.surfaceContainer.copy(
+            alpha =
+                (
+                    Settings.shared.glassTintStrength / 100f *
+                        glassActionTint
+                ).coerceIn(0.22f, 0.9f),
+        )
     val glassActionHighlight = MaterialTheme.colorScheme.onSurface.copy(alpha = if (Settings.shared.glassStyle == "CLEAR") 0.38f else 0.25f)
     val glassActionEdge = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.15f)
-    val glassActionBorder = remember(glassActionHighlight, glassActionEdge) {
-        BorderStroke(1.dp, Brush.verticalGradient(listOf(glassActionHighlight, glassActionEdge)))
-    }
+    val glassActionBorder =
+        remember(glassActionHighlight, glassActionEdge) {
+            BorderStroke(1.dp, Brush.verticalGradient(listOf(glassActionHighlight, glassActionEdge)))
+        }
     var showFloatingActions by remember { mutableStateOf(true) }
     val fabNestedScrollConnection =
         remember {
@@ -416,8 +429,20 @@ fun HomeScreen(
             val animateActions = floatingActionsMotionAllowed(rootActive, Settings.shared.glassLightMode, LocalPlayerEffectsAllowed.current)
             AnimatedVisibility(
                 visible = (LocalIsTv.current || showFloatingActions),
-                enter = if (animateActions) fadeIn(tween(PolishMotion.durationMillis)) + slideInVertically(tween(PolishMotion.durationMillis)) { it / 2 } else EnterTransition.None,
-                exit = if (animateActions) fadeOut(tween(PolishMotion.durationMillis)) + slideOutVertically(tween(PolishMotion.durationMillis)) { it / 2 } else ExitTransition.None,
+                enter =
+                    if (animateActions) {
+                        fadeIn(tween(PolishMotion.durationMillis)) +
+                            slideInVertically(tween(PolishMotion.durationMillis)) { it / 2 }
+                    } else {
+                        EnterTransition.None
+                    },
+                exit =
+                    if (animateActions) {
+                        fadeOut(tween(PolishMotion.durationMillis)) +
+                            slideOutVertically(tween(PolishMotion.durationMillis)) { it / 2 }
+                    } else {
+                        ExitTransition.None
+                    },
                 modifier =
                     Modifier
                         .align(Alignment.BottomEnd)
@@ -435,7 +460,8 @@ fun HomeScreen(
                         modifier = if (glassActions) Modifier.border(glassActionBorder, RoundedCornerShape(16.dp)) else Modifier,
                         shape = RoundedCornerShape(if (glassActions) 16.dp else 8.dp),
                         containerColor = if (glassActions) glassActionColor else MaterialTheme.colorScheme.primaryContainer,
-                        contentColor = if (glassActions) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onPrimaryContainer,
+                        contentColor =
+                            if (glassActions) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onPrimaryContainer,
                     ) {
                         Icon(
                             imageVector = MetrolistIcons.Outlined.AudioCapture,
@@ -447,7 +473,8 @@ fun HomeScreen(
                         modifier = if (glassActions) Modifier.border(glassActionBorder, RoundedCornerShape(16.dp)) else Modifier,
                         shape = RoundedCornerShape(if (glassActions) 16.dp else 12.dp),
                         containerColor = if (glassActions) glassActionColor else MaterialTheme.colorScheme.primaryContainer,
-                        contentColor = if (glassActions) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onPrimaryContainer,
+                        contentColor =
+                            if (glassActions) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onPrimaryContainer,
                     ) {
                         Icon(
                             imageVector = MetrolistIcons.Rounded.Shuffle,

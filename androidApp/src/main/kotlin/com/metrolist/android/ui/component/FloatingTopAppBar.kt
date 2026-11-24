@@ -8,8 +8,8 @@
 package com.metrolist.android.ui.component
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.border
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -39,12 +39,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.unit.dp
 import com.metrolist.shared.settings.Settings
 import com.metrolist.shared.ui.navigation.LocalGlassNavigationState
 import dev.chrisbanes.haze.HazeInput
 import dev.chrisbanes.haze.blur.HazeBlurStyle
 import dev.chrisbanes.haze.blur.hazeBlur
-import androidx.compose.ui.unit.dp
 
 private val FloatingBarElementSize = 48.dp
 private val FloatingBarElementShadow = 4.dp
@@ -70,10 +70,38 @@ fun TopBarIconButton(
     content: @Composable () -> Unit,
 ) {
     val backdrop = LocalGlassNavigationState.current
-    val radius = (Settings.shared.glassBlurStrength.coerceIn(0f, 100f) / 100f * when (Settings.shared.glassStyle) { "FROSTED" -> 24f; "CLEAR" -> 8f; else -> 20f }).dp
+    val radius =
+        (
+            Settings.shared.glassBlurStrength.coerceIn(0f, 100f) / 100f *
+                when (Settings.shared.glassStyle) {
+                    "FROSTED" -> 24f
+                    "CLEAR" -> 8f
+                    else -> 20f
+                }
+        ).dp
     val blurStyle = remember(radius) { HazeBlurStyle { blurRadius(radius) } }
-    val border = if (glass) BorderStroke(1.dp, Brush.verticalGradient(listOf(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f), MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.15f)))) else null
-    val tint = if (glass) MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = (Settings.shared.glassTintStrength / 100f * 0.7f).coerceIn(0.2f, 0.85f)) else MaterialTheme.colorScheme.surfaceContainerHigh
+    val border =
+        if (glass) {
+            BorderStroke(
+                1.dp,
+                Brush.verticalGradient(
+                    listOf(
+                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f),
+                        MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.15f),
+                    ),
+                ),
+            )
+        } else {
+            null
+        }
+    val tint =
+        if (glass) {
+            MaterialTheme.colorScheme.surfaceContainerHigh.copy(
+                alpha = (Settings.shared.glassTintStrength / 100f * 0.7f).coerceIn(0.2f, 0.85f),
+            )
+        } else {
+            MaterialTheme.colorScheme.surfaceContainerHigh
+        }
     if (floating) {
         FilledTonalIconButton(
             onClick = onClick,
@@ -81,8 +109,15 @@ fun TopBarIconButton(
                 modifier
                     .size(FloatingBarElementSize)
                     .shadow(FloatingBarElementShadow, CircleShape)
-                    .then(if (glass && backdrop != null) Modifier.clip(CircleShape).hazeBlur(HazeInput.Backdrop(backdrop), blurStyle) else Modifier)
-                    .then(if (border != null) Modifier.border(border, CircleShape) else Modifier),
+                    .then(
+                        if (glass &&
+                            backdrop != null
+                        ) {
+                            Modifier.clip(CircleShape).hazeBlur(HazeInput.Backdrop(backdrop), blurStyle)
+                        } else {
+                            Modifier
+                        },
+                    ).then(if (border != null) Modifier.border(border, CircleShape) else Modifier),
             shape = CircleShape,
             colors =
                 IconButtonDefaults.filledTonalIconButtonColors(
@@ -114,10 +149,38 @@ fun FloatingTopAppBar(
     actions: @Composable RowScope.() -> Unit,
 ) {
     val backdrop = LocalGlassNavigationState.current
-    val radius = (Settings.shared.glassBlurStrength.coerceIn(0f, 100f) / 100f * when (Settings.shared.glassStyle) { "FROSTED" -> 24f; "CLEAR" -> 8f; else -> 20f }).dp
+    val radius =
+        (
+            Settings.shared.glassBlurStrength.coerceIn(0f, 100f) / 100f *
+                when (Settings.shared.glassStyle) {
+                    "FROSTED" -> 24f
+                    "CLEAR" -> 8f
+                    else -> 20f
+                }
+        ).dp
     val blurStyle = remember(radius) { HazeBlurStyle { blurRadius(radius) } }
-    val border = if (glass) BorderStroke(1.dp, Brush.verticalGradient(listOf(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f), MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.15f)))) else null
-    val tint = if (glass) MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = (Settings.shared.glassTintStrength / 100f * 0.7f).coerceIn(0.2f, 0.85f)) else MaterialTheme.colorScheme.surfaceContainerHigh
+    val border =
+        if (glass) {
+            BorderStroke(
+                1.dp,
+                Brush.verticalGradient(
+                    listOf(
+                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f),
+                        MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.15f),
+                    ),
+                ),
+            )
+        } else {
+            null
+        }
+    val tint =
+        if (glass) {
+            MaterialTheme.colorScheme.surfaceContainerHigh.copy(
+                alpha = (Settings.shared.glassTintStrength / 100f * 0.7f).coerceIn(0.2f, 0.85f),
+            )
+        } else {
+            MaterialTheme.colorScheme.surfaceContainerHigh
+        }
     Row(
         modifier =
             modifier
@@ -128,7 +191,16 @@ fun FloatingTopAppBar(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Surface(
-            modifier = Modifier.weight(1f).height(FloatingBarElementSize).then(if (glass && backdrop != null) Modifier.clip(CircleShape).hazeBlur(HazeInput.Backdrop(backdrop), blurStyle) else Modifier),
+            modifier =
+                Modifier.weight(1f).height(FloatingBarElementSize).then(
+                    if (glass &&
+                        backdrop != null
+                    ) {
+                        Modifier.clip(CircleShape).hazeBlur(HazeInput.Backdrop(backdrop), blurStyle)
+                    } else {
+                        Modifier
+                    },
+                ),
             shape = CircleShape,
             color = tint,
             border = border,

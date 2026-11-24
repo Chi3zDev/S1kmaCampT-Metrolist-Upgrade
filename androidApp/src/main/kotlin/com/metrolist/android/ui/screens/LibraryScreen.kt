@@ -76,12 +76,12 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.metrolist.android.streak.StreakCard
-import com.metrolist.android.streak.rememberListeningStreak
 import com.metrolist.android.LocalMiniPlayerBottomInset
 import com.metrolist.android.extensions.isInternetConnected
 import com.metrolist.android.listentogether.AndroidListenTogetherManager
 import com.metrolist.android.playback.LocalPlayerConnection
+import com.metrolist.android.streak.StreakCard
+import com.metrolist.android.streak.rememberListeningStreak
 import com.metrolist.android.ui.component.AdaptiveModalBottomSheet
 import com.metrolist.android.ui.component.SwipeGestureHandler
 import com.metrolist.android.ui.component.tabContentTopPadding

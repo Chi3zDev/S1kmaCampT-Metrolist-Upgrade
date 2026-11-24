@@ -181,6 +181,9 @@ import com.metrolist.android.playback.SongDownloadManager
 import com.metrolist.android.playback.isRunnable
 import com.metrolist.android.playback.resolveIncomingPlaybackSong
 import com.metrolist.android.playback.voiceSearchRequest
+import com.metrolist.android.recap.RecapScreen
+import com.metrolist.android.streak.StreakCelebrationPresenter
+import com.metrolist.android.streak.StreakScreen
 import com.metrolist.android.ui.component.BottomSheetMenu
 import com.metrolist.android.ui.component.FloatingTopAppBar
 import com.metrolist.android.ui.component.LocalMenuState
@@ -206,10 +209,6 @@ import com.metrolist.android.ui.screens.AutoPlaylistScreen
 import com.metrolist.android.ui.screens.BrowseScreen
 import com.metrolist.android.ui.screens.DownloadsScreen
 import com.metrolist.android.ui.screens.HistoryScreen
-import com.metrolist.android.recap.RecapScreen
-import com.metrolist.android.streak.StreakScreen
-import com.metrolist.android.streak.StreakCelebrationPresenter
-import com.metrolist.android.ui.screens.ProfileScreen
 import com.metrolist.android.ui.screens.HomeScreen
 import com.metrolist.android.ui.screens.HomeSectionScreen
 import com.metrolist.android.ui.screens.IntegrationsScreen
@@ -217,6 +216,7 @@ import com.metrolist.android.ui.screens.LibraryScreen
 import com.metrolist.android.ui.screens.LoginScreen
 import com.metrolist.android.ui.screens.PlaylistScreen
 import com.metrolist.android.ui.screens.PodcastScreen
+import com.metrolist.android.ui.screens.ProfileScreen
 import com.metrolist.android.ui.screens.RecognitionHistoryScreen
 import com.metrolist.android.ui.screens.RecognitionScreen
 import com.metrolist.android.ui.screens.SearchScreen
@@ -317,6 +317,8 @@ import com.metrolist.shared.state.UploadNotificationState
 import com.metrolist.shared.state.applyContentRegion
 import com.metrolist.shared.ui.LocalIsInPipMode
 import com.metrolist.shared.ui.LocalIsTv
+import com.metrolist.shared.ui.LocalPlayerEffectsAllowed
+import com.metrolist.shared.ui.PolishMotion
 import com.metrolist.shared.ui.TokenLoginScreen
 import com.metrolist.shared.ui.YouTubeSyncSnackbar
 import com.metrolist.shared.ui.components.AlertDialog
@@ -329,8 +331,6 @@ import com.metrolist.shared.ui.components.PopupVisibility
 import com.metrolist.shared.ui.components.UnavailableSongSnackbar
 import com.metrolist.shared.ui.components.images.AsyncImage
 import com.metrolist.shared.ui.components.lyrics.LyricsTranslationSnackbar
-import com.metrolist.shared.ui.LocalPlayerEffectsAllowed
-import com.metrolist.shared.ui.PolishMotion
 import com.metrolist.shared.ui.components.rememberBottomSheetState
 import com.metrolist.shared.ui.design.expressive.components.ExpressiveMiniPlayerHeight
 import com.metrolist.shared.ui.haptics.HapticEvent
@@ -350,17 +350,13 @@ import com.metrolist.shared.ui.navigation.AlbumSeed
 import com.metrolist.shared.ui.navigation.DesktopContentMaxWidth
 import com.metrolist.shared.ui.navigation.LocalAlbumArtworkSource
 import com.metrolist.shared.ui.navigation.LocalContentObscured
-import com.metrolist.shared.ui.navigation.LocalFloatingNavBar
-import com.metrolist.shared.ui.navigation.LocalGlassNavbarBottomOffset
 import com.metrolist.shared.ui.navigation.LocalExpandGlassNavigation
-import com.metrolist.shared.ui.navigation.LocalGlassMotionAllowed
+import com.metrolist.shared.ui.navigation.LocalFloatingNavBar
 import com.metrolist.shared.ui.navigation.LocalGlassBubbleAllowed
-import com.metrolist.shared.ui.navigation.glassNavigationMotionAllowed
-import com.metrolist.shared.ui.navigation.glassMorphNavbarBottomOffset
-import com.metrolist.shared.ui.navigation.glassMorphPlayerDown
-import com.metrolist.shared.ui.navigation.glassMorphPlayerStart
-import com.metrolist.shared.ui.navigation.LocalGlassNavigationMorphProgress
+import com.metrolist.shared.ui.navigation.LocalGlassMotionAllowed
+import com.metrolist.shared.ui.navigation.LocalGlassNavbarBottomOffset
 import com.metrolist.shared.ui.navigation.LocalGlassNavigationEnabled
+import com.metrolist.shared.ui.navigation.LocalGlassNavigationMorphProgress
 import com.metrolist.shared.ui.navigation.LocalGlassNavigationState
 import com.metrolist.shared.ui.navigation.LocalNavVisibilityScope
 import com.metrolist.shared.ui.navigation.LocalNavigationContainerState
@@ -371,6 +367,10 @@ import com.metrolist.shared.ui.navigation.NavigationDestination
 import com.metrolist.shared.ui.navigation.Navigator
 import com.metrolist.shared.ui.navigation.Screen
 import com.metrolist.shared.ui.navigation.currentAdaptiveLayout
+import com.metrolist.shared.ui.navigation.glassMorphNavbarBottomOffset
+import com.metrolist.shared.ui.navigation.glassMorphPlayerDown
+import com.metrolist.shared.ui.navigation.glassMorphPlayerStart
+import com.metrolist.shared.ui.navigation.glassNavigationMotionAllowed
 import com.metrolist.shared.ui.navigation.isNavigationBar
 import com.metrolist.shared.ui.navigation.navigationPopupSource
 import com.metrolist.shared.ui.navigation.rememberNavigationMotion
@@ -830,10 +830,11 @@ fun MetrolistApp(
             (Settings.shared.floatingNavBar || useGlassNavigation) && !useDesktopUi && !usesDirectionalNavigation &&
                 navigationSuiteType.isNavigationBar
         val hazeState = rememberHazeState()
-        val canBlurGlass = remember(context) {
-            Build.VERSION.SDK_INT > Build.VERSION_CODES.S_V2 &&
-                !(context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager).isLowRamDevice
-        }
+        val canBlurGlass =
+            remember(context) {
+                Build.VERSION.SDK_INT > Build.VERSION_CODES.S_V2 &&
+                    !(context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager).isLowRamDevice
+            }
         val glassBackdrop = if (useGlass && canBlurGlass && !Settings.shared.glassLightMode) hazeState else null
         val isImeVisible = WindowInsets.ime.asPaddingValues().calculateBottomPadding() > 0.dp
         val shouldHideMiniPlayerForIme = isLandscape && isImeVisible
@@ -877,44 +878,61 @@ fun MetrolistApp(
         val density = LocalDensity.current
         var glassNavigationCollapsed by remember { mutableStateOf(false) }
         val glassScrollThreshold = with(density) { 24.dp.toPx() }
-        val glassScrollConnection = remember(useGlassNavigation, glassScrollThreshold) {
-            object : NestedScrollConnection {
-                private var accumulated = 0f
-                override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                    if (!useGlassNavigation || source != NestedScrollSource.UserInput) return Offset.Zero
-                    if (available.y == 0f) return Offset.Zero
-                    if (accumulated * available.y < 0f) accumulated = 0f
-                    accumulated += available.y
-                    if (kotlin.math.abs(accumulated) >= glassScrollThreshold) {
-                        glassNavigationCollapsed = accumulated < 0f
-                        accumulated = 0f
+        val glassScrollConnection =
+            remember(useGlassNavigation, glassScrollThreshold) {
+                object : NestedScrollConnection {
+                    private var accumulated = 0f
+
+                    override fun onPreScroll(
+                        available: Offset,
+                        source: NestedScrollSource,
+                    ): Offset {
+                        if (!useGlassNavigation || source != NestedScrollSource.UserInput) return Offset.Zero
+                        if (available.y == 0f) return Offset.Zero
+                        if (accumulated * available.y < 0f) accumulated = 0f
+                        accumulated += available.y
+                        if (kotlin.math.abs(accumulated) >= glassScrollThreshold) {
+                            glassNavigationCollapsed = accumulated < 0f
+                            accumulated = 0f
+                        }
+                        return Offset.Zero
                     }
-                    return Offset.Zero
                 }
             }
-        }
         LaunchedEffect(useGlassNavigation, currentRoute) { glassNavigationCollapsed = false }
         val appLifecycleState by lifecycleOwner.lifecycle.currentStateAsState()
-        val glassSystemMotionAllowed = remember(context, appLifecycleState) {
-            android.provider.Settings.Global.getFloat(
-                context.contentResolver, android.provider.Settings.Global.ANIMATOR_DURATION_SCALE, 1f,
-            ) > 0f
-        }
-        val glassDeviceMotionAllowed = remember(context) {
-            Build.VERSION.SDK_INT > Build.VERSION_CODES.R &&
-                !(context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager).isLowRamDevice
-        }
-        val glassMotionAllowed = glassNavigationMotionAllowed(
-            systemAllowed = glassSystemMotionAllowed,
-            deviceAllowed = glassDeviceMotionAllowed,
-            visible = appLifecycleState.isAtLeast(Lifecycle.State.RESUMED),
-            lightMode = Settings.shared.glassLightMode,
-            motionEnabled = Settings.shared.glassNavbarMotion != "OFF",
-        )
+        val glassSystemMotionAllowed =
+            remember(context, appLifecycleState) {
+                android.provider.Settings.Global.getFloat(
+                    context.contentResolver,
+                    android.provider.Settings.Global.ANIMATOR_DURATION_SCALE,
+                    1f,
+                ) > 0f
+            }
+        val glassDeviceMotionAllowed =
+            remember(context) {
+                Build.VERSION.SDK_INT > Build.VERSION_CODES.R &&
+                    !(context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager).isLowRamDevice
+            }
+        val glassMotionAllowed =
+            glassNavigationMotionAllowed(
+                systemAllowed = glassSystemMotionAllowed,
+                deviceAllowed = glassDeviceMotionAllowed,
+                visible = appLifecycleState.isAtLeast(Lifecycle.State.RESUMED),
+                lightMode = Settings.shared.glassLightMode,
+                motionEnabled = Settings.shared.glassNavbarMotion != "OFF",
+            )
         val glassMorphTarget = if (useGlassNavigation && shouldShowNavigationBar && glassNavigationCollapsed) 1f else 0f
-        val glassMorphProgress = if (glassMotionAllowed) {
-            animateFloatAsState(glassMorphTarget, PolishMotion.interactiveSpring(), label = "glassNavigationMorph").value.coerceIn(0f, 1f)
-        } else glassMorphTarget
+        val glassMorphProgress =
+            if (glassMotionAllowed) {
+                animateFloatAsState(
+                    glassMorphTarget,
+                    PolishMotion.interactiveSpring(),
+                    label = "glassNavigationMorph",
+                ).value.coerceIn(0f, 1f)
+            } else {
+                glassMorphTarget
+            }
         var navigationBarContentInset by remember(navigationSuiteType, useFloatingNavBar) { mutableStateOf(0.dp) }
         var floatingNavBarHeight by remember(navigationSuiteType, useFloatingNavBar) { mutableStateOf(0.dp) }
         val safeBottomPadding =
@@ -930,7 +948,8 @@ fun MetrolistApp(
                 label = "navigationVisibility",
             )
         val hasBottomNavigation = navigationSuiteType.isNavigationBar
-        val isExpressiveMiniPlayer = !useGlassMiniPlayer && Settings.shared.miniPlayerType == MiniPlayerType.EXPRESSIVE && !useDesktopMiniPlayer
+        val isExpressiveMiniPlayer =
+            !useGlassMiniPlayer && Settings.shared.miniPlayerType == MiniPlayerType.EXPRESSIVE && !useDesktopMiniPlayer
         val isModernMiniPlayer = (useGlassMiniPlayer || Settings.shared.miniPlayerType == MiniPlayerType.MODERN) && !useDesktopMiniPlayer
         val miniPlayerBottomSpacing =
             when {
@@ -956,12 +975,24 @@ fun MetrolistApp(
             } else {
                 MiniPlayerHeight
             }
-        val glassPlayerBelow = useGlassNavigation && useGlassMiniPlayer && Settings.shared.glassPlayerBelow && shouldRenderMiniPlayer && shouldShowNavigationBar
-        val glassMorphPlayer = useGlassNavigation && useGlassMiniPlayer && shouldRenderMiniPlayer && shouldShowNavigationBar && LocalConfiguration.current.screenWidthDp >= 280
+        val glassPlayerBelow =
+            useGlassNavigation && useGlassMiniPlayer && Settings.shared.glassPlayerBelow && shouldRenderMiniPlayer &&
+                shouldShowNavigationBar
+        val glassMorphPlayer =
+            useGlassNavigation && useGlassMiniPlayer && shouldRenderMiniPlayer && shouldShowNavigationBar &&
+                LocalConfiguration.current.screenWidthDp >= 280
         // Keep the bottom-sheet anchor fixed; move only its collapsed header with the same progress as the nav.
-        val glassPlayerMorphDown = if (glassMorphPlayer && !glassPlayerBelow) {
-            glassMorphPlayerDown(navigationBottomInset.value, safeBottomPadding.value, playerBelow = false, progress = glassMorphProgress).dp
-        } else 0.dp
+        val glassPlayerMorphDown =
+            if (glassMorphPlayer && !glassPlayerBelow) {
+                glassMorphPlayerDown(
+                    navigationBottomInset.value,
+                    safeBottomPadding.value,
+                    playerBelow = false,
+                    progress = glassMorphProgress,
+                ).dp
+            } else {
+                0.dp
+            }
         val miniPlayerInsets =
             calculateMiniPlayerInsets(
                 systemBottomInset = if (shouldRenderMiniPlayer) safeBottomPadding else navigationBarBottomPadding,
@@ -1485,10 +1516,13 @@ fun MetrolistApp(
                         CompositionLocalProvider(
                             LocalContentObscured provides (isInPipMode || contentObscured),
                             LocalFloatingNavBar provides useFloatingNavBar,
-                            LocalGlassNavbarBottomOffset provides glassMorphNavbarBottomOffset(
-                                miniPlayerHeight.value, miniPlayerBottomSpacing.value, glassPlayerBelow,
-                                if (glassMorphPlayer) glassMorphProgress else 0f,
-                            ).dp,
+                            LocalGlassNavbarBottomOffset provides
+                                glassMorphNavbarBottomOffset(
+                                    miniPlayerHeight.value,
+                                    miniPlayerBottomSpacing.value,
+                                    glassPlayerBelow,
+                                    if (glassMorphPlayer) glassMorphProgress else 0f,
+                                ).dp,
                             LocalGlassNavigationEnabled provides useGlassNavigation,
                             LocalGlassNavigationMorphProgress provides glassMorphProgress,
                             LocalGlassMotionAllowed provides glassMotionAllowed,
@@ -2025,7 +2059,15 @@ fun MetrolistApp(
                                                     }
                                                 }.layout { measurable, constraints ->
                                                     val availableDp = with(density) { constraints.maxWidth.toDp().value }
-                                                    val morphInset = if (glassMorphPlayer) glassMorphPlayerStart(availableDp, glassMorphProgress).dp else 0.dp
+                                                    val morphInset =
+                                                        if (glassMorphPlayer) {
+                                                            glassMorphPlayerStart(
+                                                                availableDp,
+                                                                glassMorphProgress,
+                                                            ).dp
+                                                        } else {
+                                                            0.dp
+                                                        }
                                                     val start = (miniPlayerRailPadding() + morphInset).roundToPx()
                                                     val down = glassPlayerMorphDown.roundToPx()
                                                     val child = measurable.measure(constraints.offset(horizontal = -start))
@@ -2607,7 +2649,8 @@ fun getEntryProvider(
                 onLogout = {
                     scope.launch {
                         authManager.clearAllCredentials()
-                        context.packageManager.getLaunchIntentForPackage(context.packageName)
+                        context.packageManager
+                            .getLaunchIntentForPackage(context.packageName)
                             ?.apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK) }
                             ?.let(context::startActivitySafely)
                     }

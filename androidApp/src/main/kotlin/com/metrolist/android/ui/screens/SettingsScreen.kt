@@ -253,63 +253,65 @@ fun SettingsScreen(
                 },
             ),
         )
-    val bundledFontActions = listOf(
-        QuickFontManager.NUNITO_EXTRABOLD_ID to stringResource(Res.string.app_font_nunito_extrabold),
-        QuickFontManager.NUNITO_BOLD_ID to stringResource(Res.string.app_font_nunito_bold),
-    ).map { (id, label) ->
-        SettingsHostAction(
-            id = "bundledFont:$id",
-            title = label,
-            description = stringResource(if (activeFontId() == id) Res.string.app_font_active else Res.string.app_font_installed),
-            onClick = {
-                SharedPreferences.shared.appFont = FontOption.SYSTEM
-                SharedPreferences.shared.androidActiveFontId = id
-            },
-        )
-    }
-    val fontDownloadActions =
-        bundledFontActions + QuickFontManager.fonts.map { font ->
-            val fontName = stringResource(font.labelRes)
-            val isDownloaded = font.id in installedFontIds.orEmpty()
-            val isActive = activeFontId() == font.id && isDownloaded
+    val bundledFontActions =
+        listOf(
+            QuickFontManager.NUNITO_EXTRABOLD_ID to stringResource(Res.string.app_font_nunito_extrabold),
+            QuickFontManager.NUNITO_BOLD_ID to stringResource(Res.string.app_font_nunito_bold),
+        ).map { (id, label) ->
             SettingsHostAction(
-                id = "downloadFont:${font.id}",
-                title = fontName,
-                description =
-                    when {
-                        downloadingFontId == font.id -> stringResource(Res.string.app_font_downloading, fontName)
-                        installedFontIds == null -> stringResource(Res.string.app_font_checking)
-                        isActive -> stringResource(Res.string.app_font_active)
-                        isDownloaded -> stringResource(Res.string.app_font_installed)
-                        else -> stringResource(Res.string.app_font_download_and_use)
-                    },
-                enabled = installedFontIds != null && downloadingFontId == null,
+                id = "bundledFont:$id",
+                title = label,
+                description = stringResource(if (activeFontId() == id) Res.string.app_font_active else Res.string.app_font_installed),
                 onClick = {
-                    if (isDownloaded) {
-                        SharedPreferences.shared.appFont = FontOption.SYSTEM
-                        SharedPreferences.shared.androidActiveFontId = font.id
-                    } else {
-                        downloadingFontId = font.id
-                        scope.launch {
-                            QuickFontManager
-                                .downloadFonts(context, font.id)
-                                .onSuccess {
-                                    SharedPreferences.shared.appFont = FontOption.SYSTEM
-                                    SharedPreferences.shared.androidActiveFontId = font.id
-                                }.onFailure {
-                                    Toast
-                                        .makeText(
-                                            context,
-                                            getString(Res.string.app_font_download_error, fontName),
-                                            Toast.LENGTH_LONG,
-                                        ).show()
-                                }
-                            downloadingFontId = null
-                        }
-                    }
+                    SharedPreferences.shared.appFont = FontOption.SYSTEM
+                    SharedPreferences.shared.androidActiveFontId = id
                 },
             )
         }
+    val fontDownloadActions =
+        bundledFontActions +
+            QuickFontManager.fonts.map { font ->
+                val fontName = stringResource(font.labelRes)
+                val isDownloaded = font.id in installedFontIds.orEmpty()
+                val isActive = activeFontId() == font.id && isDownloaded
+                SettingsHostAction(
+                    id = "downloadFont:${font.id}",
+                    title = fontName,
+                    description =
+                        when {
+                            downloadingFontId == font.id -> stringResource(Res.string.app_font_downloading, fontName)
+                            installedFontIds == null -> stringResource(Res.string.app_font_checking)
+                            isActive -> stringResource(Res.string.app_font_active)
+                            isDownloaded -> stringResource(Res.string.app_font_installed)
+                            else -> stringResource(Res.string.app_font_download_and_use)
+                        },
+                    enabled = installedFontIds != null && downloadingFontId == null,
+                    onClick = {
+                        if (isDownloaded) {
+                            SharedPreferences.shared.appFont = FontOption.SYSTEM
+                            SharedPreferences.shared.androidActiveFontId = font.id
+                        } else {
+                            downloadingFontId = font.id
+                            scope.launch {
+                                QuickFontManager
+                                    .downloadFonts(context, font.id)
+                                    .onSuccess {
+                                        SharedPreferences.shared.appFont = FontOption.SYSTEM
+                                        SharedPreferences.shared.androidActiveFontId = font.id
+                                    }.onFailure {
+                                        Toast
+                                            .makeText(
+                                                context,
+                                                getString(Res.string.app_font_download_error, fontName),
+                                                Toast.LENGTH_LONG,
+                                            ).show()
+                                    }
+                                downloadingFontId = null
+                            }
+                        }
+                    },
+                )
+            }
     var totalCacheSize by remember { mutableLongStateOf(0L) }
     var freeStorageSize by remember { mutableLongStateOf(0L) }
     var isCalculatingCacheSize by remember { mutableStateOf(true) }

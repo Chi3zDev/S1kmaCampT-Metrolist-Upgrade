@@ -2,6 +2,7 @@ package com.metrolist.android.ui.screens.settings
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -10,13 +11,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Modifier
-import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.metrolist.android.recap.RecapEntry
 import com.metrolist.android.LocalMiniPlayerBottomInset
 import com.metrolist.android.playback.LocalPlayerConnection
+import com.metrolist.android.recap.RecapEntry
 import com.metrolist.android.ui.menu.AlbumMenu
 import com.metrolist.android.ui.menu.ArtistMenu
 import com.metrolist.android.ui.menu.SongMenu
