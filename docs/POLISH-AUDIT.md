@@ -18,7 +18,7 @@ Basis: `main` 70eb9763 (Upgrade 1 beta 1). Audit kode awal; bukan hasil uji visu
 - [ ] P2 · `RecapScreen.kt:167–210` memakai tiga warna dengan dua lingkaran statis untuk semua slide dan `AnimatedContent` default; variasi masuk, mesh, geser/fade/parallax belum ada. Risiko: jank, efek bergerak di background, motion sickness.
 - [ ] P1 · `RecapScreen.kt:159` progress diperbarui setiap 50 ms selama tidak ditekan/dijeda; audit lifecycle, visibilitas, mode ringan dan timer tanpa mengubah semantik data. Pertimbangkan dampak aksesibilitas hit target dan navigasi gesture; uji TalkBack.
 - [ ] P2 · Hari puncak/jam favorit tidak tampak dalam model slide saat ini; butuh sumber data yang valid. **Jika memerlukan query atau perubahan database, tanya pengguna dahulu.** Jangan mengarang statistik.
-- [ ] P1 · `RecapShare.kt` mempunyai renderer Canvas terpisah dan font sistem, sedangkan layar memakai Compose; kesamaan hasil dan font belum terjamin. Perbaiki rendering bersama atau verifikasi representasi; risiko ekspor, memori dan teks terpotong.
+- [ ] P1 · `RecapScreen.kt` membagikan tangkapan graphics layer layar, sedangkan `RecapShare.kt` adalah renderer terpisah yang tidak ditemukan pemanggilnya dalam source. Verifikasi ekspor hasil tangkapan, resolusi, font dan pemotongan teks; jangan hapus renderer lama tanpa memeriksa pemakai lainnya.
 
 ## 3. Navbar dan kaca
 - [ ] P2 · `FloatingNavigationBar.kt` sudah memiliki bubble/drag dan spring damping 0,9; belum memakai bahasa gerak bersama. Audit morph scroll dan konsistensi tint/border/padding pada tombol, chip, kartu dan Profil. Risiko perubahan utama navigasi: **tanya sebelum mengubah perilaku navigasi**, fokus, urutan atau rute.
@@ -45,4 +45,5 @@ Basis: `main` 70eb9763 (Upgrade 1 beta 1). Audit kode awal; bukan hasil uji visu
 
 ## Log pekerjaan
 - Audit kode awal dibuat; tidak ada kode aplikasi yang diubah pada tahap audit.
-- Streak: implementasi awal, tes gerbang dan label aksesibilitas dipush. Pemeriksaan perangkat, profil performa dan build commit terakhir tetap terbuka.
+- Streak: implementasi awal, tes gerbang dan label aksesibilitas dipush. Build debug dan tes terpilih lulus; benchmark dan pemeriksaan perangkat masih terbuka.
+- Recap: implementasi awal mesh berbasis tema, transisi, pembatasan lifecycle dan area teks bergulir. Tidak ada perubahan database; pengujian dan fitur lain masih terbuka.

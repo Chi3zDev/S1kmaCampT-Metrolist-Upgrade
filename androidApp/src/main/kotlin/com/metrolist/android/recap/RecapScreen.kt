@@ -1,10 +1,22 @@
 package com.metrolist.android.recap
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -36,6 +48,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.MotionDurationScale
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import android.graphics.Bitmap
 import android.widget.Toast
 import androidx.compose.ui.draw.clip
@@ -57,6 +72,14 @@ import coil3.compose.AsyncImage
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import com.metrolist.shared.db.MusicDatabase
+import com.metrolist.shared.settings.Settings
+import com.metrolist.shared.ui.LocalPlayerEffectsAllowed
+import com.metrolist.shared.ui.PolishMotion
+import com.metrolist.shared.ui.navigation.LocalRootContentActive
+import com.metrolist.shared.ui.navigation.LocalContentObscured
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.currentStateAsState
 import com.metrolist.shared.generated.resources.Res
 import com.metrolist.shared.generated.resources.back
 import com.metrolist.shared.generated.resources.recap_empty
@@ -156,12 +179,16 @@ private fun RecapStory(data: RecapData, onBack: () -> Unit, onPeriod: () -> Unit
     var page by remember(data) { mutableIntStateOf(0) }
     var progress by remember(data, page) { mutableFloatStateOf(0f) }
     var pressed by remember { mutableStateOf(false) }
-    LaunchedEffect(page, pressed, paused) {
-        while (!pressed && !paused && progress < 1f) {
+    val lifecycle by LocalLifecycleOwner.current.lifecycle.currentStateAsState()
+    val visible = lifecycle == Lifecycle.State.RESUMED && LocalRootContentActive.current && !LocalContentObscured.current
+    val motionScale = rememberCoroutineScope().coroutineContext[MotionDurationScale]?.scaleFactor ?: 1f
+    val motionEnabled = visible && motionScale > 0f && !Settings.shared.glassLightMode && LocalPlayerEffectsAllowed.current
+    LaunchedEffect(page, pressed, paused, visible) {
+        while (recapTimerRunning(visible, pressed, paused) && progress < 1f) {
             delay(50)
             progress = (progress + 1f / 120f).coerceAtMost(1f)
         }
-        if (!pressed && !paused && progress >= 1f && page < pages.lastIndex) page++
+        if (recapTimerRunning(visible, pressed, paused) && progress >= 1f && page < pages.lastIndex) page++
     }
     val colors = MaterialTheme.colorScheme
     val slideColor = when (pages[page]) {
@@ -203,20 +230,28 @@ private fun RecapStory(data: RecapData, onBack: () -> Unit, onPeriod: () -> Unit
                 drawLayer(graphicsLayer)
             }.background(Brush.linearGradient(listOf(colors.surface, slideColor, colors.surface))),
         ) {
-        Canvas(Modifier.fillMaxSize()) {
-            drawCircle(color = slideColor.copy(alpha = .35f), radius = size.width * .48f, center = Offset(size.width, size.height * .19f))
-            drawCircle(color = slideColor.copy(alpha = .25f), radius = size.width * .38f, center = Offset(0f, size.height * .85f))
-        }
-        AnimatedContent(targetState = pages[page], modifier = Modifier.align(Alignment.Center).padding(28.dp), label = "recapSlide") { slide ->
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        RecapBackdrop(pages[page], slideColor, colors.primary, colors.tertiary, motionEnabled)
+        AnimatedContent(
+            targetState = pages[page],
+            modifier = Modifier.fillMaxSize().padding(start = 28.dp, end = 28.dp, top = 88.dp, bottom = 24.dp),
+            contentAlignment = Alignment.Center,
+            transitionSpec = {
+                val duration = if (motionEnabled) PolishMotion.durationMillis else 0
+                val direction = if (targetState >= initialState) 1 else -1
+                (fadeIn(tween(duration)) + slideInHorizontally(tween(duration)) { direction * it / 7 })
+                    .togetherWith(fadeOut(tween(duration)) + slideOutHorizontally(tween(duration)) { -direction * it / 12 })
+            },
+            label = "recapSlide",
+        ) { slide ->
+            Column(modifier = Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 when (slide) {
                     0 -> {
-                        CountingNumber(data.playCount.toLong())
+                        CountingNumber(data.playCount.toLong(), motionEnabled)
                         Text(stringResource(Res.string.story_intro, data.playCount), style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
                     }
                     1 -> {
                         Text(stringResource(Res.string.recap_minutes), style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-                        CountingNumber(data.minutes)
+                        CountingNumber(data.minutes, motionEnabled)
                     }
                     2 -> {
                         Text(stringResource(Res.string.recap_top_artists), style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold)
@@ -282,11 +317,12 @@ private fun RecapStory(data: RecapData, onBack: () -> Unit, onPeriod: () -> Unit
 }
 
 @Composable
-private fun CountingNumber(value: Long) {
-    var started by remember(value) { mutableStateOf(false) }
-    LaunchedEffect(value) { started = true }
-    val fraction by animateFloatAsState(if (started) 1f else 0f, animationSpec = tween(900), label = "recapNumber")
-    Text((value * fraction).toLong().toString(), style = MaterialTheme.typography.displayLarge, fontWeight = FontWeight.Black, color = MaterialTheme.colorScheme.primary)
+private fun CountingNumber(value: Long, animate: Boolean) {
+    var started by remember(value) { mutableStateOf(!animate) }
+    LaunchedEffect(value, animate) { started = true }
+    val fraction by animateFloatAsState(if (started || !animate) 1f else 0f, animationSpec = tween(if (animate) PolishMotion.durationMillis else 0), label = "recapNumber")
+    Text((value * fraction).toLong().toString(), style = MaterialTheme.typography.displayLarge, fontWeight = FontWeight.Black, color = MaterialTheme.colorScheme.primary,
+        modifier = Modifier.clearAndSetSemantics { contentDescription = value.toString() })
 }
 
 @Composable
@@ -297,6 +333,28 @@ private fun StoryRow(rank: Int, title: String, subtitle: String?, artwork: Strin
         Column(Modifier.weight(1f)) {
             Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.titleMedium)
             if (!subtitle.isNullOrBlank()) Text(subtitle, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodySmall)
+        }
+    }
+}
+
+@Composable
+private fun RecapBackdrop(slide: Int, base: androidx.compose.ui.graphics.Color, primary: androidx.compose.ui.graphics.Color, accent: androidx.compose.ui.graphics.Color, animate: Boolean) {
+    val phase = if (animate) {
+        val transition = rememberInfiniteTransition(label = "recapMesh")
+        val value by transition.animateFloat(0f, 1f, infiniteRepeatable(tween(18_000, easing = LinearEasing), RepeatMode.Reverse), label = "recapMeshPhase")
+        value
+    } else 0f
+    Canvas(Modifier.fillMaxSize()) {
+        val drift = (phase - .5f) * size.width * .12f
+        val positions = when (slide % 3) {
+            0 -> listOf(Offset(size.width * .85f + drift, size.height * .18f), Offset(size.width * .15f - drift, size.height * .78f))
+            1 -> listOf(Offset(size.width * .15f - drift, size.height * .25f), Offset(size.width * .85f + drift, size.height * .68f))
+            else -> listOf(Offset(size.width * .55f + drift, size.height * .10f), Offset(size.width * .35f - drift, size.height * .90f))
+        }
+        positions.forEachIndexed { i, center ->
+            val color = if (i == 0) primary else accent
+            val radius = size.width * if (i == 0) .75f else .60f
+            drawCircle(Brush.radialGradient(listOf(color.copy(alpha = .32f), base.copy(alpha = 0f)), center, radius), radius, center)
         }
     }
 }
