@@ -21,7 +21,6 @@ import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
@@ -64,7 +63,7 @@ internal fun renderGlassLyricsPoster(
     fun measureText(fontSize: Float) = textMeasurer.measure(
         text,
         style = TextStyle(color = style.textColor, fontFamily = family, fontWeight = if (style.font == LyricsPosterFont.NUNITO_EXTRABOLD) FontWeight.ExtraBold else FontWeight.Bold,
-            fontSize = fontSize.sp, lineHeight = (fontSize * 1.15f).sp, textAlign = TextAlign.Start),
+            fontSize = fontSize.sp, lineHeight = (fontSize * 1.15f).sp, textAlign = style.alignment),
         constraints = textConstraints,
         maxLines = Int.MAX_VALUE,
         overflow = TextOverflow.Clip,
@@ -100,7 +99,7 @@ internal fun renderGlassLyricsPoster(
             drawRect(Color(0xFF191412).copy(alpha = 0.67f), topLeft = Offset(cardLeft, cardTop), size = Size(cardWidth, cardHeight))
             drawRect(Color.Black.copy(alpha = 0.23f), topLeft = Offset(cardLeft, footerTop), size = Size(cardWidth, footerHeight))
             drawLine(Color.White.copy(alpha = 0.14f), Offset(cardLeft, footerTop), Offset(cardLeft + cardWidth, footerTop), strokeWidth = scale * 0.7f)
-            val alignmentOffset = lyricsPosterScaleOffset(TextAlign.Start, layoutDirection, textWidth, fit.drawScale)
+            val alignmentOffset = lyricsPosterScaleOffset(style.alignment, layoutDirection, textWidth, fit.drawScale)
             translate(cardLeft + inner + alignmentOffset, cardTop + inner) {
                 scale(fit.drawScale, pivot = Offset.Zero) { drawText(measured) }
             }
