@@ -66,6 +66,17 @@ internal fun glassPosterFooterLayout(
     }
 }
 
+internal data class GlassPosterCoverCrop(val offset: IntOffset, val size: IntSize)
+
+/** Center-crop to the target aspect ratio without stretching rectangular artwork. */
+internal fun glassPosterCoverCrop(source: IntSize, target: IntSize): GlassPosterCoverCrop {
+    require(source.width > 0 && source.height > 0 && target.width > 0 && target.height > 0)
+    val sourceIsWider = source.width.toLong() * target.height > target.width.toLong() * source.height
+    val cropWidth = if (sourceIsWider) (source.height.toLong() * target.width / target.height).toInt().coerceAtLeast(1) else source.width
+    val cropHeight = if (sourceIsWider) source.height else (source.width.toLong() * target.height / target.width).toInt().coerceAtLeast(1)
+    return GlassPosterCoverCrop(IntOffset((source.width - cropWidth) / 2, (source.height - cropHeight) / 2), IntSize(cropWidth, cropHeight))
+}
+
 /** The same renderer is used for preview and export. No backdrop blur is applied. */
 internal fun renderGlassLyricsPoster(
     lyrics: String,
@@ -120,11 +131,10 @@ internal fun renderGlassLyricsPoster(
         drawRect(style.backgroundColor)
         when (style.background) {
             LyricsImageBackground.BLUR, LyricsImageBackground.GLASS -> blurredArtwork?.let { image ->
-                val cropWidth = (image.height * width / height).toInt().coerceIn(1, image.width)
-                val cropHeight = (image.width * height / width).toInt().coerceIn(1, image.height)
-                val source = if (width < height) IntSize(cropWidth, image.height) else IntSize(image.width, cropHeight)
-                drawImage(image, srcOffset = IntOffset((image.width - source.width) / 2, (image.height - source.height) / 2),
-                    srcSize = source, dstSize = IntSize(width.toInt(), height.toInt()), filterQuality = FilterQuality.High)
+                val target = IntSize(bitmap.width, bitmap.height)
+                val crop = glassPosterCoverCrop(IntSize(image.width, image.height), target)
+                drawImage(image, srcOffset = crop.offset,
+                    srcSize = crop.size, dstSize = target, filterQuality = FilterQuality.High)
             }
             LyricsImageBackground.GRADIENT -> drawRect(Brush.linearGradient(palette.firstOrNull()?.let(::getGradientColors) ?: listOf(style.backgroundColor, style.backgroundColor)))
             LyricsImageBackground.SOLID -> Unit

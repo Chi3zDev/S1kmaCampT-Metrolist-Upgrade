@@ -2,6 +2,8 @@ package com.metrolist.shared.ui.components.lyrics
 
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -19,6 +21,14 @@ class GlassLyricsPosterTest {
         assertEquals(glassPosterCardWidthFraction(1.35f), glassPosterCardWidthFraction(2f))
         assertEquals(0.78f, glassPosterCardWidthFraction(Float.NaN), 0.0001f)
         assertEquals(0.78f, glassPosterCardWidthFraction(Float.POSITIVE_INFINITY), 0.0001f)
+    }
+
+    @Test
+    fun posterArtworkCropsToSquareAndStoryWithoutStretching() {
+        assertEquals(GlassPosterCoverCrop(IntOffset(50, 0), IntSize(100, 100)), glassPosterCoverCrop(IntSize(200, 100), IntSize(100, 100)))
+        assertEquals(GlassPosterCoverCrop(IntOffset(0, 50), IntSize(100, 100)), glassPosterCoverCrop(IntSize(100, 200), IntSize(100, 100)))
+        assertEquals(GlassPosterCoverCrop(IntOffset(22, 0), IntSize(56, 100)), glassPosterCoverCrop(IntSize(100, 100), IntSize(90, 160)))
+        assertEquals(GlassPosterCoverCrop(IntOffset(0, 28), IntSize(100, 177)), glassPosterCoverCrop(IntSize(100, 233), IntSize(90, 160)))
     }
 
     @Test
