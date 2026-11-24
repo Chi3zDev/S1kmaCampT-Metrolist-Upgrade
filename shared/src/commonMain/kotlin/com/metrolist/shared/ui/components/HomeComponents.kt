@@ -50,7 +50,14 @@ fun GenreCard(
         modifier = modifier.height(52.dp),
         shape = shape,
         color = glassCardColor(MaterialTheme.colorScheme.secondaryContainer),
-        contentColor = if (glassCardBorder() != null) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSecondaryContainer,
+        contentColor =
+            if (glassCardBorder() !=
+                null
+            ) {
+                MaterialTheme.colorScheme.onSurface
+            } else {
+                MaterialTheme.colorScheme.onSecondaryContainer
+            },
         border = glassCardBorder(),
         tonalElevation = 1.dp,
     ) {

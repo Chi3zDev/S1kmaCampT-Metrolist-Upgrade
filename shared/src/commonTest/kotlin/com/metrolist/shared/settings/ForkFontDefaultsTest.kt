@@ -25,6 +25,7 @@ class ForkFontDefaultsTest {
         assertEquals("", imported.androidActiveFontId)
         assertEquals("font.ttf", imported.androidCustomFontFile)
     }
+
     @Test
     fun freshAppearanceDefaultsDoNotOverwriteStoredChoices() {
         val fresh = Settings(MapSettings())

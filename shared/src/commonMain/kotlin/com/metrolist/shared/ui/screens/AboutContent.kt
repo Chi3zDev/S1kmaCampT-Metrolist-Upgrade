@@ -35,8 +35,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.metrolist.shared.generated.resources.Res
 import com.metrolist.shared.generated.resources.about
-import com.metrolist.shared.generated.resources.about_github_upgrade
 import com.metrolist.shared.generated.resources.about_github_metrolist
+import com.metrolist.shared.generated.resources.about_github_upgrade
 import com.metrolist.shared.generated.resources.brand_discord
 import com.metrolist.shared.generated.resources.brand_github
 import com.metrolist.shared.generated.resources.brand_telegram
@@ -316,11 +316,12 @@ internal fun CommunitySection(
                             AboutCommunityLinkKind.REPOSITORY -> MetrolistIconsBrand.Github
                             AboutCommunityLinkKind.LICENSE -> MetrolistIcons.Outlined.Info
                         },
-                    title = if (link.url.endsWith("S1kmaCampT-Metrolist-Upgrade")) {
-                        sharedStringResource(Res.string.about_github_upgrade)
-                    } else {
-                        sharedStringResource(Res.string.about_github_metrolist)
-                    },
+                    title =
+                        if (link.url.endsWith("S1kmaCampT-Metrolist-Upgrade")) {
+                            sharedStringResource(Res.string.about_github_upgrade)
+                        } else {
+                            sharedStringResource(Res.string.about_github_metrolist)
+                        },
                     onClick = { onOpenLink(link) },
                 )
             },

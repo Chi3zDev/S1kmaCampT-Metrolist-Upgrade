@@ -403,7 +403,8 @@ fun <T> AdaptiveNavigationScaffold(
                         val morph = if (glass) LocalGlassNavigationMorphProgress.current.coerceIn(0f, 1f) else 0f
                         BoxWithConstraints(
                             modifier =
-                                Modifier.align(if (glass) Alignment.BottomStart else Alignment.BottomCenter)
+                                Modifier
+                                    .align(if (glass) Alignment.BottomStart else Alignment.BottomCenter)
                                     .then(if (glass) Modifier.fillMaxWidth() else Modifier)
                                     .onSizeChanged { size ->
                                         onFloatingNavigationOccupiedHeightChanged(with(density) { size.height.toDp() })

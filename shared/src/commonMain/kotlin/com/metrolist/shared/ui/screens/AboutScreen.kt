@@ -53,7 +53,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Size
@@ -66,6 +65,7 @@ import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
@@ -76,27 +76,27 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.metrolist.shared.BuildConfig
 import com.metrolist.shared.generated.resources.Res
+import com.metrolist.shared.generated.resources.about_nunito_credit
 import com.metrolist.shared.generated.resources.about_play_favorite_song
 import com.metrolist.shared.generated.resources.about_upgrade_developer
-import com.metrolist.shared.generated.resources.about_upgrade_version
-import com.metrolist.shared.generated.resources.about_nunito_credit
-import com.metrolist.shared.generated.resources.about_upgrade_whats_new
+import com.metrolist.shared.generated.resources.about_upgrade_note_about
+import com.metrolist.shared.generated.resources.about_upgrade_note_defaults
+import com.metrolist.shared.generated.resources.about_upgrade_note_fonts
+import com.metrolist.shared.generated.resources.about_upgrade_note_glass
+import com.metrolist.shared.generated.resources.about_upgrade_note_poster
+import com.metrolist.shared.generated.resources.about_upgrade_note_profile
+import com.metrolist.shared.generated.resources.about_upgrade_note_recap
+import com.metrolist.shared.generated.resources.about_upgrade_note_streak
+import com.metrolist.shared.generated.resources.about_upgrade_two_interface
 import com.metrolist.shared.generated.resources.about_upgrade_two_motion
 import com.metrolist.shared.generated.resources.about_upgrade_two_player_poster
-import com.metrolist.shared.generated.resources.about_upgrade_two_interface
-import com.metrolist.shared.generated.resources.about_upgrade_note_streak
-import com.metrolist.shared.generated.resources.about_upgrade_note_recap
-import com.metrolist.shared.generated.resources.about_upgrade_note_poster
-import com.metrolist.shared.generated.resources.about_upgrade_note_glass
-import com.metrolist.shared.generated.resources.about_upgrade_note_profile
-import com.metrolist.shared.generated.resources.about_upgrade_note_about
-import com.metrolist.shared.generated.resources.about_upgrade_note_fonts
-import com.metrolist.shared.generated.resources.about_upgrade_note_defaults
-import com.metrolist.shared.generated.resources.chi3zdev_avatar
+import com.metrolist.shared.generated.resources.about_upgrade_version
+import com.metrolist.shared.generated.resources.about_upgrade_whats_new
 import com.metrolist.shared.generated.resources.app_name
 import com.metrolist.shared.generated.resources.back
 import com.metrolist.shared.generated.resources.build_type_debug
 import com.metrolist.shared.generated.resources.build_type_release
+import com.metrolist.shared.generated.resources.chi3zdev_avatar
 import com.metrolist.shared.generated.resources.devmode_already_active
 import com.metrolist.shared.generated.resources.devtools_enabled
 import com.metrolist.shared.generated.resources.play
@@ -259,7 +259,11 @@ fun AboutScreen(
                     border = glassCardBorder(),
                 ) {
                     Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Text(stringResource(Res.string.about_upgrade_whats_new), Modifier.weight(1f), style = MaterialTheme.typography.titleMedium)
+                        Text(
+                            stringResource(Res.string.about_upgrade_whats_new),
+                            Modifier.weight(1f),
+                            style = MaterialTheme.typography.titleMedium,
+                        )
                         Icon(MetrolistIcons.Outlined.ChevronRight, contentDescription = null)
                     }
                 }
@@ -411,7 +415,11 @@ private fun AppHeaderCard(
                 )
                 InfoBadge(architecture, colorScheme.surfaceContainerHighest, colorScheme.onSurfaceVariant)
                 if (upgradeNumber != null) {
-                    InfoBadge(stringResource(Res.string.about_upgrade_version, upgradeNumber), colorScheme.secondaryContainer, colorScheme.onSecondaryContainer)
+                    InfoBadge(
+                        stringResource(Res.string.about_upgrade_version, upgradeNumber),
+                        colorScheme.secondaryContainer,
+                        colorScheme.onSecondaryContainer,
+                    )
                 }
                 InfoBadge(
                     stringResource(if (isDebug) Res.string.build_type_debug else Res.string.build_type_release),
@@ -469,31 +477,40 @@ private fun InfoBadge(
 }
 
 // Add new version entries here; descriptions are localized resources.
-private val upgradeOneNotes = listOf(
-    Res.string.about_upgrade_note_streak,
-    Res.string.about_upgrade_note_recap,
-    Res.string.about_upgrade_note_poster,
-    Res.string.about_upgrade_note_glass,
-    Res.string.about_upgrade_note_profile,
-    Res.string.about_upgrade_note_about,
-    Res.string.about_upgrade_note_fonts,
-    Res.string.about_upgrade_note_defaults,
-)
+private val upgradeOneNotes =
+    listOf(
+        Res.string.about_upgrade_note_streak,
+        Res.string.about_upgrade_note_recap,
+        Res.string.about_upgrade_note_poster,
+        Res.string.about_upgrade_note_glass,
+        Res.string.about_upgrade_note_profile,
+        Res.string.about_upgrade_note_about,
+        Res.string.about_upgrade_note_fonts,
+        Res.string.about_upgrade_note_defaults,
+    )
 
-private val upgradeTwoNotes = listOf(
-    Res.string.about_upgrade_two_motion,
-    Res.string.about_upgrade_two_player_poster,
-    Res.string.about_upgrade_two_interface,
-)
+private val upgradeTwoNotes =
+    listOf(
+        Res.string.about_upgrade_two_motion,
+        Res.string.about_upgrade_two_player_poster,
+        Res.string.about_upgrade_two_interface,
+    )
 
-internal fun upgradeNoteVersions(upgradeNumber: Int): List<Int> =
-    if (upgradeNumber >= 2) listOf(2, 1) else listOf(1)
+internal fun upgradeNoteVersions(upgradeNumber: Int): List<Int> = if (upgradeNumber >= 2) listOf(2, 1) else listOf(1)
 
 @Composable
-private fun UpgradeNotesScreen(bottomInset: Dp, upgradeNumber: Int, onBack: () -> Unit) {
+private fun UpgradeNotesScreen(
+    bottomInset: Dp,
+    upgradeNumber: Int,
+    onBack: () -> Unit,
+) {
     Column(
-        modifier = Modifier.fillMaxSize().verticalScrollWithDrag(rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 16.dp).padding(bottom = bottomInset),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .verticalScrollWithDrag(rememberScrollState())
+                .padding(horizontal = 16.dp, vertical = 16.dp)
+                .padding(bottom = bottomInset),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -503,10 +520,19 @@ private fun UpgradeNotesScreen(bottomInset: Dp, upgradeNumber: Int, onBack: () -
             Text(stringResource(Res.string.about_upgrade_whats_new), style = MaterialTheme.typography.headlineSmall)
         }
         upgradeNoteVersions(upgradeNumber).forEach { version ->
-            Text(stringResource(Res.string.about_upgrade_version, version), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            Text(
+                stringResource(Res.string.about_upgrade_version, version),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+            )
             val notes = if (version == 2) upgradeTwoNotes else upgradeOneNotes
             notes.forEach { note ->
-                Surface(shape = RoundedCornerShape(16.dp), color = glassCardColor(MaterialTheme.colorScheme.surfaceContainer), border = glassCardBorder(), modifier = Modifier.fillMaxWidth()) {
+                Surface(
+                    shape = RoundedCornerShape(16.dp),
+                    color = glassCardColor(MaterialTheme.colorScheme.surfaceContainer),
+                    border = glassCardBorder(),
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
                     Text(stringResource(note), Modifier.padding(16.dp), style = MaterialTheme.typography.bodyLarge)
                 }
             }
@@ -515,7 +541,11 @@ private fun UpgradeNotesScreen(bottomInset: Dp, upgradeNumber: Int, onBack: () -
 }
 
 @Composable
-private fun UpgradeDeveloperCard(upgradeNumber: Int, colorScheme: ColorScheme, onClick: () -> Unit) {
+private fun UpgradeDeveloperCard(
+    upgradeNumber: Int,
+    colorScheme: ColorScheme,
+    onClick: () -> Unit,
+) {
     Column(Modifier.fillMaxWidth()) {
         Text(
             text = stringResource(Res.string.about_upgrade_developer),
@@ -530,7 +560,11 @@ private fun UpgradeDeveloperCard(upgradeNumber: Int, colorScheme: ColorScheme, o
             color = glassCardColor(colorScheme.surfaceContainer),
             border = glassCardBorder(),
         ) {
-            Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(
+                Modifier.padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
                 Image(
                     painter = painterResource(Res.drawable.chi3zdev_avatar),
                     contentDescription = null,
@@ -600,17 +634,30 @@ private fun CollaboratorsList(
                             border = glassCardBorder(),
                         ) {
                             Column(
-                                modifier = Modifier.fillMaxWidth().combinedClickable(
-                                    onLongClick = onContributorLongClick
-                                        ?.takeIf { contributor.favoriteSongVideoId != null }
-                                        ?.let { { it(contributor) } },
-                                    onClick = { onContributorClick(contributor) },
-                                ).padding(12.dp),
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .combinedClickable(
+                                            onLongClick =
+                                                onContributorLongClick
+                                                    ?.takeIf { contributor.favoriteSongVideoId != null }
+                                                    ?.let { { it(contributor) } },
+                                            onClick = { onContributorClick(contributor) },
+                                        ).padding(12.dp),
                                 verticalArrangement = Arrangement.spacedBy(6.dp),
                             ) {
                                 ContributorAvatar(contributor = contributor, size = avatarSize, colorScheme = colorScheme)
-                                Text(contributor.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, color = colorScheme.onSurface)
-                                Text(text.roleLabel(contributor.role), style = MaterialTheme.typography.bodyMedium, color = colorScheme.onSurfaceVariant)
+                                Text(
+                                    contributor.name,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = colorScheme.onSurface,
+                                )
+                                Text(
+                                    text.roleLabel(contributor.role),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = colorScheme.onSurfaceVariant,
+                                )
                             }
                         }
                     }

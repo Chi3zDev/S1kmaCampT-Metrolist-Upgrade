@@ -18,7 +18,12 @@ import com.metrolist.shared.settings.Settings
 fun glassCardColor(fallback: Color): Color {
     val settings = Settings.shared
     if (!settings.glassNavigation || !settings.glassCards) return fallback
-    val multiplier = when (settings.glassStyle) { "FROSTED" -> 0.9f; "CLEAR" -> 0.45f; else -> 0.7f }
+    val multiplier =
+        when (settings.glassStyle) {
+            "FROSTED" -> 0.9f
+            "CLEAR" -> 0.45f
+            else -> 0.7f
+        }
     return MaterialTheme.colorScheme.surfaceContainer.copy(alpha = (settings.glassTintStrength / 100f * multiplier).coerceIn(0.22f, 0.9f))
 }
 

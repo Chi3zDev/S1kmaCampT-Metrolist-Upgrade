@@ -340,11 +340,14 @@ class Settings(
     var androidCustomFontFile by preference(AndroidCustomFontFileKey, "")
     var androidCustomFontName by preference(AndroidCustomFontNameKey, "")
     var androidActiveFontId by preference(AndroidActiveFontIdKey, "")
+
     /** Set a fork default only when Android confirms a fresh installation and no font was stored. */
     fun applyFreshAndroidFontDefault(isFreshInstall: Boolean) {
         if (!isFreshInstall || settings.hasKey(AndroidActiveFontIdKey) || settings.hasKey("appFont") ||
             settings.hasKey(AndroidCustomFontFileKey)
-        ) return
+        ) {
+            return
+        }
         androidActiveFontId = "nunito_extrabold"
     }
 

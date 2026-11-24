@@ -5,11 +5,11 @@ package com.metrolist.shared.ui.navigation
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -26,11 +26,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -49,21 +49,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.AbsoluteAlignment
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.Role
@@ -109,21 +109,30 @@ internal fun <T> FloatingNavigation(
     modifier: Modifier = Modifier,
 ) {
     val density = LocalDensity.current
-    val allowGlassMotion = !LocalGlassNavigationEnabled.current ||
-        (LocalGlassMotionAllowed.current && !Settings.shared.glassLightMode && Settings.shared.glassNavbarMotion != "OFF")
+    val allowGlassMotion =
+        !LocalGlassNavigationEnabled.current ||
+            (LocalGlassMotionAllowed.current && !Settings.shared.glassLightMode && Settings.shared.glassNavbarMotion != "OFF")
     AnimatedVisibility(
         visible = navigationVisible,
         modifier = modifier,
-        enter = if (!allowGlassMotion) EnterTransition.None else
-            expandVertically(
-                animationSpec = spring(dampingRatio = 0.9f, stiffness = 700f),
-                expandFrom = Alignment.Bottom,
-            ),
-        exit = if (!allowGlassMotion) ExitTransition.None else
-            shrinkVertically(
-                animationSpec = spring(dampingRatio = 0.9f, stiffness = 700f),
-                shrinkTowards = Alignment.Bottom,
-            ),
+        enter =
+            if (!allowGlassMotion) {
+                EnterTransition.None
+            } else {
+                expandVertically(
+                    animationSpec = spring(dampingRatio = 0.9f, stiffness = 700f),
+                    expandFrom = Alignment.Bottom,
+                )
+            },
+        exit =
+            if (!allowGlassMotion) {
+                ExitTransition.None
+            } else {
+                shrinkVertically(
+                    animationSpec = spring(dampingRatio = 0.9f, stiffness = 700f),
+                    shrinkTowards = Alignment.Bottom,
+                )
+            },
     ) {
         FloatingNavigationBar(
             items = items,
@@ -166,16 +175,34 @@ private fun <T> FloatingNavigationBar(
     var dragIndex by remember { mutableIntStateOf(-1) }
     var stretch by remember { mutableStateOf(1f) }
     val currentOnSelect by rememberUpdatedState(onSelect)
+
     fun itemAt(x: Float): Int {
         if (rowWidth <= 0 || pillItems.isEmpty()) return -1
         val visual = ((x / rowWidth * pillItems.size).toInt()).coerceIn(0, pillItems.lastIndex)
         return if (layoutDirection == LayoutDirection.Rtl) pillItems.lastIndex - visual else visual
     }
-    val radius = (settings.glassBlurStrength.coerceIn(0f, 100f) / 100f * when (settings.glassStyle) { "FROSTED" -> 24f; "CLEAR" -> 8f; else -> 20f }).dp
-    val tintAlpha = (settings.glassTintStrength.coerceIn(0f, 100f) / 100f * when (settings.glassStyle) { "FROSTED" -> 0.9f; "CLEAR" -> 0.45f; else -> 0.7f }).coerceIn(0.12f, 0.9f)
+    val radius =
+        (
+            settings.glassBlurStrength.coerceIn(0f, 100f) / 100f *
+                when (settings.glassStyle) {
+                    "FROSTED" -> 24f
+                    "CLEAR" -> 8f
+                    else -> 20f
+                }
+        ).dp
+    val tintAlpha =
+        (
+            settings.glassTintStrength.coerceIn(0f, 100f) / 100f *
+                when (settings.glassStyle) {
+                    "FROSTED" -> 0.9f
+                    "CLEAR" -> 0.45f
+                    else -> 0.7f
+                }
+        ).coerceIn(0.12f, 0.9f)
     val glassTint = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = tintAlpha)
     val cornerPercent = 12f + settings.glassCornerRoundness.coerceIn(0f, 100f) * 0.38f
-    val glassShape = remember(cornerPercent, morphProgress) { RoundedCornerShape((cornerPercent + (50f - cornerPercent) * morphProgress).toInt()) }
+    val glassShape =
+        remember(cornerPercent, morphProgress) { RoundedCornerShape((cornerPercent + (50f - cornerPercent) * morphProgress).toInt()) }
     val glassStyle = remember(radius) { HazeBlurStyle { blurRadius(radius) } }
 
     Row(
@@ -188,12 +215,36 @@ private fun <T> FloatingNavigationBar(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Surface(
-            modifier = (if (!glassEnabled) Modifier.animateContentSize() else Modifier).then(if (glassEnabled) Modifier.fillMaxWidth() else Modifier.wrapContentWidth()).height(FloatingBarHeight).then(
-                if (glassState != null) Modifier.clip(glassShape).hazeBlur(HazeInput.Backdrop(glassState), glassStyle) else Modifier,
-            ),
+            modifier =
+                (if (!glassEnabled) Modifier.animateContentSize() else Modifier)
+                    .then(
+                        if (glassEnabled) Modifier.fillMaxWidth() else Modifier.wrapContentWidth(),
+                    ).height(FloatingBarHeight)
+                    .then(
+                        if (glassState !=
+                            null
+                        ) {
+                            Modifier.clip(glassShape).hazeBlur(HazeInput.Backdrop(glassState), glassStyle)
+                        } else {
+                            Modifier
+                        },
+                    ),
             shape = if (glassEnabled) glassShape else CircleShape,
             color = if (glassEnabled) glassTint else MaterialTheme.colorScheme.surfaceContainer,
-            border = if (glassEnabled) BorderStroke(1.dp, Brush.verticalGradient(listOf(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f), MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.15f)))) else null,
+            border =
+                if (glassEnabled) {
+                    BorderStroke(
+                        1.dp,
+                        Brush.verticalGradient(
+                            listOf(
+                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+                                MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.15f),
+                            ),
+                        ),
+                    )
+                } else {
+                    null
+                },
             contentColor = MaterialTheme.colorScheme.onSurface,
             shadowElevation = FloatingBarShadow,
         ) {
@@ -201,17 +252,23 @@ private fun <T> FloatingNavigationBar(
                 val selectedIndex = pillItems.indexOfFirst { it.key == selectedKey }.coerceAtLeast(0)
                 val visualIndex = if (layoutDirection == LayoutDirection.Rtl) pillItems.lastIndex - selectedIndex else selectedIndex
                 val targetCenter = if (rowWidth == 0) 0f else (visualIndex + .5f) * rowWidth / pillItems.size
-                val animatedCenter = if (bubbleEnabled) {
-                    val position = remember { Animatable(targetCenter) }
-                    LaunchedEffect(targetCenter, dragX) {
-                        val finger = dragX
-                        if (finger != null) position.snapTo(finger) else position.animateTo(targetCenter, NavSpring)
+                val animatedCenter =
+                    if (bubbleEnabled) {
+                        val position = remember { Animatable(targetCenter) }
+                        LaunchedEffect(targetCenter, dragX) {
+                            val finger = dragX
+                            if (finger != null) position.snapTo(finger) else position.animateTo(targetCenter, NavSpring)
+                        }
+                        dragX ?: position.value
+                    } else {
+                        targetCenter
                     }
-                    dragX ?: position.value
-                } else targetCenter
                 val cellWidth = if (pillItems.isEmpty()) 0f else rowWidth.toFloat() / pillItems.size
                 Box(
-                    Modifier.fillMaxWidth().alpha((1f - morphProgress * 2f).coerceIn(0f, 1f)).padding(horizontal = 8.dp)
+                    Modifier
+                        .fillMaxWidth()
+                        .alpha((1f - morphProgress * 2f).coerceIn(0f, 1f))
+                        .padding(horizontal = 8.dp)
                         .onSizeChanged { rowWidth = it.width }
                         .pointerInput(pillItems.map { it.key }, rowWidth, layoutDirection) {
                             detectHorizontalDragGestures(
@@ -233,37 +290,111 @@ private fun <T> FloatingNavigationBar(
                                 },
                                 onDragEnd = {
                                     pillItems.getOrNull(dragIndex)?.let { currentOnSelect(it.key) }
-                                    dragX = null; dragIndex = -1; stretch = 1f
+                                    dragX = null
+                                    dragIndex = -1
+                                    stretch = 1f
                                 },
-                                onDragCancel = { dragX = null; dragIndex = -1; stretch = 1f },
+                                onDragCancel = {
+                                    dragX = null
+                                    dragIndex = -1
+                                    stretch = 1f
+                                },
                             )
                         },
                     contentAlignment = AbsoluteAlignment.CenterLeft,
                 ) {
                     if (bubbleEnabled && rowWidth > 0) {
                         val center = dragX ?: animatedCenter
-                        val bubbleStretch by animateFloatAsState(if (dragX != null) stretch else 1f, PolishMotion.interactiveSpring(), label = "glassBubbleStretch")
-                        val bubbleHeight by animateFloatAsState(if (dragX != null) 0.96f else 1f, PolishMotion.interactiveSpring(), label = "glassBubbleHeight")
-                        Box(Modifier.absoluteOffset { IntOffset((center - cellWidth / 2f).toInt(), 0) }
-                            .width(with(density) { cellWidth.toDp() }).height(FloatingItemHeight)
-                            .graphicsLayer { scaleX = bubbleStretch; scaleY = bubbleHeight }
-                            .padding(horizontal = 3.dp).clip(CircleShape)
-                            .background(Brush.verticalGradient(listOf(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.22f), MaterialTheme.colorScheme.onSurface.copy(alpha = 0.09f)))))
+                        val bubbleStretch by animateFloatAsState(
+                            if (dragX !=
+                                null
+                            ) {
+                                stretch
+                            } else {
+                                1f
+                            },
+                            PolishMotion.interactiveSpring(),
+                            label = "glassBubbleStretch",
+                        )
+                        val bubbleHeight by animateFloatAsState(
+                            if (dragX !=
+                                null
+                            ) {
+                                0.96f
+                            } else {
+                                1f
+                            },
+                            PolishMotion.interactiveSpring(),
+                            label = "glassBubbleHeight",
+                        )
+                        Box(
+                            Modifier
+                                .absoluteOffset { IntOffset((center - cellWidth / 2f).toInt(), 0) }
+                                .width(with(density) { cellWidth.toDp() })
+                                .height(FloatingItemHeight)
+                                .graphicsLayer {
+                                    scaleX = bubbleStretch
+                                    scaleY = bubbleHeight
+                                }.padding(horizontal = 3.dp)
+                                .clip(CircleShape)
+                                .background(
+                                    Brush.verticalGradient(
+                                        listOf(
+                                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.22f),
+                                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.09f),
+                                        ),
+                                    ),
+                                ),
+                        )
                     }
                     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                         pillItems.forEachIndexed { index, item ->
                             val selected = if (dragIndex >= 0) index == dragIndex else item.key == selectedKey
                             Box(
-                                modifier = itemModifier(item.key).weight(1f).height(FloatingItemHeight)
-                                    .clip(CircleShape)
-                                    .background(if (selected && !bubbleEnabled) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.14f) else Color.Transparent)
-                                    .selectable(selected = item.key == selectedKey, onClick = { onSelect(item.key) }, role = Role.Tab),
+                                modifier =
+                                    itemModifier(item.key)
+                                        .weight(1f)
+                                        .height(FloatingItemHeight)
+                                        .clip(CircleShape)
+                                        .background(
+                                            if (selected &&
+                                                !bubbleEnabled
+                                            ) {
+                                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.14f)
+                                            } else {
+                                                Color.Transparent
+                                            },
+                                        ).selectable(selected = item.key == selectedKey, onClick = {
+                                            onSelect(item.key)
+                                        }, role = Role.Tab),
                                 contentAlignment = Alignment.Center,
                             ) {
                                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Icon(if (selected) item.selectedIcon else item.icon, contentDescription = item.label, tint = MaterialTheme.colorScheme.onSurface,
-                                        modifier = if (bubbleEnabled && dragIndex == index) Modifier.graphicsLayer { scaleX = 1.08f; scaleY = 1.08f } else Modifier)
-                                    if (settings.glassNavbarLabels) Text(item.label, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
+                                    Icon(
+                                        if (selected) item.selectedIcon else item.icon,
+                                        contentDescription = item.label,
+                                        tint = MaterialTheme.colorScheme.onSurface,
+                                        modifier =
+                                            if (bubbleEnabled &&
+                                                dragIndex == index
+                                            ) {
+                                                Modifier.graphicsLayer {
+                                                    scaleX = 1.08f
+                                                    scaleY = 1.08f
+                                                }
+                                            } else {
+                                                Modifier
+                                            },
+                                    )
+                                    if (settings.glassNavbarLabels) {
+                                        Text(
+                                            item.label,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis,
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.onSurface,
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -278,13 +409,30 @@ private fun <T> FloatingNavigationBar(
                     if (collapsed) {
                         val selectedItem = items.firstOrNull { it.key == selectedKey }
                         if (selectedItem != null) {
-                            Box(Modifier.size(48.dp).alpha(((morphProgress - 0.5f) * 2f).coerceIn(0f, 1f)).clip(CircleShape).clickable(onClick = expand), contentAlignment = Alignment.Center) {
-                                Icon(selectedItem.selectedIcon, contentDescription = selectedItem.label, tint = MaterialTheme.colorScheme.onSurface)
+                            Box(
+                                Modifier
+                                    .size(
+                                        48.dp,
+                                    ).alpha(((morphProgress - 0.5f) * 2f).coerceIn(0f, 1f))
+                                    .clip(CircleShape)
+                                    .clickable(onClick = expand),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                Icon(
+                                    selectedItem.selectedIcon,
+                                    contentDescription = selectedItem.label,
+                                    tint = MaterialTheme.colorScheme.onSurface,
+                                )
                             }
                         }
                     } else {
                         pillItems.forEach { item ->
-                            FloatingNavigationItem(item = item, selected = item.key == selectedKey, onClick = { onSelect(item.key) }, modifier = itemModifier(item.key))
+                            FloatingNavigationItem(
+                                item = item,
+                                selected = item.key == selectedKey,
+                                onClick = { onSelect(item.key) },
+                                modifier = itemModifier(item.key),
+                            )
                         }
                     }
                 }

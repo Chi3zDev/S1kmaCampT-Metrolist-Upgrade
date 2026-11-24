@@ -1,3 +1,5 @@
+@file:Suppress("ktlint:standard:property-naming")
+
 package com.metrolist.shared.ui
 
 import androidx.compose.animation.core.Spring

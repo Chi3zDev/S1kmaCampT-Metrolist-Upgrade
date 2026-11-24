@@ -89,36 +89,207 @@ internal fun SettingsUiRegistryBuilder.registerAppearanceSettings(host: SharedSe
     ) {
         if (host.platform == SettingsPlatform.ANDROID) {
             group("liquidGlass", stringResource(Res.string.glass_settings_title)) {
-                switch(id = "glassNavigation", title = stringResource(Res.string.glass_settings_title), description = stringResource(Res.string.glass_settings_description), checked = settings.glassNavigation) { settings.glassNavigation = it }
-                val styles = listOf(
-                    SettingsChoice("FROSTED", stringResource(Res.string.glass_style_frosted)),
-                    SettingsChoice("CLEAR", stringResource(Res.string.glass_style_clear)),
-                    SettingsChoice("BLUR", stringResource(Res.string.glass_style_blur)),
-                )
-                choice(id = "glassStyle", title = stringResource(Res.string.glass_style), valueLabel = styles.firstOrNull { it.id == settings.glassStyle }?.label, choices = styles, selectedChoiceId = settings.glassStyle, enabled = settings.glassNavigation) { settings.glassStyle = it }
-                slider(id = "glassBlurStrength", title = stringResource(Res.string.glass_blur_strength), value = settings.glassBlurStrength, range = 0f..100f, steps = 0, enabled = settings.glassNavigation) { settings.glassBlurStrength = it }
-                slider(id = "glassTintStrength", title = stringResource(Res.string.glass_tint_strength), value = settings.glassTintStrength, range = 0f..100f, steps = 0, enabled = settings.glassNavigation) { settings.glassTintStrength = it }
-                slider(id = "glassCornerRoundness", title = stringResource(Res.string.glass_corner_roundness), value = settings.glassCornerRoundness, range = 0f..100f, steps = 0, enabled = settings.glassNavigation) { settings.glassCornerRoundness = it }
-                switch(id = "glassNavbar", title = stringResource(Res.string.glass_area_navbar), checked = settings.glassNavbar, enabled = settings.glassNavigation) { settings.glassNavbar = it }
-                switch(id = "glassMiniPlayer", title = stringResource(Res.string.glass_area_mini_player), checked = settings.glassMiniPlayer, enabled = settings.glassNavigation) { settings.glassMiniPlayer = it }
-                switch(id = "glassTopBar", title = stringResource(Res.string.glass_area_top_bar), checked = settings.glassTopBar, enabled = settings.glassNavigation) { settings.glassTopBar = it }
-                switch(id = "glassCards", title = stringResource(Res.string.glass_area_cards), checked = settings.glassCards, enabled = settings.glassNavigation) { settings.glassCards = it }
-                switch(id = "glassFloatingActions", title = stringResource(Res.string.glass_area_floating_actions), checked = settings.glassFloatingActions, enabled = settings.glassNavigation) { settings.glassFloatingActions = it }
-                switch(id = "streakCelebrationEnabled", title = stringResource(Res.string.streak_celebration_setting), description = stringResource(Res.string.streak_celebration_independent_description), checked = settings.streakCelebrationEnabled) { settings.streakCelebrationEnabled = it }
-                switch(id = "glassPlayer", title = stringResource(Res.string.glass_area_player), checked = settings.glassPlayer, enabled = settings.glassNavigation) { settings.glassPlayer = it }
-                switch(id = "glassProfile", title = stringResource(Res.string.glass_area_profile), checked = settings.glassProfile, enabled = settings.glassNavigation) { settings.glassProfile = it }
-                switch(id = "glassLyricsPoster", title = stringResource(Res.string.glass_area_poster), checked = settings.glassLyricsPoster, enabled = settings.glassNavigation) { settings.glassLyricsPoster = it }
-                switch(id = "glassLightMode", title = stringResource(Res.string.glass_light_mode), description = stringResource(Res.string.glass_light_mode_description), checked = settings.glassLightMode, enabled = settings.glassNavigation) { settings.glassLightMode = it }
-                val navbarMotionChoices = listOf(
-                    SettingsChoice("FULL", stringResource(Res.string.glass_navbar_motion_full)),
-                    SettingsChoice("LIGHT", stringResource(Res.string.glass_navbar_motion_light)),
-                    SettingsChoice("OFF", stringResource(Res.string.glass_navbar_motion_off)),
-                )
-                choice(id = "glassNavbarMotion", title = stringResource(Res.string.glass_navbar_motion), valueLabel = navbarMotionChoices.firstOrNull { it.id == settings.glassNavbarMotion }?.label, choices = navbarMotionChoices, selectedChoiceId = settings.glassNavbarMotion, enabled = settings.glassNavigation && settings.glassNavbar) { settings.glassNavbarMotion = it }
-                switch(id = "glassNavbarLabels", title = stringResource(Res.string.glass_show_labels), checked = settings.glassNavbarLabels, enabled = settings.glassNavigation) { settings.glassNavbarLabels = it }
-                val positions = listOf(SettingsChoice("ABOVE", stringResource(Res.string.glass_player_above)), SettingsChoice("BELOW", stringResource(Res.string.glass_player_below)))
+                switch(
+                    id = "glassNavigation",
+                    title = stringResource(Res.string.glass_settings_title),
+                    description = stringResource(Res.string.glass_settings_description),
+                    checked = settings.glassNavigation,
+                ) {
+                    settings.glassNavigation =
+                        it
+                }
+                val styles =
+                    listOf(
+                        SettingsChoice("FROSTED", stringResource(Res.string.glass_style_frosted)),
+                        SettingsChoice("CLEAR", stringResource(Res.string.glass_style_clear)),
+                        SettingsChoice("BLUR", stringResource(Res.string.glass_style_blur)),
+                    )
+                choice(
+                    id = "glassStyle",
+                    title = stringResource(Res.string.glass_style),
+                    valueLabel =
+                        styles
+                            .firstOrNull {
+                                it.id ==
+                                    settings.glassStyle
+                            }?.label,
+                    choices = styles,
+                    selectedChoiceId = settings.glassStyle,
+                    enabled = settings.glassNavigation,
+                ) {
+                    settings.glassStyle =
+                        it
+                }
+                slider(
+                    id = "glassBlurStrength",
+                    title = stringResource(Res.string.glass_blur_strength),
+                    value = settings.glassBlurStrength,
+                    range =
+                        0f..100f,
+                    steps = 0,
+                    enabled = settings.glassNavigation,
+                ) { settings.glassBlurStrength = it }
+                slider(
+                    id = "glassTintStrength",
+                    title = stringResource(Res.string.glass_tint_strength),
+                    value = settings.glassTintStrength,
+                    range =
+                        0f..100f,
+                    steps = 0,
+                    enabled = settings.glassNavigation,
+                ) { settings.glassTintStrength = it }
+                slider(
+                    id = "glassCornerRoundness",
+                    title = stringResource(Res.string.glass_corner_roundness),
+                    value = settings.glassCornerRoundness,
+                    range =
+                        0f..100f,
+                    steps = 0,
+                    enabled = settings.glassNavigation,
+                ) { settings.glassCornerRoundness = it }
+                switch(
+                    id = "glassNavbar",
+                    title = stringResource(Res.string.glass_area_navbar),
+                    checked = settings.glassNavbar,
+                    enabled = settings.glassNavigation,
+                ) {
+                    settings.glassNavbar =
+                        it
+                }
+                switch(
+                    id = "glassMiniPlayer",
+                    title = stringResource(Res.string.glass_area_mini_player),
+                    checked = settings.glassMiniPlayer,
+                    enabled = settings.glassNavigation,
+                ) {
+                    settings.glassMiniPlayer =
+                        it
+                }
+                switch(
+                    id = "glassTopBar",
+                    title = stringResource(Res.string.glass_area_top_bar),
+                    checked = settings.glassTopBar,
+                    enabled = settings.glassNavigation,
+                ) {
+                    settings.glassTopBar =
+                        it
+                }
+                switch(
+                    id = "glassCards",
+                    title = stringResource(Res.string.glass_area_cards),
+                    checked = settings.glassCards,
+                    enabled = settings.glassNavigation,
+                ) {
+                    settings.glassCards =
+                        it
+                }
+                switch(
+                    id = "glassFloatingActions",
+                    title = stringResource(Res.string.glass_area_floating_actions),
+                    checked = settings.glassFloatingActions,
+                    enabled = settings.glassNavigation,
+                ) {
+                    settings.glassFloatingActions =
+                        it
+                }
+                switch(
+                    id = "streakCelebrationEnabled",
+                    title = stringResource(Res.string.streak_celebration_setting),
+                    description = stringResource(Res.string.streak_celebration_independent_description),
+                    checked = settings.streakCelebrationEnabled,
+                ) {
+                    settings.streakCelebrationEnabled =
+                        it
+                }
+                switch(
+                    id = "glassPlayer",
+                    title = stringResource(Res.string.glass_area_player),
+                    checked = settings.glassPlayer,
+                    enabled = settings.glassNavigation,
+                ) {
+                    settings.glassPlayer =
+                        it
+                }
+                switch(
+                    id = "glassProfile",
+                    title = stringResource(Res.string.glass_area_profile),
+                    checked = settings.glassProfile,
+                    enabled = settings.glassNavigation,
+                ) {
+                    settings.glassProfile =
+                        it
+                }
+                switch(
+                    id = "glassLyricsPoster",
+                    title = stringResource(Res.string.glass_area_poster),
+                    checked = settings.glassLyricsPoster,
+                    enabled = settings.glassNavigation,
+                ) {
+                    settings.glassLyricsPoster =
+                        it
+                }
+                switch(
+                    id = "glassLightMode",
+                    title = stringResource(Res.string.glass_light_mode),
+                    description = stringResource(Res.string.glass_light_mode_description),
+                    checked = settings.glassLightMode,
+                    enabled = settings.glassNavigation,
+                ) {
+                    settings.glassLightMode =
+                        it
+                }
+                val navbarMotionChoices =
+                    listOf(
+                        SettingsChoice("FULL", stringResource(Res.string.glass_navbar_motion_full)),
+                        SettingsChoice("LIGHT", stringResource(Res.string.glass_navbar_motion_light)),
+                        SettingsChoice("OFF", stringResource(Res.string.glass_navbar_motion_off)),
+                    )
+                choice(
+                    id = "glassNavbarMotion",
+                    title = stringResource(Res.string.glass_navbar_motion),
+                    valueLabel =
+                        navbarMotionChoices
+                            .firstOrNull {
+                                it.id ==
+                                    settings.glassNavbarMotion
+                            }?.label,
+                    choices = navbarMotionChoices,
+                    selectedChoiceId = settings.glassNavbarMotion,
+                    enabled =
+                        settings.glassNavigation && settings.glassNavbar,
+                ) { settings.glassNavbarMotion = it }
+                switch(
+                    id = "glassNavbarLabels",
+                    title = stringResource(Res.string.glass_show_labels),
+                    checked = settings.glassNavbarLabels,
+                    enabled = settings.glassNavigation,
+                ) {
+                    settings.glassNavbarLabels =
+                        it
+                }
+                val positions =
+                    listOf(
+                        SettingsChoice("ABOVE", stringResource(Res.string.glass_player_above)),
+                        SettingsChoice("BELOW", stringResource(Res.string.glass_player_below)),
+                    )
                 val position = if (settings.glassPlayerBelow) "BELOW" else "ABOVE"
-                choice(id = "glassPlayerPosition", title = stringResource(Res.string.glass_player_position), valueLabel = positions.first { it.id == position }.label, choices = positions, selectedChoiceId = position, enabled = settings.glassNavigation && settings.glassNavbar && settings.glassMiniPlayer) { settings.glassPlayerBelow = it == "BELOW" }
+                choice(
+                    id = "glassPlayerPosition",
+                    title = stringResource(Res.string.glass_player_position),
+                    valueLabel =
+                        positions
+                            .first {
+                                it.id ==
+                                    position
+                            }.label,
+                    choices = positions,
+                    selectedChoiceId = position,
+                    enabled =
+                        settings.glassNavigation && settings.glassNavbar && settings.glassMiniPlayer,
+                ) {
+                    settings.glassPlayerBelow =
+                        it == "BELOW"
+                }
             }
         }
         group("theme", stringResource(Res.string.appearance_theme)) {
@@ -366,11 +537,49 @@ internal fun SettingsUiRegistryBuilder.registerAppearanceSettings(host: SharedSe
         }
         if (host.platform != SettingsPlatform.DESKTOP) {
             group("playerAppearance", stringResource(Res.string.appearance_player)) {
-                switch(id = "playerArtworkTransitions", title = stringResource(Res.string.player_artwork_transitions), description = stringResource(Res.string.player_artwork_transitions_description), checked = settings.playerArtworkTransitions) { settings.playerArtworkTransitions = it }
-                switch(id = "playerAuraEnabled", title = stringResource(Res.string.player_aura_effect), description = stringResource(Res.string.player_aura_effect_description), checked = settings.playerAuraEnabled) { settings.playerAuraEnabled = it }
-                switch(id = "playerWaveEnabled", title = stringResource(Res.string.player_wave_effect), description = stringResource(Res.string.player_wave_effect_description), checked = settings.playerWaveEnabled) { settings.playerWaveEnabled = it }
-                switch(id = "lyricsGlowEnabled", title = stringResource(Res.string.lyrics_glow), checked = settings.lyricsGlowEnabled) { settings.lyricsGlowEnabled = it }
-                slider(id = "lyricsGlowIntensity", title = stringResource(Res.string.lyrics_glow_intensity), value = settings.lyricsGlowIntensity, range = 0f..100f, steps = 0, enabled = settings.lyricsGlowEnabled && !settings.glassLightMode) { settings.lyricsGlowIntensity = it }
+                switch(
+                    id = "playerArtworkTransitions",
+                    title = stringResource(Res.string.player_artwork_transitions),
+                    description = stringResource(Res.string.player_artwork_transitions_description),
+                    checked = settings.playerArtworkTransitions,
+                ) {
+                    settings.playerArtworkTransitions =
+                        it
+                }
+                switch(
+                    id = "playerAuraEnabled",
+                    title = stringResource(Res.string.player_aura_effect),
+                    description = stringResource(Res.string.player_aura_effect_description),
+                    checked = settings.playerAuraEnabled,
+                ) {
+                    settings.playerAuraEnabled =
+                        it
+                }
+                switch(
+                    id = "playerWaveEnabled",
+                    title = stringResource(Res.string.player_wave_effect),
+                    description = stringResource(Res.string.player_wave_effect_description),
+                    checked = settings.playerWaveEnabled,
+                ) {
+                    settings.playerWaveEnabled =
+                        it
+                }
+                switch(id = "lyricsGlowEnabled", title = stringResource(Res.string.lyrics_glow), checked = settings.lyricsGlowEnabled) {
+                    settings.lyricsGlowEnabled =
+                        it
+                }
+                slider(
+                    id = "lyricsGlowIntensity",
+                    title = stringResource(Res.string.lyrics_glow_intensity),
+                    value = settings.lyricsGlowIntensity,
+                    range =
+                        0f..100f,
+                    steps = 0,
+                    enabled = settings.lyricsGlowEnabled && !settings.glassLightMode,
+                ) {
+                    settings.lyricsGlowIntensity =
+                        it
+                }
 
                 if (SettingsPageId.PLAYER_STYLE in host.availablePages) {
                     navigation(
@@ -519,11 +728,49 @@ internal fun SettingsUiRegistryBuilder.registerAppearanceSettings(host: SharedSe
         }
         if (host.platform == SettingsPlatform.DESKTOP) {
             group("playerAppearance", stringResource(Res.string.appearance_player)) {
-                switch(id = "playerArtworkTransitions", title = stringResource(Res.string.player_artwork_transitions), description = stringResource(Res.string.player_artwork_transitions_description), checked = settings.playerArtworkTransitions) { settings.playerArtworkTransitions = it }
-                switch(id = "playerAuraEnabled", title = stringResource(Res.string.player_aura_effect), description = stringResource(Res.string.player_aura_effect_description), checked = settings.playerAuraEnabled) { settings.playerAuraEnabled = it }
-                switch(id = "playerWaveEnabled", title = stringResource(Res.string.player_wave_effect), description = stringResource(Res.string.player_wave_effect_description), checked = settings.playerWaveEnabled) { settings.playerWaveEnabled = it }
-                switch(id = "lyricsGlowEnabled", title = stringResource(Res.string.lyrics_glow), checked = settings.lyricsGlowEnabled) { settings.lyricsGlowEnabled = it }
-                slider(id = "lyricsGlowIntensity", title = stringResource(Res.string.lyrics_glow_intensity), value = settings.lyricsGlowIntensity, range = 0f..100f, steps = 0, enabled = settings.lyricsGlowEnabled && !settings.glassLightMode) { settings.lyricsGlowIntensity = it }
+                switch(
+                    id = "playerArtworkTransitions",
+                    title = stringResource(Res.string.player_artwork_transitions),
+                    description = stringResource(Res.string.player_artwork_transitions_description),
+                    checked = settings.playerArtworkTransitions,
+                ) {
+                    settings.playerArtworkTransitions =
+                        it
+                }
+                switch(
+                    id = "playerAuraEnabled",
+                    title = stringResource(Res.string.player_aura_effect),
+                    description = stringResource(Res.string.player_aura_effect_description),
+                    checked = settings.playerAuraEnabled,
+                ) {
+                    settings.playerAuraEnabled =
+                        it
+                }
+                switch(
+                    id = "playerWaveEnabled",
+                    title = stringResource(Res.string.player_wave_effect),
+                    description = stringResource(Res.string.player_wave_effect_description),
+                    checked = settings.playerWaveEnabled,
+                ) {
+                    settings.playerWaveEnabled =
+                        it
+                }
+                switch(id = "lyricsGlowEnabled", title = stringResource(Res.string.lyrics_glow), checked = settings.lyricsGlowEnabled) {
+                    settings.lyricsGlowEnabled =
+                        it
+                }
+                slider(
+                    id = "lyricsGlowIntensity",
+                    title = stringResource(Res.string.lyrics_glow_intensity),
+                    value = settings.lyricsGlowIntensity,
+                    range =
+                        0f..100f,
+                    steps = 0,
+                    enabled = settings.lyricsGlowEnabled && !settings.glassLightMode,
+                ) {
+                    settings.lyricsGlowIntensity =
+                        it
+                }
 
                 if (SettingsPageId.PLAYER_STYLE in host.availablePages) {
                     navigation(
@@ -637,12 +884,15 @@ internal fun SettingsUiRegistryBuilder.registerAppearanceSettings(host: SharedSe
                     SettingsChoice(PlayerType.MODERN.name, stringResource(Res.string.player_type_modern)),
                     SettingsChoice(PlayerType.VINTAGE.name, stringResource(Res.string.player_type_vintage)),
                     SettingsChoice(PlayerType.CLASSIC.name, stringResource(Res.string.player_type_classic)),
-                ) + if (host.platform == SettingsPlatform.ANDROID) {
-                    listOf(
-                        SettingsChoice(PlayerType.VINYL.name, stringResource(Res.string.player_type_vinyl)),
-                        SettingsChoice(PlayerType.GLASS_CARD.name, stringResource(Res.string.player_type_glass_card)),
-                    )
-                } else emptyList()
+                ) +
+                    if (host.platform == SettingsPlatform.ANDROID) {
+                        listOf(
+                            SettingsChoice(PlayerType.VINYL.name, stringResource(Res.string.player_type_vinyl)),
+                            SettingsChoice(PlayerType.GLASS_CARD.name, stringResource(Res.string.player_type_glass_card)),
+                        )
+                    } else {
+                        emptyList()
+                    }
             }
         val selectedPlayerType =
             settings.playerType.takeIf { type -> playerTypeChoices.any { it.id == type.name } }
