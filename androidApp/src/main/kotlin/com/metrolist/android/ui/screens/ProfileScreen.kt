@@ -69,8 +69,9 @@ fun ProfileScreen(
 ) {
     val glass = Settings.shared.glassNavigation && Settings.shared.glassProfile
     val surface = MaterialTheme.colorScheme.surfaceContainerHigh
-    val color = if (glass) surface.copy(alpha = (Settings.shared.glassTintStrength / 100f * 0.7f).coerceIn(0.25f, 0.9f)) else surface
-    val high = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
+    val tintMultiplier = when (Settings.shared.glassStyle) { "FROSTED" -> 0.9f; "CLEAR" -> 0.45f; else -> 0.7f }
+    val color = if (glass) MaterialTheme.colorScheme.surfaceContainer.copy(alpha = (Settings.shared.glassTintStrength / 100f * tintMultiplier).coerceIn(0.22f, 0.9f)) else surface
+    val high = MaterialTheme.colorScheme.onSurface.copy(alpha = if (Settings.shared.glassStyle == "CLEAR") 0.38f else 0.25f)
     val low = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.15f)
     val border = remember(high, low, glass) { if (glass) BorderStroke(1.dp, Brush.verticalGradient(listOf(high, low))) else null }
     val shape = RoundedCornerShape(24.dp)
@@ -89,16 +90,16 @@ fun ProfileScreen(
                         } else {
                             Icon(MetrolistIcons.Outlined.AccountCircle, contentDescription = null, modifier = Modifier.size(56.dp))
                         }
-                        Column {
+                        Column(Modifier.weight(1f)) {
                             Text(if (authManager.isLoggedIn) authManager.accountName else stringResource(Res.string.glass_profile_signed_out), style = MaterialTheme.typography.titleLarge)
                             if (authManager.isLoggedIn) Text(authManager.accountChannelHandle.ifBlank { authManager.accountEmail }, style = MaterialTheme.typography.bodyMedium)
                         }
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Button(onClick = if (authManager.isLoggedIn) onSwitchAccount else onLogin) {
+                        Button(onClick = if (authManager.isLoggedIn) onSwitchAccount else onLogin, modifier = Modifier.weight(1f)) {
                             Text(stringResource(if (authManager.isLoggedIn) Res.string.menu_switch_account else Res.string.account_sign_in))
                         }
-                        TextButton(onClick = onTokenLogin) { Text(stringResource(Res.string.account_login_with_token)) }
+                        TextButton(onClick = onTokenLogin, modifier = Modifier.weight(1f)) { Text(stringResource(Res.string.account_login_with_token)) }
                     }
                     if (authManager.isLoggedIn) TextButton(onClick = { confirmLogout = true }) { Text(stringResource(Res.string.action_logout)) }
                 }

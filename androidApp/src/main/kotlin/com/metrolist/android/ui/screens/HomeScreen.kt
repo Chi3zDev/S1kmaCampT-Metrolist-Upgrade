@@ -193,8 +193,9 @@ fun HomeScreen(
     val showTopRefreshIndicator = isRefreshing || uiState.isRefreshing
     val isTv = LocalIsTv.current
     val glassActions = Settings.shared.glassNavigation && Settings.shared.glassFloatingActions
-    val glassActionColor = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = (Settings.shared.glassTintStrength / 100f * 0.7f).coerceIn(0.25f, 0.85f))
-    val glassActionHighlight = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f)
+    val glassActionTint = when (Settings.shared.glassStyle) { "FROSTED" -> 0.9f; "CLEAR" -> 0.45f; else -> 0.7f }
+    val glassActionColor = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = (Settings.shared.glassTintStrength / 100f * glassActionTint).coerceIn(0.22f, 0.9f))
+    val glassActionHighlight = MaterialTheme.colorScheme.onSurface.copy(alpha = if (Settings.shared.glassStyle == "CLEAR") 0.38f else 0.25f)
     val glassActionEdge = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.15f)
     val glassActionBorder = remember(glassActionHighlight, glassActionEdge) {
         BorderStroke(1.dp, Brush.verticalGradient(listOf(glassActionHighlight, glassActionEdge)))
