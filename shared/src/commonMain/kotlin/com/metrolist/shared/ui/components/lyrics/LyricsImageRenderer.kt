@@ -30,8 +30,8 @@ import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.drawText
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
@@ -47,9 +47,15 @@ internal enum class LyricsPosterStyle { CLASSIC, GLASS_CARD }
 
 internal enum class LyricsImageBackground { GLASS, SOLID, BLUR, GRADIENT }
 
-internal enum class LyricsPosterFont(val family: FontFamily) {
-    SANS(FontFamily.SansSerif), SERIF(FontFamily.Serif), MONO(FontFamily.Monospace), HANDWRITING(FontFamily.Cursive),
-    NUNITO_BOLD(FontFamily.SansSerif), NUNITO_EXTRABOLD(FontFamily.SansSerif),
+internal enum class LyricsPosterFont(
+    val family: FontFamily,
+) {
+    SANS(FontFamily.SansSerif),
+    SERIF(FontFamily.Serif),
+    MONO(FontFamily.Monospace),
+    HANDWRITING(FontFamily.Cursive),
+    NUNITO_BOLD(FontFamily.SansSerif),
+    NUNITO_EXTRABOLD(FontFamily.SansSerif),
 }
 
 internal data class LyricsImageStyle(
@@ -84,7 +90,10 @@ private fun DrawScope.drawCover(
     )
 }
 
-internal fun prepareLyricsArtwork(image: ImageBitmap, blurRadius: Int = 6): Pair<List<Color>, ImageBitmap> {
+internal fun prepareLyricsArtwork(
+    image: ImageBitmap,
+    blurRadius: Int = 6,
+): Pair<List<Color>, ImageBitmap> {
     val sample = ImageBitmap(64, 64)
     CanvasDrawScope().draw(Density(1f), LayoutDirection.Ltr, Canvas(sample), Size(64f, 64f)) {
         drawRect(Color.Black)
@@ -123,7 +132,21 @@ internal fun renderLyricsImage(
     shareUrl: String? = null,
 ): ImageBitmap {
     if (style.posterStyle == LyricsPosterStyle.GLASS_CARD) {
-        return renderGlassLyricsPoster(lyrics, title, artist, appName, artwork, blurredArtwork, palette, style, textMeasurer, logo, layoutDirection, sizePx, story)
+        return renderGlassLyricsPoster(
+            lyrics,
+            title,
+            artist,
+            appName,
+            artwork,
+            blurredArtwork,
+            palette,
+            style,
+            textMeasurer,
+            logo,
+            layoutDirection,
+            sizePx,
+            story,
+        )
     }
     val bitmap = ImageBitmap(sizePx, if (story) sizePx * 16 / 9 else sizePx)
     val scale = sizePx / 340f
@@ -195,24 +218,60 @@ internal fun renderLyricsImage(
         clipPath(path) {
             drawRect(style.backgroundColor)
             when (style.background) {
-                LyricsImageBackground.SOLID -> Unit
+                LyricsImageBackground.SOLID -> {
+                    Unit
+                }
+
                 LyricsImageBackground.BLUR, LyricsImageBackground.GLASS -> {
                     blurredArtwork?.let {
                         drawImage(it, dstSize = IntSize(size.width.toInt(), size.height.toInt()), filterQuality = FilterQuality.High)
                         if (style.background == LyricsImageBackground.GLASS && style.glassEnabled) {
-                            val styleTint = when (style.glassStyle) { "FROSTED" -> 0.65f; "CLEAR" -> 0.22f; else -> 0.42f }
+                            val styleTint =
+                                when (style.glassStyle) {
+                                    "FROSTED" -> 0.65f
+                                    "CLEAR" -> 0.22f
+                                    else -> 0.42f
+                                }
                             drawRect(style.backgroundColor.copy(alpha = (styleTint * style.glassTint).coerceIn(0f, 0.65f)))
                             drawRect(Color.Black.copy(alpha = if (style.glassStyle == "CLEAR") 0.48f else 0.55f))
                             val inset = 4f * scale
                             val edgeSize = Size(size.width - 2 * inset, size.height - 2 * inset)
                             val corner = CornerRadius(16f * scale)
-                            drawRoundRect(Color.Black.copy(alpha = 0.18f), topLeft = Offset(inset, inset + 2f * scale), size = edgeSize, cornerRadius = corner, style = Stroke(3f * scale))
-                            drawRoundRect(Brush.verticalGradient(listOf(Color.White.copy(alpha = if (style.glassStyle == "CLEAR") 0.65f else 0.35f), Color.White.copy(alpha = 0.06f))), topLeft = Offset(inset, inset), size = edgeSize, cornerRadius = corner, style = Stroke(scale))
+                            drawRoundRect(
+                                Color.Black.copy(alpha = 0.18f),
+                                topLeft = Offset(inset, inset + 2f * scale),
+                                size = edgeSize,
+                                cornerRadius = corner,
+                                style =
+                                    Stroke(3f * scale),
+                            )
+                            drawRoundRect(
+                                Brush.verticalGradient(
+                                    listOf(
+                                        Color.White.copy(
+                                            alpha =
+                                                if (style.glassStyle ==
+                                                    "CLEAR"
+                                                ) {
+                                                    0.65f
+                                                } else {
+                                                    0.35f
+                                                },
+                                        ),
+                                        Color.White.copy(alpha = 0.06f),
+                                    ),
+                                ),
+                                topLeft = Offset(inset, inset),
+                                size = edgeSize,
+                                cornerRadius = corner,
+                                style = Stroke(scale),
+                            )
                         } else {
                             drawRect(Color.Black.copy(alpha = if (style.background == LyricsImageBackground.GLASS) 0.65f else 0.55f))
                         }
                     }
                 }
+
                 LyricsImageBackground.GRADIENT -> {
                     val colors = palette.firstOrNull()?.let(::getGradientColors) ?: listOf(style.backgroundColor, style.backgroundColor)
                     drawRect(Brush.linearGradient(colors))

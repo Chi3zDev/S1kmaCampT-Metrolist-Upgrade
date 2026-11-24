@@ -1042,9 +1042,14 @@ private fun OgRtlExpressiveWordAnimation(
     val currentPositionProvider by rememberUpdatedState(positionProvider)
     val density = LocalDensity.current
     val fontSizePx = remember(lyricStyle) { with(density) { lyricStyle.fontSize.toPx() } }
-    val glowShadow = remember(glowStrength, expressiveAccent, fontSizePx) {
-        Shadow(expressiveAccent.copy(alpha = expressiveAccent.alpha * glowStrength), Offset.Zero, (fontSizePx * 0.24f).coerceAtLeast(1f))
-    }
+    val glowShadow =
+        remember(glowStrength, expressiveAccent, fontSizePx) {
+            Shadow(
+                expressiveAccent.copy(alpha = expressiveAccent.alpha * glowStrength),
+                Offset.Zero,
+                (fontSizePx * 0.24f).coerceAtLeast(1f),
+            )
+        }
     val gradientWidth = fontSizePx * 0.4f
     val extraPaddingPx = minOf(fontSizePx * 0.4f, with(density) { LYRICS_LINE_HORIZONTAL_PADDING.toPx() })
 

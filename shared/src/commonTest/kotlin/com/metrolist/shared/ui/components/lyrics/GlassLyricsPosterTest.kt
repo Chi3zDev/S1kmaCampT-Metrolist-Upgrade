@@ -1,7 +1,7 @@
 package com.metrolist.shared.ui.components.lyrics
 
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
@@ -71,12 +71,13 @@ class GlassLyricsPosterTest {
 
     @Test
     fun styleRoundTripsWithoutLosingFontOrBackground() {
-        val style = LyricsImageStyle(
-            posterStyle = LyricsPosterStyle.GLASS_CARD,
-            background = LyricsImageBackground.BLUR,
-            font = LyricsPosterFont.NUNITO_EXTRABOLD,
-            textScale = 1.2f,
-        )
+        val style =
+            LyricsImageStyle(
+                posterStyle = LyricsPosterStyle.GLASS_CARD,
+                background = LyricsImageBackground.BLUR,
+                font = LyricsPosterFont.NUNITO_EXTRABOLD,
+                textScale = 1.2f,
+            )
         val restored = decodeLyricsImageStyle(style.encodeForStorage(), TextAlign.Left)
         assertEquals(LyricsPosterStyle.GLASS_CARD, restored.posterStyle)
         assertEquals(LyricsImageBackground.BLUR, restored.background)
@@ -86,9 +87,12 @@ class GlassLyricsPosterTest {
 
     @Test
     fun previousStyleDefaultsToClassic() {
-        val legacy = """{"background":"SOLID","backgroundColor":0,"textColor":0,"secondaryColor":0,"textScale":1.0,"contentScale":1.0,"font":"SANS"}"""
+        val legacy =
+            """{"background":"SOLID","backgroundColor":0,"textColor":0,"secondaryColor":0,""" +
+                """"textScale":1.0,"contentScale":1.0,"font":"SANS"}"""
         assertEquals(LyricsPosterStyle.CLASSIC, decodeLyricsImageStyle(legacy, TextAlign.Center).posterStyle)
     }
+
     @Test
     fun veryTallTextUsesDrawScaleToStayInsideAvailableHeight() {
         val fit = fitLyricsImageText(height = 20f, textScale = 1f) { 100f }
@@ -105,17 +109,21 @@ class GlassLyricsPosterTest {
 
     @Test
     fun unknownPosterFontAndStyleFallBackSafely() {
-        val stored = """{"background":"SOLID","backgroundColor":0,"textColor":0,"secondaryColor":0,"textScale":1.0,"contentScale":1.0,"font":"REMOVED_FONT","posterStyle":"REMOVED_STYLE"}"""
+        val stored =
+            """{"background":"SOLID","backgroundColor":0,"textColor":0,"secondaryColor":0,""" +
+                """"textScale":1.0,"contentScale":1.0,"font":"REMOVED_FONT","posterStyle":"REMOVED_STYLE"}"""
         val restored = decodeLyricsImageStyle(stored, TextAlign.Center)
         assertEquals(LyricsPosterStyle.CLASSIC, restored.posterStyle)
         assertEquals(LyricsPosterFont.SANS, restored.font)
     }
+
     @Test
     fun glassPosterKeepsLightTextOnItsDarkCard() {
         assertEquals(Color.White, lyricsPosterTextColor(LyricsPosterStyle.GLASS_CARD, true, 0.95f))
         assertEquals(Color.Black, lyricsPosterTextColor(LyricsPosterStyle.CLASSIC, true, 0.95f))
         assertEquals(Color.White, lyricsPosterTextColor(LyricsPosterStyle.CLASSIC, true, 0.1f))
     }
+
     @Test
     fun scaledPosterTextRespectsStartEndAndLayoutDirection() {
         assertEquals(0f, lyricsPosterScaleOffset(TextAlign.Start, LayoutDirection.Ltr, 100f, 0.5f))

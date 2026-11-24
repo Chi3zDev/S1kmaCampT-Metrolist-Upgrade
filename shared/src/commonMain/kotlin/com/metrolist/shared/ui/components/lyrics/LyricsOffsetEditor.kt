@@ -70,10 +70,10 @@ import com.metrolist.shared.generated.resources.lyrics_offset_later
 import com.metrolist.shared.generated.resources.milliseconds_unit
 import com.metrolist.shared.generated.resources.settings_reset_to_default
 import com.metrolist.shared.settings.Settings
-import com.metrolist.shared.ui.player.playerGlassCard
 import com.metrolist.shared.ui.LocalIsTv
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import com.metrolist.shared.ui.playback.retainPlaybackKeyFocus
+import com.metrolist.shared.ui.player.playerGlassCard
 import com.metrolist.shared.ui.tv.tvFocusHighlight
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.abs
@@ -129,11 +129,14 @@ fun LyricsOffsetEditor(
             contentColor = contentColor,
         )
     Column(
-        modifier = modifier.fillMaxWidth().then(
-            if (Settings.shared.glassNavigation && Settings.shared.glassPlayer) {
-                Modifier.playerGlassCard(contentColor).padding(12.dp)
-            } else Modifier,
-        ),
+        modifier =
+            modifier.fillMaxWidth().then(
+                if (Settings.shared.glassNavigation && Settings.shared.glassPlayer) {
+                    Modifier.playerGlassCard(contentColor).padding(12.dp)
+                } else {
+                    Modifier
+                },
+            ),
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {

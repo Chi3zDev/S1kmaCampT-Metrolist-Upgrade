@@ -51,8 +51,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -67,27 +67,25 @@ import coil3.SingletonImageLoader
 import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
 import com.metrolist.shared.generated.resources.Res
-import com.metrolist.shared.generated.resources.app_name
 import com.metrolist.shared.generated.resources.app_font_nunito_bold
 import com.metrolist.shared.generated.resources.app_font_nunito_extrabold
-import com.metrolist.shared.generated.resources.nunito_poster_bold
-import com.metrolist.shared.generated.resources.nunito_poster_extrabold
+import com.metrolist.shared.generated.resources.app_name
 import com.metrolist.shared.generated.resources.background_color
 import com.metrolist.shared.generated.resources.blurred_artwork
 import com.metrolist.shared.generated.resources.cancel
 import com.metrolist.shared.generated.resources.customize_colors
 import com.metrolist.shared.generated.resources.gradient
 import com.metrolist.shared.generated.resources.logo
-import com.metrolist.shared.generated.resources.lyrics_poster_glass
-import com.metrolist.shared.generated.resources.lyrics_poster_format
-import com.metrolist.shared.generated.resources.lyrics_poster_font
-import com.metrolist.shared.generated.resources.lyrics_poster_style
 import com.metrolist.shared.generated.resources.lyrics_poster_classic
-import com.metrolist.shared.generated.resources.lyrics_poster_glass_card
+import com.metrolist.shared.generated.resources.lyrics_poster_font
+import com.metrolist.shared.generated.resources.lyrics_poster_font_handwriting
+import com.metrolist.shared.generated.resources.lyrics_poster_font_mono
 import com.metrolist.shared.generated.resources.lyrics_poster_font_sans
 import com.metrolist.shared.generated.resources.lyrics_poster_font_serif
-import com.metrolist.shared.generated.resources.lyrics_poster_font_mono
-import com.metrolist.shared.generated.resources.lyrics_poster_font_handwriting
+import com.metrolist.shared.generated.resources.lyrics_poster_format
+import com.metrolist.shared.generated.resources.lyrics_poster_glass
+import com.metrolist.shared.generated.resources.lyrics_poster_glass_card
+import com.metrolist.shared.generated.resources.lyrics_poster_style
 import com.metrolist.shared.generated.resources.lyrics_share_artwork_failed
 import com.metrolist.shared.generated.resources.lyrics_share_auto_fit
 import com.metrolist.shared.generated.resources.lyrics_share_color
@@ -99,6 +97,8 @@ import com.metrolist.shared.generated.resources.lyrics_share_story_image
 import com.metrolist.shared.generated.resources.lyrics_share_story_style
 import com.metrolist.shared.generated.resources.lyrics_share_text
 import com.metrolist.shared.generated.resources.lyrics_share_text_size
+import com.metrolist.shared.generated.resources.nunito_poster_bold
+import com.metrolist.shared.generated.resources.nunito_poster_extrabold
 import com.metrolist.shared.generated.resources.player_background_style
 import com.metrolist.shared.generated.resources.preview
 import com.metrolist.shared.generated.resources.secondary_text_color
@@ -172,11 +172,21 @@ fun LyricsShareDialog(
     val glassEnabled = Settings.shared.glassNavigation && Settings.shared.glassLyricsPoster
     val glassVariant = Settings.shared.glassStyle
     val glassStrength = Settings.shared.glassBlurStrength.coerceIn(0f, 100f)
-    val artworkBlurRadius = if (style.posterStyle == LyricsPosterStyle.GLASS_CARD) {
-        12
-    } else if (glassEnabled && style.background == LyricsImageBackground.GLASS) {
-        (glassStrength / 100f * when (glassVariant) { "FROSTED" -> 9f; "CLEAR" -> 2f; else -> 6f }).roundToInt().coerceIn(0, 9)
-    } else 6
+    val artworkBlurRadius =
+        if (style.posterStyle == LyricsPosterStyle.GLASS_CARD) {
+            12
+        } else if (glassEnabled && style.background == LyricsImageBackground.GLASS) {
+            (
+                glassStrength / 100f *
+                    when (glassVariant) {
+                        "FROSTED" -> 9f
+                        "CLEAR" -> 2f
+                        else -> 6f
+                    }
+            ).roundToInt().coerceIn(0, 9)
+        } else {
+            6
+        }
     LaunchedEffect(artworkUrl, artworkBlurRadius) {
         loadingArtwork = artworkUrl != null
         artworkFailed = false
@@ -214,27 +224,37 @@ fun LyricsShareDialog(
     val appName = stringResource(Res.string.app_name)
     val direction = LocalLayoutDirection.current
     val posterBackground = palette.firstOrNull() ?: MaterialTheme.colorScheme.surface
-    val effectiveBackground = if (Settings.shared.glassNavigation && !Settings.shared.glassLyricsPoster && style.background == LyricsImageBackground.GLASS) LyricsImageBackground.SOLID else style.background
-    val posterText = lyricsPosterTextColor(
-        style.posterStyle,
-        effectiveBackground == LyricsImageBackground.SOLID || artwork == null,
-        posterBackground.luminance(),
-    )
-    val posterFont = when (style.font) {
-        LyricsPosterFont.NUNITO_BOLD -> FontFamily(Font(Res.font.nunito_poster_bold, weight = FontWeight.Bold))
-        LyricsPosterFont.NUNITO_EXTRABOLD -> FontFamily(Font(Res.font.nunito_poster_extrabold, weight = FontWeight.ExtraBold))
-        else -> null
-    }
-    val renderStyle = style.copy(
-        fontFamilyOverride = posterFont,
-        background = effectiveBackground,
-        backgroundColor = posterBackground,
-        textColor = posterText,
-        secondaryColor = posterText.copy(alpha = 0.8f),
-        glassEnabled = glassEnabled,
-        glassStyle = glassVariant,
-        glassTint = Settings.shared.glassTintStrength.coerceIn(0f, 100f) / 100f,
-    )
+    val effectiveBackground =
+        if (Settings.shared.glassNavigation && !Settings.shared.glassLyricsPoster &&
+            style.background == LyricsImageBackground.GLASS
+        ) {
+            LyricsImageBackground.SOLID
+        } else {
+            style.background
+        }
+    val posterText =
+        lyricsPosterTextColor(
+            style.posterStyle,
+            effectiveBackground == LyricsImageBackground.SOLID || artwork == null,
+            posterBackground.luminance(),
+        )
+    val posterFont =
+        when (style.font) {
+            LyricsPosterFont.NUNITO_BOLD -> FontFamily(Font(Res.font.nunito_poster_bold, weight = FontWeight.Bold))
+            LyricsPosterFont.NUNITO_EXTRABOLD -> FontFamily(Font(Res.font.nunito_poster_extrabold, weight = FontWeight.ExtraBold))
+            else -> null
+        }
+    val renderStyle =
+        style.copy(
+            fontFamilyOverride = posterFont,
+            background = effectiveBackground,
+            backgroundColor = posterBackground,
+            textColor = posterText,
+            secondaryColor = posterText.copy(alpha = 0.8f),
+            glassEnabled = glassEnabled,
+            glassStyle = glassVariant,
+            glassTint = Settings.shared.glassTintStrength.coerceIn(0f, 100f) / 100f,
+        )
     val storyBackgroundColor = MaterialTheme.colorScheme.surface
     val storyCardColor = MaterialTheme.colorScheme.surfaceContainerHigh
     val storyTextColor = MaterialTheme.colorScheme.onSurface
@@ -382,12 +402,31 @@ fun LyricsShareDialog(
                         item {
                             Text(stringResource(Res.string.lyrics_poster_style))
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                ExpressiveFilterChip(selected = style.posterStyle == LyricsPosterStyle.CLASSIC, enabled = !busy,
+                                ExpressiveFilterChip(
+                                    selected = style.posterStyle == LyricsPosterStyle.CLASSIC,
+                                    enabled = !busy,
                                     onClick = { style = style.copy(posterStyle = LyricsPosterStyle.CLASSIC) },
-                                    label = { Text(stringResource(Res.string.lyrics_poster_classic)) })
-                                ExpressiveFilterChip(selected = style.posterStyle == LyricsPosterStyle.GLASS_CARD, enabled = !busy,
-                                    onClick = { style = style.copy(posterStyle = LyricsPosterStyle.GLASS_CARD, background = if (artwork != null) LyricsImageBackground.BLUR else LyricsImageBackground.SOLID) },
-                                    label = { Text(stringResource(Res.string.lyrics_poster_glass_card)) })
+                                    label = { Text(stringResource(Res.string.lyrics_poster_classic)) },
+                                )
+                                ExpressiveFilterChip(
+                                    selected = style.posterStyle == LyricsPosterStyle.GLASS_CARD,
+                                    enabled = !busy,
+                                    onClick = {
+                                        style =
+                                            style.copy(
+                                                posterStyle = LyricsPosterStyle.GLASS_CARD,
+                                                background =
+                                                    if (artwork !=
+                                                        null
+                                                    ) {
+                                                        LyricsImageBackground.BLUR
+                                                    } else {
+                                                        LyricsImageBackground.SOLID
+                                                    },
+                                            )
+                                    },
+                                    label = { Text(stringResource(Res.string.lyrics_poster_glass_card)) },
+                                )
                             }
                         }
                         run {
@@ -398,26 +437,30 @@ fun LyricsShareDialog(
                                     Modifier.fillMaxWidth().carouselScroll(scrollState).horizontalScroll(scrollState),
                                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                                 ) {
-                                    LyricsImageBackground.entries.filter { style.posterStyle != LyricsPosterStyle.GLASS_CARD || it != LyricsImageBackground.GLASS }.forEach { background ->
-                                        ExpressiveFilterChip(
-                                            selected = style.background == background,
-                                            enabled = !busy && (background == LyricsImageBackground.SOLID || artwork != null),
-                                            onClick = { style = style.copy(background = background) },
-                                            label = {
-                                                Text(
-                                                    stringResource(
-                                                        when (background) {
-                                                            LyricsImageBackground.GLASS -> Res.string.lyrics_poster_glass
-                                                            LyricsImageBackground.SOLID -> Res.string.settings_solid
-                                                            LyricsImageBackground.BLUR -> Res.string.blurred_artwork
-                                                            LyricsImageBackground.GRADIENT -> Res.string.gradient
-                                                        },
-                                                    ),
-                                                    maxLines = 1,
-                                                )
-                                            },
-                                        )
-                                    }
+                                    LyricsImageBackground.entries
+                                        .filter {
+                                            style.posterStyle != LyricsPosterStyle.GLASS_CARD ||
+                                                it != LyricsImageBackground.GLASS
+                                        }.forEach { background ->
+                                            ExpressiveFilterChip(
+                                                selected = style.background == background,
+                                                enabled = !busy && (background == LyricsImageBackground.SOLID || artwork != null),
+                                                onClick = { style = style.copy(background = background) },
+                                                label = {
+                                                    Text(
+                                                        stringResource(
+                                                            when (background) {
+                                                                LyricsImageBackground.GLASS -> Res.string.lyrics_poster_glass
+                                                                LyricsImageBackground.SOLID -> Res.string.settings_solid
+                                                                LyricsImageBackground.BLUR -> Res.string.blurred_artwork
+                                                                LyricsImageBackground.GRADIENT -> Res.string.gradient
+                                                            },
+                                                        ),
+                                                        maxLines = 1,
+                                                    )
+                                                },
+                                            )
+                                        }
                                 }
                             }
                         }
@@ -425,28 +468,38 @@ fun LyricsShareDialog(
                         item {
                             Text(stringResource(Res.string.lyrics_poster_format))
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                ExpressiveFilterChip(selected = !useStoryLayout, enabled = !busy, onClick = { useStoryLayout = false }, label = { Text(stringResource(Res.string.lyrics_share_square_image)) })
-                                ExpressiveFilterChip(selected = useStoryLayout, enabled = !busy, onClick = { useStoryLayout = true }, label = { Text(stringResource(Res.string.lyrics_share_story_image)) })
+                                ExpressiveFilterChip(selected = !useStoryLayout, enabled = !busy, onClick = {
+                                    useStoryLayout = false
+                                }, label = { Text(stringResource(Res.string.lyrics_share_square_image)) })
+                                ExpressiveFilterChip(selected = useStoryLayout, enabled = !busy, onClick = {
+                                    useStoryLayout = true
+                                }, label = { Text(stringResource(Res.string.lyrics_share_story_image)) })
                             }
                         }
                         item {
                             Text(stringResource(Res.string.lyrics_poster_font))
                             val fontScroll = rememberScrollState()
-                            Row(Modifier.fillMaxWidth().carouselScroll(fontScroll).horizontalScroll(fontScroll), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Row(
+                                Modifier.fillMaxWidth().carouselScroll(fontScroll).horizontalScroll(fontScroll),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            ) {
                                 LyricsPosterFont.entries.forEach { font ->
-                                    val label = when (font) {
-                                        LyricsPosterFont.SANS -> Res.string.lyrics_poster_font_sans
-                                        LyricsPosterFont.SERIF -> Res.string.lyrics_poster_font_serif
-                                        LyricsPosterFont.MONO -> Res.string.lyrics_poster_font_mono
-                                        LyricsPosterFont.HANDWRITING -> Res.string.lyrics_poster_font_handwriting
-                                        LyricsPosterFont.NUNITO_BOLD -> Res.string.app_font_nunito_bold
-                                        LyricsPosterFont.NUNITO_EXTRABOLD -> Res.string.app_font_nunito_extrabold
-                                    }
-                                    ExpressiveFilterChip(selected = style.font == font, enabled = !busy, onClick = { style = style.copy(font = font) }, label = { Text(stringResource(label), maxLines = 1) })
+                                    val label =
+                                        when (font) {
+                                            LyricsPosterFont.SANS -> Res.string.lyrics_poster_font_sans
+                                            LyricsPosterFont.SERIF -> Res.string.lyrics_poster_font_serif
+                                            LyricsPosterFont.MONO -> Res.string.lyrics_poster_font_mono
+                                            LyricsPosterFont.HANDWRITING -> Res.string.lyrics_poster_font_handwriting
+                                            LyricsPosterFont.NUNITO_BOLD -> Res.string.app_font_nunito_bold
+                                            LyricsPosterFont.NUNITO_EXTRABOLD -> Res.string.app_font_nunito_extrabold
+                                        }
+                                    ExpressiveFilterChip(selected = style.font == font, enabled = !busy, onClick = {
+                                        style =
+                                            style.copy(font = font)
+                                    }, label = { Text(stringResource(label), maxLines = 1) })
                                 }
                             }
                         }
-
                     }
                     LazyListScrollbar(scrollState, Modifier.align(Alignment.CenterEnd))
                 }

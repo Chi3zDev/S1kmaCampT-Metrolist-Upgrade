@@ -37,7 +37,11 @@ internal fun glassPosterCardWidthFraction(contentScale: Float): Float {
 }
 
 /** Shrink long footer labels before falling back to ellipsis at the minimum readable size. */
-internal fun fitGlassPosterLabelFontSize(preferred: Float, minimum: Float, overflows: (Float) -> Boolean): Float {
+internal fun fitGlassPosterLabelFontSize(
+    preferred: Float,
+    minimum: Float,
+    overflows: (Float) -> Boolean,
+): Float {
     if (!overflows(preferred)) return preferred
     if (overflows(minimum)) return minimum
     var low = minimum
@@ -49,23 +53,49 @@ internal fun fitGlassPosterLabelFontSize(preferred: Float, minimum: Float, overf
     return low
 }
 
-internal data class GlassPosterSurface(val cardAlpha: Float, val borderAlpha: Float)
+internal data class GlassPosterSurface(
+    val cardAlpha: Float,
+    val borderAlpha: Float,
+)
 
 /** Keep the dark, readable card while reflecting the existing glass style and tint. */
-internal fun glassPosterSurface(enabled: Boolean, variant: String, tint: Float): GlassPosterSurface {
+internal fun glassPosterSurface(
+    enabled: Boolean,
+    variant: String,
+    tint: Float,
+): GlassPosterSurface {
     if (!enabled) return GlassPosterSurface(0.67f, 0.20f)
     val strength = tint.takeIf { it.isFinite() }?.coerceIn(0f, 1f) ?: 0.55f
-    val base = when (variant) { "CLEAR" -> 0.62f; "FROSTED" -> 0.74f; else -> 0.67f }
-    val border = when (variant) { "CLEAR" -> 0.28f; "FROSTED" -> 0.16f; else -> 0.20f }
+    val base =
+        when (variant) {
+            "CLEAR" -> 0.62f
+            "FROSTED" -> 0.74f
+            else -> 0.67f
+        }
+    val border =
+        when (variant) {
+            "CLEAR" -> 0.28f
+            "FROSTED" -> 0.16f
+            else -> 0.20f
+        }
     return GlassPosterSurface((base + (strength - 0.55f) * 0.12f).coerceIn(0.60f, 0.82f), border)
 }
 
-internal data class GlassPosterFooterLayout(val artworkX: Float, val labelX: Float, val labelWidth: Float)
+internal data class GlassPosterFooterLayout(
+    val artworkX: Float,
+    val labelX: Float,
+    val labelWidth: Float,
+)
 
 /** Align the artwork to the reading-direction start; reclaim its space when unavailable. */
 internal fun glassPosterFooterLayout(
-    left: Float, width: Float, inset: Float, artSize: Float, gap: Float,
-    hasArtwork: Boolean, direction: LayoutDirection,
+    left: Float,
+    width: Float,
+    inset: Float,
+    artSize: Float,
+    gap: Float,
+    hasArtwork: Boolean,
+    direction: LayoutDirection,
 ): GlassPosterFooterLayout {
     val start = left + inset
     val end = left + width - inset
@@ -77,10 +107,16 @@ internal fun glassPosterFooterLayout(
     }
 }
 
-internal data class GlassPosterCoverCrop(val offset: IntOffset, val size: IntSize)
+internal data class GlassPosterCoverCrop(
+    val offset: IntOffset,
+    val size: IntSize,
+)
 
 /** Center-crop to the target aspect ratio without stretching rectangular artwork. */
-internal fun glassPosterCoverCrop(source: IntSize, target: IntSize): GlassPosterCoverCrop {
+internal fun glassPosterCoverCrop(
+    source: IntSize,
+    target: IntSize,
+): GlassPosterCoverCrop {
     require(source.width > 0 && source.height > 0 && target.width > 0 && target.height > 0)
     val sourceIsWider = source.width.toLong() * target.height > target.width.toLong() * source.height
     val cropWidth = if (sourceIsWider) (source.height.toLong() * target.width / target.height).toInt().coerceAtLeast(1) else source.width
@@ -118,16 +154,31 @@ internal fun renderGlassLyricsPoster(
     val text = lyrics.lines().take(6).joinToString("\n")
     val family = style.fontFamilyOverride ?: style.font.family
 
-    fun measureText(fontSize: Float) = textMeasurer.measure(
-        text,
-        style = TextStyle(color = style.textColor, fontFamily = family, fontWeight = if (style.font == LyricsPosterFont.NUNITO_EXTRABOLD) FontWeight.ExtraBold else FontWeight.Bold,
-            fontSize = fontSize.sp, lineHeight = (fontSize * 1.15f).sp, textAlign = style.alignment),
-        constraints = textConstraints,
-        maxLines = Int.MAX_VALUE,
-        overflow = TextOverflow.Clip,
-        density = density,
-        layoutDirection = layoutDirection,
-    )
+    fun measureText(fontSize: Float) =
+        textMeasurer.measure(
+            text,
+            style =
+                TextStyle(
+                    color = style.textColor,
+                    fontFamily = family,
+                    fontWeight =
+                        if (style.font ==
+                            LyricsPosterFont.NUNITO_EXTRABOLD
+                        ) {
+                            FontWeight.ExtraBold
+                        } else {
+                            FontWeight.Bold
+                        },
+                    fontSize = fontSize.sp,
+                    lineHeight = (fontSize * 1.15f).sp,
+                    textAlign = style.alignment,
+                ),
+            constraints = textConstraints,
+            maxLines = Int.MAX_VALUE,
+            overflow = TextOverflow.Clip,
+            density = density,
+            layoutDirection = layoutDirection,
+        )
     val fit = fitLyricsImageText(maxTextHeight, style.textScale, maxFontSize = 32f) { measureText(it).size.height.toFloat() }
     val measured = measureText(fit.fontSize)
     val renderedHeight = measured.size.height * fit.drawScale
@@ -137,26 +188,59 @@ internal fun renderGlassLyricsPoster(
     val cardTop = (height - cardHeight) / 2f
     val footerTop = cardTop + cardHeight - footerHeight
     val radius = 20f * scale
-    val surface = glassPosterSurface(style.glassEnabled && style.background == LyricsImageBackground.GLASS, style.glassStyle, style.glassTint)
+    val surface =
+        glassPosterSurface(style.glassEnabled && style.background == LyricsImageBackground.GLASS, style.glassStyle, style.glassTint)
 
     CanvasDrawScope().draw(density, layoutDirection, Canvas(bitmap), Size(width, height)) {
         drawRect(style.backgroundColor)
         when (style.background) {
-            LyricsImageBackground.BLUR, LyricsImageBackground.GLASS -> blurredArtwork?.let { image ->
-                val target = IntSize(bitmap.width, bitmap.height)
-                val crop = glassPosterCoverCrop(IntSize(image.width, image.height), target)
-                drawImage(image, srcOffset = crop.offset,
-                    srcSize = crop.size, dstSize = target, filterQuality = FilterQuality.High)
+            LyricsImageBackground.BLUR, LyricsImageBackground.GLASS -> {
+                blurredArtwork?.let { image ->
+                    val target = IntSize(bitmap.width, bitmap.height)
+                    val crop = glassPosterCoverCrop(IntSize(image.width, image.height), target)
+                    drawImage(
+                        image,
+                        srcOffset = crop.offset,
+                        srcSize = crop.size,
+                        dstSize = target,
+                        filterQuality = FilterQuality.High,
+                    )
+                }
             }
-            LyricsImageBackground.GRADIENT -> drawRect(Brush.linearGradient(palette.firstOrNull()?.let(::getGradientColors) ?: listOf(style.backgroundColor, style.backgroundColor)))
-            LyricsImageBackground.SOLID -> Unit
+
+            LyricsImageBackground.GRADIENT -> {
+                drawRect(
+                    Brush.linearGradient(
+                        palette.firstOrNull()?.let(::getGradientColors) ?: listOf(style.backgroundColor, style.backgroundColor),
+                    ),
+                )
+            }
+
+            LyricsImageBackground.SOLID -> {
+                Unit
+            }
         }
         drawRect(Color(0xFF180C08).copy(alpha = 0.52f))
-        val cardPath = Path().apply { addRoundRect(RoundRect(cardLeft, cardTop, cardLeft + cardWidth, cardTop + cardHeight, CornerRadius(radius))) }
+        val cardPath =
+            Path().apply {
+                addRoundRect(
+                    RoundRect(cardLeft, cardTop, cardLeft + cardWidth, cardTop + cardHeight, CornerRadius(radius)),
+                )
+            }
         clipPath(cardPath) {
-            drawRect(Color(0xFF191412).copy(alpha = surface.cardAlpha), topLeft = Offset(cardLeft, cardTop), size = Size(cardWidth, cardHeight))
+            drawRect(
+                Color(0xFF191412).copy(alpha = surface.cardAlpha),
+                topLeft = Offset(cardLeft, cardTop),
+                size = Size(cardWidth, cardHeight),
+            )
             drawRect(Color.Black.copy(alpha = 0.23f), topLeft = Offset(cardLeft, footerTop), size = Size(cardWidth, footerHeight))
-            drawLine(Color.White.copy(alpha = 0.14f), Offset(cardLeft, footerTop), Offset(cardLeft + cardWidth, footerTop), strokeWidth = scale * 0.7f)
+            drawLine(
+                Color.White.copy(alpha = 0.14f),
+                Offset(cardLeft, footerTop),
+                Offset(cardLeft + cardWidth, footerTop),
+                strokeWidth =
+                    scale * 0.7f,
+            )
             val alignmentOffset = lyricsPosterScaleOffset(style.alignment, layoutDirection, textWidth, fit.drawScale)
             translate(cardLeft + inner + alignmentOffset, cardTop + inner) {
                 scale(fit.drawScale, pivot = Offset.Zero) { drawText(measured) }
@@ -169,19 +253,47 @@ internal fun renderGlassLyricsPoster(
                 val crop = minOf(image.width, image.height)
                 val artPath = Path().apply { addRoundRect(RoundRect(artX, artY, artX + artSize, artY + artSize, CornerRadius(6f * scale))) }
                 clipPath(artPath) {
-                    drawImage(image, srcOffset = IntOffset((image.width - crop) / 2, (image.height - crop) / 2), srcSize = IntSize(crop, crop),
-                        dstOffset = IntOffset(artX.toInt(), artY.toInt()), dstSize = IntSize(artSize.toInt(), artSize.toInt()), filterQuality = FilterQuality.High)
+                    drawImage(
+                        image,
+                        srcOffset = IntOffset((image.width - crop) / 2, (image.height - crop) / 2),
+                        srcSize = IntSize(crop, crop),
+                        dstOffset = IntOffset(artX.toInt(), artY.toInt()),
+                        dstSize = IntSize(artSize.toInt(), artSize.toInt()),
+                        filterQuality = FilterQuality.High,
+                    )
                 }
             }
             val labelX = footer.labelX
             val labelWidth = footer.labelWidth.toInt().coerceAtLeast(1)
-            fun label(value: String, size: Float, y: Float, color: Color, weight: FontWeight) {
-                fun measure(fontSize: Float) = textMeasurer.measure(value, style = TextStyle(color = color, fontSize = fontSize.sp, fontWeight = weight, textAlign = androidx.compose.ui.text.style.TextAlign.Start),
-                    maxLines = 1, overflow = TextOverflow.Ellipsis, constraints = Constraints(minWidth = labelWidth, maxWidth = labelWidth), density = density, layoutDirection = layoutDirection)
-                val fittedSize = fitGlassPosterLabelFontSize(size, minimum = 8f) { fontSize ->
-                    val result = measure(fontSize)
-                    result.didOverflowWidth || (result.lineCount > 0 && result.isLineEllipsized(0))
-                }
+
+            fun label(
+                value: String,
+                size: Float,
+                y: Float,
+                color: Color,
+                weight: FontWeight,
+            ) {
+                fun measure(fontSize: Float) =
+                    textMeasurer.measure(
+                        value,
+                        style =
+                            TextStyle(
+                                color = color,
+                                fontSize = fontSize.sp,
+                                fontWeight = weight,
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Start,
+                            ),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        constraints = Constraints(minWidth = labelWidth, maxWidth = labelWidth),
+                        density = density,
+                        layoutDirection = layoutDirection,
+                    )
+                val fittedSize =
+                    fitGlassPosterLabelFontSize(size, minimum = 8f) { fontSize ->
+                        val result = measure(fontSize)
+                        result.didOverflowWidth || (result.lineCount > 0 && result.isLineEllipsized(0))
+                    }
                 drawText(measure(fittedSize), topLeft = Offset(labelX, y))
             }
             label(title, 14f, artY, style.textColor, FontWeight.Bold)
@@ -194,11 +306,30 @@ internal fun renderGlassLyricsPoster(
                 with(logo) { draw(Size(logoSize, logoSize), colorFilter = ColorFilter.tint(style.secondaryColor)) }
             }
             val appWidth = (labelWidth - appGap).toInt().coerceAtLeast(1)
-            val appLayout = textMeasurer.measure(appName, style = TextStyle(color = style.secondaryColor, fontSize = 9f.sp, textAlign = androidx.compose.ui.text.style.TextAlign.Start),
-                maxLines = 1, overflow = TextOverflow.Ellipsis, constraints = Constraints(minWidth = appWidth, maxWidth = appWidth), density = density, layoutDirection = layoutDirection)
+            val appLayout =
+                textMeasurer.measure(
+                    appName,
+                    style =
+                        TextStyle(
+                            color = style.secondaryColor,
+                            fontSize = 9f.sp,
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Start,
+                        ),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    constraints = Constraints(minWidth = appWidth, maxWidth = appWidth),
+                    density = density,
+                    layoutDirection = layoutDirection,
+                )
             drawText(appLayout, topLeft = Offset(if (rtl) labelX else labelX + appGap, artY + 35f * scale))
         }
-        drawRoundRect(Color.White.copy(alpha = surface.borderAlpha), topLeft = Offset(cardLeft, cardTop), size = Size(cardWidth, cardHeight), cornerRadius = CornerRadius(radius), style = Stroke(scale))
+        drawRoundRect(
+            Color.White.copy(alpha = surface.borderAlpha),
+            topLeft = Offset(cardLeft, cardTop),
+            size = Size(cardWidth, cardHeight),
+            cornerRadius = CornerRadius(radius),
+            style = Stroke(scale),
+        )
     }
     return bitmap
 }

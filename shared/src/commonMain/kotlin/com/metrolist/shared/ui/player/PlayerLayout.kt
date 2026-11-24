@@ -142,9 +142,9 @@ import com.metrolist.shared.repository.isLocalLyricsProvider
 import com.metrolist.shared.settings.PlayerBackgroundStyle
 import com.metrolist.shared.settings.PlayerType
 import com.metrolist.shared.settings.Settings
+import com.metrolist.shared.ui.LocalIsTv
 import com.metrolist.shared.ui.LocalPlayerEffectsAllowed
 import com.metrolist.shared.ui.PolishMotion
-import com.metrolist.shared.ui.LocalIsTv
 import com.metrolist.shared.ui.components.CrossfadeArtwork
 import com.metrolist.shared.ui.components.PlayerConnectedButtonGroup
 import com.metrolist.shared.ui.components.PlayerLikeShareButtons
@@ -307,11 +307,16 @@ internal fun TabletPlayerContent(
                 ) {
                     Box(Modifier.widthIn(max = contentMaxWidth).fillMaxWidth(), contentAlignment = Alignment.Center) {
                         Column(
-                            modifier = if (playerType == PlayerType.GLASS_CARD && Settings.shared.glassNavigation && Settings.shared.glassPlayer) {
-                                Modifier.playerGlassCard(textBackgroundColor).padding(16.dp)
-                            } else if (Settings.shared.glassNavigation && Settings.shared.glassPlayer && !uiState.isLyricsVisible) {
-                                Modifier.playerGlassCard(textBackgroundColor)
-                            } else Modifier,
+                            modifier =
+                                if (playerType == PlayerType.GLASS_CARD && Settings.shared.glassNavigation &&
+                                    Settings.shared.glassPlayer
+                                ) {
+                                    Modifier.playerGlassCard(textBackgroundColor).padding(16.dp)
+                                } else if (Settings.shared.glassNavigation && Settings.shared.glassPlayer && !uiState.isLyricsVisible) {
+                                    Modifier.playerGlassCard(textBackgroundColor)
+                                } else {
+                                    Modifier
+                                },
                             horizontalAlignment = Alignment.CenterHorizontally,
                         ) {
                             Row(
@@ -494,7 +499,12 @@ internal fun TabletPlayerContent(
                                             currentSong?.let { song ->
                                                 rememberTrackMarquee(
                                                     trackId = song.id,
-                                                    enabled = playerDecorativeMotionAllowed(LocalPlayerContentActive.current, Settings.shared.glassLightMode, LocalPlayerEffectsAllowed.current),
+                                                    enabled =
+                                                        playerDecorativeMotionAllowed(
+                                                            LocalPlayerContentActive.current,
+                                                            Settings.shared.glassLightMode,
+                                                            LocalPlayerEffectsAllowed.current,
+                                                        ),
                                                     initialDelayMillis = 3000L,
                                                 )
                                             } ?: Modifier,
@@ -506,7 +516,17 @@ internal fun TabletPlayerContent(
                             PlayerArtistLine(
                                 artists = currentSong?.artists,
                                 onNavigateToArtist = onNavigateToArtist,
-                                iterations = if (playerDecorativeMotionAllowed(LocalPlayerContentActive.current, Settings.shared.glassLightMode, LocalPlayerEffectsAllowed.current)) 1 else 0,
+                                iterations =
+                                    if (playerDecorativeMotionAllowed(
+                                            LocalPlayerContentActive.current,
+                                            Settings.shared.glassLightMode,
+                                            LocalPlayerEffectsAllowed.current,
+                                        )
+                                    ) {
+                                        1
+                                    } else {
+                                        0
+                                    },
                                 style = MaterialTheme.typography.titleMedium,
                                 color = textBackgroundColor.copy(alpha = 0.72f),
                                 centered = true,
@@ -551,7 +571,9 @@ internal fun TabletPlayerContent(
                                 Spacer(modifier = Modifier.height(if (compactHeight) 4.dp else 8.dp))
 
                                 if (!isListenTogetherGuest) {
-                                    if (playerType == PlayerType.VINTAGE || playerType == PlayerType.CLASSIC || playerType == PlayerType.VINYL) {
+                                    if (playerType == PlayerType.VINTAGE || playerType == PlayerType.CLASSIC ||
+                                        playerType == PlayerType.VINYL
+                                    ) {
                                         VintagePlayerControls(
                                             playPauseFocusRequester = playPauseFocusRequester,
                                             text = vintagePlayerControlsText(),
@@ -612,7 +634,11 @@ internal fun TabletPlayerContent(
                                     }
                                 }
                                 if (playerType == PlayerType.GLASS_CARD && !castState.isConnected && !isListenTogetherGuest) {
-                                    platform.SystemMusicVolume(Modifier.fillMaxWidth(), textBackgroundColor, LocalPlayerContentActive.current)
+                                    platform.SystemMusicVolume(
+                                        Modifier.fillMaxWidth(),
+                                        textBackgroundColor,
+                                        LocalPlayerContentActive.current,
+                                    )
                                 }
                             }
                         }
@@ -1135,7 +1161,17 @@ internal fun LandscapePlayerContent(
                             maxLines = 1,
                             modifier =
                                 Modifier.playbackMarquee(
-                                    iterations = if (playerDecorativeMotionAllowed(LocalPlayerContentActive.current, Settings.shared.glassLightMode, LocalPlayerEffectsAllowed.current)) 1 else 0,
+                                    iterations =
+                                        if (playerDecorativeMotionAllowed(
+                                                LocalPlayerContentActive.current,
+                                                Settings.shared.glassLightMode,
+                                                LocalPlayerEffectsAllowed.current,
+                                            )
+                                        ) {
+                                            1
+                                        } else {
+                                            0
+                                        },
                                     initialDelayMillis = 3000,
                                     velocity = 30.dp,
                                 ),
@@ -1212,7 +1248,12 @@ internal fun LandscapePlayerContent(
                 Column(modifier = Modifier.fillMaxSize()) {
                     BoxWithConstraints(Modifier.fillMaxWidth().weight(1f)) {
                         val artworkSize = if (isTv) tvArtworkSize else minOf(maxHeight, maxWidth)
-                        val lyricsMotion = playerLyricsMotionAllowed(LocalPlayerContentActive.current, Settings.shared.glassLightMode, LocalPlayerEffectsAllowed.current)
+                        val lyricsMotion =
+                            playerLyricsMotionAllowed(
+                                LocalPlayerContentActive.current,
+                                Settings.shared.glassLightMode,
+                                LocalPlayerEffectsAllowed.current,
+                            )
                         AnimatedContent(
                             targetState = uiState.isLyricsVisible,
                             transitionSpec = {
@@ -1347,16 +1388,22 @@ internal fun LandscapePlayerContent(
                 BoxWithConstraints(modifier = Modifier.weight(1f).fillMaxWidth()) {
                     val contentHeight = maxHeight
                     Column(
-                        modifier = Modifier.fillMaxWidth()
-                            .verticalScrollWithDrag(rememberScrollState())
-                            .heightIn(min = contentHeight)
-                            .then(
-                                if (playerType == PlayerType.GLASS_CARD && Settings.shared.glassNavigation && Settings.shared.glassPlayer) {
-                                    Modifier.playerGlassCard(controlsColor).padding(horizontal = 12.dp, vertical = 8.dp)
-                                } else if (Settings.shared.glassNavigation && Settings.shared.glassPlayer) {
-                                    Modifier.playerGlassCard(controlsColor)
-                                } else Modifier,
-                            ),
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .verticalScrollWithDrag(rememberScrollState())
+                                .heightIn(min = contentHeight)
+                                .then(
+                                    if (playerType == PlayerType.GLASS_CARD && Settings.shared.glassNavigation &&
+                                        Settings.shared.glassPlayer
+                                    ) {
+                                        Modifier.playerGlassCard(controlsColor).padding(horizontal = 12.dp, vertical = 8.dp)
+                                    } else if (Settings.shared.glassNavigation && Settings.shared.glassPlayer) {
+                                        Modifier.playerGlassCard(controlsColor)
+                                    } else {
+                                        Modifier
+                                    },
+                                ),
                         verticalArrangement =
                             if (isTv) {
                                 Arrangement.spacedBy(if (compactHeight) 4.dp else 16.dp, Alignment.CenterVertically)
@@ -1425,7 +1472,12 @@ internal fun LandscapePlayerContent(
                                                     currentSong?.let { song ->
                                                         rememberTrackMarquee(
                                                             trackId = song.id,
-                                                            enabled = playerDecorativeMotionAllowed(LocalPlayerContentActive.current, Settings.shared.glassLightMode, LocalPlayerEffectsAllowed.current),
+                                                            enabled =
+                                                                playerDecorativeMotionAllowed(
+                                                                    LocalPlayerContentActive.current,
+                                                                    Settings.shared.glassLightMode,
+                                                                    LocalPlayerEffectsAllowed.current,
+                                                                ),
                                                             initialDelayMillis = 3000L,
                                                         )
                                                     } ?: Modifier,
@@ -1434,7 +1486,17 @@ internal fun LandscapePlayerContent(
                                     PlayerArtistLine(
                                         artists = currentSong?.artists,
                                         onNavigateToArtist = onNavigateToArtist,
-                                        iterations = if (playerDecorativeMotionAllowed(LocalPlayerContentActive.current, Settings.shared.glassLightMode, LocalPlayerEffectsAllowed.current)) 1 else 0,
+                                        iterations =
+                                            if (playerDecorativeMotionAllowed(
+                                                    LocalPlayerContentActive.current,
+                                                    Settings.shared.glassLightMode,
+                                                    LocalPlayerEffectsAllowed.current,
+                                                )
+                                            ) {
+                                                1
+                                            } else {
+                                                0
+                                            },
                                         style =
                                             if (compactHeight) {
                                                 MaterialTheme.typography.bodyMedium
@@ -1905,9 +1967,12 @@ internal fun LyricsViewWithPosition(
         songId = uiState.currentSong?.id,
         isCasting = isCasting,
         isBuffering = isBuffering,
-        modifier = if (Settings.shared.glassNavigation && Settings.shared.glassPlayer) {
-            modifier.playerGlassCard(textColor)
-        } else modifier,
+        modifier =
+            if (Settings.shared.glassNavigation && Settings.shared.glassPlayer) {
+                modifier.playerGlassCard(textColor)
+            } else {
+                modifier
+            },
     )
 }
 

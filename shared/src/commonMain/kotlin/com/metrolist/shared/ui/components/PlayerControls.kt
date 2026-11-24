@@ -54,8 +54,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
@@ -123,15 +123,22 @@ internal fun playerInactiveControlContainerColor(): Color {
 fun Modifier.playerControlBlend(): Modifier {
     val settings = Settings.shared
     val darkTheme = settings.getCurrentThemeIsDark()
-    val blended = graphicsLayer {
-        blendMode = if (settings.playerBackgroundStyle != PlayerBackgroundStyle.SOLID && darkTheme) BlendMode.Screen else BlendMode.SrcOver
-        compositingStrategy = CompositingStrategy.Offscreen
-    }
+    val blended =
+        graphicsLayer {
+            blendMode =
+                if (settings.playerBackgroundStyle != PlayerBackgroundStyle.SOLID && darkTheme) BlendMode.Screen else BlendMode.SrcOver
+            compositingStrategy = CompositingStrategy.Offscreen
+        }
     if (!settings.glassNavigation || !settings.glassPlayer) return blended
 
     // Player backgrounds are already derived from artwork; do not capture or blur them.
     val tint = (settings.glassTintStrength / 100f).coerceIn(0f, 1f)
-    val strength = when (settings.glassStyle) { "CLEAR" -> 0.12f; "FROSTED" -> 0.24f; else -> 0.18f }
+    val strength =
+        when (settings.glassStyle) {
+            "CLEAR" -> 0.12f
+            "FROSTED" -> 0.24f
+            else -> 0.18f
+        }
     val radius = (12f + settings.glassCornerRoundness.coerceIn(0f, 100f) * 0.38f).dp
     val shape = RoundedCornerShape(radius)
     val surface = MaterialTheme.colorScheme.surface

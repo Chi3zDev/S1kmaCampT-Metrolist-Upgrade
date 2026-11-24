@@ -23,21 +23,21 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
-import com.metrolist.shared.ui.components.LocalVisualWorkActive
-import com.metrolist.shared.ui.components.CrossfadeArtwork
-import com.metrolist.shared.ui.LocalPlayerEffectsAllowed
-import com.metrolist.shared.settings.Settings
-import com.metrolist.shared.viewmodels.PlayerViewModel
 import com.metrolist.shared.generated.resources.Res
 import com.metrolist.shared.generated.resources.album_art
-import org.jetbrains.compose.resources.stringResource
+import com.metrolist.shared.settings.Settings
+import com.metrolist.shared.ui.LocalPlayerEffectsAllowed
+import com.metrolist.shared.ui.components.CrossfadeArtwork
+import com.metrolist.shared.ui.components.LocalVisualWorkActive
+import com.metrolist.shared.viewmodels.PlayerViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
+import org.jetbrains.compose.resources.stringResource
 import kotlin.time.TimeSource
 
 /** Normalized arm contact point moves from the outer grooves toward the label. */
@@ -89,18 +89,37 @@ internal fun VinylRecord(
     }
 
     Box(modifier.fillMaxWidth().aspectRatio(1f), contentAlignment = Alignment.Center) {
-        Box(Modifier.fillMaxSize().graphicsLayer {
-            translationX = -size.width * 0.24f
-            rotationZ = angle.floatValue
-        }, contentAlignment = Alignment.Center) {
+        Box(
+            Modifier.fillMaxSize().graphicsLayer {
+                translationX = -size.width * 0.24f
+                rotationZ = angle.floatValue
+            },
+            contentAlignment = Alignment.Center,
+        ) {
             Canvas(Modifier.fillMaxSize()) {
                 val radius = size.minDimension / 2f
                 drawCircle(Color(0xFF101012), radius)
                 drawCircle(Brush.radialGradient(listOf(Color(0xFF3D3D42), Color(0xFF111114), Color(0xFF29292D))), radius)
                 for (i in 0..13) {
-                    drawCircle(Color.White.copy(alpha = if (i % 2 == 0) 0.12f else 0.045f), radius * (0.48f + i * 0.035f), style = Stroke(radius * 0.004f))
+                    drawCircle(
+                        Color.White.copy(
+                            alpha =
+                                if (i % 2 ==
+                                    0
+                                ) {
+                                    0.12f
+                                } else {
+                                    0.045f
+                                },
+                        ),
+                        radius * (0.48f + i * 0.035f),
+                        style = Stroke(radius * 0.004f),
+                    )
                 }
-                drawCircle(Brush.sweepGradient(listOf(Color.Transparent, Color.White.copy(alpha = 0.14f), Color.Transparent, Color.Transparent)), radius)
+                drawCircle(
+                    Brush.sweepGradient(listOf(Color.Transparent, Color.White.copy(alpha = 0.14f), Color.Transparent, Color.Transparent)),
+                    radius,
+                )
             }
             Box(Modifier.fillMaxSize(0.47f).clip(CircleShape)) { artwork() }
             Canvas(Modifier.size(5.dp)) { drawCircle(Color(0xFFD9D9DB)) }

@@ -22,6 +22,7 @@ class PlayerSliderEffectsTest {
         assertEquals(SliderStyle.DEFAULT, effectivePlayerSliderStyle(SliderStyle.DEFAULT, false, true, false))
         assertEquals(SliderStyle.SLIM, effectivePlayerSliderStyle(SliderStyle.SLIM, false, true, false))
     }
+
     @Test
     fun auraIsSuppressedInLightweightOrUnsupportedMode() {
         assertTrue(playerAuraAllowed(true, false, true))

@@ -43,11 +43,11 @@ import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorProducer
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.layout
@@ -89,19 +89,34 @@ import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.roundToInt
 
-internal fun lyricLineMotionAllowed(lightMode: Boolean, deviceAllowed: Boolean): Boolean = !lightMode && deviceAllowed
+internal fun lyricLineMotionAllowed(
+    lightMode: Boolean,
+    deviceAllowed: Boolean,
+): Boolean = !lightMode && deviceAllowed
 
-internal fun lyricGlowStrength(enabled: Boolean, lightMode: Boolean, deviceAllowed: Boolean, intensity: Float): Float =
-    if (!enabled || lightMode || !deviceAllowed || !intensity.isFinite()) 0f else (intensity / 100f).coerceIn(0f, 1f)
+internal fun lyricGlowStrength(
+    enabled: Boolean,
+    lightMode: Boolean,
+    deviceAllowed: Boolean,
+    intensity: Float,
+): Float = if (!enabled || lightMode || !deviceAllowed || !intensity.isFinite()) 0f else (intensity / 100f).coerceIn(0f, 1f)
 
 @Composable
 internal fun currentLyricGlowStrength(): Float {
     val settings = Settings.shared
-    return lyricGlowStrength(settings.lyricsGlowEnabled, settings.glassLightMode, LocalPlayerEffectsAllowed.current, settings.lyricsGlowIntensity)
+    return lyricGlowStrength(
+        settings.lyricsGlowEnabled,
+        settings.glassLightMode,
+        LocalPlayerEffectsAllowed.current,
+        settings.lyricsGlowIntensity,
+    )
 }
 
 @Composable
-private fun TextStyle.withActiveLyricGlow(isActive: Boolean, color: Color): TextStyle {
+private fun TextStyle.withActiveLyricGlow(
+    isActive: Boolean,
+    color: Color,
+): TextStyle {
     val strength = currentLyricGlowStrength()
     if (!isActive || strength == 0f) return this
     val radius = with(LocalDensity.current) { 12.dp.toPx() }

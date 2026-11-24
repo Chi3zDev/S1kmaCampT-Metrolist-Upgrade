@@ -17,8 +17,11 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 /** Glass cards always use a dark scrim; the classic poster follows its background. */
-internal fun lyricsPosterTextColor(posterStyle: LyricsPosterStyle, plainBackground: Boolean, luminance: Float): Color =
-    if (posterStyle != LyricsPosterStyle.GLASS_CARD && plainBackground && luminance > 0.4f) Color.Black else Color.White
+internal fun lyricsPosterTextColor(
+    posterStyle: LyricsPosterStyle,
+    plainBackground: Boolean,
+    luminance: Float,
+): Color = if (posterStyle != LyricsPosterStyle.GLASS_CARD && plainBackground && luminance > 0.4f) Color.Black else Color.White
 
 internal fun lyricsPosterScaleOffset(
     alignment: TextAlign,
@@ -44,12 +47,14 @@ internal fun toggleLyricsShareLine(
 ): Set<Int> =
     when {
         selected.isEmpty() -> setOf(index)
+
         index in selected && (index == selected.minOrNull() || index == selected.maxOrNull()) -> selected - index
+
         index !in selected && selected.size < LYRICS_SHARE_LINE_LIMIT &&
             (index == selected.minOrNull()!! - 1 || index == selected.maxOrNull()!! + 1) -> selected + index
+
         else -> selected
     }
-
 
 internal fun selectedLyricsText(
     lyrics: List<LyricsEntry>,

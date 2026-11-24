@@ -9,9 +9,9 @@ package com.metrolist.shared.ui.player
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.BoundsTransform
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.BoundsTransform
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.SizeTransform
@@ -189,14 +189,14 @@ import com.metrolist.shared.generated.resources.video
 import com.metrolist.shared.playback.LocalPlayerSession
 import com.metrolist.shared.playback.SleepTimerState
 import com.metrolist.shared.settings.PlayerBackgroundStyle
-import com.metrolist.shared.ui.LocalPlayerEffectsAllowed
-import com.metrolist.shared.ui.PolishMotion
 import com.metrolist.shared.settings.PlayerThumbnailStyle
 import com.metrolist.shared.settings.PlayerType
 import com.metrolist.shared.settings.Settings
 import com.metrolist.shared.ui.LocalIsInPipMode
 import com.metrolist.shared.ui.LocalIsTv
+import com.metrolist.shared.ui.LocalPlayerEffectsAllowed
 import com.metrolist.shared.ui.LocalPlayerImmersiveMode
+import com.metrolist.shared.ui.PolishMotion
 import com.metrolist.shared.ui.components.BlurredArtworkBackground
 import com.metrolist.shared.ui.components.BottomSheet
 import com.metrolist.shared.ui.components.BottomSheetState
@@ -263,7 +263,8 @@ internal fun Modifier.artworkSwipe(
     val currentOnNext by rememberUpdatedState(onNext)
     var totalDrag by remember { mutableFloatStateOf(0f) }
     var dragging by remember { mutableStateOf(false) }
-    val motionAllowed = playerDecorativeMotionAllowed(LocalPlayerContentActive.current, Settings.shared.glassLightMode, LocalPlayerEffectsAllowed.current)
+    val motionAllowed =
+        playerDecorativeMotionAllowed(LocalPlayerContentActive.current, Settings.shared.glassLightMode, LocalPlayerEffectsAllowed.current)
     val offset =
         animateFloatAsState(
             targetValue = totalDrag,
@@ -380,7 +381,12 @@ internal fun SeekFeedbackOverlay(
     val seekDescription = stringResource(Res.string.seek_feedback_description, directionLabel, label)
     val density = LocalDensity.current
     val nudgeDistance = with(density) { 12.dp.toPx() }
-    val motionAllowed = playerDecorativeMotionAllowed(visible && LocalPlayerContentActive.current, Settings.shared.glassLightMode, LocalPlayerEffectsAllowed.current)
+    val motionAllowed =
+        playerDecorativeMotionAllowed(
+            visible && LocalPlayerContentActive.current,
+            Settings.shared.glassLightMode,
+            LocalPlayerEffectsAllowed.current,
+        )
     val supportsBlur = supportsNativeBlur() && !Settings.shared.glassLightMode && LocalPlayerEffectsAllowed.current
     val labelShadow =
         remember(density) {
@@ -403,8 +409,24 @@ internal fun SeekFeedbackOverlay(
 
     AnimatedVisibility(
         visible = visible,
-        enter = if (motionAllowed) scaleIn(initialScale = 0.7f, animationSpec = spatialSpec) + fadeIn(animationSpec = effectsSpec) else EnterTransition.None,
-        exit = if (motionAllowed) scaleOut(targetScale = 0.9f, animationSpec = spatialSpec) + fadeOut(animationSpec = effectsSpec) else ExitTransition.None,
+        enter =
+            if (motionAllowed) {
+                scaleIn(
+                    initialScale = 0.7f,
+                    animationSpec = spatialSpec,
+                ) + fadeIn(animationSpec = effectsSpec)
+            } else {
+                EnterTransition.None
+            },
+        exit =
+            if (motionAllowed) {
+                scaleOut(
+                    targetScale = 0.9f,
+                    animationSpec = spatialSpec,
+                ) + fadeOut(animationSpec = effectsSpec)
+            } else {
+                ExitTransition.None
+            },
         modifier = modifier,
     ) {
         Column(
@@ -678,9 +700,11 @@ fun PlayerScreen(
             prefersTallCover,
         ) { if (artworkAllowedOnNetwork) canvasLayers.select(currentSong, platform, preferTall = prefersTallCover) else null }
     val canRenderCanvasThumbnail =
-        !usesCompactStyleArtwork && Settings.shared.isCanvasEnabled && currentCanvasLayer != null && currentCanvasLayer.source != CanvasContentSource.APPLE_MUSIC
+        !usesCompactStyleArtwork && Settings.shared.isCanvasEnabled && currentCanvasLayer != null &&
+            currentCanvasLayer.source != CanvasContentSource.APPLE_MUSIC
     val isArtworkCover = currentCanvasLayer?.source == CanvasContentSource.APPLE_MUSIC
-    val renderAnimatedCover = !usesCompactStyleArtwork && artworkAllowedOnNetwork && canvasLayers.shouldRender(currentCanvasLayer, playerContentState)
+    val renderAnimatedCover =
+        !usesCompactStyleArtwork && artworkAllowedOnNetwork && canvasLayers.shouldRender(currentCanvasLayer, playerContentState)
     val artworkOverlayContent by rememberUpdatedState<@Composable (Modifier) -> Unit> { artworkModifier ->
         if (renderAnimatedCover && isArtworkCover && (!isTv || !uiState.isLyricsVisible)) {
             canvasLayers.Render(
@@ -1007,9 +1031,14 @@ fun PlayerScreen(
                     !isFullscreen &&
                     (useLandscapeLayout || !uiState.isLyricsVisible) &&
                     !canvasMinimalUi
-            val artworkCrossfade = if (contentActive && isPlaying && Settings.shared.playerArtworkTransitions &&
-                !Settings.shared.glassLightMode && LocalPlayerEffectsAllowed.current
-            ) platform.artworkCrossfade(currentSong?.id) else PlayerArtworkCrossfade()
+            val artworkCrossfade =
+                if (contentActive && isPlaying && Settings.shared.playerArtworkTransitions &&
+                    !Settings.shared.glassLightMode && LocalPlayerEffectsAllowed.current
+                ) {
+                    platform.artworkCrossfade(currentSong?.id)
+                } else {
+                    PlayerArtworkCrossfade()
+                }
             val crossfadeNextArtworkUrl = artworkCrossfade.nextArtworkUrl
             val artworkCrossfadeProgress = artworkCrossfade.progressProvider
 
@@ -1067,7 +1096,8 @@ fun PlayerScreen(
                 LocalPlayerArtworkPrefetchUrls provides if (isScreenVisible) artworkPrefetchUrls else emptyList(),
                 LocalPlayerContentActive provides contentActive,
                 LocalPlayerPositionActive provides (playerContentState.isPositionActive && !queueCoversPlayer),
-                LocalPlayerBackgroundAnimating provides (contentActive && isPlaying && !Settings.shared.glassLightMode && LocalPlayerEffectsAllowed.current),
+                LocalPlayerBackgroundAnimating provides
+                    (contentActive && isPlaying && !Settings.shared.glassLightMode && LocalPlayerEffectsAllowed.current),
             ) {
                 Box(
                     modifier =
@@ -1235,7 +1265,8 @@ fun PlayerScreen(
                                     }
                                 }
                             }
-                            if (!showVideoSurface && playerAuraAllowed(
+                            if (!showVideoSurface &&
+                                playerAuraAllowed(
                                     Settings.shared.playerAuraEnabled,
                                     Settings.shared.glassLightMode,
                                     LocalPlayerEffectsAllowed.current,
@@ -1421,17 +1452,37 @@ fun PlayerScreen(
                                             WindowInsets.mandatorySystemGestures.only(WindowInsetsSides.Bottom),
                                         ).padding(horizontal = 24.dp)
                                         .then(
-                                            if (portraitPlayerGlassVisible(Settings.shared.glassNavigation, Settings.shared.glassPlayer, uiState.isLyricsVisible)) {
-                                                Modifier.portraitPlayerGlassCard(textBackgroundColor, topInset = 64.dp, bottomInset = QueuePeekHeight + 26.dp)
-                                            } else Modifier,
+                                            if (portraitPlayerGlassVisible(
+                                                    Settings.shared.glassNavigation,
+                                                    Settings.shared.glassPlayer,
+                                                    uiState.isLyricsVisible,
+                                                )
+                                            ) {
+                                                Modifier.portraitPlayerGlassCard(
+                                                    textBackgroundColor,
+                                                    topInset = 64.dp,
+                                                    bottomInset =
+                                                        QueuePeekHeight + 26.dp,
+                                                )
+                                            } else {
+                                                Modifier
+                                            },
                                         ).then(
-                                            if (playerType == PlayerType.GLASS_CARD && Settings.shared.glassNavigation && Settings.shared.glassPlayer) {
+                                            if (playerType == PlayerType.GLASS_CARD && Settings.shared.glassNavigation &&
+                                                Settings.shared.glassPlayer
+                                            ) {
                                                 Modifier.padding(horizontal = 16.dp)
-                                            } else Modifier,
-                                        )
-                                        .padding(top = 16.dp),
+                                            } else {
+                                                Modifier
+                                            },
+                                        ).padding(top = 16.dp),
                             ) {
-                                val lyricsMotion = playerLyricsMotionAllowed(contentActive, Settings.shared.glassLightMode, LocalPlayerEffectsAllowed.current)
+                                val lyricsMotion =
+                                    playerLyricsMotionAllowed(
+                                        contentActive,
+                                        Settings.shared.glassLightMode,
+                                        LocalPlayerEffectsAllowed.current,
+                                    )
                                 AnimatedContent(
                                     targetState = uiState.isLyricsVisible,
                                     transitionSpec = {
@@ -1679,7 +1730,9 @@ fun PlayerScreen(
                                                         }
                                                     }
 
-                                                    if (!showVideoButton && (playerType == PlayerType.CLASSIC || playerType == PlayerType.GLASS_CARD)) {
+                                                    if (!showVideoButton &&
+                                                        (playerType == PlayerType.CLASSIC || playerType == PlayerType.GLASS_CARD)
+                                                    ) {
                                                         Column(
                                                             horizontalAlignment = Alignment.CenterHorizontally,
                                                             modifier = Modifier.align(Alignment.Center).padding(horizontal = 52.dp),
@@ -1698,7 +1751,17 @@ fun PlayerScreen(
                                                                     maxLines = 1,
                                                                     modifier =
                                                                         Modifier.playbackMarquee(
-                                                                            iterations = if (playerDecorativeMotionAllowed(LocalPlayerContentActive.current, Settings.shared.glassLightMode, LocalPlayerEffectsAllowed.current)) 1 else 0,
+                                                                            iterations =
+                                                                                if (playerDecorativeMotionAllowed(
+                                                                                        LocalPlayerContentActive.current,
+                                                                                        Settings.shared.glassLightMode,
+                                                                                        LocalPlayerEffectsAllowed.current,
+                                                                                    )
+                                                                                ) {
+                                                                                    1
+                                                                                } else {
+                                                                                    0
+                                                                                },
                                                                             initialDelayMillis = 3000,
                                                                             velocity = 30.dp,
                                                                         ),
@@ -1791,12 +1854,23 @@ fun PlayerScreen(
                                                     },
                                             ) {
                                                 Box(
-                                                    contentAlignment = if (playerType == PlayerType.GLASS_CARD) Alignment.TopCenter else Alignment.Center,
+                                                    contentAlignment =
+                                                        if (playerType ==
+                                                            PlayerType.GLASS_CARD
+                                                        ) {
+                                                            Alignment.TopCenter
+                                                        } else {
+                                                            Alignment.Center
+                                                        },
                                                     modifier =
                                                         Modifier
                                                             .fillMaxWidth()
-                                                            .weight(1f, fill = usesCanvasThumbnail || usesFullscreenThumbnail || playerType == PlayerType.GLASS_CARD)
-                                                            .artworkSwipe(
+                                                            .weight(
+                                                                1f,
+                                                                fill =
+                                                                    usesCanvasThumbnail || usesFullscreenThumbnail ||
+                                                                        playerType == PlayerType.GLASS_CARD,
+                                                            ).artworkSwipe(
                                                                 enabled = artworkSwipeEnabled,
                                                                 sensitivity = Settings.shared.swipeSensitivity,
                                                                 onPrevious = viewModel::previous,
@@ -1877,7 +1951,9 @@ fun PlayerScreen(
                                                                         .clip(albumArtShape),
                                                             ) {
                                                                 CrossfadeArtwork(
-                                                                    animate = LocalPlayerBackgroundAnimating.current && Settings.shared.playerArtworkTransitions,
+                                                                    animate =
+                                                                        LocalPlayerBackgroundAnimating.current &&
+                                                                            Settings.shared.playerArtworkTransitions,
                                                                     currentUrl = currentSong.displayThumbnail,
                                                                     nextUrl = crossfadeNextArtworkUrl,
                                                                     progress = artworkCrossfadeProgress,
@@ -1952,7 +2028,9 @@ fun PlayerScreen(
                                             Row(verticalAlignment = Alignment.CenterVertically) {
                                                 if (usesFullscreenThumbnail) {
                                                     CrossfadeArtwork(
-                                                        animate = LocalPlayerBackgroundAnimating.current && Settings.shared.playerArtworkTransitions,
+                                                        animate =
+                                                            LocalPlayerBackgroundAnimating.current &&
+                                                                Settings.shared.playerArtworkTransitions,
                                                         currentUrl = currentSong?.displayThumbnail,
                                                         nextUrl = crossfadeNextArtworkUrl,
                                                         progress = artworkCrossfadeProgress,
@@ -1983,7 +2061,9 @@ fun PlayerScreen(
                                                                     .clip(smallAlbumArtShape),
                                                         ) {
                                                             CrossfadeArtwork(
-                                                                animate = LocalPlayerBackgroundAnimating.current && Settings.shared.playerArtworkTransitions,
+                                                                animate =
+                                                                    LocalPlayerBackgroundAnimating.current &&
+                                                                        Settings.shared.playerArtworkTransitions,
                                                                 currentUrl = currentSong?.displayThumbnail,
                                                                 nextUrl = crossfadeNextArtworkUrl,
                                                                 progress = artworkCrossfadeProgress,
@@ -2005,7 +2085,9 @@ fun PlayerScreen(
                                         ) {
                                             if (playerType == PlayerType.GLASS_CARD) {
                                                 Text(
-                                                    text = uiState.queueTitle?.takeIf { it.isNotBlank() } ?: stringResource(Res.string.app_name),
+                                                    text =
+                                                        uiState.queueTitle?.takeIf { it.isNotBlank() }
+                                                            ?: stringResource(Res.string.app_name),
                                                     style = MaterialTheme.typography.labelMedium,
                                                     color = textBackgroundColor.copy(alpha = 0.7f),
                                                     maxLines = 1,
@@ -2056,7 +2138,12 @@ fun PlayerScreen(
                                                                     displayedSong?.let { song ->
                                                                         rememberTrackMarquee(
                                                                             trackId = song.id,
-                                                                            enabled = playerDecorativeMotionAllowed(LocalPlayerContentActive.current, Settings.shared.glassLightMode, LocalPlayerEffectsAllowed.current),
+                                                                            enabled =
+                                                                                playerDecorativeMotionAllowed(
+                                                                                    LocalPlayerContentActive.current,
+                                                                                    Settings.shared.glassLightMode,
+                                                                                    LocalPlayerEffectsAllowed.current,
+                                                                                ),
                                                                             initialDelayMillis = 3000L,
                                                                         )
                                                                     } ?: Modifier,
@@ -2065,7 +2152,17 @@ fun PlayerScreen(
                                                     PlayerArtistLine(
                                                         artists = displayedSong?.artists,
                                                         onNavigateToArtist = onNavigateToArtist,
-                                                        iterations = if (playerDecorativeMotionAllowed(LocalPlayerContentActive.current, Settings.shared.glassLightMode, LocalPlayerEffectsAllowed.current)) 1 else 0,
+                                                        iterations =
+                                                            if (playerDecorativeMotionAllowed(
+                                                                    LocalPlayerContentActive.current,
+                                                                    Settings.shared.glassLightMode,
+                                                                    LocalPlayerEffectsAllowed.current,
+                                                                )
+                                                            ) {
+                                                                1
+                                                            } else {
+                                                                0
+                                                            },
                                                         style =
                                                             if (usesCanvasThumbnail) {
                                                                 MaterialTheme.typography.bodyMedium
@@ -2337,7 +2434,9 @@ fun PlayerScreen(
                                     }
                                 }
 
-                                if (playerType == PlayerType.GLASS_CARD && !castState.isConnected && !isListenTogetherGuest && !canvasMinimalUi) {
+                                if (playerType == PlayerType.GLASS_CARD && !castState.isConnected && !isListenTogetherGuest &&
+                                    !canvasMinimalUi
+                                ) {
                                     platform.SystemMusicVolume(Modifier.fillMaxWidth(), textBackgroundColor, contentActive)
                                 }
 

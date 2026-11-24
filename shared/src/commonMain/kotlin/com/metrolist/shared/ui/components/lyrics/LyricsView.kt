@@ -115,8 +115,8 @@ import com.metrolist.shared.api.lyrics.LyricsUtils.lyricsSeekPositionForOffset
 import com.metrolist.shared.generated.resources.Res
 import com.metrolist.shared.generated.resources.cancel
 import com.metrolist.shared.generated.resources.lyrics_curated_by
-import com.metrolist.shared.generated.resources.lyrics_poster_selection_rule
 import com.metrolist.shared.generated.resources.lyrics_poster_partial_only
+import com.metrolist.shared.generated.resources.lyrics_poster_selection_rule
 import com.metrolist.shared.generated.resources.lyrics_share_selected_count
 import com.metrolist.shared.generated.resources.lyrics_written_by
 import com.metrolist.shared.generated.resources.share
@@ -340,12 +340,14 @@ fun LyricsView(
             }
 
     val displayLyrics = remember(lyrics) { mergeBackgroundLyricsEntries(lyrics) }
-    val shareableLineCount = remember(displayLyrics) {
-        displayLyrics.indices.count { selectedLyricsText(displayLyrics, setOf(it)).isNotBlank() }
-    }
-    val selectedTextLineCount = remember(displayLyrics, selectedIndices) {
-        selectedLyricsText(displayLyrics, selectedIndices).lines().count { it.isNotBlank() }
-    }
+    val shareableLineCount =
+        remember(displayLyrics) {
+            displayLyrics.indices.count { selectedLyricsText(displayLyrics, setOf(it)).isNotBlank() }
+        }
+    val selectedTextLineCount =
+        remember(displayLyrics, selectedIndices) {
+            selectedLyricsText(displayLyrics, selectedIndices).lines().count { it.isNotBlank() }
+        }
     val unsyncedDisplayLyrics =
         remember(displayLyrics) {
             displayLyrics.mapIndexedNotNull { index, entry ->
@@ -1694,8 +1696,9 @@ fun LyricsView(
                         )
                         TextButton(onClick = selection::clear, shapes = ButtonDefaults.shapes()) { Text(stringResource(Res.string.cancel)) }
                         TextButton(
-                            enabled = selectedIndices.isNotEmpty() && selectedIndices.size < shareableLineCount &&
-                                selectedTextLineCount in 1..LYRICS_SHARE_LINE_LIMIT,
+                            enabled =
+                                selectedIndices.isNotEmpty() && selectedIndices.size < shareableLineCount &&
+                                    selectedTextLineCount in 1..LYRICS_SHARE_LINE_LIMIT,
                             onClick = {
                                 onShareSelection?.invoke(
                                     selectedLyricsText(

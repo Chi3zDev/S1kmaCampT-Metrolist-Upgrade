@@ -15,16 +15,24 @@ import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
 
-internal fun playerAuraAllowed(enabled: Boolean, lightMode: Boolean, deviceAllowed: Boolean): Boolean =
-    enabled && !lightMode && deviceAllowed
+internal fun playerAuraAllowed(
+    enabled: Boolean,
+    lightMode: Boolean,
+    deviceAllowed: Boolean,
+): Boolean = enabled && !lightMode && deviceAllowed
 
 /** A low-opacity, artwork-colored mesh. The phase is read only while drawing, not in composition. */
 @Composable
-internal fun PlayerAura(colors: List<Color>, fallback: Color, animate: Boolean) {
-    val palette = remember(colors, fallback) {
-        val usable = colors.take(3).ifEmpty { listOf(fallback) }
-        List(3) { usable[it % usable.size] }
-    }
+internal fun PlayerAura(
+    colors: List<Color>,
+    fallback: Color,
+    animate: Boolean,
+) {
+    val palette =
+        remember(colors, fallback) {
+            val usable = colors.take(3).ifEmpty { listOf(fallback) }
+            List(3) { usable[it % usable.size] }
+        }
     val motionScale = rememberCoroutineScope().coroutineContext[MotionDurationScale]?.scaleFactor ?: 1f
     val phase = rememberWavePhase(animate && motionScale > 0f, cycleMillis = 20_000L)
     Canvas(Modifier.fillMaxSize()) {
