@@ -22,6 +22,21 @@ class GlassLyricsPosterTest {
     }
 
     @Test
+    fun footerMirrorsInRtlAndUsesMissingArtworkSpace() {
+        val ltr = glassPosterFooterLayout(10f, 200f, 20f, 50f, 12f, true, LayoutDirection.Ltr)
+        val rtl = glassPosterFooterLayout(10f, 200f, 20f, 50f, 12f, true, LayoutDirection.Rtl)
+        assertEquals(30f, ltr.artworkX)
+        assertEquals(140f, rtl.artworkX)
+        assertEquals(92f, ltr.labelX)
+        assertEquals(30f, rtl.labelX)
+        assertEquals(98f, ltr.labelWidth)
+        assertEquals(ltr.labelWidth, rtl.labelWidth)
+        val noArt = glassPosterFooterLayout(10f, 200f, 20f, 50f, 12f, false, LayoutDirection.Rtl)
+        assertEquals(30f, noArt.labelX)
+        assertEquals(160f, noArt.labelWidth)
+    }
+
+    @Test
     fun footerLabelsShrinkOnlyWhenNeededAndKeepAMinimum() {
         assertEquals(14f, fitGlassPosterLabelFontSize(14f, 8f) { false })
         assertEquals(8f, fitGlassPosterLabelFontSize(14f, 8f) { true })
