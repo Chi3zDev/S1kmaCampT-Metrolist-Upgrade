@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectableGroup
@@ -62,7 +62,7 @@ fun <T> ChipShelf(
         modifier =
             modifier
                 .fillMaxWidth()
-                .height(ChipShelfHeight)
+                .heightIn(min = ChipShelfHeight)
                 .padding(horizontal = 4.dp)
                 .clipToBounds()
                 .focusGroup()
@@ -120,7 +120,7 @@ private fun ShelfChip(
         selected = selected,
         onClick = onClick,
         modifier =
-            Modifier.height(containerHeight).bringIntoViewRequester(bringIntoViewRequester).clearAndSetSemantics {
+            Modifier.heightIn(min = containerHeight).bringIntoViewRequester(bringIntoViewRequester).clearAndSetSemantics {
                 contentDescription = chipDescription
                 role = Role.Button
                 this.selected = selected
@@ -164,7 +164,7 @@ fun ExpressiveFilterChip(
         contentPadding = ButtonDefaults.ExtraSmallContentPadding,
         modifier =
             modifier
-                .height(ButtonDefaults.ExtraSmallContainerHeight)
+                .heightIn(min = ButtonDefaults.ExtraSmallContainerHeight)
                 .then(if (glassBorder != null) Modifier.border(glassBorder, ToggleButtonDefaults.shape) else Modifier)
                 .tvFocusHighlight(ToggleButtonDefaults.shape)
                 .semantics { this.selected = selected },
