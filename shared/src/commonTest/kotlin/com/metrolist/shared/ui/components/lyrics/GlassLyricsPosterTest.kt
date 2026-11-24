@@ -24,6 +24,21 @@ class GlassLyricsPosterTest {
     }
 
     @Test
+    fun glassSurfaceRespectsStyleAndKeepsAReadableDarkScrim() {
+        val baseline = GlassPosterSurface(0.67f, 0.20f)
+        assertEquals(baseline, glassPosterSurface(false, "CLEAR", 0f))
+        assertEquals(baseline, glassPosterSurface(true, "BLUR", 0.55f))
+        assertEquals(baseline, glassPosterSurface(true, "UNKNOWN", Float.NaN))
+        val clear = glassPosterSurface(true, "CLEAR", 0f)
+        val frosted = glassPosterSurface(true, "FROSTED", 1f)
+        assertTrue(clear.cardAlpha >= 0.60f)
+        assertTrue(frosted.cardAlpha <= 0.82f && frosted.cardAlpha > clear.cardAlpha)
+        assertTrue(clear.borderAlpha > frosted.borderAlpha)
+        assertEquals(glassPosterSurface(true, "CLEAR", 0f), glassPosterSurface(true, "CLEAR", -5f))
+        assertEquals(glassPosterSurface(true, "FROSTED", 1f), glassPosterSurface(true, "FROSTED", 5f))
+    }
+
+    @Test
     fun posterArtworkCropsToSquareAndStoryWithoutStretching() {
         assertEquals(GlassPosterCoverCrop(IntOffset(50, 0), IntSize(100, 100)), glassPosterCoverCrop(IntSize(200, 100), IntSize(100, 100)))
         assertEquals(GlassPosterCoverCrop(IntOffset(0, 50), IntSize(100, 100)), glassPosterCoverCrop(IntSize(100, 200), IntSize(100, 100)))

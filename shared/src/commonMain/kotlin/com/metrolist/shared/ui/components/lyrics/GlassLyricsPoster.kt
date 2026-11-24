@@ -49,6 +49,17 @@ internal fun fitGlassPosterLabelFontSize(preferred: Float, minimum: Float, overf
     return low
 }
 
+internal data class GlassPosterSurface(val cardAlpha: Float, val borderAlpha: Float)
+
+/** Keep the dark, readable card while reflecting the existing glass style and tint. */
+internal fun glassPosterSurface(enabled: Boolean, variant: String, tint: Float): GlassPosterSurface {
+    if (!enabled) return GlassPosterSurface(0.67f, 0.20f)
+    val strength = tint.takeIf { it.isFinite() }?.coerceIn(0f, 1f) ?: 0.55f
+    val base = when (variant) { "CLEAR" -> 0.62f; "FROSTED" -> 0.74f; else -> 0.67f }
+    val border = when (variant) { "CLEAR" -> 0.28f; "FROSTED" -> 0.16f; else -> 0.20f }
+    return GlassPosterSurface((base + (strength - 0.55f) * 0.12f).coerceIn(0.60f, 0.82f), border)
+}
+
 internal data class GlassPosterFooterLayout(val artworkX: Float, val labelX: Float, val labelWidth: Float)
 
 /** Align the artwork to the reading-direction start; reclaim its space when unavailable. */
@@ -126,6 +137,7 @@ internal fun renderGlassLyricsPoster(
     val cardTop = (height - cardHeight) / 2f
     val footerTop = cardTop + cardHeight - footerHeight
     val radius = 20f * scale
+    val surface = glassPosterSurface(style.glassEnabled && style.background == LyricsImageBackground.GLASS, style.glassStyle, style.glassTint)
 
     CanvasDrawScope().draw(density, layoutDirection, Canvas(bitmap), Size(width, height)) {
         drawRect(style.backgroundColor)
@@ -142,7 +154,7 @@ internal fun renderGlassLyricsPoster(
         drawRect(Color(0xFF180C08).copy(alpha = 0.52f))
         val cardPath = Path().apply { addRoundRect(RoundRect(cardLeft, cardTop, cardLeft + cardWidth, cardTop + cardHeight, CornerRadius(radius))) }
         clipPath(cardPath) {
-            drawRect(Color(0xFF191412).copy(alpha = 0.67f), topLeft = Offset(cardLeft, cardTop), size = Size(cardWidth, cardHeight))
+            drawRect(Color(0xFF191412).copy(alpha = surface.cardAlpha), topLeft = Offset(cardLeft, cardTop), size = Size(cardWidth, cardHeight))
             drawRect(Color.Black.copy(alpha = 0.23f), topLeft = Offset(cardLeft, footerTop), size = Size(cardWidth, footerHeight))
             drawLine(Color.White.copy(alpha = 0.14f), Offset(cardLeft, footerTop), Offset(cardLeft + cardWidth, footerTop), strokeWidth = scale * 0.7f)
             val alignmentOffset = lyricsPosterScaleOffset(style.alignment, layoutDirection, textWidth, fit.drawScale)
@@ -186,7 +198,7 @@ internal fun renderGlassLyricsPoster(
                 maxLines = 1, overflow = TextOverflow.Ellipsis, constraints = Constraints(minWidth = appWidth, maxWidth = appWidth), density = density, layoutDirection = layoutDirection)
             drawText(appLayout, topLeft = Offset(if (rtl) labelX else labelX + appGap, artY + 35f * scale))
         }
-        drawRoundRect(Color.White.copy(alpha = 0.2f), topLeft = Offset(cardLeft, cardTop), size = Size(cardWidth, cardHeight), cornerRadius = CornerRadius(radius), style = Stroke(scale))
+        drawRoundRect(Color.White.copy(alpha = surface.borderAlpha), topLeft = Offset(cardLeft, cardTop), size = Size(cardWidth, cardHeight), cornerRadius = CornerRadius(radius), style = Stroke(scale))
     }
     return bitmap
 }

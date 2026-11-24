@@ -32,7 +32,7 @@ Basis: `main` 70eb9763 (Upgrade 1 beta 1). Audit kode awal; bukan hasil uji visu
 ## 5. Poster lirik
 - [ ] P1 · Lebar Kartu Kaca kini merespons seluruh rentang slider 0,6–1,35 dengan margin sisi aman; ukuran default 1,0 dipertahankan. Nilai tak valid kembali ke default; tes batas, build dan benchmark lulus di Actions 45495085664. Verifikasi tampilan ekspor dan teks panjang di HP masih terbuka.
 - [ ] P1 · Label judul/artis Kartu Kaca kini diperkecil sebelum dipotong pada ruang sempit; footer menyesuaikan RTL dan memakai ruang sampul saat gambar tidak tersedia; latar sampul persegi/Story kini center-crop alih-alih merenggangkan gambar nonpersegi. Tes logika ditambahkan; build dan tes terpilih commit `aab22668` lulus di Actions 45500795290, tahap benchmark masih berjalan. Renderer Klasik dan Kartu Kaca berbagi jalur pemanggilan, tetapi preview dan ekspor memakai ukuran berbeda: uji hasil pixel/layout, enam baris, RTL, teks panjang, font fallback, kontras dan format persegi/Story. Belum ada bukti hasil perangkat identik.
-- [ ] P2 · Kartu Kaca memakai warna/opacity/radius tetap yang berbeda dari parameter kaca renderer Klasik; audit konsistensi dan tetap jaga branding serta keterbacaan.
+- [ ] P2 · Kartu Kaca mempertahankan warna dan radius desainnya, namun opacity dan tepi kini merespons gaya/tint kaca existing dengan lapisan gelap minimum; tidak menambah blur. Tes kebijakan ditambahkan, menunggu CI dan verifikasi kontras di perangkat.
 
 ## 6. Tentang, Settings dan teks
 - [ ] P2 · Audit pengelompokan Appearance dan switch berulang, spacing, ikon, penjelasan serta badge versi; pertahankan semua kredit, GPL, font, tautan dan dukungan Palestina. Risiko mengubah preferensi atau menyembunyikan kredit.
