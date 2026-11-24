@@ -59,7 +59,7 @@ jobs:
           if-no-files-found: error
 
       - name: Test streak recovery and glass geometry
-        run: ./gradlew :androidApp:testDebugUnitTest --tests com.metrolist.android.streak.ListeningStreakTest --tests com.metrolist.android.recap.RecapDataTest --tests com.metrolist.android.recap.RecapMotionPolicyTest --tests com.metrolist.android.ui.GlassMorphGeometryTest --tests com.metrolist.android.ui.player.SystemMusicVolumeControlTest --no-daemon -Dorg.gradle.java.installations.paths="$JAVA_HOME_25_X64"
+        run: ./gradlew :androidApp:testDebugUnitTest --tests com.metrolist.android.streak.ListeningStreakTest --tests com.metrolist.android.recap.RecapDataTest --tests com.metrolist.android.recap.RecapMotionPolicyTest --tests com.metrolist.android.ui.screens.HomeMotionPolicyTest --tests com.metrolist.android.ui.GlassMorphGeometryTest --tests com.metrolist.android.ui.player.SystemMusicVolumeControlTest --no-daemon -Dorg.gradle.java.installations.paths="$JAVA_HOME_25_X64"
 
       - name: Test upgrade defaults and poster compatibility
         run: ./gradlew :shared:testAndroidHostTest --tests com.metrolist.shared.settings.ForkFontDefaultsTest --tests com.metrolist.shared.ui.components.lyrics.GlassLyricsPosterTest --tests com.metrolist.shared.ui.components.lyrics.LyricGlowTest --tests com.metrolist.shared.ui.components.lyrics.words.SyllableGlowTest --tests com.metrolist.shared.ui.player.PlayerSliderEffectsTest --tests com.metrolist.shared.ui.player.VinylRecordTest --tests com.metrolist.shared.ui.player.PlayerArtworkTransitionSettingTest --no-daemon -Dorg.gradle.java.installations.paths="$JAVA_HOME_25_X64"
@@ -129,7 +129,7 @@ jobs:
         uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6
 
       - name: Test streak recovery and glass geometry
-        run: ./gradlew :androidApp:testDebugUnitTest --tests com.metrolist.android.streak.ListeningStreakTest --tests com.metrolist.android.recap.RecapDataTest --tests com.metrolist.android.recap.RecapMotionPolicyTest --tests com.metrolist.android.ui.GlassMorphGeometryTest --tests com.metrolist.android.ui.player.SystemMusicVolumeControlTest --no-daemon -Dorg.gradle.java.installations.paths="$JAVA_HOME_25_X64"
+        run: ./gradlew :androidApp:testDebugUnitTest --tests com.metrolist.android.streak.ListeningStreakTest --tests com.metrolist.android.recap.RecapDataTest --tests com.metrolist.android.recap.RecapMotionPolicyTest --tests com.metrolist.android.ui.screens.HomeMotionPolicyTest --tests com.metrolist.android.ui.GlassMorphGeometryTest --tests com.metrolist.android.ui.player.SystemMusicVolumeControlTest --no-daemon -Dorg.gradle.java.installations.paths="$JAVA_HOME_25_X64"
 
       - name: Test upgrade defaults and poster compatibility
         run: ./gradlew :shared:testAndroidHostTest --tests com.metrolist.shared.settings.ForkFontDefaultsTest --tests com.metrolist.shared.ui.components.lyrics.GlassLyricsPosterTest --tests com.metrolist.shared.ui.components.lyrics.LyricGlowTest --tests com.metrolist.shared.ui.components.lyrics.words.SyllableGlowTest --tests com.metrolist.shared.ui.player.PlayerSliderEffectsTest --tests com.metrolist.shared.ui.player.VinylRecordTest --tests com.metrolist.shared.ui.player.PlayerArtworkTransitionSettingTest --no-daemon -Dorg.gradle.java.installations.paths="$JAVA_HOME_25_X64"

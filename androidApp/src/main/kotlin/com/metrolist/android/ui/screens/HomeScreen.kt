@@ -413,7 +413,7 @@ fun HomeScreen(
         }
 
         if (!isTv) {
-            val animateActions = rootActive && !Settings.shared.glassLightMode && LocalPlayerEffectsAllowed.current
+            val animateActions = floatingActionsMotionAllowed(rootActive, Settings.shared.glassLightMode, LocalPlayerEffectsAllowed.current)
             AnimatedVisibility(
                 visible = (LocalIsTv.current || showFloatingActions),
                 enter = if (animateActions) fadeIn(tween(PolishMotion.durationMillis)) + slideInVertically(tween(PolishMotion.durationMillis)) { it / 2 } else EnterTransition.None,
