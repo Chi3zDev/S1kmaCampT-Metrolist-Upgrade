@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -35,8 +34,6 @@ import kotlinx.coroutines.delay
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.res.painterResource
-import com.metrolist.android.R
 import com.metrolist.shared.generated.resources.Res
 import com.metrolist.shared.generated.resources.streak_active
 import com.metrolist.shared.generated.resources.streak_days
@@ -88,7 +85,7 @@ fun StreakCard(state: StreakCardState, onClick: () -> Unit, modifier: Modifier =
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 val lifecycle by LocalLifecycleOwner.current.lifecycle.currentStateAsState()
                 val showMotion = lifecycle == Lifecycle.State.RESUMED && LocalRootContentActive.current && !LocalContentObscured.current && streakMotionEnabled()
-                Flame(flameTint, animate = showMotion, extinguished = extinguished, modifier = Modifier.size(40.dp))
+                Flame(flameTint, animate = showMotion, particles = !extinguished, extinguished = extinguished, modifier = Modifier.size(40.dp))
                 Column {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         Text(streak.current.toString(), style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.onSurface)

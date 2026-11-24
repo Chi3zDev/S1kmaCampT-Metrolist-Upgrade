@@ -2577,6 +2577,10 @@
     <string name="streak_restore_too_long">Jeda terakhir melebihi batas pemulihan.</string>
     <string name="streak_restore_no_quota">Jatah tidak cukup untuk memulihkan seluruh jeda.</string>
     <string name="streak_restore_corrupt">Data pemulihan tidak dapat dibaca. Pulihkan dari cadangan.</string>
+    <string name="streak_day_listened">Mendengarkan</string>
+    <string name="streak_day_restored">Dipulihkan</string>
+    <string name="streak_day_empty">Belum ada aktivitas mendengarkan</string>
+    <string name="streak_day_today">Hari ini</string>
     <string name="streak_calendar">Kalender mendengarkan</string>
     <string name="streak_week">Minggu ini</string>
     <string name="streak_calendar_legend">Warna utama: mendengarkan · Aksen: dipulihkan · Lingkaran: hari ini</string>

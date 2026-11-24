@@ -51,6 +51,8 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.time.ZoneId
 import java.time.format.TextStyle
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 import java.util.Locale
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -132,7 +134,7 @@ fun StreakScreen(onBack: () -> Unit) {
         item {
             StreakPanel {
                 Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Flame(flameColor, animate = screenActive && streakMotionEnabled(), particles = !extinguished && streak.current >= 100, extinguished = extinguished)
+                    Flame(flameColor, animate = screenActive && streakMotionEnabled(), particles = !extinguished, extinguished = extinguished)
                     StreakCount(streak.current, screenActive && streakMotionEnabled(), MaterialTheme.typography.displayMedium)
                     Text(stringResource(shownLevel.title), color = flameColor, style = MaterialTheme.typography.titleLarge)
                     Text(stringResource(when { extinguished -> Res.string.streak_extinguished; streak.todayCounted -> Res.string.streak_active; else -> Res.string.streak_waiting }), textAlign = TextAlign.Center)
@@ -226,7 +228,12 @@ internal fun DayDot(day: LocalDate, today: LocalDate, listened: Set<LocalDate>, 
     val c = MaterialTheme.colorScheme
     val background = when { day in listened -> c.primary; day in restored -> c.tertiary; day == today -> c.secondaryContainer; else -> c.surfaceVariant }
     val foreground = when { day in listened -> c.onPrimary; day in restored -> c.onTertiary; else -> c.onSurfaceVariant }
-    Box(Modifier.size(36.dp).padding(2.dp).background(background, CircleShape)
+    val status = stringResource(when { day in listened -> Res.string.streak_day_listened; day in restored -> Res.string.streak_day_restored; else -> Res.string.streak_day_empty })
+    val locale = Locale.getDefault()
+    val date = remember(day, locale) { day.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL).withLocale(locale)) }
+    val todayLabel = if (day == today) stringResource(Res.string.streak_day_today) else null
+    val description = listOfNotNull(date, status, todayLabel).joinToString(", ")
+    Box(Modifier.size(36.dp).padding(2.dp).clearAndSetSemantics { contentDescription = description }.background(background, CircleShape)
         .then(if (day == today) Modifier.border(2.dp, c.outline, CircleShape) else Modifier), contentAlignment = Alignment.Center) {
         Text(day.dayOfMonth.toString(), color = foreground, style = MaterialTheme.typography.labelSmall)
     }

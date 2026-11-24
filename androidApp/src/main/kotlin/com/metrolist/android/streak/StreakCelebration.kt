@@ -100,7 +100,7 @@ fun BoxScope.StreakCelebrationPresenter(
         ) {
             Column(Modifier.fillMaxWidth().padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text(stringResource(if (event.levelUp) Res.string.streak_level_up else Res.string.streak_celebration_title), style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center)
-                Flame(level.color, animate = motionEnabled, levelUp = event.levelUp, particles = event.count >= 100)
+                Flame(level.color, animate = motionEnabled, levelUp = event.levelUp, particles = true)
                 AnimatedVisibility(visible = stage >= 2, enter = fadeIn(tween(PolishMotion.durationMillis))) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                         StreakCount(event.count, motionEnabled, MaterialTheme.typography.titleLarge)
