@@ -2608,6 +2608,9 @@
     <string name="about_github_metrolist">GitHub Metrolist</string>
     <string name="about_upgrade_developer">Pengembang Upgrade</string>
     <string name="about_upgrade_version">Upgrade %1$d</string>
+    <string name="about_upgrade_two_motion">Gerak Streak dan Recap diperhalus, dengan pembatasan mode ringan dan visibilitas.</string>
+    <string name="about_upgrade_two_player_poster">Tampilan pemutar dan lirik dipoles, serta ukuran dan penyesuaian teks poster ditingkatkan.</string>
+    <string name="about_upgrade_two_interface">Kaca navigasi, Profil, Tentang, dan Pengaturan diperbaiki tanpa menghapus kredit atau preferensi yang ada.</string>
     <string name="about_upgrade_beta_version">Upgrade %1$d beta 1</string>
     <string name="app_font_nunito_extrabold">Nunito ExtraBold</string>
     <string name="app_font_nunito_bold">Nunito Bold</string>

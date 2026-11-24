@@ -81,6 +81,9 @@ import com.metrolist.shared.generated.resources.about_upgrade_developer
 import com.metrolist.shared.generated.resources.about_upgrade_version
 import com.metrolist.shared.generated.resources.about_nunito_credit
 import com.metrolist.shared.generated.resources.about_upgrade_whats_new
+import com.metrolist.shared.generated.resources.about_upgrade_two_motion
+import com.metrolist.shared.generated.resources.about_upgrade_two_player_poster
+import com.metrolist.shared.generated.resources.about_upgrade_two_interface
 import com.metrolist.shared.generated.resources.about_upgrade_note_streak
 import com.metrolist.shared.generated.resources.about_upgrade_note_recap
 import com.metrolist.shared.generated.resources.about_upgrade_note_poster
@@ -144,7 +147,7 @@ fun AboutScreen(
     var showUpgradeNotes by rememberSaveable { mutableStateOf(false) }
     if (showUpgradeNotes && upgradeNumber != null) {
         NavigationBackHandler(onBack = { showUpgradeNotes = false })
-        UpgradeNotesScreen(bottomInset) { showUpgradeNotes = false }
+        UpgradeNotesScreen(bottomInset, upgradeNumber) { showUpgradeNotes = false }
         return
     }
     val openCommunityLink =
@@ -477,8 +480,17 @@ private val upgradeOneNotes = listOf(
     Res.string.about_upgrade_note_defaults,
 )
 
+private val upgradeTwoNotes = listOf(
+    Res.string.about_upgrade_two_motion,
+    Res.string.about_upgrade_two_player_poster,
+    Res.string.about_upgrade_two_interface,
+)
+
+internal fun upgradeNoteVersions(upgradeNumber: Int): List<Int> =
+    if (upgradeNumber >= 2) listOf(2, 1) else listOf(1)
+
 @Composable
-private fun UpgradeNotesScreen(bottomInset: Dp, onBack: () -> Unit) {
+private fun UpgradeNotesScreen(bottomInset: Dp, upgradeNumber: Int, onBack: () -> Unit) {
     Column(
         modifier = Modifier.fillMaxSize().verticalScrollWithDrag(rememberScrollState())
             .padding(horizontal = 16.dp, vertical = 16.dp).padding(bottom = bottomInset),
@@ -490,10 +502,13 @@ private fun UpgradeNotesScreen(bottomInset: Dp, onBack: () -> Unit) {
             }
             Text(stringResource(Res.string.about_upgrade_whats_new), style = MaterialTheme.typography.headlineSmall)
         }
-        Text(stringResource(Res.string.about_upgrade_version, 1), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-        upgradeOneNotes.forEach { note ->
-            Surface(shape = RoundedCornerShape(16.dp), color = glassCardColor(MaterialTheme.colorScheme.surfaceContainer), border = glassCardBorder(), modifier = Modifier.fillMaxWidth()) {
-                Text(stringResource(note), Modifier.padding(16.dp), style = MaterialTheme.typography.bodyLarge)
+        upgradeNoteVersions(upgradeNumber).forEach { version ->
+            Text(stringResource(Res.string.about_upgrade_version, version), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            val notes = if (version == 2) upgradeTwoNotes else upgradeOneNotes
+            notes.forEach { note ->
+                Surface(shape = RoundedCornerShape(16.dp), color = glassCardColor(MaterialTheme.colorScheme.surfaceContainer), border = glassCardBorder(), modifier = Modifier.fillMaxWidth()) {
+                    Text(stringResource(note), Modifier.padding(16.dp), style = MaterialTheme.typography.bodyLarge)
+                }
             }
         }
     }

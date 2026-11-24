@@ -5686,6 +5686,9 @@
     <string name="about_github_metrolist">GitHub Metrolist</string>
     <string name="about_upgrade_developer">Upgrade developer</string>
     <string name="about_upgrade_version">Upgrade %1$d</string>
+    <string name="about_upgrade_two_motion">Refined Streak and Recap motion, with lightweight mode and visibility safeguards.</string>
+    <string name="about_upgrade_two_player_poster">Polished player and lyrics visuals, and improved poster sizing and text fitting.</string>
+    <string name="about_upgrade_two_interface">Improved navigation glass, Profile, About and Settings while retaining existing credits and preferences.</string>
     <string name="about_upgrade_beta_version">Upgrade %1$d beta 1</string>
     <string name="app_font_nunito_extrabold">Nunito ExtraBold</string>
     <string name="app_font_nunito_bold">Nunito Bold</string>
