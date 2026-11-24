@@ -2544,6 +2544,7 @@
     <string name="appearance_glass_navigation">Bilah navigasi kaca cair</string>
     <string name="appearance_glass_navigation_description">Gunakan bilah navigasi dan pemutar mini transparan yang melayang. Efek buram dinonaktifkan di perangkat lama atau dengan memori rendah.</string>
     <string name="glass_settings_title">Kaca cair</string>
+    <string name="glass_settings_description">Sesuaikan tampilan kaca untuk area di bawah. Tab akun tetap tersedia saat kaca dimatikan.</string>
     <string name="glass_style">Gaya kaca</string>
     <string name="glass_style_frosted">Frosted</string>
     <string name="glass_style_clear">Clear</string>
@@ -2594,6 +2595,7 @@
     <string name="glass_navbar_motion_light">Ringan, tanpa gelembung</string>
     <string name="glass_navbar_motion_off">Mati</string>
     <string name="streak_celebration_setting">Perayaan streak</string>
+    <string name="streak_celebration_independent_description">Atur perayaan streak secara terpisah dari efek kaca.</string>
     <string name="streak_celebration_title">Terus dengarkan!</string>
     <string name="streak_level_up">Naik level!</string>
     <string name="streak_celebration_continue">Lanjut</string>

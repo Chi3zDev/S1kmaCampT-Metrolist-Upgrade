@@ -5622,6 +5622,7 @@
     <string name="appearance_glass_navigation">Navbar liquid glass</string>
     <string name="appearance_glass_navigation_description">Use a translucent floating navigation bar and mini player. Blur is disabled on older or low-memory devices.</string>
     <string name="glass_settings_title">Liquid glass</string>
+    <string name="glass_settings_description">Customize glass styling for the areas below. The account tab remains available when glass is off.</string>
     <string name="glass_style">Glass style</string>
     <string name="glass_style_frosted">Frosted</string>
     <string name="glass_style_clear">Clear</string>
@@ -5672,6 +5673,7 @@
     <string name="glass_navbar_motion_light">Light, without bubble</string>
     <string name="glass_navbar_motion_off">Off</string>
     <string name="streak_celebration_setting">Streak celebration</string>
+    <string name="streak_celebration_independent_description">Controls streak celebrations independently of glass effects.</string>
     <string name="streak_celebration_title">Keep listening!</string>
     <string name="streak_level_up">Level up!</string>
     <string name="streak_celebration_continue">Continue</string>

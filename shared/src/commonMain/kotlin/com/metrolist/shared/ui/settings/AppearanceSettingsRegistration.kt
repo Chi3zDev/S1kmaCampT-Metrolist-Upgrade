@@ -89,7 +89,7 @@ internal fun SettingsUiRegistryBuilder.registerAppearanceSettings(host: SharedSe
     ) {
         if (host.platform == SettingsPlatform.ANDROID) {
             group("liquidGlass", stringResource(Res.string.glass_settings_title)) {
-                switch(id = "glassNavigation", title = stringResource(Res.string.glass_settings_title), checked = settings.glassNavigation) { settings.glassNavigation = it }
+                switch(id = "glassNavigation", title = stringResource(Res.string.glass_settings_title), description = stringResource(Res.string.glass_settings_description), checked = settings.glassNavigation) { settings.glassNavigation = it }
                 val styles = listOf(
                     SettingsChoice("FROSTED", stringResource(Res.string.glass_style_frosted)),
                     SettingsChoice("CLEAR", stringResource(Res.string.glass_style_clear)),
@@ -104,7 +104,7 @@ internal fun SettingsUiRegistryBuilder.registerAppearanceSettings(host: SharedSe
                 switch(id = "glassTopBar", title = stringResource(Res.string.glass_area_top_bar), checked = settings.glassTopBar, enabled = settings.glassNavigation) { settings.glassTopBar = it }
                 switch(id = "glassCards", title = stringResource(Res.string.glass_area_cards), checked = settings.glassCards, enabled = settings.glassNavigation) { settings.glassCards = it }
                 switch(id = "glassFloatingActions", title = stringResource(Res.string.glass_area_floating_actions), checked = settings.glassFloatingActions, enabled = settings.glassNavigation) { settings.glassFloatingActions = it }
-                switch(id = "streakCelebrationEnabled", title = stringResource(Res.string.streak_celebration_setting), checked = settings.streakCelebrationEnabled) { settings.streakCelebrationEnabled = it }
+                switch(id = "streakCelebrationEnabled", title = stringResource(Res.string.streak_celebration_setting), description = stringResource(Res.string.streak_celebration_independent_description), checked = settings.streakCelebrationEnabled) { settings.streakCelebrationEnabled = it }
                 switch(id = "glassPlayer", title = stringResource(Res.string.glass_area_player), checked = settings.glassPlayer, enabled = settings.glassNavigation) { settings.glassPlayer = it }
                 switch(id = "glassProfile", title = stringResource(Res.string.glass_area_profile), checked = settings.glassProfile, enabled = settings.glassNavigation) { settings.glassProfile = it }
                 switch(id = "glassLyricsPoster", title = stringResource(Res.string.glass_area_poster), checked = settings.glassLyricsPoster, enabled = settings.glassNavigation) { settings.glassLyricsPoster = it }
