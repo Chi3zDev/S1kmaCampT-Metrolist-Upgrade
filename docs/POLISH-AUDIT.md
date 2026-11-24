@@ -36,7 +36,7 @@ Basis: `main` 70eb9763 (Upgrade 1 beta 1). Audit kode awal; bukan hasil uji visu
 
 ## 6. Tentang, Settings dan teks
 - [ ] P2 · Header About memakai tint/border kaca bersama, badge dapat membungkus teks, dan badge Upgrade tidak lagi selalu mengklaim beta 1; label versi lengkap tetap ditampilkan. Audit pengelompokan Appearance, switch berulang, spacing dan penjelasan masih terbuka; pertahankan semua kredit, GPL, font, tautan dan dukungan Palestina. Risiko mengubah preferensi atau menyembunyikan kredit.
-- [ ] P1 · Periksa semua teks baru melalui resources Inggris/Indonesia, terutama pembesaran font, scrolling dan ellipsis. Jangan ubah navigasi Settings utama tanpa izin.
+- [ ] P1 · Header Settings lebar kini memakai tinggi minimum, bukan tinggi tetap, agar dapat tumbuh bersama font sistem. Periksa semua teks baru melalui resources Inggris/Indonesia, terutama pembesaran font, scrolling dan ellipsis. Jangan ubah navigasi Settings utama tanpa izin.
 
 ## 7. Performa, bug, dan rilis
 - [ ] P1 · Profil recomposition/frame dan animasi pada latar/tertutup, Android 11 ke bawah dan RAM rendah; audit sumber blur tunggal dan objek Canvas. Temuan jank saat ini belum diukur.

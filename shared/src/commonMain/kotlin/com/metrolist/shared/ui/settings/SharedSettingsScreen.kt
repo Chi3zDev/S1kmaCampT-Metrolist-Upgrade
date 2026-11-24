@@ -241,7 +241,7 @@ internal fun SharedSettingsRegistryScreen(
                     modifier = Modifier.weight(1f).fillMaxHeight().padding(end = 12.dp, bottom = 12.dp),
                 ) {
                     Row(
-                        modifier = Modifier.fillMaxWidth().height(80.dp).padding(start = 32.dp, end = 8.dp),
+                        modifier = Modifier.fillMaxWidth().heightIn(min = 80.dp).padding(start = 32.dp, end = 8.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         if (canNavigateBackFromSettings(pageStack, expanded = true)) {
