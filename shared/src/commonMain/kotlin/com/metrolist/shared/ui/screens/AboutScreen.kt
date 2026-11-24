@@ -80,6 +80,7 @@ import com.metrolist.shared.generated.resources.Res
 import com.metrolist.shared.generated.resources.about_play_favorite_song
 import com.metrolist.shared.generated.resources.about_upgrade_developer
 import com.metrolist.shared.generated.resources.about_upgrade_version
+import com.metrolist.shared.generated.resources.about_upgrade_beta_version
 import com.metrolist.shared.generated.resources.about_nunito_credit
 import com.metrolist.shared.generated.resources.about_upgrade_whats_new
 import com.metrolist.shared.generated.resources.about_upgrade_note_streak
@@ -408,7 +409,7 @@ private fun AppHeaderCard(
                 )
                 InfoBadge(architecture, colorScheme.surfaceContainerHighest, colorScheme.onSurfaceVariant)
                 if (upgradeNumber != null) {
-                    InfoBadge(stringResource(Res.string.about_upgrade_version, upgradeNumber), colorScheme.secondaryContainer, colorScheme.onSecondaryContainer)
+                    InfoBadge(stringResource(Res.string.about_upgrade_beta_version, upgradeNumber), colorScheme.secondaryContainer, colorScheme.onSecondaryContainer)
                 }
                 InfoBadge(
                     stringResource(if (isDebug) Res.string.build_type_debug else Res.string.build_type_release),

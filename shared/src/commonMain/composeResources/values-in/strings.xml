@@ -2600,6 +2600,7 @@
     <string name="about_github_metrolist">GitHub Metrolist</string>
     <string name="about_upgrade_developer">Pengembang Upgrade</string>
     <string name="about_upgrade_version">Upgrade %1$d</string>
+    <string name="about_upgrade_beta_version">Upgrade %1$d beta 1</string>
     <string name="app_font_nunito_extrabold">Nunito ExtraBold</string>
     <string name="app_font_nunito_bold">Nunito Bold</string>
     <string name="about_nunito_credit">Font: Nunito oleh The Nunito Project Authors (SIL OFL 1.1)</string>
