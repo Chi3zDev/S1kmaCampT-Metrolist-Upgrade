@@ -1695,7 +1695,7 @@ fun PlayerScreen(
                                                                     maxLines = 1,
                                                                     modifier =
                                                                         Modifier.playbackMarquee(
-                                                                            iterations = if (LocalPlayerContentActive.current) 1 else 0,
+                                                                            iterations = if (playerDecorativeMotionAllowed(LocalPlayerContentActive.current, Settings.shared.glassLightMode, LocalPlayerEffectsAllowed.current)) 1 else 0,
                                                                             initialDelayMillis = 3000,
                                                                             velocity = 30.dp,
                                                                         ),
@@ -2053,7 +2053,7 @@ fun PlayerScreen(
                                                                     displayedSong?.let { song ->
                                                                         rememberTrackMarquee(
                                                                             trackId = song.id,
-                                                                            enabled = LocalPlayerContentActive.current,
+                                                                            enabled = playerDecorativeMotionAllowed(LocalPlayerContentActive.current, Settings.shared.glassLightMode, LocalPlayerEffectsAllowed.current),
                                                                             initialDelayMillis = 3000L,
                                                                         )
                                                                     } ?: Modifier,
@@ -2062,7 +2062,7 @@ fun PlayerScreen(
                                                     PlayerArtistLine(
                                                         artists = displayedSong?.artists,
                                                         onNavigateToArtist = onNavigateToArtist,
-                                                        iterations = if (LocalPlayerContentActive.current) 1 else 0,
+                                                        iterations = if (playerDecorativeMotionAllowed(LocalPlayerContentActive.current, Settings.shared.glassLightMode, LocalPlayerEffectsAllowed.current)) 1 else 0,
                                                         style =
                                                             if (usesCanvasThumbnail) {
                                                                 MaterialTheme.typography.bodyMedium

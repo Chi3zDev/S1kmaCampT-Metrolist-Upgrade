@@ -494,7 +494,7 @@ internal fun TabletPlayerContent(
                                             currentSong?.let { song ->
                                                 rememberTrackMarquee(
                                                     trackId = song.id,
-                                                    enabled = LocalPlayerContentActive.current,
+                                                    enabled = playerDecorativeMotionAllowed(LocalPlayerContentActive.current, Settings.shared.glassLightMode, LocalPlayerEffectsAllowed.current),
                                                     initialDelayMillis = 3000L,
                                                 )
                                             } ?: Modifier,
@@ -506,7 +506,7 @@ internal fun TabletPlayerContent(
                             PlayerArtistLine(
                                 artists = currentSong?.artists,
                                 onNavigateToArtist = onNavigateToArtist,
-                                iterations = if (LocalPlayerContentActive.current) 1 else 0,
+                                iterations = if (playerDecorativeMotionAllowed(LocalPlayerContentActive.current, Settings.shared.glassLightMode, LocalPlayerEffectsAllowed.current)) 1 else 0,
                                 style = MaterialTheme.typography.titleMedium,
                                 color = textBackgroundColor.copy(alpha = 0.72f),
                                 centered = true,
@@ -1135,7 +1135,7 @@ internal fun LandscapePlayerContent(
                             maxLines = 1,
                             modifier =
                                 Modifier.playbackMarquee(
-                                    iterations = if (LocalPlayerContentActive.current) 1 else 0,
+                                    iterations = if (playerDecorativeMotionAllowed(LocalPlayerContentActive.current, Settings.shared.glassLightMode, LocalPlayerEffectsAllowed.current)) 1 else 0,
                                     initialDelayMillis = 3000,
                                     velocity = 30.dp,
                                 ),
@@ -1425,7 +1425,7 @@ internal fun LandscapePlayerContent(
                                                     currentSong?.let { song ->
                                                         rememberTrackMarquee(
                                                             trackId = song.id,
-                                                            enabled = LocalPlayerContentActive.current,
+                                                            enabled = playerDecorativeMotionAllowed(LocalPlayerContentActive.current, Settings.shared.glassLightMode, LocalPlayerEffectsAllowed.current),
                                                             initialDelayMillis = 3000L,
                                                         )
                                                     } ?: Modifier,
@@ -1434,7 +1434,7 @@ internal fun LandscapePlayerContent(
                                     PlayerArtistLine(
                                         artists = currentSong?.artists,
                                         onNavigateToArtist = onNavigateToArtist,
-                                        iterations = if (LocalPlayerContentActive.current) 1 else 0,
+                                        iterations = if (playerDecorativeMotionAllowed(LocalPlayerContentActive.current, Settings.shared.glassLightMode, LocalPlayerEffectsAllowed.current)) 1 else 0,
                                         style =
                                             if (compactHeight) {
                                                 MaterialTheme.typography.bodyMedium

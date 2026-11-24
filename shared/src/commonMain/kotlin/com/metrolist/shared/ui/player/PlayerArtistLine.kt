@@ -19,7 +19,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.MotionDurationScale
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.onFocusChanged
@@ -59,14 +58,9 @@ import com.metrolist.shared.ui.components.LocalVisualWorkActive
 import com.metrolist.shared.ui.components.animateMarquee
 import com.metrolist.shared.utils.isDesktop
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.ceil
 import kotlin.math.roundToInt
-
-private object ArtistMarqueeDurationScale : MotionDurationScale {
-    override val scaleFactor = 1f
-}
 
 internal data class ArtistMarqueeCycle(
     val distance: Int,
@@ -138,22 +132,23 @@ fun PlayerArtistLine(
             return@LaunchedEffect
         }
         if (focusedArtist != null) {
-            focusedBounds?.let { offset.animateTo(artistMarqueeFocusOffset(offset.value, it, containerWidth)) }
+            focusedBounds?.let {
+                val target = artistMarqueeFocusOffset(offset.value, it, containerWidth)
+                if (iterations > 0) offset.animateTo(target) else offset.snapTo(target)
+            }
             return@LaunchedEffect
         }
         offset.snapTo(0f)
         val cycle = artistMarqueeCycle(contentWidth, containerWidth, pixelsPerSecond)
         if (iterations <= 0 || cycle == null) return@LaunchedEffect
-        withContext(ArtistMarqueeDurationScale) {
-            try {
-                repeat(iterations) { index ->
-                    delay(if (index == 0) initialDelayMillis.toLong() else MarqueeDefaults.RepeatDelayMillis.toLong())
-                    offset.animateMarquee(cycle.distance, cycle.durationMillis)
-                    offset.snapTo(0f)
-                }
-            } finally {
-                if (focusedArtist == null) offset.snapTo(0f)
+        try {
+            repeat(iterations) { index ->
+                delay(if (index == 0) initialDelayMillis.toLong() else MarqueeDefaults.RepeatDelayMillis.toLong())
+                offset.animateMarquee(cycle.distance, cycle.durationMillis)
+                offset.snapTo(0f)
             }
+        } finally {
+            if (focusedArtist == null) offset.snapTo(0f)
         }
     }
     val viewArtistLabel = stringResource(Res.string.view_artist)
