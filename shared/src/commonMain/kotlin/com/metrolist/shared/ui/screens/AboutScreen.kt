@@ -72,7 +72,6 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.metrolist.shared.BuildConfig
@@ -80,7 +79,6 @@ import com.metrolist.shared.generated.resources.Res
 import com.metrolist.shared.generated.resources.about_play_favorite_song
 import com.metrolist.shared.generated.resources.about_upgrade_developer
 import com.metrolist.shared.generated.resources.about_upgrade_version
-import com.metrolist.shared.generated.resources.about_upgrade_beta_version
 import com.metrolist.shared.generated.resources.about_nunito_credit
 import com.metrolist.shared.generated.resources.about_upgrade_whats_new
 import com.metrolist.shared.generated.resources.about_upgrade_note_streak
@@ -360,7 +358,8 @@ private fun AppHeaderCard(
 ) {
     Card(
         shape = RoundedCornerShape(28.dp),
-        colors = CardDefaults.cardColors(containerColor = colorScheme.surfaceContainer),
+        colors = CardDefaults.cardColors(containerColor = glassCardColor(colorScheme.surfaceContainer)),
+        border = glassCardBorder(),
         modifier = Modifier.fillMaxWidth(),
     ) {
         Column(
@@ -409,7 +408,7 @@ private fun AppHeaderCard(
                 )
                 InfoBadge(architecture, colorScheme.surfaceContainerHighest, colorScheme.onSurfaceVariant)
                 if (upgradeNumber != null) {
-                    InfoBadge(stringResource(Res.string.about_upgrade_beta_version, upgradeNumber), colorScheme.secondaryContainer, colorScheme.onSecondaryContainer)
+                    InfoBadge(stringResource(Res.string.about_upgrade_version, upgradeNumber), colorScheme.secondaryContainer, colorScheme.onSecondaryContainer)
                 }
                 InfoBadge(
                     stringResource(if (isDebug) Res.string.build_type_debug else Res.string.build_type_release),
@@ -460,9 +459,7 @@ private fun InfoBadge(
         Text(
             text = label,
             style = MaterialTheme.typography.labelLarge,
-            maxLines = 1,
-            softWrap = false,
-            overflow = TextOverflow.Ellipsis,
+            textAlign = TextAlign.Center,
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
         )
     }
