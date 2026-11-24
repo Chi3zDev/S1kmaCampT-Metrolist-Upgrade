@@ -17,7 +17,7 @@ Basis: `main` 70eb9763 (Upgrade 1 beta 1). Audit kode awal; bukan hasil uji visu
 ## 2. Recap (story)
 - [ ] P2 · `RecapScreen.kt:167–210` memakai tiga warna dengan dua lingkaran statis untuk semua slide dan `AnimatedContent` default; variasi masuk, mesh, geser/fade/parallax belum ada. Risiko: jank, efek bergerak di background, motion sickness.
 - [ ] P1 · `RecapScreen.kt:159` progress diperbarui setiap 50 ms selama tidak ditekan/dijeda; audit lifecycle, visibilitas, mode ringan dan timer tanpa mengubah semantik data. Pertimbangkan dampak aksesibilitas hit target dan navigasi gesture; uji TalkBack.
-- [ ] P2 · Hari puncak/jam favorit tidak tampak dalam model slide saat ini; butuh sumber data yang valid. **Jika memerlukan query atau perubahan database, tanya pengguna dahulu.** Jangan mengarang statistik.
+- [x] P2 · Hari puncak/jam favorit memakai bucket harian dan per jam yang sudah tersedia dalam snapshot statistik; bucket jam tak presisi sudah difilter oleh statistik existing. Kosong atau tidak valid tidak ditampilkan. Pengguna mengizinkan pembacaan riwayat; tidak ada query baru atau perubahan skema.
 - [ ] P1 · `RecapScreen.kt` membagikan tangkapan graphics layer layar, sedangkan `RecapShare.kt` adalah renderer terpisah yang tidak ditemukan pemanggilnya dalam source. Verifikasi ekspor hasil tangkapan, resolusi, font dan pemotongan teks; jangan hapus renderer lama tanpa memeriksa pemakai lainnya.
 
 ## 3. Navbar dan kaca
@@ -46,4 +46,4 @@ Basis: `main` 70eb9763 (Upgrade 1 beta 1). Audit kode awal; bukan hasil uji visu
 ## Log pekerjaan
 - Audit kode awal dibuat; tidak ada kode aplikasi yang diubah pada tahap audit.
 - Streak: implementasi awal, tes gerbang dan label aksesibilitas dipush. Build debug dan tes terpilih lulus; benchmark dan pemeriksaan perangkat masih terbuka.
-- Recap: implementasi awal mesh berbasis tema, transisi, pembatasan lifecycle dan area teks bergulir. Tidak ada perubahan database; pengujian dan fitur lain masih terbuka.
+- Recap: implementasi awal mesh berbasis tema, transisi, pembatasan lifecycle dan area teks bergulir. Slide hari puncak/jam favorit menggunakan bucket statistik existing dengan izin membaca riwayat; tidak ada perubahan database. Pengujian dan fitur lain masih terbuka.

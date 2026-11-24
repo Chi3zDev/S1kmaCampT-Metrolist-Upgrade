@@ -2523,6 +2523,8 @@
     <string name="recap_watch">Tonton Recap</string>
     <string name="recap_share_square">Bagikan persegi</string>
     <string name="recap_share_story">Bagikan story</string>
+    <string name="story_peak_day">Hari paling ramai</string>
+    <string name="story_favorite_hour">Jam favoritmu</string>
     <string name="story_intro">Kamu memutar %1$d lagu</string>
     <string name="story_plays">%1$d putar</string>
     <string name="story_repeat">Sering diulang</string>

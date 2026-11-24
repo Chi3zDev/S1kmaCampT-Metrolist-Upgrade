@@ -5601,6 +5601,8 @@
     <string name="recap_watch">Watch recap</string>
     <string name="recap_share_square">Share square</string>
     <string name="recap_share_story">Share story</string>
+    <string name="story_peak_day">Your busiest day</string>
+    <string name="story_favorite_hour">Your favorite hour</string>
     <string name="story_intro">You played %1$d songs</string>
     <string name="story_plays">%1$d plays</string>
     <string name="story_repeat">On repeat</string>

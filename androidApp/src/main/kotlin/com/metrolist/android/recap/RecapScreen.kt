@@ -94,6 +94,8 @@ import com.metrolist.shared.generated.resources.recap_top_songs
 import com.metrolist.shared.generated.resources.recap_year_filter
 import com.metrolist.shared.generated.resources.share
 import com.metrolist.shared.generated.resources.statistics_share_failed
+import com.metrolist.shared.generated.resources.story_peak_day
+import com.metrolist.shared.generated.resources.story_favorite_hour
 import com.metrolist.shared.generated.resources.story_intro
 import com.metrolist.shared.generated.resources.story_plays
 import com.metrolist.shared.generated.resources.story_repeat
@@ -102,6 +104,9 @@ import com.metrolist.shared.generated.resources.story_change_period
 import com.metrolist.shared.generated.resources.story_previous_month
 import com.metrolist.shared.generated.resources.story_next_month
 import com.metrolist.shared.ui.icons.MetrolistIcons
+import java.time.LocalDate
+import java.time.format.FormatStyle
+import java.util.Locale
 import java.time.Instant
 import java.time.ZoneId
 import java.time.YearMonth
@@ -175,7 +180,7 @@ fun RecapScreen(onBack: () -> Unit) {
 
 @Composable
 private fun RecapStory(data: RecapData, onBack: () -> Unit, onPeriod: () -> Unit, paused: Boolean) {
-    val pages = buildList { add(0); add(1); if (data.artists.isNotEmpty()) add(2); add(3); if (data.songs.any { it.playCount > 1 }) add(4); add(5) }
+    val pages = buildList { add(0); add(1); if (data.artists.isNotEmpty()) add(2); add(3); if (data.songs.any { it.playCount > 1 }) add(4); if (data.peakDay != null) add(6); if (data.favoriteHour != null) add(7); add(5) }
     var page by remember(data) { mutableIntStateOf(0) }
     var progress by remember(data, page) { mutableFloatStateOf(0f) }
     var pressed by remember { mutableStateOf(false) }
@@ -232,7 +237,7 @@ private fun RecapStory(data: RecapData, onBack: () -> Unit, onPeriod: () -> Unit
         ) {
         RecapBackdrop(pages[page], slideColor, colors.primary, colors.tertiary, motionEnabled)
         AnimatedContent(
-            targetState = pages[page],
+            targetState = page,
             modifier = Modifier.fillMaxSize().padding(start = 28.dp, end = 28.dp, top = 88.dp, bottom = 24.dp),
             contentAlignment = Alignment.Center,
             transitionSpec = {
@@ -242,7 +247,8 @@ private fun RecapStory(data: RecapData, onBack: () -> Unit, onPeriod: () -> Unit
                     .togetherWith(fadeOut(tween(duration)) + slideOutHorizontally(tween(duration)) { -direction * it / 12 })
             },
             label = "recapSlide",
-        ) { slide ->
+        ) { slideIndex ->
+            val slide = pages[slideIndex]
             Column(modifier = Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 when (slide) {
                     0 -> {
@@ -268,6 +274,16 @@ private fun RecapStory(data: RecapData, onBack: () -> Unit, onPeriod: () -> Unit
                         data.songs.filter { it.playCount > 1 }.sortedByDescending { it.playCount }.take(5).forEachIndexed { index, song ->
                             StoryRow(index + 1, song.title, stringResource(Res.string.story_plays, song.playCount), song.thumbnailUrl)
                         }
+                    }
+                    6 -> data.peakDay?.let { bucket ->
+                        Text(stringResource(Res.string.story_peak_day), style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold)
+                        Text(LocalDate.parse(bucket.bucket).format(DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG).withLocale(Locale.getDefault())), style = MaterialTheme.typography.headlineMedium)
+                        Text(stringResource(Res.string.story_plays, bucket.playCount), style = MaterialTheme.typography.titleLarge)
+                    }
+                    7 -> data.favoriteHour?.let { bucket ->
+                        Text(stringResource(Res.string.story_favorite_hour), style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold)
+                        Text(String.format(Locale.getDefault(), "%02d:00", bucket.bucket.toInt()), style = MaterialTheme.typography.displayLarge, fontWeight = FontWeight.Bold)
+                        Text(stringResource(Res.string.story_plays, bucket.playCount), style = MaterialTheme.typography.titleLarge)
                     }
                     else -> {
                         Text(stringResource(Res.string.story_summary), style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold)
