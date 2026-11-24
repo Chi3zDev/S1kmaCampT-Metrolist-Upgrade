@@ -30,6 +30,12 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.sp
 import com.metrolist.shared.ui.theme.getGradientColors
 
+/** Use the whole editor range while retaining the original default width and safe side margins. */
+internal fun glassPosterCardWidthFraction(contentScale: Float): Float {
+    val scale = contentScale.takeIf { it.isFinite() }?.coerceIn(0.6f, 1.35f) ?: 1f
+    return if (scale <= 1f) 0.78f * scale else 0.78f + (scale - 1f) * (0.12f / 0.35f)
+}
+
 /** The same renderer is used for preview and export. No backdrop blur is applied. */
 internal fun renderGlassLyricsPoster(
     lyrics: String,
@@ -51,7 +57,7 @@ internal fun renderGlassLyricsPoster(
     val density = Density(scale, fontScale = 1f)
     val width = bitmap.width.toFloat()
     val height = bitmap.height.toFloat()
-    val cardWidth = width * (0.78f * style.contentScale.coerceIn(0.7f, 1.15f)).coerceAtMost(0.90f)
+    val cardWidth = width * glassPosterCardWidthFraction(style.contentScale)
     val inner = 20f * scale
     val textWidth = cardWidth - 2 * inner
     val constrainedWidth = textWidth.toInt().coerceAtLeast(1)

@@ -9,6 +9,19 @@ import kotlin.test.assertTrue
 
 class GlassLyricsPosterTest {
     @Test
+    fun cardWidthUsesWholeSliderRangeAndKeepsSafeDefaults() {
+        assertEquals(0.78f, glassPosterCardWidthFraction(1f), 0.0001f)
+        assertEquals(0.468f, glassPosterCardWidthFraction(0.6f), 0.0001f)
+        assertEquals(0.90f, glassPosterCardWidthFraction(1.35f), 0.0001f)
+        assertTrue(glassPosterCardWidthFraction(0.6f) < glassPosterCardWidthFraction(0.7f))
+        assertTrue(glassPosterCardWidthFraction(1.15f) < glassPosterCardWidthFraction(1.35f))
+        assertEquals(glassPosterCardWidthFraction(0.6f), glassPosterCardWidthFraction(-1f))
+        assertEquals(glassPosterCardWidthFraction(1.35f), glassPosterCardWidthFraction(2f))
+        assertEquals(0.78f, glassPosterCardWidthFraction(Float.NaN), 0.0001f)
+        assertEquals(0.78f, glassPosterCardWidthFraction(Float.POSITIVE_INFINITY), 0.0001f)
+    }
+
+    @Test
     fun styleRoundTripsWithoutLosingFontOrBackground() {
         val style = LyricsImageStyle(
             posterStyle = LyricsPosterStyle.GLASS_CARD,
