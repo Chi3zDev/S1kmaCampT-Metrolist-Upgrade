@@ -1423,7 +1423,10 @@ fun PlayerScreen(
                                         .then(
                                             if (portraitPlayerGlassVisible(Settings.shared.glassNavigation, Settings.shared.glassPlayer, uiState.isLyricsVisible)) {
                                                 Modifier.portraitPlayerGlassCard(textBackgroundColor, topInset = 64.dp, bottomInset = QueuePeekHeight + 26.dp)
-                                                    .then(if (playerType == PlayerType.GLASS_CARD) Modifier.padding(horizontal = 16.dp) else Modifier)
+                                            } else Modifier,
+                                        ).then(
+                                            if (playerType == PlayerType.GLASS_CARD && Settings.shared.glassNavigation && Settings.shared.glassPlayer) {
+                                                Modifier.padding(horizontal = 16.dp)
                                             } else Modifier,
                                         )
                                         .padding(top = 16.dp),
