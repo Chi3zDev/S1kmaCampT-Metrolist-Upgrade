@@ -22,6 +22,14 @@ class GlassLyricsPosterTest {
     }
 
     @Test
+    fun footerLabelsShrinkOnlyWhenNeededAndKeepAMinimum() {
+        assertEquals(14f, fitGlassPosterLabelFontSize(14f, 8f) { false })
+        assertEquals(8f, fitGlassPosterLabelFontSize(14f, 8f) { true })
+        val fitted = fitGlassPosterLabelFontSize(14f, 8f) { it > 10f }
+        assertTrue(fitted <= 10f && fitted > 9.9f)
+    }
+
+    @Test
     fun styleRoundTripsWithoutLosingFontOrBackground() {
         val style = LyricsImageStyle(
             posterStyle = LyricsPosterStyle.GLASS_CARD,

@@ -36,6 +36,19 @@ internal fun glassPosterCardWidthFraction(contentScale: Float): Float {
     return if (scale <= 1f) 0.78f * scale else 0.78f + (scale - 1f) * (0.12f / 0.35f)
 }
 
+/** Shrink long footer labels before falling back to ellipsis at the minimum readable size. */
+internal fun fitGlassPosterLabelFontSize(preferred: Float, minimum: Float, overflows: (Float) -> Boolean): Float {
+    if (!overflows(preferred)) return preferred
+    if (overflows(minimum)) return minimum
+    var low = minimum
+    var high = preferred
+    repeat(8) {
+        val middle = (low + high) / 2f
+        if (overflows(middle)) high = middle else low = middle
+    }
+    return low
+}
+
 /** The same renderer is used for preview and export. No backdrop blur is applied. */
 internal fun renderGlassLyricsPoster(
     lyrics: String,
@@ -123,9 +136,13 @@ internal fun renderGlassLyricsPoster(
             val labelX = artX + artSize + 12f * scale
             val labelWidth = (cardLeft + cardWidth - inner - labelX).toInt().coerceAtLeast(1)
             fun label(value: String, size: Float, y: Float, color: Color, weight: FontWeight) {
-                val layout = textMeasurer.measure(value, style = TextStyle(color = color, fontSize = size.sp, fontWeight = weight),
+                fun measure(fontSize: Float) = textMeasurer.measure(value, style = TextStyle(color = color, fontSize = fontSize.sp, fontWeight = weight),
                     maxLines = 1, overflow = TextOverflow.Ellipsis, constraints = Constraints(maxWidth = labelWidth), density = density, layoutDirection = layoutDirection)
-                drawText(layout, topLeft = Offset(labelX, y))
+                val fittedSize = fitGlassPosterLabelFontSize(size, minimum = 8f) { fontSize ->
+                    val result = measure(fontSize)
+                    result.didOverflowWidth || (result.lineCount > 0 && result.isLineEllipsized(0))
+                }
+                drawText(measure(fittedSize), topLeft = Offset(labelX, y))
             }
             label(title, 14f, artY, style.textColor, FontWeight.Bold)
             label(artist, 12f, artY + 19f * scale, style.secondaryColor, FontWeight.Normal)
