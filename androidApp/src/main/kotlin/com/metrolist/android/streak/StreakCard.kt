@@ -86,7 +86,9 @@ fun StreakCard(state: StreakCardState, onClick: () -> Unit, modifier: Modifier =
     Card(onClick = onClick, modifier = modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp), colors = CardDefaults.cardColors(containerColor = glassCardColor(MaterialTheme.colorScheme.surfaceContainerHigh)), border = glassCardBorder()) {
         Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Icon(painterResource(R.drawable.ic_streak_flame), contentDescription = null, modifier = Modifier.size(40.dp), tint = flameTint)
+                val lifecycle by LocalLifecycleOwner.current.lifecycle.currentStateAsState()
+                val showMotion = lifecycle == Lifecycle.State.RESUMED && LocalRootContentActive.current && !LocalContentObscured.current && streakMotionEnabled()
+                Flame(flameTint, animate = showMotion, extinguished = extinguished, modifier = Modifier.size(40.dp))
                 Column {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         Text(streak.current.toString(), style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.onSurface)

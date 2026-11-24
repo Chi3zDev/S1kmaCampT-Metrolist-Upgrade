@@ -1,8 +1,10 @@
 package com.metrolist.android.streak
 
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.animateIntAsState
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
@@ -22,6 +24,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -34,6 +40,8 @@ import com.metrolist.android.ui.component.tabContentTopPadding
 import com.metrolist.shared.db.MusicDatabase
 import com.metrolist.shared.generated.resources.*
 import com.metrolist.shared.settings.Settings
+import com.metrolist.shared.ui.PolishMotion
+import com.metrolist.shared.ui.LocalPlayerEffectsAllowed
 import com.metrolist.shared.ui.components.glassCardBorder
 import com.metrolist.shared.ui.components.glassCardColor
 import com.metrolist.shared.ui.navigation.LocalRootContentActive
@@ -86,7 +94,7 @@ fun StreakScreen(onBack: () -> Unit) {
     val shownLevel = streakLevel(if (extinguished) previousLength else streak.current)
     val targetFlameColor = if (extinguished) MaterialTheme.colorScheme.outline else shownLevel.color
     val flameColor = if (screenActive && streakMotionEnabled()) {
-        animateColorAsState(targetFlameColor, animationSpec = tween(500), label = "streakFlameColor").value
+        animateColorAsState(targetFlameColor, animationSpec = tween(PolishMotion.durationMillis), label = "streakFlameColor").value
     } else targetFlameColor
     val next = if (extinguished) null else streakLevels.firstOrNull { it.minimumDays > streak.current }
     val progress = if (extinguished) 0f else if (next == null) 1f else ((streak.current - shownLevel.minimumDays).toFloat() / (next.minimumDays - shownLevel.minimumDays)).coerceIn(0f, 1f)
@@ -124,8 +132,8 @@ fun StreakScreen(onBack: () -> Unit) {
         item {
             StreakPanel {
                 Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Flame(flameColor, animate = !extinguished && screenActive && streakMotionEnabled(), particles = !extinguished && streak.current >= 100)
-                    Text(streak.current.toString(), style = MaterialTheme.typography.displayMedium)
+                    Flame(flameColor, animate = screenActive && streakMotionEnabled(), particles = !extinguished && streak.current >= 100, extinguished = extinguished)
+                    StreakCount(streak.current, screenActive && streakMotionEnabled(), MaterialTheme.typography.displayMedium)
                     Text(stringResource(shownLevel.title), color = flameColor, style = MaterialTheme.typography.titleLarge)
                     Text(stringResource(when { extinguished -> Res.string.streak_extinguished; streak.todayCounted -> Res.string.streak_active; else -> Res.string.streak_waiting }), textAlign = TextAlign.Center)
                     if (extinguished) Text(stringResource(Res.string.streak_previous, previousLength))
@@ -145,7 +153,7 @@ fun StreakScreen(onBack: () -> Unit) {
                         val day = start.plusDays(offset.toLong())
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(day.dayOfWeek.getDisplayName(TextStyle.NARROW_STANDALONE, Locale.getDefault()), style = MaterialTheme.typography.labelSmall)
-                            DayDot(day, today, listened, restored)
+                            StaggeredDayDot(day, today, listened, restored, offset, screenActive && streakMotionEnabled())
                         }
                     }
                 }
@@ -225,21 +233,30 @@ internal fun DayDot(day: LocalDate, today: LocalDate, listened: Set<LocalDate>, 
 }
 
 @Composable
-internal fun Flame(color: Color, animate: Boolean, levelUp: Boolean = false, particles: Boolean = false) {
-    val scale = if (animate) {
+internal fun Flame(color: Color, animate: Boolean, levelUp: Boolean = false, particles: Boolean = false, extinguished: Boolean = false, modifier: Modifier = Modifier) {
+    var entered by remember { mutableStateOf(!animate) }
+    LaunchedEffect(animate, extinguished) { entered = true }
+    val targetScale = if (extinguished) .82f else if (!entered && animate) .72f else 1f
+    val entranceScale by animateFloatAsState(targetScale, animationSpec = if (animate && levelUp) PolishMotion.interactiveSpring() else tween(if (animate) PolishMotion.durationMillis else 0), label = "flameEntrance")
+    val phase = if (animate) {
         val transition = rememberInfiniteTransition(label = "flame")
-        val value by transition.animateFloat(if (levelUp) 0.86f else 0.94f, if (levelUp) 1.14f else 1.04f, infiniteRepeatable(tween(if (levelUp) 800 else 1200), RepeatMode.Reverse), label = "flicker")
+        val value by transition.animateFloat(0f, 1f, infiniteRepeatable(tween(2400, easing = LinearEasing)), label = "flamePhase")
         value
-    } else 1f
-    Canvas(Modifier.size(100.dp)) {
+    } else 0f
+    val flicker = if (animate && !extinguished) kotlin.math.sin(phase * 6.283185f) * 0.035f + kotlin.math.sin(phase * 18.849556f) * 0.015f else 0f
+    val scale = 1f + flicker
+    Canvas(modifier.size(100.dp).graphicsLayer { scaleX = entranceScale; scaleY = entranceScale }) {
         val w = size.width; val h = size.height
-        // A few simple translucent circles share the existing flicker; no blur or second animation.
-        drawCircle(color.copy(alpha = if (animate) .09f else .04f), radius = w * .46f, center = Offset(w * .5f, h * .55f))
-        if (particles && animate) {
-            val drift = (scale - .94f) * h
-            drawCircle(color.copy(alpha = .7f), radius = w * .025f, center = Offset(w * .22f, h * .3f - drift))
-            drawCircle(color.copy(alpha = .5f), radius = w * .018f, center = Offset(w * .78f, h * .22f + drift))
-            drawCircle(Color.White.copy(alpha = .65f), radius = w * .015f, center = Offset(w * .68f, h * .07f - drift))
+        val glow = if (animate && !extinguished) (0.10f + flicker).coerceIn(0.04f, 0.16f) else 0.04f
+        drawCircle(Brush.radialGradient(listOf(color.copy(alpha = glow), Color.Transparent), center = Offset(w * .5f, h * .62f), radius = w * .48f), radius = w * .48f, center = Offset(w * .5f, h * .62f))
+        if (animate && (particles || extinguished)) {
+            repeat(4) { index ->
+                val step = (phase + index * .25f) % 1f
+                val alpha = (1f - step) * if (extinguished) .22f else .70f
+                val x = w * (.30f + index * .13f) + kotlin.math.sin((phase + index) * 6.283185f) * w * .025f
+                val y = h * (.72f - step * .68f)
+                drawCircle(color.copy(alpha = alpha), radius = w * (if (extinguished) .025f + step * .025f else .016f), center = Offset(x, y))
+            }
         }
         val path = Path().apply {
             moveTo(w * .5f, h * (1f - scale) * .2f)
@@ -249,14 +266,14 @@ internal fun Flame(color: Color, animate: Boolean, levelUp: Boolean = false, par
             cubicTo(w * .31f, h * .43f, w * .37f, h * .35f, w * .5f, h * (1f - scale) * .2f)
             close()
         }
-        drawPath(path, color)
+        drawPath(path, color.copy(alpha = if (extinguished) .55f else 1f))
         val inner = Path().apply {
             moveTo(w * .5f, h * .49f)
             cubicTo(w * .31f, h * .73f, w * .35f, h * .94f, w * .5f, h * .94f)
             cubicTo(w * .66f, h * .94f, w * .7f, h * .75f, w * .5f, h * .49f)
             close()
         }
-        drawPath(inner, Color.White.copy(alpha = .55f))
+        drawPath(inner, Color.White.copy(alpha = if (extinguished) .12f else .55f))
     }
 }
 
@@ -264,7 +281,28 @@ internal fun Flame(color: Color, animate: Boolean, levelUp: Boolean = false, par
 internal fun streakMotionEnabled(): Boolean {
     val context = LocalContext.current
     val lifecycle by LocalLifecycleOwner.current.lifecycle.currentStateAsState()
-    return remember(context, lifecycle) {
+    val systemAllowsMotion = remember(context, lifecycle) {
         android.provider.Settings.Global.getFloat(context.contentResolver, android.provider.Settings.Global.ANIMATOR_DURATION_SCALE, 1f) > 0f
     }
+    return streakMotionAllowed(systemAllowsMotion, Settings.shared.glassLightMode, LocalPlayerEffectsAllowed.current)
+}
+
+@Composable
+internal fun StreakCount(count: Int, animate: Boolean, style: androidx.compose.ui.text.TextStyle) {
+    var target by remember { mutableIntStateOf(if (animate) 0 else count) }
+    LaunchedEffect(count, animate) { target = count }
+    val value by animateIntAsState(target, animationSpec = tween(if (animate) PolishMotion.durationMillis else 0), label = "streakCount")
+    Text(if (animate) value.toString() else count.toString(), style = style,
+        modifier = Modifier.clearAndSetSemantics { contentDescription = count.toString() })
+}
+
+@Composable
+internal fun StaggeredDayDot(day: LocalDate, today: LocalDate, listened: Set<LocalDate>, restored: Set<LocalDate>, index: Int, animate: Boolean) {
+    var shown by remember(day) { mutableStateOf(!animate) }
+    LaunchedEffect(day, animate) {
+        if (animate) { shown = false; delay(index * PolishMotion.staggerMillis) }
+        shown = true
+    }
+    val alpha by animateFloatAsState(if (!animate || shown) 1f else 0f, tween(PolishMotion.durationMillis), label = "streakDay")
+    Box(Modifier.graphicsLayer { this.alpha = alpha }) { DayDot(day, today, listened, restored) }
 }

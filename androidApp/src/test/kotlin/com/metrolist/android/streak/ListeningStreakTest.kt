@@ -4,12 +4,22 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.ZoneId
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertNotNull
 import org.junit.Test
 
 class ListeningStreakTest {
+    @Test
+    fun decorativeMotionRequiresEveryGate() {
+        assertTrue(streakMotionAllowed(systemAllowed = true, lightMode = false, deviceAllowed = true))
+        assertFalse(streakMotionAllowed(systemAllowed = false, lightMode = false, deviceAllowed = true))
+        assertFalse(streakMotionAllowed(systemAllowed = true, lightMode = true, deviceAllowed = true))
+        assertFalse(streakMotionAllowed(systemAllowed = true, lightMode = false, deviceAllowed = false))
+    }
+
     private fun ms(value: String) = Instant.parse(value).toEpochMilli()
 
     @Test

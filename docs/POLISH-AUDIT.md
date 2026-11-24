@@ -44,3 +44,4 @@ Basis: `main` 70eb9763 (Upgrade 1 beta 1). Audit kode awal; bukan hasil uji visu
 
 ## Log pekerjaan
 - Audit kode awal dibuat; tidak ada kode aplikasi yang diubah pada tahap audit.
+- Streak (implementasi awal, belum dinyatakan selesai): durasi dan stagger bersama, count-up, hari berurutan, api berlapis/percikan/asap, perayaan bertahap, serta gerbang mode ringan/perangkat ditambahkan. Logika pemulihan dan playback tidak diubah. Tes, build CI dan verifikasi perangkat masih menunggu; item terkait tetap belum dicentang.

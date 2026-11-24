@@ -1,5 +1,8 @@
 package com.metrolist.android.streak
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -17,6 +20,7 @@ import androidx.lifecycle.compose.currentStateAsState
 import com.metrolist.shared.db.MusicDatabase
 import com.metrolist.shared.generated.resources.*
 import com.metrolist.shared.settings.Settings
+import com.metrolist.shared.ui.PolishMotion
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -78,6 +82,16 @@ fun BoxScope.StreakCelebrationPresenter(
     val event = celebration
     if (event != null && visible && lifecycle == Lifecycle.State.RESUMED) {
         val level = streakLevel(event.count)
+        val motionEnabled = streakMotionEnabled()
+        var stage by remember(event) { mutableIntStateOf(if (motionEnabled) 0 else 3) }
+        LaunchedEffect(event, motionEnabled) {
+            if (!motionEnabled) { stage = 3; return@LaunchedEffect }
+            stage = 1
+            delay(PolishMotion.staggerMillis * 2)
+            stage = 2
+            delay(PolishMotion.staggerMillis * 2)
+            stage = 3
+        }
         Card(
             modifier = Modifier.align(Alignment.TopCenter).statusBarsPadding().padding(horizontal = 20.dp, vertical = 12.dp).widthIn(max = 400.dp).zIndex(100f).clickable { celebration = null },
             shape = RoundedCornerShape(24.dp),
@@ -86,12 +100,19 @@ fun BoxScope.StreakCelebrationPresenter(
         ) {
             Column(Modifier.fillMaxWidth().padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text(stringResource(if (event.levelUp) Res.string.streak_level_up else Res.string.streak_celebration_title), style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center)
-                Flame(level.color, animate = streakMotionEnabled(), levelUp = event.levelUp, particles = event.count >= 100)
-                Text("${event.count} ${stringResource(Res.string.streak_days)}", style = MaterialTheme.typography.titleLarge)
+                Flame(level.color, animate = motionEnabled, levelUp = event.levelUp, particles = event.count >= 100)
+                AnimatedVisibility(visible = stage >= 2, enter = fadeIn(tween(PolishMotion.durationMillis))) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                        StreakCount(event.count, motionEnabled, MaterialTheme.typography.titleLarge)
+                        Text(stringResource(Res.string.streak_days), style = MaterialTheme.typography.titleLarge)
+                    }
+                }
                 if (event.provisional) Text(stringResource(Res.string.streak_first_play_provisional), style = MaterialTheme.typography.bodySmall, textAlign = TextAlign.Center)
                 val start = event.today.minusDays((event.today.dayOfWeek.value - 1).toLong())
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                    repeat(7) { DayDot(start.plusDays(it.toLong()), event.today, event.listened, event.restored) }
+                AnimatedVisibility(visible = stage >= 3, enter = fadeIn(tween(PolishMotion.durationMillis))) {
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+                        repeat(7) { StaggeredDayDot(start.plusDays(it.toLong()), event.today, event.listened, event.restored, it, motionEnabled) }
+                    }
                 }
                 TextButton(onClick = { celebration = null }) { Text(stringResource(Res.string.streak_celebration_continue)) }
             }
