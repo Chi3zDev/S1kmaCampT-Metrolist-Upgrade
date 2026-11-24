@@ -307,6 +307,8 @@ internal fun TabletPlayerContent(
                         Column(
                             modifier = if (playerType == PlayerType.GLASS_CARD && Settings.shared.glassNavigation && Settings.shared.glassPlayer) {
                                 Modifier.playerGlassCard(textBackgroundColor).padding(16.dp)
+                            } else if (Settings.shared.glassNavigation && Settings.shared.glassPlayer && !uiState.isLyricsVisible) {
+                                Modifier.playerGlassCard(textBackgroundColor)
                             } else Modifier,
                             horizontalAlignment = Alignment.CenterHorizontally,
                         ) {
@@ -1345,6 +1347,8 @@ internal fun LandscapePlayerContent(
                             .then(
                                 if (playerType == PlayerType.GLASS_CARD && Settings.shared.glassNavigation && Settings.shared.glassPlayer) {
                                     Modifier.playerGlassCard(controlsColor).padding(horizontal = 12.dp, vertical = 8.dp)
+                                } else if (Settings.shared.glassNavigation && Settings.shared.glassPlayer) {
+                                    Modifier.playerGlassCard(controlsColor)
                                 } else Modifier,
                             ),
                         verticalArrangement =
@@ -1895,7 +1899,9 @@ internal fun LyricsViewWithPosition(
         songId = uiState.currentSong?.id,
         isCasting = isCasting,
         isBuffering = isBuffering,
-        modifier = modifier,
+        modifier = if (Settings.shared.glassNavigation && Settings.shared.glassPlayer) {
+            modifier.playerGlassCard(textColor)
+        } else modifier,
     )
 }
 
