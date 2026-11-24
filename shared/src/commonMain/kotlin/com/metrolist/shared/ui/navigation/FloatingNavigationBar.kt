@@ -3,6 +3,8 @@
 package com.metrolist.shared.ui.navigation
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.spring
@@ -107,15 +109,17 @@ internal fun <T> FloatingNavigation(
     modifier: Modifier = Modifier,
 ) {
     val density = LocalDensity.current
+    val allowGlassMotion = !LocalGlassNavigationEnabled.current ||
+        (LocalGlassMotionAllowed.current && !Settings.shared.glassLightMode && Settings.shared.glassNavbarMotion != "OFF")
     AnimatedVisibility(
         visible = navigationVisible,
         modifier = modifier,
-        enter =
+        enter = if (!allowGlassMotion) EnterTransition.None else
             expandVertically(
                 animationSpec = spring(dampingRatio = 0.9f, stiffness = 700f),
                 expandFrom = Alignment.Bottom,
             ),
-        exit =
+        exit = if (!allowGlassMotion) ExitTransition.None else
             shrinkVertically(
                 animationSpec = spring(dampingRatio = 0.9f, stiffness = 700f),
                 shrinkTowards = Alignment.Bottom,
