@@ -352,6 +352,7 @@ class Settings(
     fun applyFreshAndroidAppearanceDefaults(isFreshInstall: Boolean) {
         if (!isFreshInstall) return
         applyFreshAndroidFontDefault(true)
+        if (!settings.hasKey(AppIconKey)) appIcon = "METROMALLOW"
         if (!settings.hasKey("themePaletteStyle")) themePaletteStyle = ThemePaletteStyle.CONTENT
         if (!settings.hasKey("playerType")) playerType = PlayerType.VINTAGE
         if (!settings.hasKey("playerThumbnailStyle")) playerThumbnailStyle = PlayerThumbnailStyle.FULLSCREEN

@@ -29,6 +29,7 @@ class ForkFontDefaultsTest {
     fun freshAppearanceDefaultsDoNotOverwriteStoredChoices() {
         val fresh = Settings(MapSettings())
         fresh.applyFreshAndroidAppearanceDefaults(true)
+        assertEquals("METROMALLOW", fresh.appIcon)
         assertEquals(PlayerType.VINTAGE, fresh.playerType)
         assertEquals(PlayerThumbnailStyle.FULLSCREEN, fresh.playerThumbnailStyle)
         assertEquals(PlayerBackgroundStyle.LIQUID, fresh.playerBackgroundStyle)
@@ -42,11 +43,13 @@ class ForkFontDefaultsTest {
         assertEquals(true, fresh.playerAuraEnabled)
         assertEquals(ThemePaletteStyle.CONTENT, fresh.themePaletteStyle)
 
+        fresh.appIcon = "ORIGINAL"
         fresh.playerType = PlayerType.VINYL
         fresh.glassStyle = "FROSTED"
         fresh.lyricsGlowEnabled = false
         fresh.playerAuraEnabled = false
         fresh.applyFreshAndroidAppearanceDefaults(true)
+        assertEquals("ORIGINAL", fresh.appIcon)
         assertEquals(PlayerType.VINYL, fresh.playerType)
         fresh.playerType = PlayerType.GLASS_CARD
         fresh.applyFreshAndroidAppearanceDefaults(true)
@@ -56,6 +59,7 @@ class ForkFontDefaultsTest {
         assertEquals(false, fresh.playerAuraEnabled)
         val existing = Settings(MapSettings())
         existing.applyFreshAndroidAppearanceDefaults(false)
+        assertEquals("ORIGINAL", existing.appIcon)
         assertEquals(PlayerType.MODERN, existing.playerType)
         assertEquals(false, existing.glassNavigation)
     }
