@@ -1,15 +1,15 @@
 package com.metrolist.android.streak
 
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
+import org.junit.Test
 import java.time.Instant
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.ZoneId
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
-import org.junit.Assert.assertNotNull
-import org.junit.Test
 
 class ListeningStreakTest {
     @Test
@@ -38,7 +38,10 @@ class ListeningStreakTest {
     @Test
     fun localMidnightUsesDeviceZone() {
         val plays = listOf(ms("2026-01-01T16:59:00Z"), ms("2026-01-01T17:01:00Z"))
-        assertEquals(ListeningStreak(2, 2, true), calculateListeningStreak(plays, Instant.parse("2026-01-01T18:00:00Z"), ZoneId.of("Asia/Pontianak")))
+        assertEquals(
+            ListeningStreak(2, 2, true),
+            calculateListeningStreak(plays, Instant.parse("2026-01-01T18:00:00Z"), ZoneId.of("Asia/Pontianak")),
+        )
         assertEquals(ListeningStreak(1, 1, true), calculateListeningStreak(plays, Instant.parse("2026-01-01T18:00:00Z"), ZoneId.of("UTC")))
     }
 

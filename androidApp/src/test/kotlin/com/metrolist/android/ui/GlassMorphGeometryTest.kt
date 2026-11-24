@@ -1,13 +1,13 @@
 package com.metrolist.android.ui
 
-import com.metrolist.shared.ui.navigation.glassNavigationMotionAllowed
 import com.metrolist.shared.ui.navigation.glassMorphNavWidth
 import com.metrolist.shared.ui.navigation.glassMorphNavbarBottomOffset
 import com.metrolist.shared.ui.navigation.glassMorphPlayerDown
 import com.metrolist.shared.ui.navigation.glassMorphPlayerStart
+import com.metrolist.shared.ui.navigation.glassNavigationMotionAllowed
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
-import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class GlassMorphGeometryTest {
