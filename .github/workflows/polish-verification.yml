@@ -1,0 +1,56 @@
+name: Polish verification
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Check out source and submodules
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          submodules: recursive
+          persist-credentials: false
+      - name: Install JDK 25 toolchain
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6
+        with:
+          distribution: temurin
+          java-version: '25'
+      - name: Run Gradle with JDK 21
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd # v4
+        with:
+          packages: platform-tools
+      - name: Set up Gradle cache
+        uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6
+      - name: Validate localized resources
+        run: |
+          python3 scripts/check_compose_resource_escapes.py
+          python3 scripts/test_compose_resource_escapes.py
+          python3 scripts/check_translation_mechanics.py
+          python3 scripts/test_translation_mechanics.py
+      - name: Run full Android unit tests and lint
+        run: >-
+          ./gradlew :androidApp:lintDebug :androidApp:testDebugUnitTest
+          :shared:testAndroidHostTest :androidApp:ktlintCheck
+          --no-daemon -Dorg.gradle.java.installations.paths="$JAVA_HOME_25_X64"
+      - name: Upload reports on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: polish-verification-reports
+          path: |
+            androidApp/build/reports/lint*
+            androidApp/build/reports/tests/
+            androidApp/build/reports/ktlint/
+            shared/build/reports/tests/
+          if-no-files-found: ignore
