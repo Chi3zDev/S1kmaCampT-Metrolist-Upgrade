@@ -8,10 +8,11 @@ Basis: `main` 70eb9763 (Upgrade 1 beta 1). Audit kode awal; bukan hasil uji visu
 - [ ] P0 · Data streak/recovery dan riwayat tidak boleh direkayasa atau diubah untuk animasi; playback tidak boleh tertunda. Pertahankan preferensi, kredit, lisensi, signing dan workflow.
 
 ## 1. Streak
-- [ ] P2 · `StreakScreen.kt:228` api memakai satu skala berulang, glow statis dan partikel tidak naik: perlu lapisan api, flicker tidak seragam, glow dan partikel terikat visibilitas; padam menjadi abu-abu dan asap serta re-ignition yang tidak memalsukan data. Risiko: GPU/jank dan efek tetap berjalan saat tersembunyi.
-- [ ] P2 · `StreakCard.kt` menampilkan ikon serta angka statis; `StreakScreen.kt` dan `StreakCelebration.kt` perlu count-up, stagger hari, koreografi level-up dan perayaan berurutan. Risiko: perubahan nilai harus tetap diumumkan secara benar oleh TalkBack; jangan tunda musik.
-- [ ] P1 · `StreakScreen.kt:89` warna memakai tween 500 ms; samakan transisi interaktif tanpa mengubah logika pemulihan. Periksa ruang hari/angka besar dan kontras abu-abu di layar kecil; belum teruji.
-- [ ] P1 · Tambah tes logika timing/motion dan verifikasi mode ringan, skala animasi nol, lifecycle, pemulihan, serta perayaan sekali per hari. Jangan modifikasi storage/DAO tanpa izin.
+- [x] P2 · Implementasi awal api berlapis, flicker, glow, percikan naik, keadaan abu-abu dan asap; ukuran dan animasi mengikuti visibilitas host. Re-ignition memakai transisi bentuk/warna; tidak mengubah data.
+- [x] P2 · Count-up, hari muncul berurutan, level-up memakai pegas dan perayaan bertahap; label kalender TalkBack dalam bahasa Indonesia/Inggris. Musik, riwayat dan penyimpanan tidak diubah.
+- [x] P1 · Durasi warna menggunakan spesifikasi bersama. Ditambahkan tes unit gerbang mode sistem/mode ringan/perangkat.
+- [ ] P1 · Verifikasi nyata: mode ringan, skala animasi nol, lifecycle, pemulihan/level-up, perayaan sekali per hari, TalkBack, ukuran font besar, abu-abu dan teks layar kecil. Build serta tes commit terakhir sedang berjalan; hasil visual belum dinilai di HP.
+- [ ] P1 · Profil GPU dan scroll untuk memastikan item list tersembunyi tidak terus beranimasi; risiko overdraw/jank belum diukur.
 
 ## 2. Recap (story)
 - [ ] P2 · `RecapScreen.kt:167–210` memakai tiga warna dengan dua lingkaran statis untuk semua slide dan `AnimatedContent` default; variasi masuk, mesh, geser/fade/parallax belum ada. Risiko: jank, efek bergerak di background, motion sickness.
@@ -44,4 +45,4 @@ Basis: `main` 70eb9763 (Upgrade 1 beta 1). Audit kode awal; bukan hasil uji visu
 
 ## Log pekerjaan
 - Audit kode awal dibuat; tidak ada kode aplikasi yang diubah pada tahap audit.
-- Streak (implementasi awal, belum dinyatakan selesai): durasi dan stagger bersama, count-up, hari berurutan, api berlapis/percikan/asap, perayaan bertahap, serta gerbang mode ringan/perangkat ditambahkan. Logika pemulihan dan playback tidak diubah. Tes, build CI dan verifikasi perangkat masih menunggu; item terkait tetap belum dicentang.
+- Streak: implementasi awal, tes gerbang dan label aksesibilitas dipush. Pemeriksaan perangkat, profil performa dan build commit terakhir tetap terbuka.
