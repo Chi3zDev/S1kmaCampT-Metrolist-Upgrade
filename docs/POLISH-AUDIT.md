@@ -21,11 +21,11 @@ Basis: `main` 70eb9763 (Upgrade 1 beta 1). Audit kode awal; bukan hasil uji visu
 - [ ] P1 · `RecapScreen.kt` membagikan tangkapan graphics layer layar, sedangkan `RecapShare.kt` adalah renderer terpisah yang tidak ditemukan pemanggilnya dalam source. Verifikasi ekspor hasil tangkapan, resolusi, font dan pemotongan teks; jangan hapus renderer lama tanpa memeriksa pemakai lainnya.
 
 ## 3. Navbar dan kaca
-- [ ] P2 · `FloatingNavigationBar.kt` sudah memiliki bubble/drag dan spring damping 0,9; belum memakai bahasa gerak bersama. Audit morph scroll dan konsistensi tint/border/padding pada tombol, chip, kartu dan Profil. Risiko perubahan utama navigasi: **tanya sebelum mengubah perilaku navigasi**, fokus, urutan atau rute.
+- [ ] P2 · Bubble dan morph sudah memakai bahasa gerak bersama; warna Profil dan tombol melayang disejajarkan dengan kartu serta chip dapat bertambah tinggi. Audit konsistensi tint/border/padding pada seluruh layar masih terbuka. Risiko perubahan utama navigasi: **tanya sebelum mengubah perilaku navigasi**, fokus, urutan atau rute.
 - [ ] P1 · Haze/navbar memakai sumber blur yang ada; pastikan tidak menambah capture/blur, tetap ringan pada Android lama/perangkat RAM rendah dan nonaktif saat mode ringan. Uji label, touch target dan kontras; belum diuji perangkat.
 
 ## 4. Pemutar dan lirik
-- [ ] P1 · `PlayerScreen.kt`, `PlayerLayout.kt`, `PlayerGlassCard.kt`: audit pembukaan, Vintage/Kartu Kaca/Piringan, ruang kontrol dan teks panjang; cakupan kaca telah diperluas tetapi hasil visual belum diverifikasi. Risiko: overlay, pemotongan teks/kontras dan jank.
+- [ ] P1 · Peralihan player/lirik potret dan lanskap kini memakai durasi bersama dan tanpa animasi pada mode ringan/perangkat terbatas. `PlayerScreen.kt`, `PlayerLayout.kt`, `PlayerGlassCard.kt`: audit pembukaan, Vintage/Kartu Kaca/Piringan, ruang kontrol dan teks panjang; cakupan kaca telah diperluas tetapi hasil visual belum diverifikasi. Risiko: overlay, pemotongan teks/kontras dan jank.
 - [ ] P2 · `VinylRecord.kt` dan `PlayerAura.kt` sudah punya gerbang visibilitas/skala animasi; uji rotasi, perlambatan, tonearm, aura, seekbar dan glow di perangkat. Jangan ubah seek, queue, kontrol atau timing playback tanpa persetujuan.
 - [ ] P1 · Uji lirik kecil dan mode ringan/animasi nol; hindari blur tambahan serta recomposition per frame di luar area gambar.
 

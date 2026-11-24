@@ -142,6 +142,8 @@ import com.metrolist.shared.repository.isLocalLyricsProvider
 import com.metrolist.shared.settings.PlayerBackgroundStyle
 import com.metrolist.shared.settings.PlayerType
 import com.metrolist.shared.settings.Settings
+import com.metrolist.shared.ui.LocalPlayerEffectsAllowed
+import com.metrolist.shared.ui.PolishMotion
 import com.metrolist.shared.ui.LocalIsTv
 import com.metrolist.shared.ui.components.CrossfadeArtwork
 import com.metrolist.shared.ui.components.PlayerConnectedButtonGroup
@@ -1210,9 +1212,13 @@ internal fun LandscapePlayerContent(
                 Column(modifier = Modifier.fillMaxSize()) {
                     BoxWithConstraints(Modifier.fillMaxWidth().weight(1f)) {
                         val artworkSize = if (isTv) tvArtworkSize else minOf(maxHeight, maxWidth)
+                        val lyricsMotion = playerLyricsMotionAllowed(LocalPlayerContentActive.current, Settings.shared.glassLightMode, LocalPlayerEffectsAllowed.current)
                         AnimatedContent(
                             targetState = uiState.isLyricsVisible,
-                            transitionSpec = { fadeIn() togetherWith fadeOut() },
+                            transitionSpec = {
+                                val duration = if (lyricsMotion) PolishMotion.durationMillis else 0
+                                fadeIn(tween(duration)) togetherWith fadeOut(tween(duration))
+                            },
                             label = "landscapeLyricsToggle",
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center,

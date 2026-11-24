@@ -2,8 +2,18 @@ package com.metrolist.shared.ui.player
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 class PlayerArtworkTransitionSettingTest {
+    @Test
+    fun lyricsTransitionRespectsVisibilityAndLightweightModes() {
+        assertTrue(playerLyricsMotionAllowed(visible = true, lightMode = false, deviceAllowed = true))
+        assertFalse(playerLyricsMotionAllowed(visible = false, lightMode = false, deviceAllowed = true))
+        assertFalse(playerLyricsMotionAllowed(visible = true, lightMode = true, deviceAllowed = true))
+        assertFalse(playerLyricsMotionAllowed(visible = true, lightMode = false, deviceAllowed = false))
+    }
+
     @Test
     fun disabledTransitionsSnapToCurrentArtworkEvenDuringAudioCrossfade() {
         val crossfade = PlayerArtworkCrossfade("next") { 0.4f }

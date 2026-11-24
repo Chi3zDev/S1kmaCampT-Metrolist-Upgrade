@@ -188,6 +188,7 @@ import com.metrolist.shared.playback.LocalPlayerSession
 import com.metrolist.shared.playback.SleepTimerState
 import com.metrolist.shared.settings.PlayerBackgroundStyle
 import com.metrolist.shared.ui.LocalPlayerEffectsAllowed
+import com.metrolist.shared.ui.PolishMotion
 import com.metrolist.shared.settings.PlayerThumbnailStyle
 import com.metrolist.shared.settings.PlayerType
 import com.metrolist.shared.settings.Settings
@@ -1428,11 +1429,13 @@ fun PlayerScreen(
                                         )
                                         .padding(top = 16.dp),
                             ) {
+                                val lyricsMotion = playerLyricsMotionAllowed(contentActive, Settings.shared.glassLightMode, LocalPlayerEffectsAllowed.current)
                                 AnimatedContent(
                                     targetState = uiState.isLyricsVisible,
                                     transitionSpec = {
-                                        fadeIn(animationSpec = tween(400, delayMillis = 90))
-                                            .togetherWith(fadeOut(animationSpec = tween(400)))
+                                        val duration = if (lyricsMotion) PolishMotion.durationMillis else 0
+                                        fadeIn(animationSpec = tween(duration))
+                                            .togetherWith(fadeOut(animationSpec = tween(duration)))
                                     },
                                     label = "lyricsToggle",
                                     modifier = Modifier.weight(1f),
