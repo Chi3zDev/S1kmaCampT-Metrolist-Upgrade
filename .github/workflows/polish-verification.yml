@@ -43,11 +43,11 @@ jobs:
           python3 scripts/test_compose_resource_escapes.py
           python3 scripts/check_translation_mechanics.py
           python3 scripts/test_translation_mechanics.py
-      - name: Run full Android unit tests and lint
+      - name: Run full Android unit tests and Kotlin and Android lint
         run: >-
           ./gradlew :androidApp:lintDebug :androidApp:testDebugUnitTest
-          :shared:testAndroidHostTest :androidApp:ktlintCheck
-          --no-daemon -Dorg.gradle.java.installations.paths="$JAVA_HOME_25_X64"
+          :shared:testAndroidHostTest :androidApp:ktlintCheck :shared:ktlintCheck
+          --continue --no-daemon -Dorg.gradle.java.installations.paths="$JAVA_HOME_25_X64"
       - name: Upload reports on failure
         if: failure()
         uses: actions/upload-artifact@v4
