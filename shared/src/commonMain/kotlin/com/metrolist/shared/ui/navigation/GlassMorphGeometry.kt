@@ -17,3 +17,7 @@ fun glassMorphPlayerDown(navBottom: Float, safeBottom: Float, playerBelow: Boole
 
 fun glassMorphNavbarBottomOffset(playerHeight: Float, spacing: Float, playerBelow: Boolean, progress: Float): Float =
     if (playerBelow) (playerHeight + spacing).coerceAtLeast(0f) * (1f - progress.coerceIn(0f, 1f)) else 0f
+
+/** Keep decorative navbar motion off when the system or device requires a lighter path. */
+fun glassNavigationMotionAllowed(systemAllowed: Boolean, deviceAllowed: Boolean, visible: Boolean, lightMode: Boolean, motionEnabled: Boolean): Boolean =
+    systemAllowed && deviceAllowed && visible && !lightMode && motionEnabled

@@ -355,6 +355,7 @@ import com.metrolist.shared.ui.navigation.LocalGlassNavbarBottomOffset
 import com.metrolist.shared.ui.navigation.LocalExpandGlassNavigation
 import com.metrolist.shared.ui.navigation.LocalGlassMotionAllowed
 import com.metrolist.shared.ui.navigation.LocalGlassBubbleAllowed
+import com.metrolist.shared.ui.navigation.glassNavigationMotionAllowed
 import com.metrolist.shared.ui.navigation.glassMorphNavbarBottomOffset
 import com.metrolist.shared.ui.navigation.glassMorphPlayerDown
 import com.metrolist.shared.ui.navigation.glassMorphPlayerStart
@@ -899,8 +900,19 @@ fun MetrolistApp(
                 context.contentResolver, android.provider.Settings.Global.ANIMATOR_DURATION_SCALE, 1f,
             ) > 0f
         }
+        val glassDeviceMotionAllowed = remember(context) {
+            Build.VERSION.SDK_INT > Build.VERSION_CODES.R &&
+                !(context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager).isLowRamDevice
+        }
+        val glassMotionAllowed = glassNavigationMotionAllowed(
+            systemAllowed = glassSystemMotionAllowed,
+            deviceAllowed = glassDeviceMotionAllowed,
+            visible = appLifecycleState.isAtLeast(Lifecycle.State.RESUMED),
+            lightMode = Settings.shared.glassLightMode,
+            motionEnabled = Settings.shared.glassNavbarMotion != "OFF",
+        )
         val glassMorphTarget = if (useGlassNavigation && shouldShowNavigationBar && glassNavigationCollapsed) 1f else 0f
-        val glassMorphProgress = if (glassSystemMotionAllowed && appLifecycleState.isAtLeast(Lifecycle.State.RESUMED) && !Settings.shared.glassLightMode && Settings.shared.glassNavbarMotion != "OFF") {
+        val glassMorphProgress = if (glassMotionAllowed) {
             animateFloatAsState(glassMorphTarget, PolishMotion.interactiveSpring(), label = "glassNavigationMorph").value.coerceIn(0f, 1f)
         } else glassMorphTarget
         var navigationBarContentInset by remember(navigationSuiteType, useFloatingNavBar) { mutableStateOf(0.dp) }
@@ -1479,10 +1491,9 @@ fun MetrolistApp(
                             ).dp,
                             LocalGlassNavigationEnabled provides useGlassNavigation,
                             LocalGlassNavigationMorphProgress provides glassMorphProgress,
-                            LocalGlassMotionAllowed provides glassSystemMotionAllowed,
-                            LocalGlassBubbleAllowed provides (Build.VERSION.SDK_INT > Build.VERSION_CODES.R),
-                            LocalPlayerEffectsAllowed provides (Build.VERSION.SDK_INT > Build.VERSION_CODES.R &&
-                                !(context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager).isLowRamDevice),
+                            LocalGlassMotionAllowed provides glassMotionAllowed,
+                            LocalGlassBubbleAllowed provides glassDeviceMotionAllowed,
+                            LocalPlayerEffectsAllowed provides glassDeviceMotionAllowed,
                             LocalExpandGlassNavigation provides { glassNavigationCollapsed = false },
                             LocalGlassNavigationState provides glassBackdrop,
                             LocalPlayerExpanded provides isPlayerExpanded,

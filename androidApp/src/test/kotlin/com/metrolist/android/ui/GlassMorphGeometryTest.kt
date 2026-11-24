@@ -1,13 +1,26 @@
 package com.metrolist.android.ui
 
+import com.metrolist.shared.ui.navigation.glassNavigationMotionAllowed
 import com.metrolist.shared.ui.navigation.glassMorphNavWidth
 import com.metrolist.shared.ui.navigation.glassMorphNavbarBottomOffset
 import com.metrolist.shared.ui.navigation.glassMorphPlayerDown
 import com.metrolist.shared.ui.navigation.glassMorphPlayerStart
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class GlassMorphGeometryTest {
+    @Test
+    fun motionRequiresSystemDeviceVisibilityAndUserPreferences() {
+        assertTrue(glassNavigationMotionAllowed(true, true, true, false, true))
+        assertFalse(glassNavigationMotionAllowed(false, true, true, false, true))
+        assertFalse(glassNavigationMotionAllowed(true, false, true, false, true))
+        assertFalse(glassNavigationMotionAllowed(true, true, false, false, true))
+        assertFalse(glassNavigationMotionAllowed(true, true, true, true, true))
+        assertFalse(glassNavigationMotionAllowed(true, true, true, false, false))
+    }
+
     @Test
     fun expandedAndCompactWidthsShareOneProgress() {
         assertEquals(400f, glassMorphNavWidth(400f, 0f), .001f)
