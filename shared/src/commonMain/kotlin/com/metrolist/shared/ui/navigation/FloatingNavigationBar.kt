@@ -6,6 +6,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.expandVertically
@@ -71,6 +72,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.metrolist.shared.settings.Settings
+import com.metrolist.shared.ui.PolishMotion
 import com.metrolist.shared.ui.components.focusOutline
 import com.metrolist.shared.ui.haptics.HapticEvent
 import com.metrolist.shared.ui.haptics.rememberMetrolistHaptics
@@ -91,7 +93,7 @@ val LocalExpandGlassNavigation = compositionLocalOf<() -> Unit> { {} }
 private val FloatingBarHeight = 64.dp
 private val FloatingItemHeight = 48.dp
 private val FloatingBarShadow = 6.dp
-private val NavSpring = spring<Float>(dampingRatio = 0.9f, stiffness = 700f)
+private val NavSpring = PolishMotion.interactiveSpring()
 
 @Composable
 internal fun <T> FloatingNavigation(
@@ -236,9 +238,11 @@ private fun <T> FloatingNavigationBar(
                 ) {
                     if (bubbleEnabled && rowWidth > 0) {
                         val center = dragX ?: animatedCenter
+                        val bubbleStretch by animateFloatAsState(if (dragX != null) stretch else 1f, PolishMotion.interactiveSpring(), label = "glassBubbleStretch")
+                        val bubbleHeight by animateFloatAsState(if (dragX != null) 0.96f else 1f, PolishMotion.interactiveSpring(), label = "glassBubbleHeight")
                         Box(Modifier.absoluteOffset { IntOffset((center - cellWidth / 2f).toInt(), 0) }
                             .width(with(density) { cellWidth.toDp() }).height(FloatingItemHeight)
-                            .graphicsLayer { scaleX = if (dragX != null) stretch else 1f; scaleY = if (dragX != null) 0.96f else 1f }
+                            .graphicsLayer { scaleX = bubbleStretch; scaleY = bubbleHeight }
                             .padding(horizontal = 3.dp).clip(CircleShape)
                             .background(Brush.verticalGradient(listOf(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.22f), MaterialTheme.colorScheme.onSurface.copy(alpha = 0.09f)))))
                     }
