@@ -310,6 +310,6 @@ internal fun StaggeredDayDot(day: LocalDate, today: LocalDate, listened: Set<Loc
         if (animate) { shown = false; delay(index * PolishMotion.staggerMillis) }
         shown = true
     }
-    val alpha by animateFloatAsState(if (!animate || shown) 1f else 0f, tween(PolishMotion.durationMillis), label = "streakDay")
+    val alpha by animateFloatAsState(if (!animate || shown) 1f else 0f, tween(if (animate) PolishMotion.durationMillis else 0), label = "streakDay")
     Box(Modifier.graphicsLayer { this.alpha = alpha }) { DayDot(day, today, listened, restored) }
 }
