@@ -39,7 +39,7 @@ Basis: `main` 70eb9763 (Upgrade 1 beta 1). Audit kode awal; bukan hasil uji visu
 - [ ] P1 · Header Settings lebar kini memakai tinggi minimum, bukan tinggi tetap, agar dapat tumbuh bersama font sistem. Periksa semua teks baru melalui resources Inggris/Indonesia, terutama pembesaran font, scrolling dan ellipsis. Jangan ubah navigasi Settings utama tanpa izin.
 
 ## 7. Performa, bug, dan rilis
-- [ ] P1 · Profil recomposition/frame dan animasi pada latar/tertutup, Android 11 ke bawah dan RAM rendah; audit sumber blur tunggal dan objek Canvas. Temuan jank saat ini belum diukur.
+- [ ] P1 · Audit kode menemukan satu `rememberHazeState` dan satu `hazeSource` di host Android; kartu tidak menangkap blur tambahan. Fase animasi api Streak dan mesh Recap kini dibaca di Canvas alih-alih composition untuk mengurangi invalidasi komposisi per frame; menunggu CI. Profil recomposition/frame dan animasi pada latar/tertutup, Android 11 ke bawah dan RAM rendah tetap perlu diuji di perangkat; jank belum diukur.
 - [ ] P2 · Ukuran APK diukur dari artefak build: baseline `70eb9763` debug 48.804.174 byte dan benchmark debug-signed 15.824.678 byte; `79eec772` debug 48.837.866 byte (+33.692) dan benchmark 15.834.118 byte (+9.440). Itu bukan APK release produksi; ukuran rilis final belum diukur. Audit kode dan lint masih terbuka; jangan hapus kode/kredit/aset tanpa bukti. Tambahkan tes untuk logika yang diubah dan jalankan unit test.
 - [ ] P1 · Build Actions, gabung tanpa force, perbarui `latest-build`, dan rilis `v14.0.1-upgrade.2` dengan signing yang ada hanya setelah area dan pemeriksaan selesai. CI umum/Nightly pada main sebelumnya masih mengantre; status perlu dicek lagi sebelum rilis.
 

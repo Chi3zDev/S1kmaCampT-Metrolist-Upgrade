@@ -245,14 +245,15 @@ internal fun Flame(color: Color, animate: Boolean, levelUp: Boolean = false, par
     LaunchedEffect(animate, extinguished) { entered = true }
     val targetScale = if (extinguished) .82f else if (!entered && animate) .72f else 1f
     val entranceScale by animateFloatAsState(targetScale, animationSpec = if (animate && levelUp) PolishMotion.interactiveSpring() else tween(if (animate) PolishMotion.durationMillis else 0), label = "flameEntrance")
-    val phase = if (animate) {
+    val phaseState = if (animate) {
         val transition = rememberInfiniteTransition(label = "flame")
-        val value by transition.animateFloat(0f, 1f, infiniteRepeatable(tween(2400, easing = LinearEasing)), label = "flamePhase")
-        value
-    } else 0f
-    val flicker = if (animate && !extinguished) kotlin.math.sin(phase * 6.283185f) * 0.035f + kotlin.math.sin(phase * 18.849556f) * 0.015f else 0f
-    val scale = 1f + flicker
+        transition.animateFloat(0f, 1f, infiniteRepeatable(tween(2400, easing = LinearEasing)), label = "flamePhase")
+    } else null
     Canvas(modifier.size(100.dp).graphicsLayer { scaleX = entranceScale; scaleY = entranceScale }) {
+        // Read the changing phase in draw, not composition, so only this Canvas is invalidated.
+        val phase = phaseState?.value ?: 0f
+        val flicker = if (animate && !extinguished) kotlin.math.sin(phase * 6.283185f) * 0.035f + kotlin.math.sin(phase * 18.849556f) * 0.015f else 0f
+        val scale = 1f + flicker
         val w = size.width; val h = size.height
         val glow = if (animate && !extinguished) (0.10f + flicker).coerceIn(0.04f, 0.16f) else 0.04f
         drawCircle(Brush.radialGradient(listOf(color.copy(alpha = glow), Color.Transparent), center = Offset(w * .5f, h * .62f), radius = w * .48f), radius = w * .48f, center = Offset(w * .5f, h * .62f))

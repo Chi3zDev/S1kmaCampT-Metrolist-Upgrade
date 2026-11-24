@@ -361,12 +361,13 @@ private fun StoryRow(rank: Int, title: String, subtitle: String?, artwork: Strin
 
 @Composable
 private fun RecapBackdrop(slide: Int, base: androidx.compose.ui.graphics.Color, primary: androidx.compose.ui.graphics.Color, accent: androidx.compose.ui.graphics.Color, animate: Boolean) {
-    val phase = if (animate) {
+    val phaseState = if (animate) {
         val transition = rememberInfiniteTransition(label = "recapMesh")
-        val value by transition.animateFloat(0f, 1f, infiniteRepeatable(tween(18_000, easing = LinearEasing), RepeatMode.Reverse), label = "recapMeshPhase")
-        value
-    } else 0f
+        transition.animateFloat(0f, 1f, infiniteRepeatable(tween(18_000, easing = LinearEasing), RepeatMode.Reverse), label = "recapMeshPhase")
+    } else null
     Canvas(Modifier.fillMaxSize()) {
+        // Keep mesh animation updates in the draw phase instead of recomposing the screen.
+        val phase = phaseState?.value ?: 0f
         val drift = (phase - .5f) * size.width * .12f
         val positions = when (slide % 3) {
             0 -> listOf(Offset(size.width * .85f + drift, size.height * .18f), Offset(size.width * .15f - drift, size.height * .78f))
