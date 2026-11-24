@@ -330,6 +330,7 @@ import com.metrolist.shared.ui.components.UnavailableSongSnackbar
 import com.metrolist.shared.ui.components.images.AsyncImage
 import com.metrolist.shared.ui.components.lyrics.LyricsTranslationSnackbar
 import com.metrolist.shared.ui.LocalPlayerEffectsAllowed
+import com.metrolist.shared.ui.PolishMotion
 import com.metrolist.shared.ui.components.rememberBottomSheetState
 import com.metrolist.shared.ui.design.expressive.components.ExpressiveMiniPlayerHeight
 import com.metrolist.shared.ui.haptics.HapticEvent
@@ -899,8 +900,8 @@ fun MetrolistApp(
             ) > 0f
         }
         val glassMorphTarget = if (useGlassNavigation && shouldShowNavigationBar && glassNavigationCollapsed) 1f else 0f
-        val glassMorphProgress = if (glassSystemMotionAllowed && Settings.shared.glassNavbarMotion != "OFF") {
-            animateFloatAsState(glassMorphTarget, spring(dampingRatio = 0.9f, stiffness = 700f), label = "glassNavigationMorph").value.coerceIn(0f, 1f)
+        val glassMorphProgress = if (glassSystemMotionAllowed && appLifecycleState.isAtLeast(Lifecycle.State.RESUMED) && !Settings.shared.glassLightMode && Settings.shared.glassNavbarMotion != "OFF") {
+            animateFloatAsState(glassMorphTarget, PolishMotion.interactiveSpring(), label = "glassNavigationMorph").value.coerceIn(0f, 1f)
         } else glassMorphTarget
         var navigationBarContentInset by remember(navigationSuiteType, useFloatingNavBar) { mutableStateOf(0.dp) }
         var floatingNavBarHeight by remember(navigationSuiteType, useFloatingNavBar) { mutableStateOf(0.dp) }
