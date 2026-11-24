@@ -10,6 +10,9 @@ package com.metrolist.android.ui.screens
 import android.content.res.Configuration
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -103,6 +106,8 @@ import com.metrolist.shared.model.YTItem
 import com.metrolist.shared.model.isAvailableOffline
 import com.metrolist.shared.settings.LibraryFilterType
 import com.metrolist.shared.settings.Settings
+import com.metrolist.shared.ui.LocalPlayerEffectsAllowed
+import com.metrolist.shared.ui.PolishMotion
 import com.metrolist.shared.ui.LocalIsTv
 import com.metrolist.shared.ui.components.ChipShelf
 import com.metrolist.shared.ui.components.HomeLoadingPlaceholder
@@ -408,10 +413,11 @@ fun HomeScreen(
         }
 
         if (!isTv) {
+            val animateActions = rootActive && !Settings.shared.glassLightMode && LocalPlayerEffectsAllowed.current
             AnimatedVisibility(
                 visible = (LocalIsTv.current || showFloatingActions),
-                enter = fadeIn() + slideInVertically { it / 2 },
-                exit = fadeOut() + slideOutVertically { it / 2 },
+                enter = if (animateActions) fadeIn(tween(PolishMotion.durationMillis)) + slideInVertically(tween(PolishMotion.durationMillis)) { it / 2 } else EnterTransition.None,
+                exit = if (animateActions) fadeOut(tween(PolishMotion.durationMillis)) + slideOutVertically(tween(PolishMotion.durationMillis)) { it / 2 } else ExitTransition.None,
                 modifier =
                     Modifier
                         .align(Alignment.BottomEnd)
