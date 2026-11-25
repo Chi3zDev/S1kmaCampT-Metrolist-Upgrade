@@ -71,6 +71,9 @@ import com.metrolist.android.utils.SentryManager
 import com.metrolist.android.viewmodels.HomeViewModel
 import com.metrolist.android.viewmodels.SearchViewModel
 import com.metrolist.shared.generated.resources.Res
+import com.metrolist.shared.generated.resources.app_background_choose
+import com.metrolist.shared.generated.resources.app_background_error
+import com.metrolist.shared.generated.resources.app_background_reset
 import com.metrolist.shared.generated.resources.app_font_active
 import com.metrolist.shared.generated.resources.app_font_applied
 import com.metrolist.shared.generated.resources.app_font_checking
@@ -147,6 +150,46 @@ fun SettingsScreen(
         if (searchState.historyMutationFailures > 0) Toast.makeText(context, historyRemovalFailed, Toast.LENGTH_LONG).show()
     }
     val scope = rememberCoroutineScope()
+    val backgroundError = stringResource(Res.string.app_background_error)
+    val backgroundPicker =
+        rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+            if (uri != null) {
+                val resolver = context.contentResolver
+                val previous = SharedPreferences.shared.androidAppBackgroundUri
+                runCatching {
+                    resolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }.onSuccess {
+                    SharedPreferences.shared.androidAppBackgroundUri = uri.toString()
+                    if (previous.isNotEmpty() && previous != uri.toString()) {
+                        runCatching { resolver.releasePersistableUriPermission(Uri.parse(previous), Intent.FLAG_GRANT_READ_URI_PERMISSION) }
+                    }
+                }.onFailure {
+                    Toast.makeText(context, backgroundError, Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+    val backgroundActions =
+        listOf(
+            SettingsHostAction(
+                id = "chooseAppBackground",
+                title = stringResource(Res.string.app_background_choose),
+                onClick = { backgroundPicker.launch(arrayOf("image/*")) },
+            ),
+            SettingsHostAction(
+                id = "resetAppBackground",
+                title = stringResource(Res.string.app_background_reset),
+                enabled = SharedPreferences.shared.androidAppBackgroundUri.isNotEmpty(),
+                onClick = {
+                    val previous = SharedPreferences.shared.androidAppBackgroundUri
+                    SharedPreferences.shared.androidAppBackgroundUri = ""
+                    if (previous.isNotEmpty()) {
+                        runCatching {
+                            context.contentResolver.releasePersistableUriPermission(Uri.parse(previous), Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        }
+                    }
+                },
+            ),
+        )
     val requireDownloadNotifications = rememberDownloadPermissionGate()
 
     val miniPlayerInset = LocalMiniPlayerBottomInset.current
@@ -507,6 +550,7 @@ fun SettingsScreen(
                             homeViewModel.shared.refresh {}
                         }
                     },
+                    backgroundActions = backgroundActions,
                     fontPrimaryActions = fontPrimaryActions,
                     fontDownloadActions = fontDownloadActions,
                     onClearSearchHistory = searchViewModel.shared::clearSearchHistory,

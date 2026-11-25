@@ -88,6 +88,19 @@ internal fun SettingsUiRegistryBuilder.registerAppearanceSettings(host: SharedSe
         subtitle = stringResource(Res.string.settings_appearance_overview),
     ) {
         if (host.platform == SettingsPlatform.ANDROID) {
+            if (host.backgroundActions.isNotEmpty()) {
+                group("appBackground", stringResource(Res.string.app_background_title)) {
+                    host.backgroundActions.forEach { item ->
+                        action(
+                            item.id,
+                            item.title,
+                            item.description,
+                            enabled = item.enabled,
+                            onClick = item.onClick,
+                        )
+                    }
+                }
+            }
             group("liquidGlass", stringResource(Res.string.glass_settings_title)) {
                 switch(
                     id = "liquidGlassTheme",

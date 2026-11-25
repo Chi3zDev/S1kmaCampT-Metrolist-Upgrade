@@ -125,6 +125,7 @@ data class SharedSettingsHost(
     val playbackSpeedDescription: String? = null,
     val homeSections: List<SettingsHomeSection> = emptyList(),
     val onHomeSectionVisibilityChanged: (String, Boolean) -> Unit = { _, _ -> },
+    val backgroundActions: List<SettingsHostAction> = emptyList(),
     val fontPrimaryActions: List<SettingsHostAction> = emptyList(),
     val fontDownloadActions: List<SettingsHostAction> = emptyList(),
     val privacyDiagnosticActions: List<SettingsHostAction> = emptyList(),

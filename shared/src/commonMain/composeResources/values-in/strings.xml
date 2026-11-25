@@ -2543,6 +2543,10 @@
     <string name="lyrics_poster_font_handwriting">Tulisan tangan</string>
     <string name="appearance_glass_navigation">Bilah navigasi kaca cair</string>
     <string name="appearance_glass_navigation_description">Gunakan bilah navigasi dan pemutar mini transparan yang melayang. Efek buram dinonaktifkan di perangkat lama atau dengan memori rendah.</string>
+    <string name="app_background_title">Latar belakang aplikasi</string>
+    <string name="app_background_choose">Pilih gambar dari galeri</string>
+    <string name="app_background_reset">Hapus gambar latar</string>
+    <string name="app_background_error">Akses gambar tidak dapat disimpan. Silakan pilih gambar lain.</string>
     <string name="liquid_glass_theme">Tema Liquid Glass</string>
     <string name="liquid_glass_theme_description">Gunakan permukaan kaca di aplikasi, terpisah dari mode terang atau gelap.</string>
     <string name="glass_settings_title">Kaca cair</string>

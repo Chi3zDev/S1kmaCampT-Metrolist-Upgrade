@@ -1541,7 +1541,7 @@ fun MetrolistApp(
                                 adaptiveLayout = adaptiveLayout,
                                 navigationSuiteType = navigationSuiteType,
                                 navigationVisible = shouldShowNavigationBar,
-                                containerColor = if (pureBlack) Color.Black else MaterialTheme.colorScheme.surface,
+                                containerColor = if (Settings.shared.androidAppBackgroundUri.isNotEmpty()) Color.Transparent else appBackground,
                                 onSearchLongClick = { navigator.navigate(Screen.Recognition) },
                                 onAccountClick = { navigator.navigate(Screen.Profile) },
                                 showAccountInBottomBar = useBottomAccount,
@@ -1779,6 +1779,17 @@ fun MetrolistApp(
                                                 .consumeWindowInsets(scaffoldPadding)
                                                 .consumeWindowInsets(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)),
                                         ) {
+                                            val backgroundUri = Settings.shared.androidAppBackgroundUri
+                                            if (backgroundUri.isNotEmpty()) {
+                                                CoilAsyncImage(
+                                                    model = android.net.Uri.parse(backgroundUri),
+                                                    contentDescription = null,
+                                                    contentScale = ContentScale.Crop,
+                                                    modifier = Modifier.fillMaxSize(),
+                                                )
+                                                // Preserve text contrast over arbitrary user-selected photographs.
+                                                Box(Modifier.fillMaxSize().background(appBackground.copy(alpha = 0.78f)))
+                                            }
                                             Box(
                                                 modifier =
                                                     Modifier
