@@ -63,7 +63,6 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredWidthIn
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
@@ -653,7 +652,6 @@ fun PlayerScreen(
         }
     }
 
-    val windowWidth = with(LocalDensity.current) { windowSize.width.toDp() }
     val playerBackgroundBlurRadiusPx = with(LocalDensity.current) { 150.dp.toPx() }
 
     val artworkSwipeEnabled =
@@ -1916,7 +1914,7 @@ fun PlayerScreen(
                                                 ) {
                                                     if (showVideoSurface) {
                                                         platform.MusicVideoSurface(
-                                                            cornerRadius = 0.dp,
+                                                            cornerRadius = PlayerArtworkCornerRadius,
                                                             fillContainer = true,
                                                             showControls = true,
                                                             useSurfaceView = false,
@@ -1928,7 +1926,10 @@ fun PlayerScreen(
                                                                 )
                                                             },
                                                             modifier =
-                                                                Modifier.requiredWidthIn(max = windowWidth),
+                                                                Modifier
+                                                                    .fillMaxWidth()
+                                                                    .aspectRatio(16f / 9f)
+                                                                    .clip(RoundedCornerShape(PlayerArtworkCornerRadius)),
                                                         )
                                                     } else if (playerType == PlayerType.VINYL && !artworkBesideTitle) {
                                                         PlayerVinylArtwork(
