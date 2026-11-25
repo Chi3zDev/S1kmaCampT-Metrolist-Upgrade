@@ -1,5 +1,5 @@
 name: Polish verification
-# Verify adapted scroll motion and Glasmio attribution.
+# Verify expanded background and Glasmio motion adaptation.
 
 on:
   workflow_dispatch:
