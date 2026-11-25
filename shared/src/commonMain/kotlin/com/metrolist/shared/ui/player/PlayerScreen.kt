@@ -1170,6 +1170,16 @@ fun PlayerScreen(
                                     )
                                 }
                             }
+                            if (playerType == PlayerType.VINYL && !uiState.isLyricsVisible) {
+                                val coverTint = gradientColorStops.firstOrNull()?.second ?: MaterialTheme.colorScheme.primary
+                                val vinylBase =
+                                    androidx.compose.ui.graphics
+                                        .lerp(Color(0xFF303034), coverTint, 0.06f)
+                                val vinylEdge =
+                                    androidx.compose.ui.graphics
+                                        .lerp(Color(0xFF171719), coverTint, 0.06f)
+                                Box(Modifier.fillMaxSize().background(Brush.radialGradient(listOf(vinylBase, vinylEdge))))
+                            }
                             if (!uiState.isLyricsVisible) {
                                 if (showFullscreenThumbnailBackground && currentSong?.displayThumbnail != null && !showVideoSurface) {
                                     FullscreenBackgroundBounds(fullscreenTransitionBounds) { transitionBounds ->
