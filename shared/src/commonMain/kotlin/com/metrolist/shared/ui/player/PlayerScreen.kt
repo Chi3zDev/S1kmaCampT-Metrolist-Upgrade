@@ -101,6 +101,7 @@ import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -113,16 +114,20 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
@@ -241,7 +246,9 @@ import com.metrolist.shared.viewmodels.PlayerViewModel
 import com.metrolist.shared.youtube.playback.PlaybackEventKind
 import com.metrolist.shared.youtube.playback.PlaybackEventLog
 import com.metrolist.shared.youtube.playback.PlaybackNetworkStateStore
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
@@ -495,6 +502,8 @@ fun PlayerScreen(
     requestPlayPauseFocus: Boolean = false,
     onPlayPauseFocusRequested: () -> Unit = {},
     onLyricsVisibleChange: (Boolean) -> Unit = {},
+    onSharePlayerImage: (suspend (ImageBitmap) -> Unit)? = null,
+    onSharePlayerImageError: () -> Unit = {},
     isScreenVisible: Boolean = true,
 ) {
     val isPlayerContentVisible by remember(bottomSheetState) {
@@ -534,7 +543,32 @@ fun PlayerScreen(
     // While the previous track stays on screen during an artwork load, song actions would target the next track.
     val displaysPlayingSong = currentSong?.id == uiState.currentSong?.id
     val toggleDisplayedLike = { if (displaysPlayingSong) viewModel.toggleLike() }
-    val shareDisplayedSong = { if (displaysPlayingSong) viewModel.shareSong() }
+    val shareScope = rememberCoroutineScope()
+    val shareLayer = rememberGraphicsLayer()
+    var capturePlayerForShare by remember { mutableStateOf(false) }
+    val shareDisplayedSong = {
+        if (displaysPlayingSong && !capturePlayerForShare) {
+            if (Settings.shared.playerType == PlayerType.GLASS_CARD && onSharePlayerImage != null) {
+                capturePlayerForShare = true
+                shareScope.launch {
+                    try {
+                        // Request a fresh recorded frame only when sharing, not during playback.
+                        withFrameNanos { }
+                        withFrameNanos { }
+                        onSharePlayerImage(shareLayer.toImageBitmap())
+                    } catch (error: CancellationException) {
+                        throw error
+                    } catch (error: Exception) {
+                        onSharePlayerImageError()
+                    } finally {
+                        capturePlayerForShare = false
+                    }
+                }
+            } else {
+                viewModel.shareSong()
+            }
+        }
+    }
     val copyDisplayedSongLink = { if (displaysPlayingSong) viewModel.copySongLink() }
     SideEffect { onLyricsVisibleChange(uiState.isLyricsVisible) }
 
@@ -912,7 +946,14 @@ fun PlayerScreen(
             modifier =
                 modifier
                     .fillMaxSize()
-                    .focusGroup(),
+                    .drawWithContent {
+                        if (capturePlayerForShare) {
+                            shareLayer.record { this@drawWithContent.drawContent() }
+                            drawLayer(shareLayer)
+                        } else {
+                            drawContent()
+                        }
+                    }.focusGroup(),
         ) {
             val screenWidth = this.maxWidth
             val maxHeight = this.maxHeight

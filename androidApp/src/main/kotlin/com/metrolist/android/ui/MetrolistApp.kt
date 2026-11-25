@@ -10,6 +10,7 @@ import android.content.res.Configuration
 import android.nfc.NfcAdapter
 import android.os.Build
 import android.provider.MediaStore
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.core.animateFloatAsState
@@ -246,6 +247,7 @@ import com.metrolist.android.update.AppUpdateState
 import com.metrolist.android.update.GitHubRelease
 import com.metrolist.android.utils.isAndroidAutomotive
 import com.metrolist.android.utils.isAndroidTv
+import com.metrolist.android.utils.shareImage
 import com.metrolist.android.utils.startActivitySafely
 import com.metrolist.android.viewmodels.LibraryViewModel
 import com.metrolist.android.viewmodels.PlaybackViewModel
@@ -289,6 +291,8 @@ import com.metrolist.shared.generated.resources.offline_mode
 import com.metrolist.shared.generated.resources.play
 import com.metrolist.shared.generated.resources.profile
 import com.metrolist.shared.generated.resources.search
+import com.metrolist.shared.generated.resources.share
+import com.metrolist.shared.generated.resources.statistics_share_failed
 import com.metrolist.shared.generated.resources.update_pending
 import com.metrolist.shared.generated.resources.updates_action
 import com.metrolist.shared.generated.resources.updates_available_message
@@ -2090,7 +2094,11 @@ fun MetrolistApp(
                             },
                         ) {
                             val playerLifecycleState by lifecycleOwner.lifecycle.currentStateAsState()
+                            val sharePlayerLabel = stringResource(Res.string.share)
+                            val sharePlayerError = stringResource(Res.string.statistics_share_failed)
                             PlayerScreen(
+                                onSharePlayerImage = { image -> shareImage(context, image, sharePlayerLabel) },
+                                onSharePlayerImageError = { Toast.makeText(context, sharePlayerError, Toast.LENGTH_SHORT).show() },
                                 isScreenVisible = playerLifecycleState.isAtLeast(Lifecycle.State.STARTED),
                                 viewModel = playerViewModel,
                                 bottomSheetState = playerBottomSheetState,
