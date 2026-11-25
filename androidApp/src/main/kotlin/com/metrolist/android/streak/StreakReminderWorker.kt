@@ -5,6 +5,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.media.AudioManager
 import android.os.Build
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
@@ -47,6 +48,9 @@ class StreakReminderWorker(
         if (settings.streakReminderLastDate == today || minuteNow < settings.streakReminderMinuteOfDay.coerceIn(0, 1439)) {
             return Result.success()
         }
+        // A qualifying play is saved at the end of a listening session. Avoid an
+        // incorrect reminder while audio is still playing and the event is pending.
+        if (applicationContext.getSystemService(AudioManager::class.java)?.isMusicActive == true) return Result.success()
         val manager = NotificationManagerCompat.from(applicationContext)
         if (!manager.areNotificationsEnabled()) return Result.success()
         if (Build.VERSION.SDK_INT >= 33 &&

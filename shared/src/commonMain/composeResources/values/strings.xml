@@ -5724,5 +5724,5 @@
     <string name="streak_level_background">Level-coloured background</string>
     <string name="streak_reminder_title">Daily streak reminder</string>
     <string name="streak_reminder_message">Listen today to keep your streak alive.</string>
-    <string name="streak_reminder_timing">Approximate time; Android may delay reminders to save battery.</string>
+    <string name="streak_reminder_timing">Approximate time; reminders may be delayed by Android or while music is playing.</string>
 </resources>

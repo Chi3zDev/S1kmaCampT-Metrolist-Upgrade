@@ -2646,5 +2646,5 @@
     <string name="streak_level_background">Latar mengikuti warna level</string>
     <string name="streak_reminder_title">Pengingat streak harian</string>
     <string name="streak_reminder_message">Dengarkan hari ini agar streak tetap menyala.</string>
-    <string name="streak_reminder_timing">Waktu perkiraan; Android dapat menunda pengingat untuk menghemat baterai.</string>
+    <string name="streak_reminder_timing">Waktu perkiraan; pengingat dapat tertunda oleh Android atau saat musik diputar.</string>
 </resources>
