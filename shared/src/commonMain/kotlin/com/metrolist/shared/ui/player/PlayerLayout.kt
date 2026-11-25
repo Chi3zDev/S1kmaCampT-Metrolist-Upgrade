@@ -369,6 +369,7 @@ internal fun TabletPlayerContent(
                                                 playerConnection?.setVideoMode(true)
                                             },
                                             modifier = Modifier.playerControlBlend(CircleShape),
+                                            buttonHeight = topButtonSize,
                                         )
                                     } else {
                                         LandscapePlayerModeSwitcher(
@@ -785,7 +786,7 @@ private fun LandscapePlayerModeSwitcher(
             contentPadding = PaddingValues(0.dp),
             colors = colors,
             modifier =
-                Modifier.size(width = 46.dp, height = buttonHeight).tvFocusHighlight(
+                Modifier.size(width = 48.dp, height = buttonHeight).tvFocusHighlight(
                     staticConnectedLeadingButtonShapes().shape,
                     color = if (songSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary,
                 ),
@@ -811,7 +812,7 @@ private fun LandscapePlayerModeSwitcher(
             contentPadding = PaddingValues(0.dp),
             colors = colors,
             modifier =
-                Modifier.size(width = 46.dp, height = buttonHeight).tvFocusHighlight(
+                Modifier.size(width = 48.dp, height = buttonHeight).tvFocusHighlight(
                     staticConnectedTrailingButtonShapes().shape,
                     color = if (isVideoActive) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary,
                 ),
@@ -992,7 +993,7 @@ internal fun LandscapePlayerContent(
         val primaryControlSize = if (compactHeight) 64.dp else 104.dp
         val horizontalPadding = if (compactHeight) 16.dp else LandscapePlayerHorizontalPadding
         val verticalPadding = if (compactHeight) 8.dp else LandscapePlayerVerticalPadding
-        val topButtonSize = if (compactHeight) 36.dp else 40.dp
+        val topButtonSize = 48.dp
         // Phones keep cast and the audio/video switch in the player menu; only TV has room for the switch on top.
         val showTopVideoSwitch = showVideoButton && isTv
         // Only the TV audio/video switcher and the classic header sit above the controls.
@@ -1236,6 +1237,7 @@ internal fun LandscapePlayerContent(
                             playerConnection?.setVideoMode(true)
                         },
                         modifier = Modifier.playerControlBlend(CircleShape),
+                        buttonHeight = topButtonSize,
                     )
                 } else {
                     LandscapePlayerModeSwitcher(

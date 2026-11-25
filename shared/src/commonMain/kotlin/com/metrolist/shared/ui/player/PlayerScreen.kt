@@ -1584,7 +1584,7 @@ fun PlayerScreen(
                                                                 Arrangement.spacedBy(
                                                                     ButtonGroupDefaults.ConnectedSpaceBetween,
                                                                 ),
-                                                            modifier = Modifier.height(40.dp).playerControlBlend(CircleShape),
+                                                            modifier = Modifier.height(48.dp).playerControlBlend(CircleShape),
                                                         ) {
                                                             val songSelected = !isVideoActive
                                                             customItem(
@@ -1614,8 +1614,8 @@ fun PlayerScreen(
                                                                         modifier =
                                                                             Modifier
                                                                                 .size(
-                                                                                    width = 46.dp,
-                                                                                    height = 40.dp,
+                                                                                    width = 48.dp,
+                                                                                    height = 48.dp,
                                                                                 ),
                                                                     ) {
                                                                         if (isResolvingToSong && LocalPlayerContentActive.current) {
@@ -1694,8 +1694,8 @@ fun PlayerScreen(
                                                                         modifier =
                                                                             Modifier
                                                                                 .size(
-                                                                                    width = 46.dp,
-                                                                                    height = 40.dp,
+                                                                                    width = 48.dp,
+                                                                                    height = 48.dp,
                                                                                 ),
                                                                     ) {
                                                                         if (isResolvingToVideo && LocalPlayerContentActive.current) {
@@ -1803,7 +1803,7 @@ fun PlayerScreen(
                                                         modifier =
                                                             Modifier
                                                                 .align(Alignment.CenterStart)
-                                                                .size(36.dp)
+                                                                .size(48.dp)
                                                                 .playerControlBlend(CircleShape),
                                                     ) {
                                                         Icon(
@@ -1842,7 +1842,7 @@ fun PlayerScreen(
                                                                                 MaterialTheme.colorScheme.onSurfaceVariant
                                                                             },
                                                                     ),
-                                                                modifier = Modifier.size(36.dp).playerControlBlend(CircleShape),
+                                                                modifier = Modifier.size(48.dp).playerControlBlend(CircleShape),
                                                             ) {
                                                                 Icon(
                                                                     imageVector =

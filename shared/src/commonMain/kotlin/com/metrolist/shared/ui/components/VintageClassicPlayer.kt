@@ -473,6 +473,7 @@ fun VintageAudioVideoModeSwitcher(
     onSongClick: () -> Unit,
     onVideoClick: () -> Unit,
     modifier: Modifier = Modifier,
+    buttonHeight: Dp = 48.dp,
 ) {
     val capsuleShape = RoundedCornerShape(50)
     val trackColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
@@ -482,10 +483,9 @@ fun VintageAudioVideoModeSwitcher(
         modifier =
             modifier
                 .width(96.dp)
-                .height(36.dp)
+                .height(buttonHeight)
                 .clip(capsuleShape)
-                .background(trackColor)
-                .padding(2.dp),
+                .background(trackColor),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         VintageAudioVideoModeItem(
