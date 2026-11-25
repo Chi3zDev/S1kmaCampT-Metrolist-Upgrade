@@ -34,11 +34,17 @@ fun glassEdgeBrush(clear: Boolean = false): Brush {
     return remember(highlight, edge) { Brush.verticalGradient(listOf(highlight, edge)) }
 }
 
+internal fun glassListMaterialEnabled(
+    liquidGlassTheme: Boolean,
+    floatingGlass: Boolean,
+    glassCards: Boolean,
+): Boolean = liquidGlassTheme || (floatingGlass && glassCards)
+
 /** Translucent decoration only: list items do not capture or blur the backdrop. */
 @Composable
 fun glassCardColor(fallback: Color): Color {
     val settings = Settings.shared
-    if (!settings.glassNavigation || !settings.glassCards) return fallback
+    if (!glassListMaterialEnabled(settings.liquidGlassTheme, settings.glassNavigation, settings.glassCards)) return fallback
     val multiplier =
         when (settings.glassStyle) {
             "FROSTED" -> 0.9f
@@ -51,7 +57,7 @@ fun glassCardColor(fallback: Color): Color {
 @Composable
 fun glassCardBorder(): BorderStroke? {
     val settings = Settings.shared
-    if (!settings.glassNavigation || !settings.glassCards) return null
+    if (!glassListMaterialEnabled(settings.liquidGlassTheme, settings.glassNavigation, settings.glassCards)) return null
     return BorderStroke(1.dp, glassEdgeBrush(settings.glassStyle == "CLEAR"))
 }
 

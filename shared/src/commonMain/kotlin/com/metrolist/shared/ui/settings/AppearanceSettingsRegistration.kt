@@ -90,6 +90,12 @@ internal fun SettingsUiRegistryBuilder.registerAppearanceSettings(host: SharedSe
         if (host.platform == SettingsPlatform.ANDROID) {
             group("liquidGlass", stringResource(Res.string.glass_settings_title)) {
                 switch(
+                    id = "liquidGlassTheme",
+                    title = stringResource(Res.string.liquid_glass_theme),
+                    description = stringResource(Res.string.liquid_glass_theme_description),
+                    checked = settings.liquidGlassTheme,
+                ) { settings.liquidGlassTheme = it }
+                switch(
                     id = "glassNavigation",
                     title = stringResource(Res.string.glass_settings_title),
                     description = stringResource(Res.string.glass_settings_description),
@@ -115,7 +121,7 @@ internal fun SettingsUiRegistryBuilder.registerAppearanceSettings(host: SharedSe
                             }?.label,
                     choices = styles,
                     selectedChoiceId = settings.glassStyle,
-                    enabled = settings.glassNavigation,
+                    enabled = settings.glassNavigation || settings.liquidGlassTheme,
                 ) {
                     settings.glassStyle =
                         it

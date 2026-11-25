@@ -5621,6 +5621,8 @@
     <string name="lyrics_poster_font_handwriting">Handwriting</string>
     <string name="appearance_glass_navigation">Navbar liquid glass</string>
     <string name="appearance_glass_navigation_description">Use a translucent floating navigation bar and mini player. Blur is disabled on older or low-memory devices.</string>
+    <string name="liquid_glass_theme">Liquid Glass theme</string>
+    <string name="liquid_glass_theme_description">Use glass surfaces throughout the app, independently of light or dark mode.</string>
     <string name="glass_settings_title">Liquid glass</string>
     <string name="glass_settings_description">Customize glass styling for the areas below. The account tab remains available when glass is off.</string>
     <string name="glass_style">Glass style</string>

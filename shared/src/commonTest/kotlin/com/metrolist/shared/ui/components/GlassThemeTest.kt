@@ -7,6 +7,14 @@ import kotlin.test.assertTrue
 
 class GlassThemeTest {
     @Test
+    fun themeAndFloatingCardsAreIndependent() {
+        assertTrue(glassListMaterialEnabled(liquidGlassTheme = true, floatingGlass = false, glassCards = false))
+        assertTrue(glassListMaterialEnabled(liquidGlassTheme = false, floatingGlass = true, glassCards = true))
+        assertTrue(!glassListMaterialEnabled(liquidGlassTheme = false, floatingGlass = true, glassCards = false))
+        assertTrue(!glassListMaterialEnabled(liquidGlassTheme = false, floatingGlass = false, glassCards = true))
+    }
+
+    @Test
     fun lightThemeUsesWhiteHighlightNotDarkInk() {
         val (highlight, edge) = glassEdgeColors(Color.White, Color.Black, Color.DarkGray, clear = true)
         assertEquals(Color.White.copy(alpha = 0.72f), highlight)
