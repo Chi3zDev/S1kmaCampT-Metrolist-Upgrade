@@ -1,5 +1,5 @@
 name: Polish verification
-# Verify expanded background and Glasmio motion adaptation.
+# Verify sixth device candidate and glass integration.
 
 on:
   workflow_dispatch:
