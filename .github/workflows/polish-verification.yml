@@ -44,7 +44,7 @@ jobs:
           python3 scripts/check_translation_mechanics.py
           python3 scripts/test_translation_mechanics.py
       # Separate Gradle invocations avoid compiling desktop/iOS and Android concurrently on a small runner.
-      # Recheck post-candidate player and streak fixes alongside locale-sensitive UI.
+      # Recheck post-candidate player, streak reminder and share-card changes.
       - name: Run full shared Android host tests
         run: ./gradlew :shared:testAndroidHostTest --no-daemon --max-workers=2 -Dorg.gradle.parallel=false -Dorg.gradle.java.installations.paths="$JAVA_HOME_25_X64"
       - name: Run full Android app unit tests
