@@ -5720,4 +5720,5 @@
     <string name="streak_level_requirement">%1$d days</string>
     <string name="streak_level_locked">Locked</string>
     <string name="streak_recovery_reset">Resets %1$s</string>
+    <string name="streak_expires_in">%1$d hours %2$d minutes before your flame goes out</string>
 </resources>

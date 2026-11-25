@@ -202,6 +202,13 @@ fun StreakScreen(onBack: () -> Unit) {
                         textAlign = TextAlign.Center,
                     )
                     if (extinguished) Text(stringResource(Res.string.streak_previous, previousLength))
+                    streakRemainingMinutes(streak, effectiveNow, zone)?.let { remaining ->
+                        Text(
+                            stringResource(Res.string.streak_expires_in, remaining / 60, remaining % 60),
+                            style = MaterialTheme.typography.labelMedium,
+                            textAlign = TextAlign.Center,
+                        )
+                    }
                     LinearProgressIndicator(progress = { progress }, modifier = Modifier.fillMaxWidth(), color = flameColor)
                     if (next !=
                         null

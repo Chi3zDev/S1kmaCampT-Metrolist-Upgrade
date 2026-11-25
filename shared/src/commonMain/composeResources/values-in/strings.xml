@@ -2642,4 +2642,5 @@
     <string name="streak_level_requirement">%1$d hari</string>
     <string name="streak_level_locked">Terkunci</string>
     <string name="streak_recovery_reset">Reset %1$s</string>
+    <string name="streak_expires_in">Sisa %1$d jam %2$d menit sebelum api padam</string>
 </resources>
