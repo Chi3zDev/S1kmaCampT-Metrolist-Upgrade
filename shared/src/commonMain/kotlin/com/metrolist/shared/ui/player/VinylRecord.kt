@@ -46,7 +46,7 @@ import kotlin.time.TimeSource
 /** Normalized arm contact point moves from the outer grooves toward the label. */
 internal fun vinylArmContact(progress: Float): Offset {
     val p = if (progress.isFinite()) progress.coerceIn(0f, 1f) else 0f
-    return Offset(0.68f - 0.16f * p, 0.76f - 0.10f * p)
+    return Offset(0.70f - 0.12f * p, 0.79f - 0.06f * p)
 }
 
 internal const val VINYL_PLAYING_DEGREES_PER_SECOND = 65f

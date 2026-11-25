@@ -922,7 +922,9 @@ fun PlayerScreen(
             val useTabletLayout = isTv && useLandscapeLayout && minOf(screenWidth, maxHeight) >= 600.dp
             val compactPortraitHeight = !useLandscapeLayout && maxHeight < 560.dp
             // Short split-screen windows shrink the centred artwork to a sliver; show it beside the title as lyrics do.
-            val artworkBesideTitle = !useLandscapeLayout && !isTv && !usesFullscreenThumbnail && maxHeight < ArtworkBesideTitleMaxHeight
+            val artworkBesideTitle =
+                !useLandscapeLayout && !isTv && !usesFullscreenThumbnail &&
+                    playerType != PlayerType.VINYL && playerType != PlayerType.GLASS_CARD && maxHeight < ArtworkBesideTitleMaxHeight
             val primaryControlSize = if (compactPortraitHeight) 64.dp else 72.dp
             val showFullscreenThumbnailBackground = usesFullscreenThumbnail
             val navigationBarBottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
