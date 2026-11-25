@@ -78,6 +78,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
@@ -171,6 +172,10 @@ import dev.chrisbanes.haze.HazeInput
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.blur.HazeBlurStyle
 import dev.chrisbanes.haze.blur.hazeBlur
+import io.github.neoruaa.glasmio.core.GlassAppearance
+import io.github.neoruaa.glasmio.glass.NavigationGlassMaterial
+import io.github.neoruaa.glasmio.glass.navigationGlassBackground
+import io.github.neoruaa.glasmio.glass.render.backdrops.LayerBackdrop
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -196,6 +201,7 @@ fun MiniPlayer(
     cardFocusRequester: FocusRequester? = null,
     glassState: HazeState? = null,
     glassEnabled: Boolean = false,
+    glasmioBackdrop: LayerBackdrop? = null,
 ) {
     val playerConnection = LocalPlayerConnection.current ?: return
 
@@ -476,6 +482,7 @@ fun MiniPlayer(
             useDesktopLayout = useDesktopLayout,
             glassState = glassState,
             glassEnabled = glassEnabled,
+            glasmioBackdrop = glasmioBackdrop,
             currentSong = song,
             isLive = isLive,
             modifier = Modifier.onSizeChanged { progressWidthPx = it.width },
@@ -616,6 +623,7 @@ internal fun MiniPlayerCard(
     useDesktopLayout: Boolean,
     glassState: HazeState? = null,
     glassEnabled: Boolean = false,
+    glasmioBackdrop: LayerBackdrop? = null,
     currentSong: SongItem,
     isLive: Boolean = false,
     modifier: Modifier = Modifier,
@@ -738,6 +746,29 @@ internal fun MiniPlayerCard(
             16.dp
         }
 
+    val miniGlassModifier =
+        if (glassEnabled && glasmioBackdrop != null) {
+            val shape = RoundedCornerShape(cornerRadius)
+            Modifier.navigationGlassBackground(
+                backdrop = glasmioBackdrop,
+                shape = { shape },
+                containerColor = backgroundColor,
+                navigationMaterial = true,
+                innerShadows = null,
+                isDark = surfaceColor.luminance() < 0.5f,
+                appearance = GlassAppearance(liquidGlassEnabled = glassSettings.glassStyle != "CLEAR"),
+                blurRadius = glassRadius,
+                material =
+                    if (glassSettings.glassStyle == "CLEAR") {
+                        NavigationGlassMaterial.Clear
+                    } else {
+                        NavigationGlassMaterial.RegularMedium
+                    },
+            )
+        } else {
+            Modifier
+        }
+
     PlayerSheetSurface(
         modifier =
             modifier
@@ -754,7 +785,8 @@ internal fun MiniPlayerCard(
                     translationX = dragOffset.value.x
                     scaleX = animatedScale.value
                     scaleY = animatedScale.value
-                }.clip(RoundedCornerShape(cornerRadius))
+                }.then(miniGlassModifier)
+                .clip(RoundedCornerShape(cornerRadius))
                 .then(if (glassState != null) Modifier.hazeBlur(HazeInput.Backdrop(glassState), glassStyle) else Modifier)
                 .then(if (!isTv && focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier)
                 .focusProperties { canFocus = !isTv }
@@ -795,9 +827,11 @@ internal fun MiniPlayerCard(
                 },
         cornerRadius = cornerRadius,
         elevation = 8.dp,
-        color = backgroundColor,
+        color = if (glasmioBackdrop != null && glassEnabled) Color.Transparent else backgroundColor,
         border =
-            if (glassEnabled) {
+            if (glassEnabled && glasmioBackdrop != null) {
+                null
+            } else if (glassEnabled) {
                 BorderStroke(
                     1.dp,
                     glassEdgeBrush(Settings.shared.glassStyle == "CLEAR"),

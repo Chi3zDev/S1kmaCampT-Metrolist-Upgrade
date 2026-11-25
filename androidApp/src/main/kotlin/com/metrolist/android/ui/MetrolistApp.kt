@@ -2083,6 +2083,7 @@ fun MetrolistApp(
                                         useDesktopLayout = useDesktopMiniPlayer,
                                         glassEnabled = useGlassMiniPlayer,
                                         glassState = if (useGlassMiniPlayer) glassBackdrop else null,
+                                        glasmioBackdrop = if (useGlassMiniPlayer) glasmioBackdrop else null,
                                         onExpand = {
                                             focusManager.clearFocus(force = true)
                                             keyboardController?.hide()
