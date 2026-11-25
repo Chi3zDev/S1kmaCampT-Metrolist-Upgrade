@@ -10,8 +10,29 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.unit.dp
 import com.metrolist.shared.settings.Settings
+
+/** Highlights remain luminous in both themes; use only a subtle tinted lower edge. */
+fun glassEdgeColors(
+    surface: Color,
+    onSurface: Color,
+    outline: Color,
+    clear: Boolean,
+): Pair<Color, Color> =
+    if (surface.luminance() >= 0.5f) {
+        Color.White.copy(alpha = if (clear) 0.72f else 0.54f) to outline.copy(alpha = 0.16f)
+    } else {
+        onSurface.copy(alpha = if (clear) 0.38f else 0.25f) to outline.copy(alpha = 0.15f)
+    }
+
+@Composable
+fun glassEdgeBrush(clear: Boolean = false): Brush {
+    val colors = MaterialTheme.colorScheme
+    val (highlight, edge) = glassEdgeColors(colors.surface, colors.onSurface, colors.outlineVariant, clear)
+    return remember(highlight, edge) { Brush.verticalGradient(listOf(highlight, edge)) }
+}
 
 /** Translucent decoration only: list items do not capture or blur the backdrop. */
 @Composable
@@ -31,9 +52,7 @@ fun glassCardColor(fallback: Color): Color {
 fun glassCardBorder(): BorderStroke? {
     val settings = Settings.shared
     if (!settings.glassNavigation || !settings.glassCards) return null
-    val highlight = MaterialTheme.colorScheme.onSurface.copy(alpha = if (settings.glassStyle == "CLEAR") 0.38f else 0.25f)
-    val edge = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.15f)
-    return remember(highlight, edge) { BorderStroke(1.dp, Brush.verticalGradient(listOf(highlight, edge))) }
+    return BorderStroke(1.dp, glassEdgeBrush(settings.glassStyle == "CLEAR"))
 }
 
 @Composable

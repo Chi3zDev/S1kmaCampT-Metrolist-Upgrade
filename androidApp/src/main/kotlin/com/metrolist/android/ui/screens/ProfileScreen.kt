@@ -27,7 +27,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.metrolist.android.LocalMiniPlayerBottomInset
@@ -50,6 +49,7 @@ import com.metrolist.shared.generated.resources.settings
 import com.metrolist.shared.generated.resources.statistics
 import com.metrolist.shared.generated.resources.streak_page_title
 import com.metrolist.shared.settings.Settings
+import com.metrolist.shared.ui.components.glassEdgeBrush
 import com.metrolist.shared.ui.components.images.AsyncImage
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import org.jetbrains.compose.resources.stringResource
@@ -87,9 +87,7 @@ fun ProfileScreen(
         } else {
             surface
         }
-    val high = MaterialTheme.colorScheme.onSurface.copy(alpha = if (Settings.shared.glassStyle == "CLEAR") 0.38f else 0.25f)
-    val low = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.15f)
-    val border = remember(high, low, glass) { if (glass) BorderStroke(1.dp, Brush.verticalGradient(listOf(high, low))) else null }
+    val border = if (glass) BorderStroke(1.dp, glassEdgeBrush(Settings.shared.glassStyle == "CLEAR")) else null
     val shape = RoundedCornerShape(24.dp)
     var confirmLogout by remember { mutableStateOf(false) }
 

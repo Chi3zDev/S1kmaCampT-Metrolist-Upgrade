@@ -44,6 +44,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
@@ -128,8 +129,16 @@ fun VintagePlayerControls(
         if (vinylStyle) {
             Modifier
                 .shadow(5.dp, vinylShape, clip = false)
-                .background(Brush.verticalGradient(listOf(Color(0xFF505055), Color(0xFF28282C))), vinylShape)
-                .border(1.dp, Color.White.copy(alpha = 0.08f), vinylShape)
+                .background(
+                    Brush.verticalGradient(
+                        if (sideButtonColor.luminance() < 0.5f) {
+                            listOf(MaterialTheme.colorScheme.surfaceContainerHighest, MaterialTheme.colorScheme.surfaceContainerHigh)
+                        } else {
+                            listOf(Color(0xFF505055), Color(0xFF28282C))
+                        },
+                    ),
+                    vinylShape,
+                ).border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.25f), vinylShape)
         } else {
             Modifier
         }

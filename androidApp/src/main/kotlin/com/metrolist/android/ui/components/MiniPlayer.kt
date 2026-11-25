@@ -152,6 +152,7 @@ import com.metrolist.shared.ui.components.LiveBadge
 import com.metrolist.shared.ui.components.MiniPlayerActions
 import com.metrolist.shared.ui.components.PlayerSheetSurface
 import com.metrolist.shared.ui.components.focusOutline
+import com.metrolist.shared.ui.components.glassEdgeBrush
 import com.metrolist.shared.ui.components.images.AsyncImage
 import com.metrolist.shared.ui.components.rememberTrackMarquee
 import com.metrolist.shared.ui.components.sliders.collectPlaybackDisplayState
@@ -799,12 +800,7 @@ internal fun MiniPlayerCard(
             if (glassEnabled) {
                 BorderStroke(
                     1.dp,
-                    Brush.verticalGradient(
-                        listOf(
-                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
-                            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.15f),
-                        ),
-                    ),
+                    glassEdgeBrush(Settings.shared.glassStyle == "CLEAR"),
                 )
             } else if (isModern) {
                 BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))

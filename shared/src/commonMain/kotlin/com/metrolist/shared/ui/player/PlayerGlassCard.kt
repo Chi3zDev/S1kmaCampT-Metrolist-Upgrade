@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.unit.dp
 import com.metrolist.shared.settings.PlayerType
 import com.metrolist.shared.settings.Settings
+import com.metrolist.shared.ui.components.glassEdgeBrush
 
 internal enum class PlayerPanelStyle { NONE, SOLID, GLASS }
 
@@ -70,7 +71,7 @@ internal fun Modifier.playerGlassCard(
     return if (glass) {
         surface.border(
             1.dp,
-            Brush.verticalGradient(listOf(contentColor.copy(alpha = 0.3f), contentColor.copy(alpha = 0.06f))),
+            glassEdgeBrush(settings.glassStyle == "CLEAR"),
             shape,
         )
     } else {
@@ -102,6 +103,7 @@ internal fun Modifier.portraitPlayerGlassCard(
         }
     val opacity = if (glass) (0.30f + styleAlpha * tint).coerceIn(0.30f, 0.86f) else 0.86f
     val radius = (12f + settings.glassCornerRoundness.coerceIn(0f, 100f) * 0.28f).dp
+    val edgeBrush = glassEdgeBrush(settings.glassStyle == "CLEAR")
     return this.drawBehind {
         val top = topInset.toPx().coerceIn(0f, size.height)
         val height = (size.height - top - bottomInset.toPx()).coerceAtLeast(0f)
@@ -123,7 +125,7 @@ internal fun Modifier.portraitPlayerGlassCard(
             )
             if (glass) {
                 drawRoundRect(
-                    Brush.verticalGradient(listOf(contentColor.copy(alpha = 0.30f), contentColor.copy(alpha = 0.06f))),
+                    edgeBrush,
                     topLeft = origin,
                     size = bounds,
                     cornerRadius = corners,

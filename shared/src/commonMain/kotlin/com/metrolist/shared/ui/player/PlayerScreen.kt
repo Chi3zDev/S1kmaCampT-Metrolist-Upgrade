@@ -776,9 +776,18 @@ fun PlayerScreen(
             !bottomSheetState.isCollapsed &&
             !showVideoSurface &&
             !uiState.isLyricsVisible
+    val lightPlayerSurface =
+        MaterialTheme.colorScheme.surface.luminance() >= 0.5f && !uiState.isLyricsVisible &&
+            !isCanvasBackdropVisible && !usesFullscreenThumbnail &&
+            (
+                playerType == PlayerType.VINYL ||
+                    (playerType == PlayerType.GLASS_CARD && Settings.shared.glassNavigation && Settings.shared.glassPlayer)
+            )
     val textBackgroundColor by animateColorAsState(
         targetValue =
-            if (
+            if (lightPlayerSurface) {
+                MaterialTheme.colorScheme.onSurface
+            } else if (
                 (
                     playerPanelStyle(playerType, Settings.shared.glassNavigation, Settings.shared.glassPlayer, uiState.isLyricsVisible) ==
                         PlayerPanelStyle.SOLID
@@ -1175,12 +1184,20 @@ fun PlayerScreen(
                             if (playerType == PlayerType.VINYL && !uiState.isLyricsVisible) {
                                 val coverTint = gradientColorStops.firstOrNull()?.second ?: MaterialTheme.colorScheme.primary
                                 val vinylBase =
-                                    androidx.compose.ui.graphics
-                                        .lerp(Color(0xFF303034), coverTint, 0.06f)
+                                    androidx.compose.ui.graphics.lerp(
+                                        if (lightPlayerSurface) MaterialTheme.colorScheme.surfaceContainerHigh else Color(0xFF303034),
+                                        coverTint,
+                                        0.06f,
+                                    )
                                 val vinylEdge =
-                                    androidx.compose.ui.graphics
-                                        .lerp(Color(0xFF171719), coverTint, 0.06f)
+                                    androidx.compose.ui.graphics.lerp(
+                                        if (lightPlayerSurface) MaterialTheme.colorScheme.surface else Color(0xFF171719),
+                                        coverTint,
+                                        0.06f,
+                                    )
                                 Box(Modifier.fillMaxSize().background(Brush.radialGradient(listOf(vinylBase, vinylEdge))))
+                            } else if (lightPlayerSurface && playerType == PlayerType.GLASS_CARD) {
+                                Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface.copy(alpha = 0.88f)))
                             }
                             if (!uiState.isLyricsVisible) {
                                 if (showFullscreenThumbnailBackground && currentSong?.displayThumbnail != null && !showVideoSurface) {

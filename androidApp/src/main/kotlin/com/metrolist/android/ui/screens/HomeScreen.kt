@@ -63,7 +63,6 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -113,6 +112,7 @@ import com.metrolist.shared.ui.components.ChipShelf
 import com.metrolist.shared.ui.components.HomeLoadingPlaceholder
 import com.metrolist.shared.ui.components.PopupVisibility
 import com.metrolist.shared.ui.components.RefreshIndicator
+import com.metrolist.shared.ui.components.glassEdgeBrush
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import com.metrolist.shared.ui.navigation.LocalRootContentActive
 import com.metrolist.shared.ui.screens.HomeContent
@@ -212,12 +212,7 @@ fun HomeScreen(
                         glassActionTint
                 ).coerceIn(0.22f, 0.9f),
         )
-    val glassActionHighlight = MaterialTheme.colorScheme.onSurface.copy(alpha = if (Settings.shared.glassStyle == "CLEAR") 0.38f else 0.25f)
-    val glassActionEdge = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.15f)
-    val glassActionBorder =
-        remember(glassActionHighlight, glassActionEdge) {
-            BorderStroke(1.dp, Brush.verticalGradient(listOf(glassActionHighlight, glassActionEdge)))
-        }
+    val glassActionBorder = BorderStroke(1.dp, glassEdgeBrush(Settings.shared.glassStyle == "CLEAR"))
     var showFloatingActions by remember { mutableStateOf(true) }
     val fabNestedScrollConnection =
         remember {

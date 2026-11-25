@@ -76,6 +76,7 @@ import androidx.compose.ui.unit.dp
 import com.metrolist.shared.settings.Settings
 import com.metrolist.shared.ui.PolishMotion
 import com.metrolist.shared.ui.components.focusOutline
+import com.metrolist.shared.ui.components.glassEdgeBrush
 import com.metrolist.shared.ui.haptics.HapticEvent
 import com.metrolist.shared.ui.haptics.rememberMetrolistHaptics
 import dev.chrisbanes.haze.HazeInput
@@ -235,12 +236,7 @@ private fun <T> FloatingNavigationBar(
                 if (glassEnabled) {
                     BorderStroke(
                         1.dp,
-                        Brush.verticalGradient(
-                            listOf(
-                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
-                                MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.15f),
-                            ),
-                        ),
+                        glassEdgeBrush(Settings.shared.glassStyle == "CLEAR"),
                     )
                 } else {
                     null
@@ -340,8 +336,8 @@ private fun <T> FloatingNavigationBar(
                                 .background(
                                     Brush.verticalGradient(
                                         listOf(
-                                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.22f),
-                                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.09f),
+                                            MaterialTheme.colorScheme.primary.copy(alpha = 0.18f),
+                                            MaterialTheme.colorScheme.primary.copy(alpha = 0.07f),
                                         ),
                                     ),
                                 ),

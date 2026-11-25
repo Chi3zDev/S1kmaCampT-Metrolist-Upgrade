@@ -38,9 +38,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.dp
 import com.metrolist.shared.settings.Settings
+import com.metrolist.shared.ui.components.glassEdgeBrush
 import com.metrolist.shared.ui.navigation.LocalGlassNavigationState
 import dev.chrisbanes.haze.HazeInput
 import dev.chrisbanes.haze.blur.HazeBlurStyle
@@ -84,12 +84,7 @@ fun TopBarIconButton(
         if (glass) {
             BorderStroke(
                 1.dp,
-                Brush.verticalGradient(
-                    listOf(
-                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f),
-                        MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.15f),
-                    ),
-                ),
+                glassEdgeBrush(Settings.shared.glassStyle == "CLEAR"),
             )
         } else {
             null
@@ -163,12 +158,7 @@ fun FloatingTopAppBar(
         if (glass) {
             BorderStroke(
                 1.dp,
-                Brush.verticalGradient(
-                    listOf(
-                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f),
-                        MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.15f),
-                    ),
-                ),
+                glassEdgeBrush(Settings.shared.glassStyle == "CLEAR"),
             )
         } else {
             null
