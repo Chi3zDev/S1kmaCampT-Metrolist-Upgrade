@@ -1,0 +1,1 @@
+Upgrade 2 beta 1: preview refined Streak and Recap motion, glass navigation, player and lyric visuals, improved posters, and polished About and Settings. This is a test build; device verification is still in progress.

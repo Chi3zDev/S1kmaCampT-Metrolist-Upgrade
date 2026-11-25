@@ -98,7 +98,7 @@ jobs:
           gh release upload latest-build Metrolist-fork-debug-universal.apk Metrolist-fork-release-test-universal.apk --clobber
 
   signed_release:
-    if: github.event_name == 'workflow_dispatch' && github.repository == 'Chi3zDev/S1kmaCampT-Metrolist-Upgrade' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feature/permanent-release')
+    if: github.event_name == 'workflow_dispatch' && github.repository == 'Chi3zDev/S1kmaCampT-Metrolist-Upgrade' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feature/permanent-release' || github.ref == 'refs/heads/feature/polish')
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:
