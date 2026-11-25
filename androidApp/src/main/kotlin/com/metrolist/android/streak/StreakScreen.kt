@@ -7,14 +7,18 @@ import android.app.TimePickerDialog
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.scaleIn
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -278,16 +282,17 @@ fun StreakScreen(onBack: () -> Unit) {
                             particles = !extinguished,
                             extinguished = extinguished,
                         )
-                        if (streak.todayCounted) {
-                            Text(
-                                "✓",
-                                modifier = Modifier.align(Alignment.BottomEnd),
-                                color = flameColor,
-                                style = MaterialTheme.typography.titleLarge,
-                            )
+                        AnimatedVisibility(
+                            visible = streak.todayCounted,
+                            modifier = Modifier.align(Alignment.BottomEnd),
+                            enter =
+                                fadeIn(tween(if (motionEnabled) 300 else 0)) +
+                                    scaleIn(tween(if (motionEnabled) 300 else 0), initialScale = if (motionEnabled) 0.6f else 1f),
+                        ) {
+                            Text("✓", color = flameColor, style = MaterialTheme.typography.titleLarge)
                         }
                     }
-                    Text(stringResource(Res.string.streak_day_today), style = MaterialTheme.typography.labelMedium)
+                    StreakTodayBadge(streak.todayCounted, flameColor, motionEnabled)
                     StreakCount(streak.current, screenActive && streakMotionEnabled(), MaterialTheme.typography.displayMedium)
                     TextButton(onClick = { showLevels = true }) {
                         Text(stringResource(shownLevel.title), color = flameColor, style = MaterialTheme.typography.titleLarge)
@@ -469,6 +474,36 @@ fun StreakScreen(onBack: () -> Unit) {
             dismissButton = { TextButton(onClick = { confirmation = false }) { Text(stringResource(Res.string.cancel)) } },
         )
     }
+}
+
+@Composable
+private fun StreakTodayBadge(
+    counted: Boolean,
+    color: Color,
+    animate: Boolean,
+) {
+    val pulse =
+        if (!counted && animate) {
+            val transition = rememberInfiniteTransition(label = "streakTodayPulse")
+            transition
+                .animateFloat(
+                    0.18f,
+                    0.46f,
+                    infiniteRepeatable(tween(1500), RepeatMode.Reverse),
+                    label = "streakTodayPulseAlpha",
+                ).value
+        } else {
+            0.18f
+        }
+    Text(
+        stringResource(Res.string.streak_day_today),
+        modifier =
+            Modifier
+                .border(1.dp, color.copy(alpha = pulse), RoundedCornerShape(50))
+                .background(color.copy(alpha = 0.08f), RoundedCornerShape(50))
+                .padding(horizontal = 14.dp, vertical = 4.dp),
+        style = MaterialTheme.typography.labelMedium,
+    )
 }
 
 @OptIn(ExperimentalLayoutApi::class)
