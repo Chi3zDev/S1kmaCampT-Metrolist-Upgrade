@@ -353,8 +353,8 @@ class MusicService :
         return true
     }
 
-    internal fun finishRecapPreview() {
-        val lease = recapLease ?: return
+    internal fun finishRecapPreview(): Boolean {
+        val lease = recapLease ?: return false
         val restore =
             recapMayRestore(
                 sameService = !isDestroying,
@@ -382,6 +382,7 @@ class MusicService :
         }
         queueCoordinator.setRecapSuspended(false)
         savePlaybackState()
+        return restore
     }
 
     private lateinit var playbackRestoreJob: Job
@@ -1441,10 +1442,7 @@ class MusicService :
                 )
             }
             player.finishInterruptedPlayback(failedPlaybackInstanceId, failure.playbackPositionMs)
-            if (recapLease?.requestId == request.requestId) {
-                finishRecapPreview()
-                return false
-            }
+            if (recapLease?.requestId == request.requestId && finishRecapPreview()) return false
             if (shouldAdvanceAfterPlaybackFailure(
                     player.wantsPlayback,
                     failure.category,
@@ -1844,7 +1842,7 @@ class MusicService :
             !request.song.id.startsWith("local_") && audioCacheManager.getCachedPlaybackResource(request.song, touch = false) == null
         ) {
             if (stagedShouldCommit == null) {
-                if (recapLease?.requestId == request.requestId) finishRecapPreview() else skipUnavailableOfflineSong(sessionId, request)
+                if (recapLease?.requestId != request.requestId || !finishRecapPreview()) skipUnavailableOfflineSong(sessionId, request)
             }
             return false
         }
@@ -2793,14 +2791,11 @@ class MusicService :
     }
 
     private suspend fun handlePlaybackCompletion(completedPlaybackInstanceId: Long? = null) {
-        if (recapLease != null) {
-            finishRecapPreview()
-            return
-        }
         if (completedPlaybackInstanceId != null && completedPlaybackInstanceId != player.currentPlaybackInstanceId) {
             transitions.consumeCrossfadeCompletion(completedPlaybackInstanceId)
             return
         }
+        if (recapLease != null && finishRecapPreview()) return
         flushPodcastProgress()
         savePlaybackState()
         if (sleepTimerController.isStopAfterCurrentSong) {
