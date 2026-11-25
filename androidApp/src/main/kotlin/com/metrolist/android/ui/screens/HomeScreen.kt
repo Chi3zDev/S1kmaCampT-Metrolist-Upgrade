@@ -197,7 +197,7 @@ fun HomeScreen(
     var isRefreshing by remember { mutableStateOf(false) }
     val showTopRefreshIndicator = isRefreshing || uiState.isRefreshing
     val isTv = LocalIsTv.current
-    val glassActions = Settings.shared.glassNavigation && Settings.shared.glassFloatingActions
+    val glassActions = (Settings.shared.glassNavigation || Settings.shared.liquidGlassTheme) && Settings.shared.glassFloatingActions
     val glassActionTint =
         when (Settings.shared.glassStyle) {
             "FROSTED" -> 0.9f

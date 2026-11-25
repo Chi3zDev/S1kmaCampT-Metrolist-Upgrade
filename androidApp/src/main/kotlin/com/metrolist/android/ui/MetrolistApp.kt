@@ -828,7 +828,8 @@ fun MetrolistApp(
         val useNavigationRail = !navigationSuiteType.isNavigationBar
         // Hiding navigation must not move the retained lookahead tree between scaffolds.
         val useGlass =
-            Settings.shared.glassNavigation && !useDesktopUi && !usesDirectionalNavigation && navigationSuiteType.isNavigationBar
+            (Settings.shared.glassNavigation || Settings.shared.liquidGlassTheme) &&
+                !useDesktopUi && !usesDirectionalNavigation && navigationSuiteType.isNavigationBar
         val useGlassNavigation = useGlass && Settings.shared.glassNavbar
         val useGlassMiniPlayer = useGlass && Settings.shared.glassMiniPlayer
         val useFloatingNavBar =

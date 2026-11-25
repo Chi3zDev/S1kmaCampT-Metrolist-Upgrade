@@ -146,7 +146,7 @@ internal fun SettingsUiRegistryBuilder.registerAppearanceSettings(host: SharedSe
                     range =
                         0f..100f,
                     steps = 0,
-                    enabled = settings.glassNavigation,
+                    enabled = settings.glassNavigation || settings.liquidGlassTheme,
                 ) { settings.glassBlurStrength = it }
                 slider(
                     id = "glassTintStrength",
@@ -164,13 +164,13 @@ internal fun SettingsUiRegistryBuilder.registerAppearanceSettings(host: SharedSe
                     range =
                         0f..100f,
                     steps = 0,
-                    enabled = settings.glassNavigation,
+                    enabled = settings.glassNavigation || settings.liquidGlassTheme,
                 ) { settings.glassCornerRoundness = it }
                 switch(
                     id = "glassNavbar",
                     title = stringResource(Res.string.glass_area_navbar),
                     checked = settings.glassNavbar,
-                    enabled = settings.glassNavigation,
+                    enabled = settings.glassNavigation || settings.liquidGlassTheme,
                 ) {
                     settings.glassNavbar =
                         it
@@ -179,7 +179,7 @@ internal fun SettingsUiRegistryBuilder.registerAppearanceSettings(host: SharedSe
                     id = "glassMiniPlayer",
                     title = stringResource(Res.string.glass_area_mini_player),
                     checked = settings.glassMiniPlayer,
-                    enabled = settings.glassNavigation,
+                    enabled = settings.glassNavigation || settings.liquidGlassTheme,
                 ) {
                     settings.glassMiniPlayer =
                         it
@@ -188,7 +188,7 @@ internal fun SettingsUiRegistryBuilder.registerAppearanceSettings(host: SharedSe
                     id = "glassTopBar",
                     title = stringResource(Res.string.glass_area_top_bar),
                     checked = settings.glassTopBar,
-                    enabled = settings.glassNavigation,
+                    enabled = settings.glassNavigation || settings.liquidGlassTheme,
                 ) {
                     settings.glassTopBar =
                         it
@@ -206,7 +206,7 @@ internal fun SettingsUiRegistryBuilder.registerAppearanceSettings(host: SharedSe
                     id = "glassFloatingActions",
                     title = stringResource(Res.string.glass_area_floating_actions),
                     checked = settings.glassFloatingActions,
-                    enabled = settings.glassNavigation,
+                    enabled = settings.glassNavigation || settings.liquidGlassTheme,
                 ) {
                     settings.glassFloatingActions =
                         it
@@ -233,7 +233,7 @@ internal fun SettingsUiRegistryBuilder.registerAppearanceSettings(host: SharedSe
                     id = "glassProfile",
                     title = stringResource(Res.string.glass_area_profile),
                     checked = settings.glassProfile,
-                    enabled = settings.glassNavigation,
+                    enabled = settings.glassNavigation || settings.liquidGlassTheme,
                 ) {
                     settings.glassProfile =
                         it

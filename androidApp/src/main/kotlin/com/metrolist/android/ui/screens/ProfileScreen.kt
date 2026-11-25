@@ -67,7 +67,7 @@ fun ProfileScreen(
     onIntegrations: () -> Unit,
     onSettings: () -> Unit,
 ) {
-    val glass = Settings.shared.glassNavigation && Settings.shared.glassProfile
+    val glass = (Settings.shared.glassNavigation || Settings.shared.liquidGlassTheme) && Settings.shared.glassProfile
     val surface = MaterialTheme.colorScheme.surfaceContainerHigh
     val tintMultiplier =
         when (Settings.shared.glassStyle) {
