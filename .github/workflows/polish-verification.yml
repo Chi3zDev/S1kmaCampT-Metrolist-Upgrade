@@ -43,11 +43,22 @@ jobs:
           python3 scripts/test_compose_resource_escapes.py
           python3 scripts/check_translation_mechanics.py
           python3 scripts/test_translation_mechanics.py
-      - name: Run full Android unit tests and Kotlin and Android lint
-        run: >-
-          ./gradlew :androidApp:lintDebug :androidApp:testDebugUnitTest
-          :shared:testAndroidHostTest :androidApp:ktlintCheck :shared:ktlintCheck
-          --continue --no-daemon -Dorg.gradle.java.installations.paths="$JAVA_HOME_25_X64"
+      # Separate Gradle invocations avoid compiling desktop/iOS and Android concurrently on a small runner.
+      - name: Run full shared Android host tests
+        run: ./gradlew :shared:testAndroidHostTest --no-daemon --max-workers=2 -Dorg.gradle.parallel=false -Dorg.gradle.java.installations.paths="$JAVA_HOME_25_X64"
+      - name: Run full Android app unit tests
+        if: success() || failure()
+        run: ./gradlew :androidApp:testDebugUnitTest --no-daemon --max-workers=2 -Dorg.gradle.parallel=false -Dorg.gradle.java.installations.paths="$JAVA_HOME_25_X64"
+      - name: Run Android lint
+        if: success() || failure()
+        run: ./gradlew :androidApp:lintDebug --no-daemon --max-workers=2 -Dorg.gradle.parallel=false -Dorg.gradle.java.installations.paths="$JAVA_HOME_25_X64"
+      - name: Check Android and shared Kotlin formatting
+        if: success() || failure()
+        run: |
+          curl -fsSL https://github.com/pinterest/ktlint/releases/download/1.8.0/ktlint -o "$RUNNER_TEMP/ktlint"
+          echo 'a3fd620207d5c40da6ca789b95e7f823c54e854b7fade7f613e91096a3706d75  '"$RUNNER_TEMP/ktlint" | sha256sum -c -
+          chmod +x "$RUNNER_TEMP/ktlint"
+          "$RUNNER_TEMP/ktlint" 'androidApp/src/**/*.kt' 'shared/src/**/*.kt' 'androidApp/**/*.kts' 'shared/**/*.kts'
       - name: Upload reports on failure
         if: failure()
         uses: actions/upload-artifact@v4
