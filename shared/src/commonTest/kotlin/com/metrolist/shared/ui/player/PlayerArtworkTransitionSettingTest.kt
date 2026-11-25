@@ -1,5 +1,6 @@
 package com.metrolist.shared.ui.player
 
+import com.metrolist.shared.settings.PlayerType
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -19,11 +20,15 @@ class PlayerArtworkTransitionSettingTest {
     }
 
     @Test
-    fun portraitGlassDoesNotStackUnderLyricsOrIgnoreSettings() {
-        assertTrue(portraitPlayerGlassVisible(glassEnabled = true, playerEnabled = true, lyricsVisible = false))
-        assertFalse(portraitPlayerGlassVisible(glassEnabled = true, playerEnabled = true, lyricsVisible = true))
-        assertFalse(portraitPlayerGlassVisible(glassEnabled = false, playerEnabled = true, lyricsVisible = false))
-        assertFalse(portraitPlayerGlassVisible(glassEnabled = true, playerEnabled = false, lyricsVisible = false))
+    fun panelsRemainWhenGlassIsOffAndVinylHasNoCard() {
+        for (type in PlayerType.entries.filter { it != PlayerType.VINYL }) {
+            assertEquals(PlayerPanelStyle.GLASS, playerPanelStyle(type, true, true, false))
+            assertEquals(PlayerPanelStyle.SOLID, playerPanelStyle(type, false, true, false))
+            assertEquals(PlayerPanelStyle.SOLID, playerPanelStyle(type, true, false, false))
+            assertEquals(PlayerPanelStyle.NONE, playerPanelStyle(type, true, true, true))
+        }
+        assertEquals(PlayerPanelStyle.NONE, playerPanelStyle(PlayerType.VINYL, true, true, false))
+        assertEquals(PlayerPanelStyle.NONE, playerPanelStyle(PlayerType.VINYL, false, false, false))
     }
 
     @Test

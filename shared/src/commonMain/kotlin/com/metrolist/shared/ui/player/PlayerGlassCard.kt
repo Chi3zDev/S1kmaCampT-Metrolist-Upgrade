@@ -3,29 +3,48 @@ package com.metrolist.shared.ui.player
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.unit.dp
+import com.metrolist.shared.settings.PlayerType
 import com.metrolist.shared.settings.Settings
 
-/** Lyrics draw their own surface, so the portrait player must not stack another underneath. */
-internal fun portraitPlayerGlassVisible(
+internal enum class PlayerPanelStyle { NONE, SOLID, GLASS }
+
+/** Vinyl has its own full-screen surface; lyrics own their separate surface. */
+internal fun playerPanelStyle(
+    playerType: PlayerType,
     glassEnabled: Boolean,
     playerEnabled: Boolean,
     lyricsVisible: Boolean,
-): Boolean = glassEnabled && playerEnabled && !lyricsVisible
+): PlayerPanelStyle =
+    when {
+        playerType == PlayerType.VINYL || lyricsVisible -> PlayerPanelStyle.NONE
+        glassEnabled && playerEnabled -> PlayerPanelStyle.GLASS
+        else -> PlayerPanelStyle.SOLID
+    }
 
 /** A tinted surface with no additional backdrop capture or blur. */
 @Composable
-internal fun Modifier.playerGlassCard(contentColor: Color): Modifier {
+internal fun Modifier.playerGlassCard(
+    contentColor: Color,
+    glass: Boolean = true,
+): Modifier {
     val settings = Settings.shared
     val roundness = settings.glassCornerRoundness.coerceIn(0f, 100f)
     val shape = RoundedCornerShape((12f + roundness * 0.28f).dp)
-    val base = if (contentColor.luminance() > 0.5f) Color.Black else Color.White
+    val base =
+        if (glass) {
+            if (contentColor.luminance() > 0.5f) Color.Black else Color.White
+        } else {
+            lerp(Color.Black, MaterialTheme.colorScheme.primary, 0.08f)
+        }
     val tint = (settings.glassTintStrength / 100f).coerceIn(0f, 1f)
     val styleAlpha =
         when (settings.glassStyle) {
@@ -35,8 +54,29 @@ internal fun Modifier.playerGlassCard(contentColor: Color): Modifier {
         }
     // Keep a minimum contrast scrim even at zero tint so text remains legible.
     val topAlpha = (0.30f + styleAlpha * tint).coerceIn(0.30f, 0.86f)
-    return background(Brush.verticalGradient(listOf(base.copy(alpha = topAlpha), base.copy(alpha = topAlpha * 0.78f))), shape)
-        .border(1.dp, Brush.verticalGradient(listOf(contentColor.copy(alpha = 0.3f), contentColor.copy(alpha = 0.06f))), shape)
+    val opacity = if (glass) topAlpha else 0.86f
+    val surface =
+        background(
+            Brush.verticalGradient(
+                listOf(
+                    base.copy(alpha = opacity),
+                    base.copy(
+                        alpha =
+                            opacity * if (glass) 0.78f else 0.92f,
+                    ),
+                ),
+            ),
+            shape,
+        )
+    return if (glass) {
+        surface.border(
+            1.dp,
+            Brush.verticalGradient(listOf(contentColor.copy(alpha = 0.3f), contentColor.copy(alpha = 0.06f))),
+            shape,
+        )
+    } else {
+        surface
+    }
 }
 
 /** Leaves the player's header and queue controls outside the floating card. */
@@ -45,9 +85,15 @@ internal fun Modifier.portraitPlayerGlassCard(
     contentColor: Color,
     topInset: androidx.compose.ui.unit.Dp,
     bottomInset: androidx.compose.ui.unit.Dp,
+    glass: Boolean,
 ): Modifier {
     val settings = Settings.shared
-    val base = if (contentColor.luminance() > 0.5f) Color.Black else Color.White
+    val base =
+        if (glass) {
+            if (contentColor.luminance() > 0.5f) Color.Black else Color.White
+        } else {
+            lerp(Color.Black, MaterialTheme.colorScheme.primary, 0.08f)
+        }
     val tint = (settings.glassTintStrength / 100f).coerceIn(0f, 1f)
     val styleAlpha =
         when (settings.glassStyle) {
@@ -55,7 +101,7 @@ internal fun Modifier.portraitPlayerGlassCard(
             "FROSTED" -> 0.68f
             else -> 0.58f
         }
-    val opacity = (0.30f + styleAlpha * tint).coerceIn(0.30f, 0.86f)
+    val opacity = if (glass) (0.30f + styleAlpha * tint).coerceIn(0.30f, 0.86f) else 0.86f
     val radius = (12f + settings.glassCornerRoundness.coerceIn(0f, 100f) * 0.28f).dp
     return this.drawBehind {
         val top = topInset.toPx().coerceIn(0f, size.height)
@@ -76,15 +122,17 @@ internal fun Modifier.portraitPlayerGlassCard(
                 size = bounds,
                 cornerRadius = corners,
             )
-            drawRoundRect(
-                Brush.verticalGradient(listOf(contentColor.copy(alpha = 0.30f), contentColor.copy(alpha = 0.06f))),
-                topLeft = origin,
-                size = bounds,
-                cornerRadius = corners,
-                style =
-                    androidx.compose.ui.graphics.drawscope
-                        .Stroke(1.dp.toPx()),
-            )
+            if (glass) {
+                drawRoundRect(
+                    Brush.verticalGradient(listOf(contentColor.copy(alpha = 0.30f), contentColor.copy(alpha = 0.06f))),
+                    topLeft = origin,
+                    size = bounds,
+                    cornerRadius = corners,
+                    style =
+                        androidx.compose.ui.graphics.drawscope
+                            .Stroke(1.dp.toPx()),
+                )
+            }
         }
     }
 }

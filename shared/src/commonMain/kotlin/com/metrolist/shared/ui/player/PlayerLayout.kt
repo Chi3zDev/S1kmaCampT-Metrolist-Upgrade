@@ -308,14 +308,26 @@ internal fun TabletPlayerContent(
                     Box(Modifier.widthIn(max = contentMaxWidth).fillMaxWidth(), contentAlignment = Alignment.Center) {
                         Column(
                             modifier =
-                                if (playerType == PlayerType.GLASS_CARD && Settings.shared.glassNavigation &&
-                                    Settings.shared.glassPlayer
+                                when (
+                                    playerPanelStyle(
+                                        playerType,
+                                        Settings.shared.glassNavigation,
+                                        Settings.shared.glassPlayer,
+                                        uiState.isLyricsVisible,
+                                    )
                                 ) {
-                                    Modifier.playerGlassCard(textBackgroundColor).padding(16.dp)
-                                } else if (Settings.shared.glassNavigation && Settings.shared.glassPlayer && !uiState.isLyricsVisible) {
-                                    Modifier.playerGlassCard(textBackgroundColor)
-                                } else {
-                                    Modifier
+                                    PlayerPanelStyle.NONE -> {
+                                        Modifier
+                                    }
+
+                                    PlayerPanelStyle.SOLID, PlayerPanelStyle.GLASS -> {
+                                        Modifier
+                                            .playerGlassCard(
+                                                textBackgroundColor,
+                                                glass =
+                                                    Settings.shared.glassNavigation && Settings.shared.glassPlayer,
+                                            ).then(if (playerType == PlayerType.GLASS_CARD) Modifier.padding(16.dp) else Modifier)
+                                    }
                                 },
                             horizontalAlignment = Alignment.CenterHorizontally,
                         ) {
@@ -928,7 +940,10 @@ internal fun LandscapePlayerContent(
     val artworkBehindControls =
         Settings.shared.playerBackgroundStyle != PlayerBackgroundStyle.SOLID && currentSong?.displayThumbnail != null
     val controlsColor =
-        if (isTv) {
+        if (isTv &&
+            playerPanelStyle(playerType, Settings.shared.glassNavigation, Settings.shared.glassPlayer, uiState.isLyricsVisible) !=
+            PlayerPanelStyle.SOLID
+        ) {
             val color by animateColorAsState(
                 if (artworkBehindControls) textBackgroundColor else MaterialTheme.colorScheme.onSurface,
                 MaterialTheme.motionScheme.defaultEffectsSpec(),
@@ -1394,14 +1409,34 @@ internal fun LandscapePlayerContent(
                                 .verticalScrollWithDrag(rememberScrollState())
                                 .heightIn(min = contentHeight)
                                 .then(
-                                    if (playerType == PlayerType.GLASS_CARD && Settings.shared.glassNavigation &&
-                                        Settings.shared.glassPlayer
+                                    when (
+                                        playerPanelStyle(
+                                            playerType,
+                                            Settings.shared.glassNavigation,
+                                            Settings.shared.glassPlayer,
+                                            uiState.isLyricsVisible,
+                                        )
                                     ) {
-                                        Modifier.playerGlassCard(controlsColor).padding(horizontal = 12.dp, vertical = 8.dp)
-                                    } else if (Settings.shared.glassNavigation && Settings.shared.glassPlayer) {
-                                        Modifier.playerGlassCard(controlsColor)
-                                    } else {
-                                        Modifier
+                                        PlayerPanelStyle.NONE -> {
+                                            Modifier
+                                        }
+
+                                        PlayerPanelStyle.SOLID, PlayerPanelStyle.GLASS -> {
+                                            Modifier
+                                                .playerGlassCard(
+                                                    controlsColor,
+                                                    glass =
+                                                        Settings.shared.glassNavigation && Settings.shared.glassPlayer,
+                                                ).then(
+                                                    if (playerType ==
+                                                        PlayerType.GLASS_CARD
+                                                    ) {
+                                                        Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+                                                    } else {
+                                                        Modifier
+                                                    },
+                                                )
+                                        }
                                     },
                                 ),
                         verticalArrangement =

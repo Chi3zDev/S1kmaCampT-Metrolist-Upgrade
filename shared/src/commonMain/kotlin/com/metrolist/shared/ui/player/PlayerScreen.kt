@@ -779,6 +779,10 @@ fun PlayerScreen(
     val textBackgroundColor by animateColorAsState(
         targetValue =
             if (
+                (
+                    playerPanelStyle(playerType, Settings.shared.glassNavigation, Settings.shared.glassPlayer, uiState.isLyricsVisible) ==
+                        PlayerPanelStyle.SOLID
+                ) ||
                 isCanvasBackdropVisible ||
                 (
                     usesFullscreenThumbnail && currentSong?.displayThumbnail != null && !uiState.isLyricsVisible &&
@@ -1452,17 +1456,20 @@ fun PlayerScreen(
                                             WindowInsets.mandatorySystemGestures.only(WindowInsetsSides.Bottom),
                                         ).padding(horizontal = 24.dp)
                                         .then(
-                                            if (portraitPlayerGlassVisible(
+                                            if (playerPanelStyle(
+                                                    playerType,
                                                     Settings.shared.glassNavigation,
                                                     Settings.shared.glassPlayer,
                                                     uiState.isLyricsVisible,
-                                                )
+                                                ) !=
+                                                PlayerPanelStyle.NONE
                                             ) {
                                                 Modifier.portraitPlayerGlassCard(
                                                     textBackgroundColor,
                                                     topInset = 64.dp,
                                                     bottomInset =
                                                         QueuePeekHeight + 26.dp,
+                                                    glass = Settings.shared.glassNavigation && Settings.shared.glassPlayer,
                                                 )
                                             } else {
                                                 Modifier
