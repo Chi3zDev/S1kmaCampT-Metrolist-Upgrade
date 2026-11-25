@@ -73,6 +73,7 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ButtonGroup
 import androidx.compose.material3.ButtonGroupDefaults
@@ -152,6 +153,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.metrolist.shared.api.artwork.CanvasContentSource
 import com.metrolist.shared.cast.CastState
 import com.metrolist.shared.constants.QueuePeekHeight
@@ -2133,7 +2135,10 @@ fun PlayerScreen(
                                             ) { displayedSong ->
                                                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                                                     Text(
-                                                        text = displayedSong?.title ?: stringResource(Res.string.unknown),
+                                                        text =
+                                                            (displayedSong?.title ?: stringResource(Res.string.unknown)).let {
+                                                                if (playerType == PlayerType.VINYL) it.uppercase() else it
+                                                            },
                                                         style =
                                                             if (usesCanvasThumbnail) {
                                                                 MaterialTheme.typography.titleMedium
@@ -2141,6 +2146,15 @@ fun PlayerScreen(
                                                                 MaterialTheme.typography.titleLarge
                                                             },
                                                         fontWeight = FontWeight.Bold,
+                                                        autoSize =
+                                                            if (playerType == PlayerType.VINYL) {
+                                                                TextAutoSize.StepBased(
+                                                                    minFontSize = 12.sp,
+                                                                    maxFontSize = MaterialTheme.typography.titleLarge.fontSize,
+                                                                )
+                                                            } else {
+                                                                null
+                                                            },
                                                         color = textBackgroundColor,
                                                         maxLines = 1,
                                                         softWrap = false,
@@ -2154,11 +2168,12 @@ fun PlayerScreen(
                                                                         rememberTrackMarquee(
                                                                             trackId = song.id,
                                                                             enabled =
-                                                                                playerDecorativeMotionAllowed(
-                                                                                    LocalPlayerContentActive.current,
-                                                                                    Settings.shared.glassLightMode,
-                                                                                    LocalPlayerEffectsAllowed.current,
-                                                                                ),
+                                                                                playerType != PlayerType.VINYL &&
+                                                                                    playerDecorativeMotionAllowed(
+                                                                                        LocalPlayerContentActive.current,
+                                                                                        Settings.shared.glassLightMode,
+                                                                                        LocalPlayerEffectsAllowed.current,
+                                                                                    ),
                                                                             initialDelayMillis = 3000L,
                                                                         )
                                                                     } ?: Modifier,
@@ -2407,6 +2422,8 @@ fun PlayerScreen(
                                                             viewModel.next()
                                                         },
                                                         sideButtonColor = textBackgroundColor,
+                                                        vinylStyle = playerType == PlayerType.VINYL,
+                                                        spacing = if (playerType == PlayerType.VINYL) 12.dp else 28.dp,
                                                         modifier = Modifier.fillMaxWidth(),
                                                     )
                                                 }

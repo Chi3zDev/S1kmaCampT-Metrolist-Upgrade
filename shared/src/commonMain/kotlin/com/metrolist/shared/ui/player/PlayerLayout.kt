@@ -50,6 +50,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.ButtonGroup
 import androidx.compose.material3.ButtonGroupDefaults
 import androidx.compose.material3.DropdownMenuItem
@@ -493,9 +494,20 @@ internal fun TabletPlayerContent(
                             Spacer(modifier = Modifier.height(24.dp))
 
                             Text(
-                                text = currentSong?.title ?: stringResource(Res.string.unknown),
+                                text =
+                                    (currentSong?.title ?: stringResource(Res.string.unknown)).let {
+                                        if (playerType == PlayerType.VINYL) it.uppercase() else it
+                                    },
                                 style = MaterialTheme.typography.headlineMedium,
                                 fontWeight = FontWeight.Bold,
+                                autoSize =
+                                    if (playerType ==
+                                        PlayerType.VINYL
+                                    ) {
+                                        TextAutoSize.StepBased(12.sp, MaterialTheme.typography.headlineMedium.fontSize)
+                                    } else {
+                                        null
+                                    },
                                 color = textBackgroundColor,
                                 maxLines = 1,
                                 softWrap = false,
@@ -612,6 +624,7 @@ internal fun TabletPlayerContent(
                                                 viewModel.next()
                                             },
                                             sideButtonColor = textBackgroundColor,
+                                            vinylStyle = playerType == PlayerType.VINYL,
                                             modifier = Modifier.fillMaxWidth(),
                                         )
                                     } else {
@@ -1486,12 +1499,23 @@ internal fun LandscapePlayerContent(
                                 }
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
-                                        text = currentSong?.title ?: stringResource(Res.string.unknown),
+                                        text =
+                                            (currentSong?.title ?: stringResource(Res.string.unknown)).let {
+                                                if (playerType == PlayerType.VINYL) it.uppercase() else it
+                                            },
                                         style =
                                             if (compactHeight) {
                                                 MaterialTheme.typography.titleLarge
                                             } else {
                                                 MaterialTheme.typography.headlineSmall
+                                            },
+                                        autoSize =
+                                            if (playerType ==
+                                                PlayerType.VINYL
+                                            ) {
+                                                TextAutoSize.StepBased(12.sp, MaterialTheme.typography.headlineSmall.fontSize)
+                                            } else {
+                                                null
                                             },
                                         color = controlsColor,
                                         maxLines = 1,
@@ -1695,6 +1719,7 @@ internal fun LandscapePlayerContent(
                                                     viewModel.next()
                                                 },
                                                 sideButtonColor = controlsColor,
+                                                vinylStyle = playerType == PlayerType.VINYL,
                                                 modifier = Modifier.fillMaxWidth(),
                                             )
                                         }

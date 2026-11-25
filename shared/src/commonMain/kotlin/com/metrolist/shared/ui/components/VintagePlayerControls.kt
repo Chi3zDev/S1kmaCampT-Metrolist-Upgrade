@@ -12,6 +12,8 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -22,6 +24,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -36,8 +39,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -89,6 +94,7 @@ fun VintagePlayerControls(
     repeatMode: RepeatMode = RepeatMode.OFF,
     onRepeatClick: (() -> Unit)? = null,
     playPauseFocusRequester: FocusRequester? = null,
+    vinylStyle: Boolean = false,
 ) {
     val hasSecondaryControls = onShuffleClick != null || onRepeatClick != null
     val haptic = rememberMetrolistHaptics()
@@ -116,6 +122,17 @@ fun VintagePlayerControls(
             scale.animateTo(0.95f)
         }
     }
+
+    val vinylShape = RoundedCornerShape(38)
+    val vinylSurface =
+        if (vinylStyle) {
+            Modifier
+                .shadow(5.dp, vinylShape, clip = false)
+                .background(Brush.verticalGradient(listOf(Color(0xFF505055), Color(0xFF28282C))), vinylShape)
+                .border(1.dp, Color.White.copy(alpha = 0.08f), vinylShape)
+        } else {
+            Modifier
+        }
 
     val hapticType =
         if (!isPlaying) {
@@ -165,7 +182,7 @@ fun VintagePlayerControls(
                 onClick = { onSkipPrevious?.invoke() },
                 enabled = enabled && onSkipPrevious != null,
                 colors = IconButtonDefaults.iconButtonColors(contentColor = sideButtonColor),
-                modifier = primaryButtonModifier.size(buttonSize).tvFocusHighlight(CircleShape),
+                modifier = primaryButtonModifier.size(buttonSize).then(vinylSurface).tvFocusHighlight(CircleShape),
                 shapes = IconButtonDefaults.shapes(),
             ) {
                 Icon(
@@ -183,6 +200,7 @@ fun VintagePlayerControls(
                 modifier =
                     primaryButtonModifier
                         .size(playButtonSize)
+                        .then(vinylSurface)
                         .scale(scale.value)
                         .tvFocusHighlight(CircleShape)
                         .then(
@@ -216,7 +234,7 @@ fun VintagePlayerControls(
                 onClick = { onSkipNext?.invoke() },
                 enabled = enabled && onSkipNext != null,
                 colors = IconButtonDefaults.iconButtonColors(contentColor = sideButtonColor),
-                modifier = primaryButtonModifier.size(buttonSize).tvFocusHighlight(CircleShape),
+                modifier = primaryButtonModifier.size(buttonSize).then(vinylSurface).tvFocusHighlight(CircleShape),
                 shapes = IconButtonDefaults.shapes(),
             ) {
                 Icon(
