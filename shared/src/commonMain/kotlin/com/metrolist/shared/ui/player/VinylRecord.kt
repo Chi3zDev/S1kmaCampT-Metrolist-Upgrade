@@ -1,5 +1,8 @@
 package com.metrolist.shared.ui.player
 
+import androidx.compose.animation.core.animateOffsetAsState
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
@@ -46,6 +49,13 @@ internal fun vinylArmContact(progress: Float): Offset {
     return Offset(0.68f - 0.16f * p, 0.76f - 0.10f * p)
 }
 
+internal const val VINYL_PLAYING_DEGREES_PER_SECOND = 65f
+
+internal fun vinylArmTarget(
+    progress: Float,
+    isPlaying: Boolean,
+): Offset = if (isPlaying) vinylArmContact(progress) else Offset(0.91f, 0.66f)
+
 /** Original vector record; artwork is supplied by the player to retain its existing image pipeline. */
 @Composable
 internal fun VinylRecord(
@@ -78,7 +88,7 @@ internal fun VinylRecord(
                     val now = clock.elapsedNow().inWholeMilliseconds
                     val seconds = ((now - previous).coerceIn(0, 100) / 1000f)
                     previous = now
-                    val target = if (isPlaying) 120f else 0f
+                    val target = if (isPlaying) VINYL_PLAYING_DEGREES_PER_SECOND else 0f
                     val amount = (seconds / if (isPlaying) 0.5f else 1.0f).coerceIn(0f, 1f)
                     velocity.floatValue += (target - velocity.floatValue) * amount
                     angle.floatValue = (angle.floatValue + velocity.floatValue * seconds) % 360f
@@ -88,10 +98,18 @@ internal fun VinylRecord(
         }
     }
 
+    val armEnd by animateOffsetAsState(
+        targetValue = vinylArmTarget(progress, isPlaying),
+        animationSpec = if (visible && motionScale > 0f) tween(600) else snap(),
+        label = "vinylTonearm",
+    )
+
     Box(modifier.fillMaxWidth().aspectRatio(1f), contentAlignment = Alignment.Center) {
         Box(
             Modifier.fillMaxSize().graphicsLayer {
-                translationX = -size.width * 0.24f
+                translationX = -size.width * 0.15f
+                scaleX = 1.05f
+                scaleY = 1.05f
                 rotationZ = angle.floatValue
             },
             contentAlignment = Alignment.Center,
@@ -117,16 +135,25 @@ internal fun VinylRecord(
                     )
                 }
                 drawCircle(
-                    Brush.sweepGradient(listOf(Color.Transparent, Color.White.copy(alpha = 0.14f), Color.Transparent, Color.Transparent)),
+                    Brush.sweepGradient(
+                        listOf(
+                            Color.Transparent,
+                            Color.White.copy(alpha = 0.14f),
+                            Color.Transparent,
+                            Color.Transparent,
+                            Color.White.copy(alpha = 0.10f),
+                            Color.Transparent,
+                        ),
+                    ),
                     radius,
                 )
             }
-            Box(Modifier.fillMaxSize(0.47f).clip(CircleShape)) { artwork() }
+            Box(Modifier.fillMaxSize(0.58f).clip(CircleShape)) { artwork() }
             Canvas(Modifier.size(5.dp)) { drawCircle(Color(0xFFD9D9DB)) }
         }
         Canvas(Modifier.fillMaxSize()) {
             val pivot = Offset(size.width * 0.87f, size.height * 0.12f)
-            val end = vinylArmContact(progress).let { Offset(it.x * size.width, it.y * size.height) }
+            val end = armEnd.let { Offset(it.x * size.width, it.y * size.height) }
             val width = size.minDimension * 0.018f
             val headStart = Offset(end.x + (pivot.x - end.x) * 0.16f, end.y + (pivot.y - end.y) * 0.16f)
             drawCircle(Color(0xFF1B1B1E), size.minDimension * 0.07f, pivot)
