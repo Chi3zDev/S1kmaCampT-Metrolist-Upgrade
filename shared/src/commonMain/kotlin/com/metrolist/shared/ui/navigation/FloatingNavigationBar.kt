@@ -98,6 +98,15 @@ private val FloatingItemHeight = 48.dp
 private val FloatingBarShadow = 6.dp
 private val NavSpring = PolishMotion.interactiveSpring()
 
+internal fun glassDragStretch(
+    amountPx: Float,
+    elapsedMs: Long,
+    density: Float,
+): Float {
+    val speed = kotlin.math.abs(amountPx) * 1000f / elapsedMs.coerceIn(1L, 80L) / density.coerceAtLeast(0.1f)
+    return 1f + (speed / 4000f).coerceIn(0f, 0.18f)
+}
+
 @Composable
 internal fun <T> FloatingNavigation(
     items: List<AdaptiveNavigationItem<T>>,
@@ -282,11 +291,10 @@ private fun <T> FloatingNavigationBar(
                                     change.consume()
                                     val x = ((dragX ?: change.position.x) + amount).coerceIn(0f, rowWidth.toFloat())
                                     dragX = x
-                                    val elapsedMs = (change.uptimeMillis - lastDragTime).coerceIn(1L, 80L)
-                                    val speedDpPerSecond =
-                                        if (lastDragTime == 0L) 0f else kotlin.math.abs(amount) * 1000f / elapsedMs / density.density
+                                    val elapsedMs = change.uptimeMillis - lastDragTime
+                                    stretch =
+                                        if (lastDragTime == 0L) 1f else glassDragStretch(amount, elapsedMs, density.density)
                                     lastDragTime = change.uptimeMillis
-                                    stretch = 1f + (speedDpPerSecond / 4000f).coerceIn(0f, 0.18f)
                                     val index = itemAt(x)
                                     if (index != dragIndex) {
                                         dragIndex = index
