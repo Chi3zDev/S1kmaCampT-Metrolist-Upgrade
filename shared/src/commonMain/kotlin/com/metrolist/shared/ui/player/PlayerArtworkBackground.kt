@@ -272,9 +272,9 @@ internal fun FullscreenThumbnailBackground(
     canvasTall: Boolean = false,
     artworkCrossfade: PlayerArtworkCrossfade = PlayerArtworkCrossfade(),
 ) {
-    // Static fullscreen covers use one centred crop across the entire viewport. Keep a
-    // dark base while the image loads and a bottom scrim for readable controls.
-    if (animatedCoverUrl == null && canvasContent == null) {
+    // Keep the static cover underneath until CanvasLayers presents a video frame.
+    // Both layers fill the same viewport so transitions never reveal empty bands.
+    if (animatedCoverUrl == null) {
         Box(Modifier.fillMaxSize().alpha(alpha).background(Color(0xFF202024))) {
             PlayerBackgroundArtwork(thumbnailUrl, artworkCrossfade) { currentUrl ->
                 CrossfadeArtwork(
@@ -286,6 +286,9 @@ internal fun FullscreenThumbnailBackground(
                     modifier = Modifier.fillMaxSize(),
                     animate = LocalPlayerBackgroundAnimating.current && Settings.shared.playerArtworkTransitions,
                 )
+            }
+            if (canvasContent != null) {
+                canvasContent(Modifier.fillMaxSize(), null)
             }
             Box(
                 Modifier.fillMaxSize().background(
