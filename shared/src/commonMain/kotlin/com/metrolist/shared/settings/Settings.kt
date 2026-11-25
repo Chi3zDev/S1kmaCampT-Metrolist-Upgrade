@@ -469,7 +469,7 @@ class Settings(
     var glassNavbarMotion by preference("FULL")
     var glassPlayerBelow by preference(false)
     var streakRecoveryJson by preference("")
-    var streakLevelBackgroundEnabled by preference(true)
+    var streakLevelBackgroundEnabled by preference(false)
     var streakReminderEnabled by preference(false)
     var streakReminderMinuteOfDay by preference(1200)
     var streakReminderLastDate by preference("")
