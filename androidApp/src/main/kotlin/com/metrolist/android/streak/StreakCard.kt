@@ -112,6 +112,7 @@ fun StreakCard(
                     particles = !extinguished,
                     extinguished = extinguished,
                     modifier = Modifier.size(40.dp),
+                    variant = currentLevel.flameVariant,
                 )
                 Column {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
