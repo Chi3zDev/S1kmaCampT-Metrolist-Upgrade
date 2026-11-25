@@ -1,5 +1,5 @@
 name: Polish verification
-# Verify glass player materials and safe gallery backdrop fallback.
+# Verify adapted scroll motion and Glasmio attribution.
 
 on:
   workflow_dispatch:
