@@ -118,7 +118,9 @@ class StreakReminderWorker(
             }
             val delay = reminderDelayMillis(Instant.now(), ZoneId.systemDefault(), minuteOfDay)
             val request =
-                PeriodicWorkRequestBuilder<StreakReminderWorker>(24, TimeUnit.HOURS)
+                // Hourly eligibility checks tolerate timezone/DST changes without posting early;
+                // the saved local date still limits notifications to one per day.
+                PeriodicWorkRequestBuilder<StreakReminderWorker>(1, TimeUnit.HOURS)
                     .setInitialDelay(delay, TimeUnit.MILLISECONDS)
                     .build()
             manager.enqueueUniquePeriodicWork(WORK, ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE, request)
