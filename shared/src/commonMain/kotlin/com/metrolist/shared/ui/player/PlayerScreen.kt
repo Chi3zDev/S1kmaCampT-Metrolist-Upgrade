@@ -1855,7 +1855,7 @@ fun PlayerScreen(
                                                     if (usesFullscreenThumbnail) {
                                                         Arrangement.Bottom
                                                     } else if (playerType == PlayerType.GLASS_CARD) {
-                                                        Arrangement.Top
+                                                        Arrangement.Bottom
                                                     } else {
                                                         Arrangement.Center
                                                     },
@@ -1865,7 +1865,7 @@ fun PlayerScreen(
                                                         if (playerType ==
                                                             PlayerType.GLASS_CARD
                                                         ) {
-                                                            Alignment.TopCenter
+                                                            Alignment.BottomCenter
                                                         } else {
                                                             Alignment.Center
                                                         },
@@ -1875,8 +1875,7 @@ fun PlayerScreen(
                                                             .weight(
                                                                 1f,
                                                                 fill =
-                                                                    usesCanvasThumbnail || usesFullscreenThumbnail ||
-                                                                        playerType == PlayerType.GLASS_CARD,
+                                                                    usesCanvasThumbnail || usesFullscreenThumbnail,
                                                             ).artworkSwipe(
                                                                 enabled = artworkSwipeEnabled,
                                                                 sensitivity = Settings.shared.swipeSensitivity,
