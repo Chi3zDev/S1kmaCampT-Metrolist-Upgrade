@@ -323,7 +323,6 @@ import com.metrolist.shared.state.applyContentRegion
 import com.metrolist.shared.ui.LocalIsInPipMode
 import com.metrolist.shared.ui.LocalIsTv
 import com.metrolist.shared.ui.LocalPlayerEffectsAllowed
-import com.metrolist.shared.ui.PolishMotion
 import com.metrolist.shared.ui.TokenLoginScreen
 import com.metrolist.shared.ui.YouTubeSyncSnackbar
 import com.metrolist.shared.ui.components.AlertDialog
@@ -354,6 +353,7 @@ import com.metrolist.shared.ui.navigation.AdaptiveFormFactor
 import com.metrolist.shared.ui.navigation.AdaptiveWidthBreakpoint
 import com.metrolist.shared.ui.navigation.AlbumSeed
 import com.metrolist.shared.ui.navigation.DesktopContentMaxWidth
+import com.metrolist.shared.ui.navigation.GlassScrollMotion
 import com.metrolist.shared.ui.navigation.LocalAlbumArtworkSource
 import com.metrolist.shared.ui.navigation.LocalContentObscured
 import com.metrolist.shared.ui.navigation.LocalExpandGlassNavigation
@@ -382,6 +382,7 @@ import com.metrolist.shared.ui.navigation.navigationPopupSource
 import com.metrolist.shared.ui.navigation.rememberNavigationMotion
 import com.metrolist.shared.ui.navigation.rememberNavigationState
 import com.metrolist.shared.ui.navigation.toEntries
+import com.metrolist.shared.ui.navigation.updateGlassScrollMotion
 import com.metrolist.shared.ui.navigation.visibleSidebarScreens
 import com.metrolist.shared.ui.navigation.withPointerInput
 import com.metrolist.shared.ui.playback.LocalPlaybackController
@@ -887,33 +888,44 @@ fun MetrolistApp(
         val navigationBarBottomPadding = WindowInsets.navigationBarsIgnoringVisibility.asPaddingValues().calculateBottomPadding()
         val density = LocalDensity.current
         var glassNavigationCollapsed by remember { mutableStateOf(false) }
-        val glassScrollThreshold = with(density) { 24.dp.toPx() }
+        val glassScrollThreshold = with(density) { 64.dp.toPx() }
         val glassScrollConnection =
-            remember(useGlassNavigation, glassScrollThreshold) {
+            remember(useGlassNavigation, glassScrollThreshold, currentRoute) {
                 object : NestedScrollConnection {
-                    private var accumulated = 0f
+                    private var motion = GlassScrollMotion()
+                    private var userScrolled = false
+                    private var flinging = false
 
-                    override fun onPreScroll(
+                    override fun onPostScroll(
+                        consumed: Offset,
                         available: Offset,
                         source: NestedScrollSource,
                     ): Offset {
-                        if (!useGlassNavigation || source != NestedScrollSource.UserInput) return Offset.Zero
-                        if (available.y == 0f) return Offset.Zero
-                        if (accumulated * available.y < 0f) accumulated = 0f
-                        accumulated += available.y
-                        if (kotlin.math.abs(accumulated) >= glassScrollThreshold) {
-                            glassNavigationCollapsed = accumulated < 0f
-                            accumulated = 0f
-                        }
+                        if (!useGlassNavigation) return Offset.Zero
+                        if (source == NestedScrollSource.UserInput) userScrolled = true
+                        if (source != NestedScrollSource.UserInput && !flinging) return Offset.Zero
+                        motion =
+                            updateGlassScrollMotion(
+                                motion.copy(compact = glassNavigationCollapsed),
+                                consumedY = consumed.y,
+                                availableY = available.y,
+                                threshold = glassScrollThreshold,
+                            )
+                        glassNavigationCollapsed = motion.compact
                         return Offset.Zero
                     }
 
                     override suspend fun onPreFling(available: Velocity): Velocity {
-                        if (useGlassNavigation && kotlin.math.abs(available.y) >= glassScrollThreshold * 16f) {
-                            glassNavigationCollapsed = available.y < 0f
-                            accumulated = 0f
-                        }
-                        // The list receives its complete fling; this changes only the bar presentation.
+                        flinging = userScrolled && available.y != 0f
+                        return Velocity.Zero
+                    }
+
+                    override suspend fun onPostFling(
+                        consumed: Velocity,
+                        available: Velocity,
+                    ): Velocity {
+                        flinging = false
+                        userScrolled = false
                         return Velocity.Zero
                     }
                 }
@@ -946,7 +958,8 @@ fun MetrolistApp(
             if (glassMotionAllowed) {
                 animateFloatAsState(
                     glassMorphTarget,
-                    PolishMotion.interactiveSpring(),
+                    // Glasmio's compact transition response, without its refraction renderer.
+                    spring(dampingRatio = 0.8f, stiffness = 438.65f),
                     label = "glassNavigationMorph",
                 ).value.coerceIn(0f, 1f)
             } else {
