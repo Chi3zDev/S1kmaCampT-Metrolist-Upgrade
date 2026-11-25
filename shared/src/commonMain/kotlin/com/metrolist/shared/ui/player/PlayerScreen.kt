@@ -788,11 +788,7 @@ fun PlayerScreen(
                 isCanvasBackdropVisible ||
                 (playerType == PlayerType.VINYL && !uiState.isLyricsVisible) ||
                 (
-                    usesFullscreenThumbnail && currentSong?.displayThumbnail != null && !uiState.isLyricsVisible &&
-                        !(
-                            isLandscape && !showVideoSurface && playerBackground == PlayerBackgroundStyle.LIQUID &&
-                                MaterialTheme.colorScheme.surface.luminance() >= 0.5f
-                        )
+                    usesFullscreenThumbnail && currentSong?.displayThumbnail != null && !uiState.isLyricsVisible
                 )
             ) {
                 Color.White

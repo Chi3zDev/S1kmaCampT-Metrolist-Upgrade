@@ -600,8 +600,7 @@ private fun LandscapeFullscreenThumbnailBackground(
             )
         }
 
-        val foregroundIsDark = playerBackground == PlayerBackgroundStyle.LIQUID && MaterialTheme.colorScheme.surface.luminance() >= 0.5f
-        val backdropScrim = if (foregroundIsDark) Color.White else Color.Black
+        val backdropScrim = Color.Black
         val layoutDirection = LocalLayoutDirection.current
         val cutoutStart = WindowInsets.displayCutout.asPaddingValues().calculateStartPadding(layoutDirection)
 
