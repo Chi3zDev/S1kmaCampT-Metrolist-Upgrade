@@ -103,10 +103,12 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.round
 import com.metrolist.shared.generated.resources.*
+import com.metrolist.shared.settings.Settings
 import com.metrolist.shared.ui.LocalIsTv
 import com.metrolist.shared.ui.components.ExpressiveSwitch
 import com.metrolist.shared.ui.components.SwipeBackLayout
 import com.metrolist.shared.ui.components.focusOutline
+import com.metrolist.shared.ui.components.glassCardColor
 import com.metrolist.shared.ui.components.singleLineMarquee
 import com.metrolist.shared.ui.equalizer.MetroEqScreen
 import com.metrolist.shared.ui.haptics.rememberMetrolistHaptics
@@ -365,7 +367,12 @@ private fun CompactSettingsHome(
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor =
+            if (host.platform == SettingsPlatform.ANDROID && Settings.shared.androidAppBackgroundUri.isNotEmpty()) {
+                Color.Transparent
+            } else {
+                MaterialTheme.colorScheme.surface
+            },
         topBar = {
             LargeFlexibleTopAppBar(
                 title = {
@@ -466,7 +473,12 @@ private fun CompactSettingsDetail(
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor =
+            if (host.platform == SettingsPlatform.ANDROID && Settings.shared.androidAppBackgroundUri.isNotEmpty()) {
+                Color.Transparent
+            } else {
+                MaterialTheme.colorScheme.surface
+            },
         topBar = {
             LargeFlexibleTopAppBar(
                 title = { Text(page.title, fontWeight = MaterialTheme.typography.titleLargeEmphasized.fontWeight) },
@@ -937,8 +949,9 @@ internal fun SettingsNavigationRow(
     val interactionSource = remember { MutableInteractionSource() }
     val pressed by interactionSource.collectIsPressedAsState()
     val shape = segmentedGroupShape(first, last, pressed)
+    val rowColor = if (pressed) MaterialTheme.colorScheme.surfaceContainerHighest else MaterialTheme.colorScheme.surfaceContainer
     val containerColor by animateColorAsState(
-        if (pressed) MaterialTheme.colorScheme.surfaceContainerHighest else MaterialTheme.colorScheme.surfaceContainer,
+        if (Settings.shared.liquidGlassTheme) glassCardColor(rowColor) else rowColor,
         label = "settingsRootRow",
     )
     Row(
@@ -1081,9 +1094,14 @@ private fun SettingsItemRow(
     val interactionSource = remember { MutableInteractionSource() }
     val pressed by interactionSource.collectIsPressedAsState()
     val shape = segmentedGroupShape(first, last, pressed)
+    val rowColor = MaterialTheme.colorScheme.settingsRowContainerColor(pressed)
     val background by animateColorAsState(
         targetValue =
-            if (highlighted) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.settingsRowContainerColor(pressed),
+            when {
+                highlighted -> MaterialTheme.colorScheme.primaryContainer
+                Settings.shared.liquidGlassTheme -> glassCardColor(rowColor)
+                else -> rowColor
+            },
         label = "settingsItemRow",
     )
     val titleColor by animateColorAsState(
