@@ -173,6 +173,7 @@ import com.metrolist.shared.ui.components.YTGridItem
 import com.metrolist.shared.ui.components.YTListItem
 import com.metrolist.shared.ui.components.animateCurrentSongColors
 import com.metrolist.shared.ui.components.animatedCurrentSongArtworkShape
+import com.metrolist.shared.ui.components.appPageBackground
 import com.metrolist.shared.ui.components.carouselArtworkShape
 import com.metrolist.shared.ui.components.currentSongSemantics
 import com.metrolist.shared.ui.components.images.AsyncImage
@@ -443,7 +444,7 @@ private fun ArtistScreenContent(
     val videoSections = remember(page) { page.videoSections }
     val librarySection = remember(page) { page.librarySection }
     BoxWithConstraints(
-        modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface),
+        modifier = modifier.fillMaxSize().background(appPageBackground(MaterialTheme.colorScheme.surface)),
         contentAlignment = Alignment.TopCenter,
     ) {
         val isWide = maxWidth >= 960.dp

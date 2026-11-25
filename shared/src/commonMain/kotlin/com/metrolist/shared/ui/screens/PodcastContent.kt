@@ -110,6 +110,7 @@ import com.metrolist.shared.ui.components.ExpandableSearchBar
 import com.metrolist.shared.ui.components.ExpandableText
 import com.metrolist.shared.ui.components.ModalBottomSheet
 import com.metrolist.shared.ui.components.SongThumbnailPlayingIndicator
+import com.metrolist.shared.ui.components.appPageBackground
 import com.metrolist.shared.ui.components.episodeProgressFraction
 import com.metrolist.shared.ui.components.images.AsyncImage
 import com.metrolist.shared.ui.components.loadingShimmer
@@ -203,7 +204,7 @@ fun PodcastContent(
     }
     Scaffold(
         modifier = modifier,
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = appPageBackground(MaterialTheme.colorScheme.surface),
         topBar = {
             TopAppBar(
                 title = {

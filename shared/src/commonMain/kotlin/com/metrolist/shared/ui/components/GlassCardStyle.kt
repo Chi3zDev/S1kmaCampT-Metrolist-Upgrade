@@ -6,6 +6,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -13,6 +14,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.unit.dp
 import com.metrolist.shared.settings.Settings
+
+/** True only when the Android host has successfully loaded a background behind its pages. */
+val LocalAppBackgroundVisible = compositionLocalOf { false }
+
+internal fun pageBackgroundColor(
+    fallback: Color,
+    imageReady: Boolean,
+): Color = if (imageReady) Color.Transparent else fallback
+
+@Composable
+fun appPageBackground(fallback: Color): Color = pageBackgroundColor(fallback, LocalAppBackgroundVisible.current)
 
 /** Highlights remain luminous in both themes; use only a subtle tinted lower edge. */
 fun glassEdgeColors(

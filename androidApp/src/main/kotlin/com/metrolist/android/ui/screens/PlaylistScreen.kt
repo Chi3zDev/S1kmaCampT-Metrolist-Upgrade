@@ -147,6 +147,7 @@ import com.metrolist.shared.ui.components.PlaylistOrderControls
 import com.metrolist.shared.ui.components.PopupContent
 import com.metrolist.shared.ui.components.PopupVisibility
 import com.metrolist.shared.ui.components.SongSelectionControls
+import com.metrolist.shared.ui.components.appPageBackground
 import com.metrolist.shared.ui.components.images.AsyncImage
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import com.metrolist.shared.ui.navigation.navigationPopupSource
@@ -579,6 +580,7 @@ fun PlaylistScreen(
 
     Scaffold(
         modifier = Modifier.imePadding().nestedScroll(scrollBehavior.nestedScrollConnection),
+        containerColor = appPageBackground(MaterialTheme.colorScheme.background),
         contentWindowInsets = WindowInsets(0),
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {

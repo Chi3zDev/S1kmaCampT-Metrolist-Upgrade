@@ -330,6 +330,7 @@ import com.metrolist.shared.ui.components.AlertDialog
 import com.metrolist.shared.ui.components.BottomSheet
 import com.metrolist.shared.ui.components.DISMISSED_ANCHOR
 import com.metrolist.shared.ui.components.EXPANDED_ANCHOR
+import com.metrolist.shared.ui.components.LocalAppBackgroundVisible
 import com.metrolist.shared.ui.components.LocalDownloadedSongIds
 import com.metrolist.shared.ui.components.PopupContent
 import com.metrolist.shared.ui.components.PopupVisibility
@@ -502,6 +503,8 @@ fun MetrolistApp(
         pureBlack = pureBlack,
     ) {
         val appBackground = if (pureBlack) Color.Black else MaterialTheme.colorScheme.surface
+        val backgroundUri = Settings.shared.androidAppBackgroundUri
+        var backgroundImageReady by remember(backgroundUri) { mutableStateOf(false) }
         val horizontalSystemBars = WindowInsets.navigationBars.union(WindowInsets.displayCutout)
         val playerBackgroundOpaque = MaterialTheme.colorScheme.surfaceContainer.alpha == 1f
         val deviceConnectState by AndroidDeviceConnect.manager.state.collectAsState()
@@ -1530,6 +1533,7 @@ fun MetrolistApp(
                                 }
                             }
                         CompositionLocalProvider(
+                            LocalAppBackgroundVisible provides backgroundImageReady,
                             LocalContentObscured provides (isInPipMode || contentObscured),
                             LocalFloatingNavBar provides useFloatingNavBar,
                             LocalGlassNavbarBottomOffset provides
@@ -1556,8 +1560,7 @@ fun MetrolistApp(
                                 adaptiveLayout = adaptiveLayout,
                                 navigationSuiteType = navigationSuiteType,
                                 navigationVisible = shouldShowNavigationBar,
-                                containerColor =
-                                    if (Settings.shared.androidAppBackgroundUri.isNotEmpty()) Color.Transparent else appBackground,
+                                containerColor = if (backgroundImageReady) Color.Transparent else appBackground,
                                 onSearchLongClick = { navigator.navigate(Screen.Recognition) },
                                 onAccountClick = { navigator.navigate(Screen.Profile) },
                                 showAccountInBottomBar = useBottomAccount,
@@ -1795,12 +1798,13 @@ fun MetrolistApp(
                                                 .consumeWindowInsets(scaffoldPadding)
                                                 .consumeWindowInsets(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)),
                                         ) {
-                                            val backgroundUri = Settings.shared.androidAppBackgroundUri
                                             if (backgroundUri.isNotEmpty()) {
                                                 CoilAsyncImage(
                                                     model = android.net.Uri.parse(backgroundUri),
                                                     contentDescription = null,
                                                     contentScale = ContentScale.Crop,
+                                                    onSuccess = { backgroundImageReady = true },
+                                                    onError = { backgroundImageReady = false },
                                                     modifier = Modifier.fillMaxSize(),
                                                 )
                                                 // Preserve text contrast over arbitrary user-selected photographs.

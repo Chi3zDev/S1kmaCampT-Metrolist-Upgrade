@@ -67,6 +67,7 @@ import com.metrolist.shared.generated.resources.Res
 import com.metrolist.shared.generated.resources.back
 import com.metrolist.shared.generated.resources.beta_tag
 import com.metrolist.shared.ui.LocalIsTv
+import com.metrolist.shared.ui.components.appPageBackground
 import com.metrolist.shared.ui.components.singleLineMarquee
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import com.metrolist.shared.ui.settings.LocalSettingsPageHasTopBar
@@ -93,6 +94,7 @@ fun SettingsSubScreen(
 
     Scaffold(
         modifier = scrollBehavior?.let { modifier.nestedScroll(it.nestedScrollConnection) } ?: modifier,
+        containerColor = appPageBackground(MaterialTheme.colorScheme.background),
         contentWindowInsets = WindowInsets(0),
         topBar = {
             if (LocalSettingsPageHasTopBar.current) {

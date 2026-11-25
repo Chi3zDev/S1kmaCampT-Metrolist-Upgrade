@@ -7,6 +7,12 @@ import kotlin.test.assertTrue
 
 class GlassThemeTest {
     @Test
+    fun pageFallsBackToThemeWhenImageIsUnavailable() {
+        assertEquals(Color.Blue, pageBackgroundColor(Color.Blue, imageReady = false))
+        assertEquals(Color.Transparent, pageBackgroundColor(Color.Blue, imageReady = true))
+    }
+
+    @Test
     fun themeAndFloatingCardsAreIndependent() {
         assertTrue(glassListMaterialEnabled(liquidGlassTheme = true, floatingGlass = false, glassCards = false))
         assertTrue(glassListMaterialEnabled(liquidGlassTheme = false, floatingGlass = true, glassCards = true))

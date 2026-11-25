@@ -174,6 +174,7 @@ import com.metrolist.shared.ui.components.PopupVisibility
 import com.metrolist.shared.ui.components.RefreshIndicator
 import com.metrolist.shared.ui.components.SongSelectionControls
 import com.metrolist.shared.ui.components.TopPlaylistOrderControls
+import com.metrolist.shared.ui.components.appPageBackground
 import com.metrolist.shared.ui.components.images.AsyncImage
 import com.metrolist.shared.ui.components.libraryCover
 import com.metrolist.shared.ui.components.rememberDownloadPlaylistFilter
@@ -734,6 +735,7 @@ fun AutoPlaylistScreen(
     val uploadingDescription = stringResource(Res.string.uploading)
 
     Scaffold(
+        containerColor = appPageBackground(MaterialTheme.colorScheme.background),
         contentWindowInsets = WindowInsets(0),
         topBar = {
             if (selection.active) {

@@ -107,6 +107,7 @@ import com.metrolist.shared.settings.Settings
 import com.metrolist.shared.ui.LocalIsTv
 import com.metrolist.shared.ui.components.ExpressiveSwitch
 import com.metrolist.shared.ui.components.SwipeBackLayout
+import com.metrolist.shared.ui.components.appPageBackground
 import com.metrolist.shared.ui.components.focusOutline
 import com.metrolist.shared.ui.components.glassCardColor
 import com.metrolist.shared.ui.components.singleLineMarquee
@@ -367,12 +368,7 @@ private fun CompactSettingsHome(
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-        containerColor =
-            if (Settings.shared.androidAppBackgroundUri.isNotEmpty()) {
-                Color.Transparent
-            } else {
-                MaterialTheme.colorScheme.surface
-            },
+        containerColor = appPageBackground(MaterialTheme.colorScheme.surface),
         topBar = {
             LargeFlexibleTopAppBar(
                 title = {
@@ -473,12 +469,7 @@ private fun CompactSettingsDetail(
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-        containerColor =
-            if (Settings.shared.androidAppBackgroundUri.isNotEmpty()) {
-                Color.Transparent
-            } else {
-                MaterialTheme.colorScheme.surface
-            },
+        containerColor = appPageBackground(MaterialTheme.colorScheme.surface),
         topBar = {
             LargeFlexibleTopAppBar(
                 title = { Text(page.title, fontWeight = MaterialTheme.typography.titleLargeEmphasized.fontWeight) },
