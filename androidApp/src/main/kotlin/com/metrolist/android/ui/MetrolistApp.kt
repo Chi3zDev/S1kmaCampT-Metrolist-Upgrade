@@ -1818,6 +1818,9 @@ fun MetrolistApp(
                                                 .fillMaxSize()
                                                 .then(if (glassBackdrop != null) Modifier.hazeSource(glassBackdrop) else Modifier)
                                                 .then(if (glasmioBackdrop != null) Modifier.layerBackdrop(glasmioBackdrop) else Modifier)
+                                                // The recorded layer must include the page's opaque base, not only
+                                                // translucent content drawn over the scaffold behind it.
+                                                .background(appBackground)
                                                 .consumeWindowInsets(scaffoldPadding)
                                                 .consumeWindowInsets(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)),
                                         ) {
