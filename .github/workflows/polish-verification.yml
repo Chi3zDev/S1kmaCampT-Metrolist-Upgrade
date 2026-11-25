@@ -1,5 +1,5 @@
 name: Polish verification
-# Verify glass surfaces, light mode, background, sharing and motion.
+# Verify glass player materials and safe gallery backdrop fallback.
 
 on:
   workflow_dispatch:
