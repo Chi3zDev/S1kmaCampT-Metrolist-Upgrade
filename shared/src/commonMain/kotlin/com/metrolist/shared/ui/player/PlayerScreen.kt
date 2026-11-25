@@ -784,6 +784,7 @@ fun PlayerScreen(
                         PlayerPanelStyle.SOLID
                 ) ||
                 isCanvasBackdropVisible ||
+                (playerType == PlayerType.VINYL && !uiState.isLyricsVisible) ||
                 (
                     usesFullscreenThumbnail && currentSong?.displayThumbnail != null && !uiState.isLyricsVisible &&
                         !(
