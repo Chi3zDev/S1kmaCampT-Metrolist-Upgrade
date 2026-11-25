@@ -58,6 +58,7 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.PointerEventPass
@@ -120,7 +121,7 @@ internal fun playerInactiveControlContainerColor(): Color {
 }
 
 @Composable
-fun Modifier.playerControlBlend(): Modifier {
+fun Modifier.playerControlBlend(outlineShape: Shape? = null): Modifier {
     val settings = Settings.shared
     val darkTheme = settings.getCurrentThemeIsDark()
     val blended =
@@ -140,7 +141,7 @@ fun Modifier.playerControlBlend(): Modifier {
             else -> 0.18f
         }
     val radius = (12f + settings.glassCornerRoundness.coerceIn(0f, 100f) * 0.38f).dp
-    val shape = RoundedCornerShape(radius)
+    val shape = outlineShape ?: RoundedCornerShape(radius)
     val surface = MaterialTheme.colorScheme.surface
     val highlight = MaterialTheme.colorScheme.onSurface
     return blended

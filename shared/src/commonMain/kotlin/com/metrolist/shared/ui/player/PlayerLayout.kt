@@ -367,7 +367,7 @@ internal fun TabletPlayerContent(
                                                 hapticManager.perform(HapticEvent.PRESS)
                                                 playerConnection?.setVideoMode(true)
                                             },
-                                            modifier = Modifier.playerControlBlend(),
+                                            modifier = Modifier.playerControlBlend(CircleShape),
                                         )
                                     } else {
                                         LandscapePlayerModeSwitcher(
@@ -382,7 +382,7 @@ internal fun TabletPlayerContent(
                                                 hapticManager.perform(HapticEvent.PRESS)
                                                 playerConnection?.setVideoMode(true)
                                             },
-                                            modifier = Modifier.playerControlBlend(),
+                                            modifier = Modifier.playerControlBlend(CircleShape),
                                         )
                                     }
                                 }
@@ -834,7 +834,7 @@ private fun LandscapePlayerCollapseButton(
                 containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
                 contentColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
             ),
-        modifier = modifier.size(buttonSize).tvFocusHighlight(CircleShape).playerControlBlend(),
+        modifier = modifier.size(buttonSize).tvFocusHighlight(CircleShape).playerControlBlend(CircleShape),
     ) {
         Icon(
             imageVector = MetrolistIcons.Default.Close,
@@ -875,7 +875,7 @@ private fun LandscapePlayerCastButton(
                 .tvFocusHighlight(
                     CircleShape,
                     color = if (isCasting) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary,
-                ).playerControlBlend(),
+                ).playerControlBlend(CircleShape),
     ) {
         Icon(
             imageVector = if (isCasting) MetrolistIcons.Filled.Cast else MetrolistIcons.Outlined.Cast,
@@ -1222,7 +1222,7 @@ internal fun LandscapePlayerContent(
                             hapticManager.perform(HapticEvent.PRESS)
                             playerConnection?.setVideoMode(true)
                         },
-                        modifier = Modifier.playerControlBlend(),
+                        modifier = Modifier.playerControlBlend(CircleShape),
                     )
                 } else {
                     LandscapePlayerModeSwitcher(
@@ -1237,7 +1237,7 @@ internal fun LandscapePlayerContent(
                             hapticManager.perform(HapticEvent.PRESS)
                             playerConnection?.setVideoMode(true)
                         },
-                        modifier = Modifier.playerControlBlend(),
+                        modifier = Modifier.playerControlBlend(CircleShape),
                     )
                 }
             }

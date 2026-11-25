@@ -1557,7 +1557,7 @@ fun PlayerScreen(
                                                                 hapticManager.perform(HapticEvent.PRESS)
                                                                 playerConnection?.setVideoMode(true)
                                                             },
-                                                            modifier = Modifier.playerControlBlend(),
+                                                            modifier = Modifier.playerControlBlend(CircleShape),
                                                         )
                                                     }
 
@@ -1570,7 +1570,7 @@ fun PlayerScreen(
                                                                 Arrangement.spacedBy(
                                                                     ButtonGroupDefaults.ConnectedSpaceBetween,
                                                                 ),
-                                                            modifier = Modifier.height(40.dp),
+                                                            modifier = Modifier.height(40.dp).playerControlBlend(CircleShape),
                                                         ) {
                                                             val songSelected = !isVideoActive
                                                             customItem(
@@ -1602,8 +1602,7 @@ fun PlayerScreen(
                                                                                 .size(
                                                                                     width = 46.dp,
                                                                                     height = 40.dp,
-                                                                                ).animateWidth(interactionSource, 12.dp)
-                                                                                .playerControlBlend(),
+                                                                                ),
                                                                     ) {
                                                                         if (isResolvingToSong && LocalPlayerContentActive.current) {
                                                                             LoadingIndicator(
@@ -1683,8 +1682,7 @@ fun PlayerScreen(
                                                                                 .size(
                                                                                     width = 46.dp,
                                                                                     height = 40.dp,
-                                                                                ).animateWidth(interactionSource, 12.dp)
-                                                                                .playerControlBlend(),
+                                                                                ),
                                                                     ) {
                                                                         if (isResolvingToVideo && LocalPlayerContentActive.current) {
                                                                             LoadingIndicator(
@@ -1792,7 +1790,7 @@ fun PlayerScreen(
                                                             Modifier
                                                                 .align(Alignment.CenterStart)
                                                                 .size(36.dp)
-                                                                .playerControlBlend(),
+                                                                .playerControlBlend(CircleShape),
                                                     ) {
                                                         Icon(
                                                             imageVector = MetrolistIcons.Outlined.KeyboardArrowDown,
@@ -1830,7 +1828,7 @@ fun PlayerScreen(
                                                                                 MaterialTheme.colorScheme.onSurfaceVariant
                                                                             },
                                                                     ),
-                                                                modifier = Modifier.size(36.dp).playerControlBlend(),
+                                                                modifier = Modifier.size(36.dp).playerControlBlend(CircleShape),
                                                             ) {
                                                                 Icon(
                                                                     imageVector =
