@@ -253,9 +253,12 @@ private fun <T> FloatingNavigationBar(
                         val position = remember { Animatable(targetCenter) }
                         LaunchedEffect(targetCenter, dragX) {
                             val finger = dragX
-                            if (finger != null) position.snapTo(finger) else position.animateTo(targetCenter, NavSpring)
+                            position.animateTo(
+                                finger ?: targetCenter,
+                                if (finger != null) spring(dampingRatio = 0.9f, stiffness = 900f) else NavSpring,
+                            )
                         }
-                        dragX ?: position.value
+                        position.value
                     } else {
                         targetCenter
                     }
@@ -267,8 +270,10 @@ private fun <T> FloatingNavigationBar(
                         .padding(horizontal = 8.dp)
                         .onSizeChanged { rowWidth = it.width }
                         .pointerInput(pillItems.map { it.key }, rowWidth, layoutDirection) {
+                            var lastDragTime = 0L
                             detectHorizontalDragGestures(
                                 onDragStart = { start ->
+                                    lastDragTime = 0L
                                     dragX = start.x.coerceIn(0f, rowWidth.toFloat())
                                     dragIndex = itemAt(start.x)
                                     haptics.perform(HapticEvent.DRAG_START)
@@ -277,7 +282,11 @@ private fun <T> FloatingNavigationBar(
                                     change.consume()
                                     val x = ((dragX ?: change.position.x) + amount).coerceIn(0f, rowWidth.toFloat())
                                     dragX = x
-                                    stretch = (1f + kotlin.math.abs(amount) / 90f).coerceAtMost(1.18f)
+                                    val elapsedMs = (change.uptimeMillis - lastDragTime).coerceIn(1L, 80L)
+                                    val speedDpPerSecond =
+                                        if (lastDragTime == 0L) 0f else kotlin.math.abs(amount) * 1000f / elapsedMs / density.density
+                                    lastDragTime = change.uptimeMillis
+                                    stretch = 1f + (speedDpPerSecond / 4000f).coerceIn(0f, 0.18f)
                                     val index = itemAt(x)
                                     if (index != dragIndex) {
                                         dragIndex = index
@@ -300,7 +309,7 @@ private fun <T> FloatingNavigationBar(
                     contentAlignment = AbsoluteAlignment.CenterLeft,
                 ) {
                     if (bubbleEnabled && rowWidth > 0) {
-                        val center = dragX ?: animatedCenter
+                        val center = animatedCenter
                         val bubbleStretch by animateFloatAsState(
                             if (dragX !=
                                 null

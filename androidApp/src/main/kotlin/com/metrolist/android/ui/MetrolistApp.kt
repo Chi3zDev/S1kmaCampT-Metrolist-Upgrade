@@ -135,6 +135,7 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.offset
 import androidx.compose.ui.zIndex
@@ -901,6 +902,15 @@ fun MetrolistApp(
                             accumulated = 0f
                         }
                         return Offset.Zero
+                    }
+
+                    override suspend fun onPreFling(available: Velocity): Velocity {
+                        if (useGlassNavigation && kotlin.math.abs(available.y) >= glassScrollThreshold * 16f) {
+                            glassNavigationCollapsed = available.y < 0f
+                            accumulated = 0f
+                        }
+                        // The list receives its complete fling; this changes only the bar presentation.
+                        return Velocity.Zero
                     }
                 }
             }
