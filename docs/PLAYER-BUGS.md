@@ -40,3 +40,14 @@ Setiap sel berarti kedua keadaan kaca, kedua bentuk tombol, kedua tema, dua ukur
 Kandidat ditag pada commit `180c95c2`. Workflow `45535540956` lulus seluruh shared Android host tests, Android unit tests, Android lint, pemeriksaan sumber terlokalisasi dan ktlint. Workflow `45535553533` lulus build debug, benchmark, tes terpilih dan build release bertanda tangan. Paket kandidat `com.chi3zdev.metrolist`, versionCode 159, `14.0.1-upgrade.2-rc.2`, min SDK 24. SHA-256 APK: `0e938ec955d521591fd7dea58f10553763f7a9bb7fd74814b6d50577f77af29e`; checksum artefak cocok dan fingerprint sertifikat v2 cocok dengan Upgrade 2 beta 1.
 
 Prerelease: https://github.com/Chi3zDev/S1kmaCampT-Metrolist-Upgrade/releases/tag/v14.0.1-upgrade.2-rc.2. Tidak ada perangkat atau emulator yang tersedia di lingkungan build: matriks, preview sesudah, animasi aktual, TalkBack dan regresi manual tetap **belum diuji**. Prerelease bukan bukti kesesuaian visual atau persetujuan untuk merge/rilis final.
+
+## Laporan perangkat setelah RC2 (25 November)
+
+Status: **belum selesai, belum diuji ulang**. Laporan ini menggantikan persyaratan panel lama: pengguna sekarang meminta **tidak ada kartu sama sekali ketika kaca dimatikan**, dan hanya tipe Kartu Kaca yang boleh memakai kartu ketika kaca diaktifkan; Modern, Vintage, Klasik dan Piringan tanpa kartu. Foto juga menunjukkan pergeseran ukuran/ruang kosong pada perubahan kepadatan layar, Kartu Kaca berubah saat fullscreen dipilih, dan video melampaui batas kartu. Gunakan foto pengguna sebagai bukti sebelum, bukan bukti hasil perbaikan.
+
+- [ ] Perbaiki kebijakan panel dan semua orientasi tanpa mengubah setelan bawaan.
+- [ ] Pertahankan thumbnail Kartu Kaca saat opsi fullscreen dipilih; cek Canvas terpisah.
+- [ ] Batasi video agar sesuai lebar dan bentuk area Kartu Kaca, termasuk saat rotasi.
+- [ ] Tata ulang ruang yang adaptif terhadap ukuran viewport/kepadatan dan font; jangan memaksa density/font sistem atau mengklaim sudah teruji di perangkat.
+- [ ] Sempurnakan piringan; periksa kontras, gerak dan ukuran pada perangkat.
+- [ ] Peningkatan Streak dan Recap yang baru diminta memerlukan implementasi, lokalisasi dan verifikasi terpisah; jangan ubah aturan hitung/pemulihan streak. Pengguna mengizinkan musik Recap mengganti sementara pemutaran dan mencoba memulihkan lagu/posisi saat Recap ditutup; perlu mekanisme aman dan tes agar tidak menimpa perubahan manual pengguna.
