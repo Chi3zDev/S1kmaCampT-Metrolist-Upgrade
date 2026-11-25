@@ -838,7 +838,8 @@ fun MetrolistApp(
         val glassBackdrop = if (useGlass && canBlurGlass && !Settings.shared.glassLightMode) hazeState else null
         val isImeVisible = WindowInsets.ime.asPaddingValues().calculateBottomPadding() > 0.dp
         val shouldHideMiniPlayerForIme = isLandscape && isImeVisible
-        val shouldShowMiniPlayer = hasMedia
+        // Recap owns its own preview controls; hide the mini player without altering playback.
+        val shouldShowMiniPlayer = hasMedia && currentRoute != Screen.Recap
         val immersiveContent = remember { mutableStateOf(false) }
         val shouldRenderMiniPlayer = shouldShowMiniPlayer && !shouldHideMiniPlayerForIme
 
