@@ -368,7 +368,7 @@ private fun CompactSettingsHome(
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         containerColor =
-            if (host.platform == SettingsPlatform.ANDROID && Settings.shared.androidAppBackgroundUri.isNotEmpty()) {
+            if (Settings.shared.androidAppBackgroundUri.isNotEmpty()) {
                 Color.Transparent
             } else {
                 MaterialTheme.colorScheme.surface
@@ -474,7 +474,7 @@ private fun CompactSettingsDetail(
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         containerColor =
-            if (host.platform == SettingsPlatform.ANDROID && Settings.shared.androidAppBackgroundUri.isNotEmpty()) {
+            if (Settings.shared.androidAppBackgroundUri.isNotEmpty()) {
                 Color.Transparent
             } else {
                 MaterialTheme.colorScheme.surface
