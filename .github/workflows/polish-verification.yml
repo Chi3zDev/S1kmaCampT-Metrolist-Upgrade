@@ -1,5 +1,5 @@
 name: Polish verification
-# Verify Glasmio toolbar and dependency compatibility.
+# Verify Glasmio device-test candidate.
 
 on:
   workflow_dispatch:
