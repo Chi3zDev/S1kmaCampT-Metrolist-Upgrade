@@ -8,6 +8,16 @@ import kotlin.test.assertTrue
 
 class PlayerArtworkTransitionSettingTest {
     @Test
+    fun glassPlayerMaterialHasDistinctBoundedStyles() {
+        val clear = playerGlassOpacity("CLEAR", 100f)
+        val regular = playerGlassOpacity("BLUR", 100f)
+        val frosted = playerGlassOpacity("FROSTED", 100f)
+        assertTrue(clear < regular && regular < frosted)
+        assertTrue(playerGlassOpacity("CLEAR", 0f) >= 0.38f)
+        assertTrue(playerGlassOpacity("FROSTED", 200f) <= 0.9f)
+    }
+
+    @Test
     fun lyricsTransitionRespectsVisibilityAndLightweightModes() {
         assertTrue(playerLyricsMotionAllowed(visible = true, lightMode = false, deviceAllowed = true))
         assertFalse(playerLyricsMotionAllowed(visible = false, lightMode = false, deviceAllowed = true))

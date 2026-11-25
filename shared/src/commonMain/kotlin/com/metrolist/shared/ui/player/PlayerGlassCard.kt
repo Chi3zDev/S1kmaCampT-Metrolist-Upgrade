@@ -30,6 +30,21 @@ internal fun playerPanelStyle(
         else -> PlayerPanelStyle.NONE
     }
 
+/** The player uses the selected material without introducing another backdrop blur. */
+internal fun playerGlassOpacity(
+    style: String,
+    tintPercent: Float,
+): Float {
+    val strength = (tintPercent / 100f).coerceIn(0f, 1f)
+    val material =
+        when (style) {
+            "CLEAR" -> 0.30f
+            "FROSTED" -> 0.64f
+            else -> 0.47f
+        }
+    return (0.38f + material * strength).coerceIn(0.38f, 0.90f)
+}
+
 /** A tinted surface with no additional backdrop capture or blur. */
 @Composable
 internal fun Modifier.playerGlassCard(
@@ -45,16 +60,8 @@ internal fun Modifier.playerGlassCard(
         } else {
             lerp(Color.Black, MaterialTheme.colorScheme.primary, 0.08f)
         }
-    val tint = (settings.glassTintStrength / 100f).coerceIn(0f, 1f)
-    val styleAlpha =
-        when (settings.glassStyle) {
-            "CLEAR" -> 0.48f
-            "FROSTED" -> 0.68f
-            else -> 0.58f
-        }
-    // Keep a minimum contrast scrim even at zero tint so text remains legible.
-    val topAlpha = (0.30f + styleAlpha * tint).coerceIn(0.30f, 0.86f)
-    val opacity = if (glass) topAlpha else 0.86f
+    // Keep a contrast scrim even at zero tint so text remains legible.
+    val opacity = if (glass) playerGlassOpacity(settings.glassStyle, settings.glassTintStrength) else 0.86f
     val surface =
         background(
             Brush.verticalGradient(
@@ -94,14 +101,7 @@ internal fun Modifier.portraitPlayerGlassCard(
         } else {
             lerp(Color.Black, MaterialTheme.colorScheme.primary, 0.08f)
         }
-    val tint = (settings.glassTintStrength / 100f).coerceIn(0f, 1f)
-    val styleAlpha =
-        when (settings.glassStyle) {
-            "CLEAR" -> 0.48f
-            "FROSTED" -> 0.68f
-            else -> 0.58f
-        }
-    val opacity = if (glass) (0.30f + styleAlpha * tint).coerceIn(0.30f, 0.86f) else 0.86f
+    val opacity = if (glass) playerGlassOpacity(settings.glassStyle, settings.glassTintStrength) else 0.86f
     val radius = (12f + settings.glassCornerRoundness.coerceIn(0f, 100f) * 0.28f).dp
     val edgeBrush = glassEdgeBrush(settings.glassStyle == "CLEAR")
     return this.drawBehind {
