@@ -919,7 +919,7 @@ fun PlayerScreen(
             val artworkBesideTitle =
                 !useLandscapeLayout && !isTv && !usesFullscreenThumbnail &&
                     playerType != PlayerType.VINYL && playerType != PlayerType.GLASS_CARD && maxHeight < ArtworkBesideTitleMaxHeight
-            val primaryControlSize = if (compactPortraitHeight) 64.dp else 72.dp
+            val primaryControlSize = portraitPrimaryControlSize(screenWidth, maxHeight)
             val showFullscreenThumbnailBackground = usesFullscreenThumbnail
             val navigationBarBottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
             val statusBarTopPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
@@ -1864,21 +1864,12 @@ fun PlayerScreen(
                                                 verticalArrangement =
                                                     if (usesFullscreenThumbnail) {
                                                         Arrangement.Bottom
-                                                    } else if (playerType == PlayerType.GLASS_CARD) {
-                                                        Arrangement.Bottom
                                                     } else {
                                                         Arrangement.Center
                                                     },
                                             ) {
                                                 Box(
-                                                    contentAlignment =
-                                                        if (playerType ==
-                                                            PlayerType.GLASS_CARD
-                                                        ) {
-                                                            Alignment.BottomCenter
-                                                        } else {
-                                                            Alignment.Center
-                                                        },
+                                                    contentAlignment = Alignment.Center,
                                                     modifier =
                                                         Modifier
                                                             .fillMaxWidth()
