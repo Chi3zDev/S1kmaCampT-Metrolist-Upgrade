@@ -18,6 +18,18 @@ Status: **belum dijalankan**. Pengguna akan melakukan uji perangkat pada tahap a
 - [ ] Poster: uji Klasik/Kartu Kaca, persegi/Story, pilihan ukuran ekstrem dan default, teks panjang, tanpa sampul dan RTL jika tersedia. Bandingkan preview dengan gambar ekspor.
 - [ ] About/Settings: lihat badge versi, changelog, pilihan bahasa/font dan penjelasan, serta pastikan kredit dan lisensi tetap tersedia. Preferensi lama tetap terjaga setelah pembaruan.
 
+## Matriks perbaikan pemutar kandidat 2
+
+Status: **belum diuji**. Untuk Modern, Vintage, Classic, Kartu Kaca dan Piringan, catat kaca ON/OFF, thumbnail Compact/Fullscreen/Canvas, tombol persegi panjang ON/OFF, tema terang/gelap, layar kecil/besar, serta font normal/besar. Tandai N/A hanya jika mode tidak berlaku (misalnya artwork piringan khusus), bukan sebagai lulus. Rincian matriks ada di `PLAYER-BUGS.md`.
+
+- [ ] Kaca OFF: panel gelap tanpa kilau; kaca ON: efek kaca tanpa panel ganda. Pada Piringan pastikan tidak ada kartu, termasuk landscape dan saat lirik dibuka.
+- [ ] Fullscreen mengisi bidang tanpa pita, terpotong di tengah, scrim cukup; uji sampul kosong, lambat, gagal dan ganti lagu/crossfade tanpa kedip. Periksa juga Canvas dan video, serta Compact.
+- [ ] Tombol atas: satu outline dan segmen headphone/video tidak bertumpuk. Uji kedua aksi, ukuran sentuh dan TalkBack.
+- [ ] Baris bawah: semua aksi terlihat atau tersedia di menu overflow, tidak terpotong dan target tidak bertumpuk. Coba teks timer panjang dan font besar.
+- [ ] Kartu Kaca: jarak sampul/judul serta scroll dan kontrol pada layar pendek. Piringan: crop kiri, ukuran label, alur/kilau, warna latar, judul/artis, tiga kontrol dan seekbar.
+- [ ] Piringan berputar sekitar 5–6 detik per putaran, melambat saat jeda; tonearm mengikuti progres dan kembali istirahat. Uji latar depan/belakang, sistem animasi mati dan mode ringan.
+- [ ] Simpan screenshot sebelum/sesudah untuk setiap gaya kaca ON/OFF jika perangkat dan kondisi sebelum tersedia. Jangan mengganti bukti dengan gambar sintetis.
+
 ## Aksesibilitas dan performa
 
 - [ ] Ulangi bagian penting dalam tema terang/gelap, font sistem besar, mode ringan, animasi sistem mati dan orientasi yang tersedia.
