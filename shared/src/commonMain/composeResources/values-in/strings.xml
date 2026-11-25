@@ -2657,4 +2657,5 @@
     <string name="streak_share_square">Persegi</string>
     <string name="streak_flame_interaction">Api streak; ketuk untuk percikan</string>
     <string name="about_upgrade_candidate_three">Upgrade %1$d (kandidat 3)</string>
+    <string name="about_upgrade_candidate_four">Upgrade %1$d (kandidat 4)</string>
 </resources>

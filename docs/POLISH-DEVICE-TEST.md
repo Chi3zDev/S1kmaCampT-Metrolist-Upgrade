@@ -32,7 +32,7 @@ Status: **belum diuji**. Untuk Modern, Vintage, Classic, Kartu Kaca dan Piringan
 
 ## Tambahan Streak dan Recap kandidat 3
 
-Status: **belum diuji**. Musik latar lagu teratas Recap dan pemulihan pemutaran sebelumnya **belum diimplementasikan**; jangan menandainya lulus pada kandidat ini.
+Status: **belum diuji**. Untuk kandidat 4, uji musik Recap dengan antrean lokal yang berbeda dari lagu teratas. Catat lagu, posisi, status putar/jeda dan urutan antrean sebelum Recap; saat keluar atau aplikasi masuk latar, pastikan pemulihan dicoba. Ulangi dengan seek atau memilih lagu lain secara manual saat Recap: pilihan manual tidak boleh ditimpa. Coba kegagalan jaringan, antrean kosong, mode acak, video, dan bila tersedia Cast/Device Connect/ruang dengar; mode remote atau ruang tidak memulai pratinjau. Jangan membuat history untuk pengujian.
 
 - [ ] Streak: cek galeri level, preview, latar level OFF secara default (pada instalasi baru), countdown, titik jatah, tanggal reset, dan kondisi api padam. Jangan mengubah riwayat atau memaksa pemulihan untuk membuat data.
 - [ ] Putar lagu dan periksa cincin Hari ini bergerak; cek centang hanya setelah hari benar-benar tercatat. Sentuh api dan periksa percikan dan haptic, lalu ulangi saat animasi sistem dimatikan dan Mode ringan menyala.

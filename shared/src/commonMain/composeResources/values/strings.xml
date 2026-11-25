@@ -5735,4 +5735,5 @@
     <string name="streak_share_square">Square</string>
     <string name="streak_flame_interaction">Streak flame; tap for a spark</string>
     <string name="about_upgrade_candidate_three">Upgrade %1$d (candidate 3)</string>
+    <string name="about_upgrade_candidate_four">Upgrade %1$d (candidate 4)</string>
 </resources>
