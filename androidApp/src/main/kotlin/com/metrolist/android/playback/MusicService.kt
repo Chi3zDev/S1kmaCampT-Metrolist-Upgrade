@@ -1441,8 +1441,8 @@ class MusicService :
                     PlaybackErrorContext(stage = failure.stage, videoId = videoId, recovered = false, song = song),
                 )
             }
+            if (recapLease?.requestId == player.latestQueuePlaybackRequestId && finishRecapPreview()) return
             player.finishInterruptedPlayback(failedPlaybackInstanceId, failure.playbackPositionMs)
-            if (recapLease?.requestId == request.requestId && finishRecapPreview()) return false
             if (shouldAdvanceAfterPlaybackFailure(
                     player.wantsPlayback,
                     failure.category,
@@ -2182,6 +2182,7 @@ class MusicService :
             showPlaybackErrorToast(
                 errorReason ?: getString(Res.string.playback_unable_to_play_queued_track),
             )
+            if (recapLease?.requestId == request.requestId && finishRecapPreview()) return false
             if (shouldAdvanceAfterPlaybackFailure(
                     player.wantsPlayback,
                     PlaybackFailureClassifier.fromThrowable(playbackFailure),
