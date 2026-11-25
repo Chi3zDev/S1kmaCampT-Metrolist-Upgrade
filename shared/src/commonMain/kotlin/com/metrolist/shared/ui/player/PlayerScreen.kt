@@ -668,7 +668,7 @@ fun PlayerScreen(
             )
 
     val playerType = Settings.shared.playerType
-    val usesCompactStyleArtwork = playerType == PlayerType.VINYL || playerType == PlayerType.GLASS_CARD
+    val usesCompactStyleArtwork = playerType == PlayerType.VINYL
     val usesFullscreenThumbnail = playerThumbnailStyle == PlayerThumbnailStyle.FULLSCREEN && !usesCompactStyleArtwork
     val prefersTallCover = usesFullscreenThumbnail && !isLandscape
     val playbackNetwork by PlaybackNetworkStateStore.state.collectAsState()

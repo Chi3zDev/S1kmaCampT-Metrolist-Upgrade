@@ -14,12 +14,12 @@ Dimensi: kaca ON/OFF; `MODERN`, `VINTAGE`, `CLASSIC`, `GLASS_CARD`, `VINYL` (kod
 | Kartu Kaca | [ ] semua varian | [ ] semua varian | [ ] semua varian |
 | Piringan | [ ] semua varian | [ ] semua varian | [ ] semua varian |
 
-Setiap sel berarti kedua keadaan kaca, kedua bentuk tombol, kedua tema, dua ukuran layar, dan dua ukuran font; belum diuji di perangkat. `PlayerScreen.kt` saat ini menonaktifkan jalur thumbnail fullscreen untuk Kartu Kaca dan Piringan (`usesCompactStyleArtwork`); kesesuaian perilaku terhadap permintaan pengguna harus diperiksa secara terpisah.
+Setiap sel berarti kedua keadaan kaca, kedua bentuk tombol, kedua tema, dua ukuran layar, dan dua ukuran font; belum diuji di perangkat. Jalur thumbnail fullscreen dan canvas kini tersedia untuk Kartu Kaca; Piringan mempertahankan artwork cakram khusus sehingga pilihan tersebut perlu dicatat N/A jika memang tidak berlaku. Semua kombinasi masih harus diuji.
 
 ## Temuan awal dan prioritas
 
 - [ ] **P1-01 — Panel menghilang saat kaca OFF (perbaikan kode awal; menunggu build dan uji perangkat).** Terlihat dari kode: `portraitPlayerGlassVisible` mensyaratkan master kaca dan kaca player, dan `PlayerLayout.kt` juga mengikat permukaan ke pengaturan tersebut. Panel dasar gaya perlu dipisah dari dekorasi kaca. Pengecualian permintaan eksplisit: Piringan tidak memakai panel kartu. Risiko kontras pada latar terang dan permukaan ganda saat lirik.
-- [ ] **P1-02 — Pita/ruang kosong sampul dan fullscreen.** Foto 1 menunjukkan bidang kosong gelap. Ukuran dan pemotongan bergantung `usesFullscreenThumbnail`, `PlayerArtworkBackground.kt`, dan layout berbobot; investigasi geometry dan crop pada orientasi berbeda. Perlu placeholder tanpa mengubah aksi seek/swipe.
+- [ ] **P1-02 — Pita/ruang kosong sampul dan fullscreen (crop statis diperbaiki; animasi dan perangkat perlu verifikasi).** Foto 1 menunjukkan bidang kosong gelap. Ukuran dan pemotongan bergantung `usesFullscreenThumbnail`, `PlayerArtworkBackground.kt`, dan layout berbobot; investigasi geometry dan crop pada orientasi berbeda. Perlu placeholder tanpa mengubah aksi seek/swipe.
 - [ ] **P1-03 — Tampilan sampul berbeda/flicker.** Foto 1–2 menunjukkan tampilan berbeda, tetapi screenshot tidak membuktikan apakah pilihan thumbnail, kondisi pemuatan, atau state yang berbeda. Periksa `playerThumbnailStyle`, `currentSong`, handoff/crossfade dan kondisi loading; jangan mengklaim reproduksi tanpa langkah atau perangkat.
 - [ ] **P1-04 — Kontrol atas.** Foto menunjukkan kemungkinan cincin ganda dan segmen headphone/video bertumpuk; audit `playerControlBlend`, `VintageAudioVideoModeSwitcher`, `ButtonGroup`, ukuran dan border tanpa mengubah aksi.
 - [ ] **P1-05 — Tombol bawah.** Audit ukuran sentuh, lebar dan pemotongan pada semua tipe serta font besar. Screenshot saja tidak membuktikan ketepatan target sentuh; periksa di HP/TalkBack.

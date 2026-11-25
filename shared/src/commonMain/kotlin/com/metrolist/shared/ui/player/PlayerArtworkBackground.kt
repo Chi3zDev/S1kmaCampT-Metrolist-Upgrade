@@ -82,6 +82,7 @@ import com.metrolist.shared.api.artwork.YouTubeCanvasClip
 import com.metrolist.shared.settings.PlayerBackgroundStyle
 import com.metrolist.shared.settings.Settings
 import com.metrolist.shared.ui.components.BlurredArtworkBackground
+import com.metrolist.shared.ui.components.CrossfadeArtwork
 import com.metrolist.shared.ui.components.LiquidBackground
 import com.metrolist.shared.ui.components.LocalVisualWorkActive
 import com.metrolist.shared.ui.components.PrefetchPlayerArtwork
@@ -273,6 +274,33 @@ internal fun FullscreenThumbnailBackground(
     canvasTall: Boolean = false,
     artworkCrossfade: PlayerArtworkCrossfade = PlayerArtworkCrossfade(),
 ) {
+    // Static fullscreen covers use one centred crop across the entire viewport. Keep a
+    // dark base while the image loads and a bottom scrim for readable controls.
+    if (animatedCoverUrl == null && canvasContent == null) {
+        Box(Modifier.fillMaxSize().alpha(alpha).background(Color(0xFF202024))) {
+            PlayerBackgroundArtwork(thumbnailUrl, artworkCrossfade) { currentUrl ->
+                CrossfadeArtwork(
+                    currentUrl = currentUrl,
+                    nextUrl = null,
+                    progress = { 0f },
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize(),
+                    animate = LocalPlayerBackgroundAnimating.current && Settings.shared.playerArtworkTransitions,
+                )
+            }
+            Box(
+                Modifier.fillMaxSize().background(
+                    Brush.verticalGradient(
+                        0f to Color.Black.copy(alpha = 0.22f),
+                        0.40f to Color.Transparent,
+                        1f to Color.Black.copy(alpha = 0.75f),
+                    ),
+                ),
+            )
+        }
+        return
+    }
     if (isLandscape) {
         LandscapeFullscreenThumbnailBackground(
             thumbnailUrl = thumbnailUrl,
