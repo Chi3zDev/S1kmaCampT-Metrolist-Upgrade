@@ -20,15 +20,22 @@ class PlayerArtworkTransitionSettingTest {
     }
 
     @Test
-    fun panelsRemainWhenGlassIsOffAndVinylHasNoCard() {
-        for (type in PlayerType.entries.filter { it != PlayerType.VINYL }) {
-            assertEquals(PlayerPanelStyle.GLASS, playerPanelStyle(type, true, true, false))
-            assertEquals(PlayerPanelStyle.SOLID, playerPanelStyle(type, false, true, false))
-            assertEquals(PlayerPanelStyle.SOLID, playerPanelStyle(type, true, false, false))
-            assertEquals(PlayerPanelStyle.NONE, playerPanelStyle(type, true, true, true))
+    fun onlyGlassCardWithBothSwitchesOnDrawsPanel() {
+        for (type in PlayerType.entries) {
+            for (master in listOf(false, true)) {
+                for (player in listOf(false, true)) {
+                    for (lyrics in listOf(false, true)) {
+                        val expected =
+                            if (type == PlayerType.GLASS_CARD && master && player && !lyrics) {
+                                PlayerPanelStyle.GLASS
+                            } else {
+                                PlayerPanelStyle.NONE
+                            }
+                        assertEquals(expected, playerPanelStyle(type, master, player, lyrics))
+                    }
+                }
+            }
         }
-        assertEquals(PlayerPanelStyle.NONE, playerPanelStyle(PlayerType.VINYL, true, true, false))
-        assertEquals(PlayerPanelStyle.NONE, playerPanelStyle(PlayerType.VINYL, false, false, false))
     }
 
     @Test

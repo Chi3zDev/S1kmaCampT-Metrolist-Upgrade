@@ -17,7 +17,7 @@ import com.metrolist.shared.settings.Settings
 
 internal enum class PlayerPanelStyle { NONE, SOLID, GLASS }
 
-/** Vinyl has its own full-screen surface; lyrics own their separate surface. */
+/** Only the Glass Card player may draw a card, and only while both glass switches are on. */
 internal fun playerPanelStyle(
     playerType: PlayerType,
     glassEnabled: Boolean,
@@ -25,9 +25,8 @@ internal fun playerPanelStyle(
     lyricsVisible: Boolean,
 ): PlayerPanelStyle =
     when {
-        playerType == PlayerType.VINYL || lyricsVisible -> PlayerPanelStyle.NONE
-        glassEnabled && playerEnabled -> PlayerPanelStyle.GLASS
-        else -> PlayerPanelStyle.SOLID
+        playerType == PlayerType.GLASS_CARD && glassEnabled && playerEnabled && !lyricsVisible -> PlayerPanelStyle.GLASS
+        else -> PlayerPanelStyle.NONE
     }
 
 /** A tinted surface with no additional backdrop capture or blur. */
