@@ -78,6 +78,7 @@ import com.metrolist.shared.BuildConfig
 import com.metrolist.shared.generated.resources.Res
 import com.metrolist.shared.generated.resources.about_nunito_credit
 import com.metrolist.shared.generated.resources.about_play_favorite_song
+import com.metrolist.shared.generated.resources.about_upgrade_candidate_three
 import com.metrolist.shared.generated.resources.about_upgrade_candidate_two
 import com.metrolist.shared.generated.resources.about_upgrade_developer
 import com.metrolist.shared.generated.resources.about_upgrade_note_about
@@ -418,7 +419,9 @@ private fun AppHeaderCard(
                 if (upgradeNumber != null) {
                     InfoBadge(
                         stringResource(
-                            if (isUpgradeCandidateTwo(
+                            if (isUpgradeCandidateThree(version)) {
+                                Res.string.about_upgrade_candidate_three
+                            } else if (isUpgradeCandidateTwo(
                                     version,
                                 )
                             ) {
@@ -508,6 +511,8 @@ private val upgradeTwoNotes =
     )
 
 internal fun isUpgradeCandidateTwo(version: String): Boolean = version.endsWith("-upgrade.2-rc.2")
+
+internal fun isUpgradeCandidateThree(version: String): Boolean = version.endsWith("-upgrade.2-rc.3")
 
 internal fun upgradeNoteVersions(upgradeNumber: Int): List<Int> = if (upgradeNumber >= 2) listOf(2, 1) else listOf(1)
 

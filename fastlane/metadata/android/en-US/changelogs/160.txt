@@ -1,0 +1,1 @@
+Upgrade 2 candidate 3: player density and artwork, streak improvements, and Recap refinements. Playback restoration for Recap is not yet implemented; device verification is pending.
