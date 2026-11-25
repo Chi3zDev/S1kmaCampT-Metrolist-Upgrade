@@ -34,3 +34,9 @@ Setiap sel berarti kedua keadaan kaca, kedua bentuk tombol, kedua tema, dua ukur
 - [ ] Perbarui `POLISH-DEVICE-TEST.md` untuk bug di atas.
 - [ ] Preview sebelum/sesudah tiap gaya kaca ON/OFF memerlukan rendering/perangkat yang benar; jangan gunakan screenshot sintetis sebagai bukti hasil aplikasi. Foto pengguna bisa menjadi bukti sebelum untuk keadaan yang terlihat saja.
 - [ ] Simpan/push commit kecil per bug; publish hanya prerelease `v14.0.1-upgrade.2-rc.2` setelah verifikasi yang bisa dilakukan, dengan status pengujian perangkat yang jujur. Tunggu persetujuan eksplisit sebelum merge/final.
+
+## Kandidat 2 — pemeriksaan otomatis
+
+Kandidat ditag pada commit `180c95c2`. Workflow `45535540956` lulus seluruh shared Android host tests, Android unit tests, Android lint, pemeriksaan sumber terlokalisasi dan ktlint. Workflow `45535553533` lulus build debug, benchmark, tes terpilih dan build release bertanda tangan. Paket kandidat `com.chi3zdev.metrolist`, versionCode 159, `14.0.1-upgrade.2-rc.2`, min SDK 24. SHA-256 APK: `0e938ec955d521591fd7dea58f10553763f7a9bb7fd74814b6d50577f77af29e`; checksum artefak cocok dan fingerprint sertifikat v2 cocok dengan Upgrade 2 beta 1.
+
+Prerelease: https://github.com/Chi3zDev/S1kmaCampT-Metrolist-Upgrade/releases/tag/v14.0.1-upgrade.2-rc.2. Tidak ada perangkat atau emulator yang tersedia di lingkungan build: matriks, preview sesudah, animasi aktual, TalkBack dan regresi manual tetap **belum diuji**. Prerelease bukan bukti kesesuaian visual atau persetujuan untuk merge/rilis final.
