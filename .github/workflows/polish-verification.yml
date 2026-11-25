@@ -1,5 +1,5 @@
 name: Polish verification
-# Verify settings backgrounds, theme materials, sharing and navigation motion.
+# Verify expanded glass surfaces, settings backgrounds, sharing and motion.
 
 on:
   workflow_dispatch:
