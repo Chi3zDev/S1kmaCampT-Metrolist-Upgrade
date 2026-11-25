@@ -1,5 +1,5 @@
 name: Polish verification
-# Validate glass theme, gallery background, sharing and navigation integration.
+# Validate glass settings, gallery background, sharing and navigation integration.
 
 on:
   workflow_dispatch:
