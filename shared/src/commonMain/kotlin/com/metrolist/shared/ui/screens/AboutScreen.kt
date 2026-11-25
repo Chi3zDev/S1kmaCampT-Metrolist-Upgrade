@@ -107,6 +107,7 @@ import com.metrolist.shared.generated.resources.devtools_enabled
 import com.metrolist.shared.generated.resources.play
 import com.metrolist.shared.generated.resources.stands_with_palestine
 import com.metrolist.shared.settings.Settings
+import com.metrolist.shared.ui.components.appPageBackground
 import com.metrolist.shared.ui.components.glassCardBorder
 import com.metrolist.shared.ui.components.glassCardColor
 import com.metrolist.shared.ui.components.images.AsyncImage
@@ -192,7 +193,7 @@ fun AboutScreen(
             } else {
                 modifier
             },
-        containerColor = if (onNavigateBack == null) Color.Transparent else colorScheme.surface,
+        containerColor = if (onNavigateBack == null) Color.Transparent else appPageBackground(colorScheme.surface),
         contentWindowInsets = WindowInsets(0),
         topBar = {
             if (onNavigateBack != null) {

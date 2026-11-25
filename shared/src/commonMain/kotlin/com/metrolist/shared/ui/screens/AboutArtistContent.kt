@@ -112,6 +112,7 @@ import com.metrolist.shared.generated.resources.subscribers
 import com.metrolist.shared.generated.resources.total_views
 import com.metrolist.shared.model.ArtistItem
 import com.metrolist.shared.ui.components.ExpandableText
+import com.metrolist.shared.ui.components.appPageBackground
 import com.metrolist.shared.ui.components.images.AsyncImage
 import com.metrolist.shared.ui.components.loadingShimmer
 import com.metrolist.shared.ui.icons.MetrolistIcons
@@ -519,6 +520,7 @@ fun AboutArtistContent(
         }
         Box(Modifier.fillMaxSize()) {
             Scaffold(
+                containerColor = appPageBackground(MaterialTheme.colorScheme.background),
                 topBar = {
                     TopAppBar(
                         title = { Text(artistName, maxLines = 1, overflow = TextOverflow.Ellipsis) },

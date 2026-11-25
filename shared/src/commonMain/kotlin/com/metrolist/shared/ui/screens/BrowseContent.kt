@@ -74,6 +74,7 @@ import com.metrolist.shared.ui.components.GenreCard
 import com.metrolist.shared.ui.components.SectionTitle
 import com.metrolist.shared.ui.components.YTGridItem
 import com.metrolist.shared.ui.components.YTListItem
+import com.metrolist.shared.ui.components.appPageBackground
 import com.metrolist.shared.ui.components.images.ImageLoadingPlaceholder
 import com.metrolist.shared.ui.components.rememberItemPlayback
 import com.metrolist.shared.ui.icons.MetrolistIcons
@@ -118,6 +119,7 @@ fun BrowseContent(
         page.sections.any { it.items.isNotEmpty() } && page.sections.all { section -> section.items.all { it is BrowseItem } }
     Scaffold(
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        containerColor = appPageBackground(MaterialTheme.colorScheme.background),
         topBar = {
             TwoRowsTopAppBar(
                 expandedHeight = 128.dp,
