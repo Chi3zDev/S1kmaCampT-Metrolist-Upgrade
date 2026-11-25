@@ -1,0 +1,1 @@
+Upgrade 2 candidate 5: light theme glass and player refinements, distinct animated streak flames for each level. Device testing pending.

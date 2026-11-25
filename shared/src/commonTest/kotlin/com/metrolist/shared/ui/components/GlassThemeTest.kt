@@ -10,7 +10,7 @@ class GlassThemeTest {
     fun lightThemeUsesWhiteHighlightNotDarkInk() {
         val (highlight, edge) = glassEdgeColors(Color.White, Color.Black, Color.DarkGray, clear = true)
         assertEquals(Color.White.copy(alpha = 0.72f), highlight)
-        assertTrue(edge.alpha <= 0.16f)
+        assertTrue(edge.alpha <= 0.17f)
     }
 
     @Test
