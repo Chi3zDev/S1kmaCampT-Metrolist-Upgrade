@@ -443,7 +443,7 @@ private fun VintageBottomBarItem(
                 style = MaterialTheme.typography.labelLarge,
                 maxLines = 1,
                 softWrap = false,
-                overflow = TextOverflow.Clip,
+                overflow = TextOverflow.Ellipsis,
             )
         }
     } else {

@@ -679,7 +679,7 @@ internal fun TabletPlayerContent(
                         modifier = Modifier.widthIn(max = 360.dp).fillMaxWidth(),
                         isListenTogetherGuest = isListenTogetherGuest,
                         controlHeight = if (compactHeight) 48.dp else 56.dp,
-                        touchTarget = if (compactWidth) 40.dp else 48.dp,
+                        touchTarget = 48.dp,
                     )
                 }
             }

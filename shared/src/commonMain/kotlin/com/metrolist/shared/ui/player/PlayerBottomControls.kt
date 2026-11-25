@@ -114,7 +114,7 @@ internal fun PlayerBottomControls(
     modifier: Modifier = Modifier,
     isListenTogetherGuest: Boolean = false,
     controlHeight: Dp = QueuePeekHeight,
-    touchTarget: Dp = 40.dp,
+    touchTarget: Dp = 48.dp,
     showQueueHandle: Boolean = true,
 ) {
     val hapticManager = rememberMetrolistHaptics()

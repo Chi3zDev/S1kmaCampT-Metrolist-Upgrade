@@ -212,9 +212,9 @@ actual fun PlayerConnectedButtonGroup(
                             ),
                         modifier =
                             if (action.text != null) {
-                                Modifier.animateWidth(interactionSource, 12.dp).navigationPopupSource().widthIn(min = buttonWidth)
+                                Modifier.navigationPopupSource().widthIn(min = buttonWidth, max = 100.dp)
                             } else {
-                                Modifier.animateWidth(interactionSource, 12.dp).navigationPopupSource().width(buttonWidth)
+                                Modifier.navigationPopupSource().width(buttonWidth)
                             }.tvFocusHighlight(shapes.shape, bringIntoView = false),
                     ) {
                         if (action.text != null) {
@@ -223,6 +223,7 @@ actual fun PlayerConnectedButtonGroup(
                                 modifier = Modifier.semantics { contentDescription = action.contentDescription },
                                 style = MaterialTheme.typography.labelSmall,
                                 maxLines = 1,
+                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                             )
                         } else {
                             Icon(
