@@ -155,7 +155,7 @@ internal fun SettingsUiRegistryBuilder.registerAppearanceSettings(host: SharedSe
                     range =
                         0f..100f,
                     steps = 0,
-                    enabled = settings.glassNavigation,
+                    enabled = settings.glassNavigation || settings.liquidGlassTheme,
                 ) { settings.glassTintStrength = it }
                 slider(
                     id = "glassCornerRoundness",
