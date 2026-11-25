@@ -8,6 +8,18 @@ import kotlin.test.assertTrue
 
 class PlayerThumbnailPolicyTest {
     @Test
+    fun fullscreenDoesNotReplaceGlassCardOrVinylArtwork() {
+        for (type in PlayerType.entries) {
+            assertFalse(usesFullscreenPlayerThumbnail(PlayerThumbnailStyle.COMPACT, type))
+            assertFalse(usesFullscreenPlayerThumbnail(PlayerThumbnailStyle.CANVAS, type))
+            assertTrue(
+                usesFullscreenPlayerThumbnail(PlayerThumbnailStyle.FULLSCREEN, type) ==
+                    (type != PlayerType.GLASS_CARD && type != PlayerType.VINYL),
+            )
+        }
+    }
+
+    @Test
     fun canvasDoesNotOverrideOtherThumbnailModes() {
         for (type in PlayerType.entries) {
             assertFalse(usesCanvasBackdrop(PlayerThumbnailStyle.COMPACT, type))

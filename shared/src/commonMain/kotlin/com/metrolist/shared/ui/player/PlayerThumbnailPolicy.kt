@@ -8,3 +8,9 @@ internal fun usesCanvasBackdrop(
     style: PlayerThumbnailStyle,
     type: PlayerType,
 ): Boolean = style == PlayerThumbnailStyle.CANVAS && type != PlayerType.VINYL
+
+/** Glass Card keeps its own cover layout even if fullscreen thumbnails are selected. */
+internal fun usesFullscreenPlayerThumbnail(
+    style: PlayerThumbnailStyle,
+    type: PlayerType,
+): Boolean = style == PlayerThumbnailStyle.FULLSCREEN && type != PlayerType.VINYL && type != PlayerType.GLASS_CARD
