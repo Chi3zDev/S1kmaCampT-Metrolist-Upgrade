@@ -101,6 +101,10 @@ internal class AndroidListeningHistory(
         }
     }
 
+    /** Read-only progress for the visible streak UI; never writes or finalizes a play. */
+    internal fun currentSessionListeningMs(): Long? =
+        if (enabled && !Settings.shared.pauseListenHistory && lastListeningSong != null) listeningClock.elapsedMs() else null
+
     fun flush(): Job? {
         finishSession()
         val write = pendingWrite

@@ -8,6 +8,14 @@ import java.time.ZoneId
 
 class StreakCountdownTest {
     @Test
+    fun progressNeverPretendsAPlayHasBeenCommitted() {
+        assertEquals(0f, streakTodayProgress(false, null, 30_000), 0.0001f)
+        assertEquals(0.5f, streakTodayProgress(false, 15_000, 30_000), 0.0001f)
+        assertEquals(0.99f, streakTodayProgress(false, 60_000, 30_000), 0.0001f)
+        assertEquals(1f, streakTodayProgress(true, null, 30_000), 0.0001f)
+    }
+
+    @Test
     fun countedTodayExtendsThroughTomorrow() {
         assertEquals(
             36L * 60L,

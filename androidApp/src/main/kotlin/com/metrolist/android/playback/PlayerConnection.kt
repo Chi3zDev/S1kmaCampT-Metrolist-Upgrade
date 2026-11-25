@@ -1557,6 +1557,9 @@ class PlayerConnection(
         musicService?.player?.applyAudioPreferences()
     }
 
+    /** Read-only live listening clock; must be sampled on the service/main thread. */
+    fun currentStreakListeningMs(): Long? = musicService?.currentStreakListeningMs()
+
     override fun currentPositionMs(): Long = musicService?.player?.getRealtimePositionMs() ?: _currentPosition.value
 
     fun currentQueueIndex(): Int? = _currentMediaItemIndex.value.takeIf { it >= 0 }

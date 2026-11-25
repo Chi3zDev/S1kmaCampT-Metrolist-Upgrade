@@ -47,6 +47,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.compose.currentStateAsState
 import com.metrolist.android.BuildConfig
 import com.metrolist.android.LocalMiniPlayerBottomInset
+import com.metrolist.android.playback.LocalPlayerConnection
 import com.metrolist.android.ui.component.tabContentTopPadding
 import com.metrolist.shared.db.MusicDatabase
 import com.metrolist.shared.generated.resources.*
@@ -87,6 +88,15 @@ fun StreakScreen(onBack: () -> Unit) {
     ) { database.dao().qualifyingStreakTimestamps() }.collectAsStateWithLifecycle(initialValue = emptyList())
     val lifecycle by LocalLifecycleOwner.current.lifecycle.currentStateAsState()
     val screenActive = lifecycle == Lifecycle.State.RESUMED && LocalRootContentActive.current && !LocalContentObscured.current
+    val playerConnection = LocalPlayerConnection.current
+    var liveListeningMs by remember(playerConnection) { mutableStateOf<Long?>(null) }
+    LaunchedEffect(screenActive, playerConnection) {
+        while (screenActive) {
+            liveListeningMs = playerConnection?.currentStreakListeningMs()
+            delay(1000)
+        }
+        liveListeningMs = null
+    }
     var now by remember { mutableStateOf(Instant.now()) }
     LaunchedEffect(screenActive) {
         while (screenActive) {
@@ -246,12 +256,38 @@ fun StreakScreen(onBack: () -> Unit) {
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    Flame(
-                        flameColor,
-                        animate = screenActive && streakMotionEnabled(),
-                        particles = !extinguished,
-                        extinguished = extinguished,
+                    val motionEnabled = screenActive && streakMotionEnabled()
+                    val minimumMs = (Settings.shared.historyDuration * 1000f).toLong().coerceAtLeast(30_000L)
+                    val todayProgress = streakTodayProgress(streak.todayCounted, liveListeningMs.takeUnless { simulated }, minimumMs)
+                    val ringProgress by animateFloatAsState(
+                        todayProgress,
+                        animationSpec = tween(if (motionEnabled) PolishMotion.durationMillis else 0),
+                        label = "streakTodayProgress",
                     )
+                    Box(Modifier.size(132.dp), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator(
+                            progress = { ringProgress },
+                            modifier = Modifier.fillMaxSize(),
+                            color = flameColor,
+                            trackColor = flameColor.copy(alpha = 0.18f),
+                            strokeWidth = 6.dp,
+                        )
+                        Flame(
+                            flameColor,
+                            animate = motionEnabled,
+                            particles = !extinguished,
+                            extinguished = extinguished,
+                        )
+                        if (streak.todayCounted) {
+                            Text(
+                                "✓",
+                                modifier = Modifier.align(Alignment.BottomEnd),
+                                color = flameColor,
+                                style = MaterialTheme.typography.titleLarge,
+                            )
+                        }
+                    }
+                    Text(stringResource(Res.string.streak_day_today), style = MaterialTheme.typography.labelMedium)
                     StreakCount(streak.current, screenActive && streakMotionEnabled(), MaterialTheme.typography.displayMedium)
                     TextButton(onClick = { showLevels = true }) {
                         Text(stringResource(shownLevel.title), color = flameColor, style = MaterialTheme.typography.titleLarge)

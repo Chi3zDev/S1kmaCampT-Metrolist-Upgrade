@@ -343,6 +343,10 @@ class MusicService :
     }
     private lateinit var listeningHistory: AndroidListeningHistory
     private val externalReportingEnabled: Boolean get() = listeningHistory.enabled
+
+    internal fun currentStreakListeningMs(): Long? =
+        if (::listeningHistory.isInitialized) listeningHistory.currentSessionListeningMs() else null
+
     lateinit var sleepTimerController: SleepTimerController
         private set
 
