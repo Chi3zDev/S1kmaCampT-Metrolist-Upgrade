@@ -252,7 +252,7 @@ internal fun SettingsUiRegistryBuilder.registerAppearanceSettings(host: SharedSe
                     title = stringResource(Res.string.glass_light_mode),
                     description = stringResource(Res.string.glass_light_mode_description),
                     checked = settings.glassLightMode,
-                    enabled = settings.glassNavigation,
+                    enabled = settings.glassNavigation || settings.liquidGlassTheme,
                 ) {
                     settings.glassLightMode =
                         it
@@ -275,13 +275,13 @@ internal fun SettingsUiRegistryBuilder.registerAppearanceSettings(host: SharedSe
                     choices = navbarMotionChoices,
                     selectedChoiceId = settings.glassNavbarMotion,
                     enabled =
-                        settings.glassNavigation && settings.glassNavbar,
+                        (settings.glassNavigation || settings.liquidGlassTheme) && settings.glassNavbar,
                 ) { settings.glassNavbarMotion = it }
                 switch(
                     id = "glassNavbarLabels",
                     title = stringResource(Res.string.glass_show_labels),
                     checked = settings.glassNavbarLabels,
-                    enabled = settings.glassNavigation,
+                    enabled = settings.glassNavigation || settings.liquidGlassTheme,
                 ) {
                     settings.glassNavbarLabels =
                         it
@@ -304,7 +304,7 @@ internal fun SettingsUiRegistryBuilder.registerAppearanceSettings(host: SharedSe
                     choices = positions,
                     selectedChoiceId = position,
                     enabled =
-                        settings.glassNavigation && settings.glassNavbar && settings.glassMiniPlayer,
+                        (settings.glassNavigation || settings.liquidGlassTheme) && settings.glassNavbar && settings.glassMiniPlayer,
                 ) {
                     settings.glassPlayerBelow =
                         it == "BELOW"
