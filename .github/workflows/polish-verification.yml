@@ -1,5 +1,5 @@
 name: Polish verification
-# Verify glass surfaces, background, sharing and drag motion tests.
+# Verify glass surfaces, light mode, background, sharing and motion.
 
 on:
   workflow_dispatch:
