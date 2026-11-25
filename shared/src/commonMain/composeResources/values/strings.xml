@@ -5722,4 +5722,7 @@
     <string name="streak_recovery_reset">Resets %1$s</string>
     <string name="streak_expires_in">%1$d hours %2$d minutes before your flame goes out</string>
     <string name="streak_level_background">Level-coloured background</string>
+    <string name="streak_reminder_title">Daily streak reminder</string>
+    <string name="streak_reminder_message">Listen today to keep your streak alive.</string>
+    <string name="streak_reminder_timing">Approximate time; Android may delay reminders to save battery.</string>
 </resources>

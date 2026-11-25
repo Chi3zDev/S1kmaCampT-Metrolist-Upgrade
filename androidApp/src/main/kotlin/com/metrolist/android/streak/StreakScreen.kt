@@ -2,6 +2,11 @@
 
 package com.metrolist.android.streak
 
+import android.Manifest
+import android.app.TimePickerDialog
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloat
@@ -71,6 +76,12 @@ import java.time.format.TextStyle
 fun StreakScreen(onBack: () -> Unit) {
     val locale = LocalConfiguration.current.locales[0]
     val database: MusicDatabase = koinInject()
+    val context = LocalContext.current
+    val reminderPermission =
+        rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            Settings.shared.streakReminderEnabled = granted
+            StreakReminderWorker.schedule(context, granted, Settings.shared.streakReminderMinuteOfDay)
+        }
     val timestamps by remember(
         database,
     ) { database.dao().qualifyingStreakTimestamps() }.collectAsStateWithLifecycle(initialValue = emptyList())
@@ -180,6 +191,38 @@ fun StreakScreen(onBack: () -> Unit) {
                     onCheckedChange = { Settings.shared.streakLevelBackgroundEnabled = it },
                     modifier = Modifier.semantics { contentDescription = label },
                 )
+            }
+        }
+        item {
+            val reminderLabel = stringResource(Res.string.streak_reminder_title)
+            val enabled = Settings.shared.streakReminderEnabled
+            val minuteOfDay = Settings.shared.streakReminderMinuteOfDay.coerceIn(0, 1439)
+            StreakPanel {
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    Text(reminderLabel, modifier = Modifier.weight(1f), style = MaterialTheme.typography.titleMedium)
+                    Switch(
+                        checked = enabled,
+                        onCheckedChange = { checked ->
+                            if (checked && Build.VERSION.SDK_INT >= 33) {
+                                reminderPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+                            } else {
+                                Settings.shared.streakReminderEnabled = checked
+                                StreakReminderWorker.schedule(context, checked, minuteOfDay)
+                            }
+                        },
+                        modifier = Modifier.semantics { contentDescription = reminderLabel },
+                    )
+                }
+                Text(stringResource(Res.string.streak_reminder_timing), style = MaterialTheme.typography.bodySmall)
+                TextButton(onClick = {
+                    TimePickerDialog(context, { _, hour, minute ->
+                        val value = hour * 60 + minute
+                        Settings.shared.streakReminderMinuteOfDay = value
+                        if (Settings.shared.streakReminderEnabled) StreakReminderWorker.schedule(context, true, value)
+                    }, minuteOfDay / 60, minuteOfDay % 60, true).show()
+                }) {
+                    Text(String.format(locale, "%02d:%02d", minuteOfDay / 60, minuteOfDay % 60))
+                }
             }
         }
         if (BuildConfig.DEBUG && showDebug) {
