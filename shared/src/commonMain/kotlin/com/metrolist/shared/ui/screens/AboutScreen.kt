@@ -81,6 +81,7 @@ import com.metrolist.shared.generated.resources.about_nunito_credit
 import com.metrolist.shared.generated.resources.about_play_favorite_song
 import com.metrolist.shared.generated.resources.about_upgrade_candidate_five
 import com.metrolist.shared.generated.resources.about_upgrade_candidate_four
+import com.metrolist.shared.generated.resources.about_upgrade_candidate_six
 import com.metrolist.shared.generated.resources.about_upgrade_candidate_three
 import com.metrolist.shared.generated.resources.about_upgrade_candidate_two
 import com.metrolist.shared.generated.resources.about_upgrade_developer
@@ -430,7 +431,9 @@ private fun AppHeaderCard(
                 if (upgradeNumber != null) {
                     InfoBadge(
                         stringResource(
-                            if (isUpgradeCandidateFive(version)) {
+                            if (isUpgradeCandidateSix(version)) {
+                                Res.string.about_upgrade_candidate_six
+                            } else if (isUpgradeCandidateFive(version)) {
                                 Res.string.about_upgrade_candidate_five
                             } else if (isUpgradeCandidateFour(version)) {
                                 Res.string.about_upgrade_candidate_four
@@ -704,3 +707,5 @@ private fun CollaboratorsList(
 internal fun isUpgradeCandidateFour(version: String): Boolean = version.endsWith("-upgrade.2-rc.4")
 
 internal fun isUpgradeCandidateFive(version: String): Boolean = version.endsWith("-upgrade.2-rc.5")
+
+internal fun isUpgradeCandidateSix(version: String): Boolean = version.endsWith("-upgrade.2-rc.6")

@@ -15,6 +15,8 @@ class AboutUpgradeNotesTest {
         assertEquals(false, isUpgradeCandidateFour("14.0.1-upgrade.2-rc.3"))
         assertEquals(true, isUpgradeCandidateFive("14.0.1-upgrade.2-rc.5"))
         assertEquals(false, isUpgradeCandidateFive("14.0.1-upgrade.2-rc.4"))
+        assertEquals(true, isUpgradeCandidateSix("14.0.1-upgrade.2-rc.6"))
+        assertEquals(false, isUpgradeCandidateSix("14.0.1-upgrade.2-rc.5"))
     }
 
     @Test

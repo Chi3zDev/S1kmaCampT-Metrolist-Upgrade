@@ -1,0 +1,1 @@
+Upgrade 2 candidate 6: Liquid Glass appearance, custom gallery background, glass player image sharing, and navigation motion. Device testing pending.

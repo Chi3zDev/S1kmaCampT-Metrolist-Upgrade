@@ -265,8 +265,8 @@ android {
         applicationId = "com.chi3zdev.metrolist"
         minSdk = 24
         targetSdk = 37
-        versionCode = 162
-        versionName = "$appVersion-upgrade.$upgradeNumber-rc.5"
+        versionCode = 163
+        versionName = "$appVersion-upgrade.$upgradeNumber-rc.6"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
