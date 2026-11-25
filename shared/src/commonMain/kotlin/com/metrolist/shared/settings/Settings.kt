@@ -446,6 +446,7 @@ class Settings(
     var forceBottomNavBar by preference(ForceBottomNavBarKey, false)
     var slimNavBar by preference(SlimNavBarKey, false)
     var floatingNavBar by preference(FloatingNavBarKey, false)
+
     // Independent of light/dark and of the existing floating glass controls.
     var liquidGlassTheme by preference(false)
     var androidAppBackgroundUri by preference("")

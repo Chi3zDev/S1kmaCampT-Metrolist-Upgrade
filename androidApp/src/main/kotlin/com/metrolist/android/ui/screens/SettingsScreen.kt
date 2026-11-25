@@ -184,7 +184,10 @@ fun SettingsScreen(
                     SharedPreferences.shared.androidAppBackgroundUri = ""
                     if (previous.isNotEmpty()) {
                         runCatching {
-                            context.contentResolver.releasePersistableUriPermission(Uri.parse(previous), Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                            context.contentResolver.releasePersistableUriPermission(
+                                Uri.parse(previous),
+                                Intent.FLAG_GRANT_READ_URI_PERMISSION,
+                            )
                         }
                     }
                 },

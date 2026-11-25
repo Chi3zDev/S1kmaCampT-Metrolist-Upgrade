@@ -1555,7 +1555,8 @@ fun MetrolistApp(
                                 adaptiveLayout = adaptiveLayout,
                                 navigationSuiteType = navigationSuiteType,
                                 navigationVisible = shouldShowNavigationBar,
-                                containerColor = if (Settings.shared.androidAppBackgroundUri.isNotEmpty()) Color.Transparent else appBackground,
+                                containerColor =
+                                    if (Settings.shared.androidAppBackgroundUri.isNotEmpty()) Color.Transparent else appBackground,
                                 onSearchLongClick = { navigator.navigate(Screen.Recognition) },
                                 onAccountClick = { navigator.navigate(Screen.Profile) },
                                 showAccountInBottomBar = useBottomAccount,
