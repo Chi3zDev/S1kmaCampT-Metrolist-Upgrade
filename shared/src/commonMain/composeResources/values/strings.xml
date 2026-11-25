@@ -5716,4 +5716,8 @@
     <string name="player_type_glass_card">Glass Card</string>
     <string name="player_artwork_transitions">Artwork transitions</string>
     <string name="player_artwork_transitions_description">Fade between covers and backgrounds without affecting audio crossfade.</string>
+    <string name="streak_levels_title">Flame levels</string>
+    <string name="streak_level_requirement">%1$d days</string>
+    <string name="streak_level_locked">Locked</string>
+    <string name="streak_recovery_reset">Resets %1$s</string>
 </resources>

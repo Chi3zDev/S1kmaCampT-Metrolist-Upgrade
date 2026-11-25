@@ -2638,4 +2638,8 @@
     <string name="player_type_glass_card">Kartu Kaca</string>
     <string name="player_artwork_transitions">Transisi sampul</string>
     <string name="player_artwork_transitions_description">Lembutkan pergantian sampul dan latar tanpa memengaruhi crossfade audio.</string>
+    <string name="streak_levels_title">Galeri level api</string>
+    <string name="streak_level_requirement">%1$d hari</string>
+    <string name="streak_level_locked">Terkunci</string>
+    <string name="streak_recovery_reset">Reset %1$s</string>
 </resources>

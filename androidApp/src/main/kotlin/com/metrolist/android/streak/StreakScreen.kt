@@ -16,6 +16,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -124,6 +126,8 @@ fun StreakScreen(onBack: () -> Unit) {
     val scope = rememberCoroutineScope()
     var confirmation by remember { mutableStateOf(false) }
     var restoreFailed by remember { mutableStateOf(false) }
+    var showLevels by remember { mutableStateOf(false) }
+    var previewLevel by remember { mutableStateOf<StreakLevel?>(null) }
 
     LazyColumn(
         contentPadding =
@@ -184,7 +188,9 @@ fun StreakScreen(onBack: () -> Unit) {
                         extinguished = extinguished,
                     )
                     StreakCount(streak.current, screenActive && streakMotionEnabled(), MaterialTheme.typography.displayMedium)
-                    Text(stringResource(shownLevel.title), color = flameColor, style = MaterialTheme.typography.titleLarge)
+                    TextButton(onClick = { showLevels = true }) {
+                        Text(stringResource(shownLevel.title), color = flameColor, style = MaterialTheme.typography.titleLarge)
+                    }
                     Text(
                         stringResource(
                             when {
@@ -261,7 +267,21 @@ fun StreakScreen(onBack: () -> Unit) {
                 if (ledger == null) {
                     Text(stringResource(Res.string.streak_restore_corrupt), color = MaterialTheme.colorScheme.error)
                 } else {
-                    Text(stringResource(Res.string.streak_recovery_remaining, ledger.remaining(today), MONTHLY_STREAK_RECOVERIES))
+                    val remaining = ledger.remaining(today)
+                    Text(stringResource(Res.string.streak_recovery_remaining, remaining, MONTHLY_STREAK_RECOVERIES))
+                    Text(
+                        "●".repeat(remaining) + "○".repeat(MONTHLY_STREAK_RECOVERIES - remaining),
+                        color = flameColor,
+                        modifier = Modifier.clearAndSetSemantics { },
+                    )
+                    val nextReset = YearMonth.from(today).plusMonths(1).atDay(1)
+                    Text(
+                        stringResource(
+                            Res.string.streak_recovery_reset,
+                            nextReset.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(locale)),
+                        ),
+                        style = MaterialTheme.typography.labelMedium,
+                    )
                     when (plan?.failure) {
                         StreakRecoveryFailure.GAP_TOO_LARGE -> Text(stringResource(Res.string.streak_restore_too_long))
                         StreakRecoveryFailure.INSUFFICIENT_QUOTA -> Text(stringResource(Res.string.streak_restore_no_quota))
@@ -278,6 +298,37 @@ fun StreakScreen(onBack: () -> Unit) {
                 }
             }
         }
+    }
+    if (showLevels) {
+        StreakLevelGallery(
+            longest = streak.longest,
+            onDismiss = { showLevels = false },
+            onSelect = { level ->
+                previewLevel = level
+                showLevels = false
+            },
+        )
+    }
+    previewLevel?.let { level ->
+        val unlocked = streak.longest >= level.minimumDays
+        AlertDialog(
+            onDismissRequest = { previewLevel = null },
+            title = { Text(stringResource(level.title)) },
+            text = {
+                Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                    Flame(
+                        color = if (unlocked) level.color else MaterialTheme.colorScheme.outline,
+                        animate = screenActive && streakMotionEnabled(),
+                        particles = unlocked,
+                        extinguished = !unlocked,
+                        modifier = Modifier.size(140.dp),
+                    )
+                    Text(stringResource(Res.string.streak_level_requirement, level.minimumDays))
+                    if (!unlocked) Text(stringResource(Res.string.streak_level_locked))
+                }
+            },
+            confirmButton = { TextButton(onClick = { previewLevel = null; showLevels = true }) { Text(stringResource(Res.string.back)) } },
+        )
     }
     if (confirmation && plan != null && !simulated) {
         AlertDialog(
@@ -305,6 +356,49 @@ fun StreakScreen(onBack: () -> Unit) {
             dismissButton = { TextButton(onClick = { confirmation = false }) { Text(stringResource(Res.string.cancel)) } },
         )
     }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun StreakLevelGallery(
+    longest: Int,
+    onDismiss: () -> Unit,
+    onSelect: (StreakLevel) -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(Res.string.streak_levels_title)) },
+        text = {
+            FlowRow(
+                modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                streakLevels.forEach { level ->
+                    val unlocked = longest >= level.minimumDays
+                    Surface(
+                        onClick = { onSelect(level) },
+                        modifier = Modifier.width(120.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    ) {
+                        Column(Modifier.padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                            Flame(
+                                color = if (unlocked) level.color else MaterialTheme.colorScheme.outline,
+                                animate = false,
+                                extinguished = !unlocked,
+                                modifier = Modifier.size(54.dp),
+                            )
+                            Text(stringResource(level.title), style = MaterialTheme.typography.labelMedium, textAlign = TextAlign.Center)
+                            Text(stringResource(Res.string.streak_level_requirement, level.minimumDays), style = MaterialTheme.typography.labelSmall)
+                            if (!unlocked) Text(stringResource(Res.string.streak_level_locked), style = MaterialTheme.typography.labelSmall)
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.back)) } },
+    )
 }
 
 @Composable
