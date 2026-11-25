@@ -5725,4 +5725,12 @@
     <string name="streak_reminder_title">Daily streak reminder</string>
     <string name="streak_reminder_message">Listen today to keep your streak alive.</string>
     <string name="streak_reminder_timing">Approximate time; reminders may be delayed by Android or while music is playing.</string>
+    <string name="streak_share">Share streak</string>
+    <string name="streak_share_error">Could not share the streak card.</string>
+    <string name="streak_share_background">Background</string>
+    <string name="streak_share_level">Level color</string>
+    <string name="streak_share_theme">Current theme</string>
+    <string name="streak_share_solid">Solid dark</string>
+    <string name="streak_share_story">Story</string>
+    <string name="streak_share_square">Square</string>
 </resources>

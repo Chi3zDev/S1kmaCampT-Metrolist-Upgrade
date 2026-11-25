@@ -5,6 +5,7 @@ package com.metrolist.android.streak
 import android.Manifest
 import android.app.TimePickerDialog
 import android.os.Build
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -38,6 +39,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -53,6 +55,7 @@ import com.metrolist.android.BuildConfig
 import com.metrolist.android.LocalMiniPlayerBottomInset
 import com.metrolist.android.playback.LocalPlayerConnection
 import com.metrolist.android.ui.component.tabContentTopPadding
+import com.metrolist.android.utils.shareImage
 import com.metrolist.shared.db.MusicDatabase
 import com.metrolist.shared.generated.resources.*
 import com.metrolist.shared.settings.Settings
@@ -62,6 +65,7 @@ import com.metrolist.shared.ui.components.glassCardBorder
 import com.metrolist.shared.ui.components.glassCardColor
 import com.metrolist.shared.ui.navigation.LocalContentObscured
 import com.metrolist.shared.ui.navigation.LocalRootContentActive
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
@@ -153,7 +157,104 @@ fun StreakScreen(onBack: () -> Unit) {
     var confirmation by remember { mutableStateOf(false) }
     var restoreFailed by remember { mutableStateOf(false) }
     var showLevels by remember { mutableStateOf(false) }
+    var showShare by remember { mutableStateOf(false) }
     var previewLevel by remember { mutableStateOf<StreakLevel?>(null) }
+
+    if (showShare) {
+        var shareBackground by remember { mutableIntStateOf(0) }
+        var sharing by remember { mutableStateOf(false) }
+        val levelLabel = stringResource(shownLevel.title)
+        val daysLabel = stringResource(Res.string.streak_days)
+        val weekLabel = stringResource(Res.string.streak_week)
+        val longestLabel = stringResource(Res.string.streak_longest, streak.longest)
+        val shareLabel = stringResource(Res.string.streak_share)
+        val errorLabel = stringResource(Res.string.streak_share_error)
+        val accent = flameColor.toArgb()
+        val themeBackground = MaterialTheme.colorScheme.surface.toArgb()
+        val themeForeground = MaterialTheme.colorScheme.onSurface.toArgb()
+        val weekdays =
+            (0..6).map { index ->
+                val day = today.minusDays((today.dayOfWeek.value - 1).toLong()).plusDays(index.toLong())
+                day.dayOfWeek.getDisplayName(TextStyle.NARROW_STANDALONE, locale) to (day in allDays)
+            }
+        val backgrounds =
+            listOf(
+                stringResource(Res.string.streak_share_level),
+                stringResource(Res.string.streak_share_theme),
+                stringResource(Res.string.streak_share_solid),
+            )
+        AlertDialog(
+            onDismissRequest = { if (!sharing) showShare = false },
+            title = { Text(shareLabel) },
+            text = {
+                Column {
+                    Text(stringResource(Res.string.streak_share_background))
+                    backgrounds.forEachIndexed { index, text ->
+                        Row(Modifier.fillMaxWidth().clickable { shareBackground = index }, verticalAlignment = Alignment.CenterVertically) {
+                            RadioButton(selected = shareBackground == index, onClick = { shareBackground = index })
+                            Text(text)
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                Row {
+                    listOf(false, true).forEach { story ->
+                        TextButton(enabled = !sharing, onClick = {
+                            sharing = true
+                            scope.launch {
+                                try {
+                                    val background =
+                                        when (shareBackground) {
+                                            0 -> {
+                                                android.graphics.Color.rgb(
+                                                    android.graphics.Color.red(accent) / 5,
+                                                    android.graphics.Color.green(accent) / 5,
+                                                    android.graphics.Color.blue(accent) / 5,
+                                                )
+                                            }
+
+                                            1 -> {
+                                                themeBackground
+                                            }
+
+                                            else -> {
+                                                android.graphics.Color.rgb(20, 20, 24)
+                                            }
+                                        }
+                                    val foreground = if (shareBackground == 1) themeForeground else android.graphics.Color.WHITE
+                                    val image =
+                                        withContext(Dispatchers.Default) {
+                                            renderStreakShare(
+                                                streak.current,
+                                                longestLabel,
+                                                levelLabel,
+                                                daysLabel,
+                                                weekLabel,
+                                                weekdays,
+                                                accent,
+                                                background,
+                                                foreground,
+                                                story,
+                                            )
+                                        }
+                                    shareImage(context, image, shareLabel)
+                                    showShare = false
+                                } catch (error: CancellationException) {
+                                    throw error
+                                } catch (_: Exception) {
+                                    Toast.makeText(context, errorLabel, Toast.LENGTH_SHORT).show()
+                                } finally {
+                                    sharing = false
+                                }
+                            }
+                        }) { Text(stringResource(if (story) Res.string.streak_share_story else Res.string.streak_share_square)) }
+                    }
+                }
+            },
+            dismissButton = { TextButton(onClick = { showShare = false }, enabled = !sharing) { Text(stringResource(Res.string.cancel)) } },
+        )
+    }
 
     val backgroundEnabled = Settings.shared.streakLevelBackgroundEnabled
     val pageSurface = MaterialTheme.colorScheme.surface
@@ -195,6 +296,9 @@ fun StreakScreen(onBack: () -> Unit) {
                         Modifier
                     },
             )
+        }
+        item {
+            OutlinedButton(onClick = { showShare = true }) { Text(stringResource(Res.string.streak_share)) }
         }
         item {
             val label = stringResource(Res.string.streak_level_background)

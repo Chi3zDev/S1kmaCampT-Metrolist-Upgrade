@@ -2647,4 +2647,12 @@
     <string name="streak_reminder_title">Pengingat streak harian</string>
     <string name="streak_reminder_message">Dengarkan hari ini agar streak tetap menyala.</string>
     <string name="streak_reminder_timing">Waktu perkiraan; pengingat dapat tertunda oleh Android atau saat musik diputar.</string>
+    <string name="streak_share">Bagikan streak</string>
+    <string name="streak_share_error">Kartu streak tidak dapat dibagikan.</string>
+    <string name="streak_share_background">Latar belakang</string>
+    <string name="streak_share_level">Warna level</string>
+    <string name="streak_share_theme">Tema saat ini</string>
+    <string name="streak_share_solid">Gelap polos</string>
+    <string name="streak_share_story">Story</string>
+    <string name="streak_share_square">Persegi</string>
 </resources>
