@@ -118,6 +118,9 @@ internal fun VinylRecord(
                 val radius = size.minDimension / 2f
                 drawCircle(Color(0xFF101012), radius)
                 drawCircle(Brush.radialGradient(listOf(Color(0xFF3D3D42), Color(0xFF111114), Color(0xFF29292D))), radius)
+                // A subtle rim and concentric grooves give the disc depth without a blur layer.
+                drawCircle(Color(0xFF77777D).copy(alpha = 0.35f), radius * 0.985f, style = Stroke(radius * 0.012f))
+                drawCircle(Color.Black.copy(alpha = 0.55f), radius * 0.94f, style = Stroke(radius * 0.012f))
                 for (i in 0..13) {
                     drawCircle(
                         Color.White.copy(
@@ -149,7 +152,15 @@ internal fun VinylRecord(
                 )
             }
             Box(Modifier.fillMaxSize(0.58f).clip(CircleShape)) { artwork() }
-            Canvas(Modifier.size(5.dp)) { drawCircle(Color(0xFFD9D9DB)) }
+            Canvas(Modifier.fillMaxSize(0.58f)) {
+                val r = size.minDimension / 2f
+                drawCircle(Color.Black.copy(alpha = 0.35f), r * 0.98f, style = Stroke(r * 0.035f))
+                drawCircle(Color.White.copy(alpha = 0.35f), r * 0.91f, style = Stroke(r * 0.012f))
+            }
+            Canvas(Modifier.size(9.dp)) {
+                drawCircle(Color(0xFF222226))
+                drawCircle(Color(0xFFE5E5E7), radius = size.minDimension * 0.27f)
+            }
         }
         Canvas(Modifier.fillMaxSize()) {
             val pivot = Offset(size.width * 0.87f, size.height * 0.12f)
@@ -162,6 +173,8 @@ internal fun VinylRecord(
             drawLine(Color(0xFFD4D4D6), pivot, end, width, StrokeCap.Round)
             drawLine(Color(0xFF222226), headStart, end, width * 3.1f, StrokeCap.Round)
             drawCircle(Color(0xFF161618), size.minDimension * 0.035f, pivot)
+            drawCircle(Color(0xFF97979C), size.minDimension * 0.015f, pivot)
+            drawLine(Color.White.copy(alpha = 0.40f), pivot, headStart, width * 0.16f, StrokeCap.Round)
         }
     }
 }
