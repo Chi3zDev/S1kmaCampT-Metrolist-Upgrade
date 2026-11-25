@@ -43,6 +43,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -75,8 +76,10 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.currentStateAsState
 import coil3.compose.AsyncImage
+import com.metrolist.android.playback.LocalPlayerConnection
 import com.metrolist.android.utils.shareImage
 import com.metrolist.shared.db.MusicDatabase
+import com.metrolist.shared.db.entities.toSongItem
 import com.metrolist.shared.generated.resources.Res
 import com.metrolist.shared.generated.resources.back
 import com.metrolist.shared.generated.resources.recap_empty
@@ -107,8 +110,10 @@ import com.metrolist.shared.ui.icons.MetrolistIcons
 import com.metrolist.shared.ui.navigation.LocalContentObscured
 import com.metrolist.shared.ui.navigation.LocalRootContentActive
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import java.time.Instant
@@ -231,6 +236,28 @@ private fun RecapStory(
     val visible = lifecycle == Lifecycle.State.RESUMED && LocalRootContentActive.current && !LocalContentObscured.current
     val motionScale = rememberCoroutineScope().coroutineContext[MotionDurationScale]?.scaleFactor ?: 1f
     val motionEnabled = visible && motionScale > 0f && !Settings.shared.glassLightMode && LocalPlayerEffectsAllowed.current
+    val database: MusicDatabase = koinInject()
+    val connection = LocalPlayerConnection.current
+    var previewAttempted by remember(data, connection) { mutableStateOf(false) }
+    DisposableEffect(connection) {
+        onDispose { connection?.finishRecapPreview() }
+    }
+    LaunchedEffect(visible) {
+        if (!visible) connection?.finishRecapPreview()
+    }
+    LaunchedEffect(page, visible, paused, data, connection) {
+        if (visible && !paused && pages[page] == 3 && !previewAttempted && connection != null) {
+            previewAttempted = true
+            try {
+                val topSong = withContext(Dispatchers.IO) { database.dao().getSongById(data.songs.first().songId)?.toSongItem() }
+                if (topSong != null) connection.beginRecapPreview(topSong)
+            } catch (error: CancellationException) {
+                throw error
+            } catch (_: Exception) {
+                // Recap is still usable if the song is missing or cannot be loaded.
+            }
+        }
+    }
     LaunchedEffect(page, pressed, paused, visible) {
         while (recapTimerRunning(visible, pressed, paused) && progress < 1f) {
             delay(50)

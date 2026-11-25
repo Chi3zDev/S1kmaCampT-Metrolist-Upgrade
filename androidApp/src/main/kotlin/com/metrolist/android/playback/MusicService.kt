@@ -103,6 +103,7 @@ import com.metrolist.shared.model.isVideoSong
 import com.metrolist.shared.model.playlistOccurrenceIdentity
 import com.metrolist.shared.model.previewThumbnailUrl
 import com.metrolist.shared.playback.MusicQueueEntry
+import com.metrolist.shared.playback.MusicQueueSnapshot
 import com.metrolist.shared.playback.PauseOnMuteController
 import com.metrolist.shared.playback.PlaybackErrorContext
 import com.metrolist.shared.playback.PlaybackFailure
@@ -297,6 +298,92 @@ class MusicService :
     private var mediaSession: MediaLibrarySession? = null
     internal var playbackCommandGeneration = 0L
         private set
+    private var recapSeekGeneration = 0L
+    private var recapLease: RecapLease? = null
+
+    private data class RecapLease(
+        val originalQueue: MusicQueueSnapshot,
+        val originalPosition: Long,
+        val originalPlaying: Boolean,
+        val previewEntryKeys: List<Long>,
+        val previewIndex: Int,
+        val previewShuffled: Boolean,
+        val requestId: Long,
+        val queueSessionId: Long,
+        val commandGeneration: Long,
+        val seekGeneration: Long,
+        val repeatMode: Int,
+    )
+
+    private fun recapLocalPlaybackOnly(): Boolean =
+        !castManager.state.value.isConnected && !AndroidDeviceConnect.manager.remote.isActive &&
+            AndroidListenTogetherManager.currentManager?.hasActiveOrPendingRoom != true
+
+    internal fun beginRecapPreview(song: SongItem): Boolean {
+        if (recapLease != null || !recapLocalPlaybackOnly() || song.isUnavailable || song.isLive || BlockedContent.isBlocked(song)) {
+            return false
+        }
+        val original = player.queueSnapshot()
+        if ((original.displayedItems.isNotEmpty() && original.currentIndex !in original.displayedItems.indices) ||
+            player.currentSong.value?.isLive == true
+        ) {
+            return false
+        }
+        val position = player.getRealtimePositionMs()
+        val playing = player.wantsPlayback
+        val repeat = repeatMode.value
+        queueCoordinator.setRecapSuspended(true)
+        player.setQueue(listOf(song), startIndex = 0, startPlaying = true, preparePlayback = true)
+        recapLease =
+            RecapLease(
+                originalQueue = original,
+                originalPosition = position,
+                originalPlaying = playing,
+                previewEntryKeys =
+                    player.queueState.value.entries
+                        .map { it.key },
+                previewIndex = player.queueState.value.currentIndex,
+                previewShuffled = player.isShuffleEnabled,
+                requestId = player.latestQueuePlaybackRequestId,
+                queueSessionId = queueCoordinator.queueSessionId,
+                commandGeneration = playbackCommandGeneration,
+                seekGeneration = recapSeekGeneration,
+                repeatMode = repeat,
+            )
+        return true
+    }
+
+    internal fun finishRecapPreview() {
+        val lease = recapLease ?: return
+        val restore =
+            recapMayRestore(
+                sameService = !isDestroying,
+                localOnly = recapLocalPlaybackOnly(),
+                sameQueueSession = queueCoordinator.queueSessionId == lease.queueSessionId,
+                sameQueue =
+                    player.queueState.value.entries
+                        .map { it.key } == lease.previewEntryKeys &&
+                        player.queueState.value.currentIndex == lease.previewIndex && player.isShuffleEnabled == lease.previewShuffled,
+                sameRequest = player.latestQueuePlaybackRequestId == lease.requestId,
+                sameCommand = playbackCommandGeneration == lease.commandGeneration,
+                sameSeek = recapSeekGeneration == lease.seekGeneration,
+                sameRepeat = repeatMode.value == lease.repeatMode,
+            )
+        recapLease = null
+        if (restore) {
+            if (lease.originalQueue.displayedItems.isEmpty()) {
+                player.stop()
+                player.restoreQueue(lease.originalQueue)
+            } else {
+                player.restoreQueue(lease.originalQueue, currentTrackChanged = true)
+                player.skipToQueueItem(lease.originalQueue.currentIndex, lease.originalPosition, lease.originalPlaying)
+            }
+            _shuffleModeEnabled.value = player.isShuffleEnabled
+        }
+        queueCoordinator.setRecapSuspended(false)
+        savePlaybackState()
+    }
+
     private lateinit var playbackRestoreJob: Job
     private lateinit var automotiveLibrary: AutomotiveMediaLibrary
     private val automotiveRootChildrenLimit = ConcurrentHashMap<MediaSession.ControllerInfo, Int>()
@@ -451,6 +538,7 @@ class MusicService :
             ExoPlaybackPlayer(
                 this,
                 onPlaybackCommand = ::onPlaybackCommand,
+                onSeekCommand = { if (recapLease != null) recapSeekGeneration++ },
                 isVideoTransitionPending = { ::videoMode.isInitialized && videoMode.isVideoModeResolving.value },
                 isCasting = { castManager.state.value.isConnected },
                 sabrPlaybackCache = audioCacheManager.sabrPlaybackCache,
@@ -1353,6 +1441,10 @@ class MusicService :
                 )
             }
             player.finishInterruptedPlayback(failedPlaybackInstanceId, failure.playbackPositionMs)
+            if (recapLease?.requestId == request.requestId) {
+                finishRecapPreview()
+                return false
+            }
             if (shouldAdvanceAfterPlaybackFailure(
                     player.wantsPlayback,
                     failure.category,
@@ -1751,7 +1843,9 @@ class MusicService :
         if (!PlaybackNetworkStateStore.current.connected && !request.song.isLocal &&
             !request.song.id.startsWith("local_") && audioCacheManager.getCachedPlaybackResource(request.song, touch = false) == null
         ) {
-            if (stagedShouldCommit == null) skipUnavailableOfflineSong(sessionId, request)
+            if (stagedShouldCommit == null) {
+                if (recapLease?.requestId == request.requestId) finishRecapPreview() else skipUnavailableOfflineSong(sessionId, request)
+            }
             return false
         }
         val wantVideo =
@@ -2116,7 +2210,9 @@ class MusicService :
         if (stagedShouldCommit != null) return true
         syncPlayback.onLocalTrackLoaded()
         AndroidDeviceConnect.manager.remote.localStateChanged(trackChanged = true)
-        if ((!queueCoordinator.isFiniteQueue || Settings.shared.autoLoadMore) && queueCoordinator.recommendationBootstrapJob == null) {
+        if (recapLease == null && (!queueCoordinator.isFiniteQueue || Settings.shared.autoLoadMore) &&
+            queueCoordinator.recommendationBootstrapJob == null
+        ) {
             bootstrapRecommendations(queueCoordinator.recommendationSeedSongId ?: request.song.id)
         }
         return true
@@ -2633,6 +2729,7 @@ class MusicService :
         if (playbackPersistenceLifecycle.restoring) null else queueCoordinator.buildPersistPlayerState()
 
     private fun savePlaybackState() {
+        if (recapLease != null) return
         if (!playbackPersistenceLifecycle.restoring) queueCoordinator.saveShuffleMode()
         if (!playbackPersistenceLifecycle.canSave(Settings.shared.persistentQueue)) return
         val state = buildPersistPlayerState()
@@ -2642,6 +2739,7 @@ class MusicService :
     }
 
     private fun saveFinalPlaybackState(): Job? {
+        if (recapLease != null) return finalPlaybackPersistence
         if (!playbackPersistenceLifecycle.restoring) queueCoordinator.saveShuffleMode()
         if (!playbackPersistenceLifecycle.canSave(Settings.shared.persistentQueue)) return finalPlaybackPersistence
         val request = playbackPersistenceWriter.request(buildPersistPlayerState())
@@ -2695,6 +2793,10 @@ class MusicService :
     }
 
     private suspend fun handlePlaybackCompletion(completedPlaybackInstanceId: Long? = null) {
+        if (recapLease != null) {
+            finishRecapPreview()
+            return
+        }
         if (completedPlaybackInstanceId != null && completedPlaybackInstanceId != player.currentPlaybackInstanceId) {
             transitions.consumeCrossfadeCompletion(completedPlaybackInstanceId)
             return

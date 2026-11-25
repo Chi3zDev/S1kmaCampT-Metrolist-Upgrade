@@ -377,6 +377,7 @@ internal fun shouldRecoverPlaybackAfterScreenOffFocusLoss(
 class ExoPlaybackPlayer(
     context: Context,
     private val onPlaybackCommand: () -> Unit = {},
+    private val onSeekCommand: () -> Unit = {},
     private val isVideoTransitionPending: () -> Boolean = { false },
     private val isCasting: () -> Boolean = { false },
     private val sabrPlaybackCache: SabrPlaybackCache = SabrPlaybackCache(),
@@ -1167,6 +1168,7 @@ class ExoPlaybackPlayer(
         position: Long,
         source: PlaybackSeekSource,
     ) {
+        onSeekCommand()
         if (currentSong.value?.isLive == true) return
         if (nextStarted) cancelNextInternal()
         val target = position.coerceAtLeast(0L)

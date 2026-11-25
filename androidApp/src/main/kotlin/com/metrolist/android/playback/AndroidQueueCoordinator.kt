@@ -111,6 +111,25 @@ internal class AndroidQueueCoordinator(
             _playlistPage.value = value
         }
     private var playlistPageJob: Job? = null
+    private var recapSuspended = false
+
+    /** Temporarily stop background queue mutation without discarding the session or its continuation. */
+    fun setRecapSuspended(suspended: Boolean) {
+        recapSuspended = suspended
+        if (suspended) {
+            recommendationRequestGeneration++
+            recommendationBootstrapJob?.cancel()
+            recommendationBootstrapJob = null
+            playlistPageJob?.cancel()
+            playlistPageJob = null
+            autoLoadMoreJob?.cancel()
+            autoLoadMoreJob = null
+            lastAutoLoadedSongId = null
+            transitions.cancelAndroidCrossfade()
+            transitions.cancelNextTrackPreload()
+        }
+    }
+
     private var lastAutoLoadedSongId: String? = null
 
     @Volatile
@@ -743,7 +762,7 @@ internal class AndroidQueueCoordinator(
     fun observeAutoLoadMore() {
         scope.launch {
             combine(repeatMode, player.songQueue) { mode, _ -> mode }.collect { mode ->
-                if (mode == Player.REPEAT_MODE_ALL) {
+                if (!recapSuspended && mode == Player.REPEAT_MODE_ALL) {
                     autoLoadMoreJob?.cancel()
                     // Repeat All removes generated tracks; allow the same song to refill once repeat is off.
                     lastAutoLoadedSongId = null
@@ -764,7 +783,7 @@ internal class AndroidQueueCoordinator(
             }
         }
         scope.launch {
-            player.shuffleEnabled.collect { if (it) schedulePlaylistPage() }
+            player.shuffleEnabled.collect { if (it && !recapSuspended) schedulePlaylistPage() }
         }
         scope.launch {
             combine(
@@ -787,6 +806,7 @@ internal class AndroidQueueCoordinator(
                 )
             }.distinctUntilChanged()
                 .collectLatest { trigger ->
+                    if (recapSuspended) return@collectLatest
                     if (playlistPage?.hasMore == true) {
                         if (shouldLoadPlaylistPage(trigger.currentIndex, trigger.queueSize)) schedulePlaylistPage()
                     } else if (trigger.shouldLoadMore && trigger.currentSongId != null) {
@@ -797,6 +817,7 @@ internal class AndroidQueueCoordinator(
     }
 
     fun scheduleAutoLoadMore(trigger: AutoLoadMoreTrigger) {
+        if (recapSuspended) return
         if (!PlaybackNetworkStateStore.current.connected) return
         if (!trigger.shouldLoadMore) return
         val currentSongId = trigger.currentSongId ?: return

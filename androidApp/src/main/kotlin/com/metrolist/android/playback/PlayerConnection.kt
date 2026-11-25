@@ -1557,6 +1557,14 @@ class PlayerConnection(
         musicService?.player?.applyAudioPreferences()
     }
 
+    /** Start only when connected locally; never enqueue a deferred or remote preview. */
+    internal fun beginRecapPreview(song: SongItem): Boolean =
+        if (_isConnected.value) musicService?.beginRecapPreview(song) == true else false
+
+    internal fun finishRecapPreview() {
+        musicService?.finishRecapPreview()
+    }
+
     /** Read-only live listening clock; must be sampled on the service/main thread. */
     fun currentStreakListeningMs(): Long? = musicService?.currentStreakListeningMs()
 
