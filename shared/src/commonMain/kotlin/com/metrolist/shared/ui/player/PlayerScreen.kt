@@ -702,7 +702,7 @@ fun PlayerScreen(
             prefersTallCover,
         ) { if (artworkAllowedOnNetwork) canvasLayers.select(currentSong, platform, preferTall = prefersTallCover) else null }
     val canRenderCanvasThumbnail =
-        !usesCompactStyleArtwork && Settings.shared.isCanvasEnabled && currentCanvasLayer != null &&
+        usesCanvasBackdrop(playerThumbnailStyle, playerType) && Settings.shared.isCanvasEnabled && currentCanvasLayer != null &&
             currentCanvasLayer.source != CanvasContentSource.APPLE_MUSIC
     val isArtworkCover = currentCanvasLayer?.source == CanvasContentSource.APPLE_MUSIC
     val renderAnimatedCover =
