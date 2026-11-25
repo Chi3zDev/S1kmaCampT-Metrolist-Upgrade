@@ -841,7 +841,8 @@ private fun rememberFullscreenArtworkBitmap(
 ): ImageBitmap? {
     LocalPlayerTrackArtwork.current?.takeIf { it.url == thumbnailUrl }?.let { return it.bitmap }
     val context = LocalPlatformContext.current
-    var artwork by remember { mutableStateOf<ImageBitmap?>(null) }
+    // A failed replacement must not leave the previous track's bitmap on screen.
+    var artwork by remember(thumbnailUrl) { mutableStateOf<ImageBitmap?>(null) }
 
     val request =
         remember(context, thumbnailUrl, targetSize) {

@@ -78,7 +78,9 @@ private fun LoadingArtwork(
     shareMiniPlayerArtwork: Boolean = false,
 ) {
     val prepared = LocalPlayerTrackArtwork.current?.takeIf { it.url == url }
-    if (prepared != null) {
+    // A matching presentation can exist before its bitmap has loaded. Let Coil
+    // continue loading that URL instead of freezing on the placeholder.
+    if (prepared != null && (prepared.bitmap != null || url.isNullOrBlank())) {
         Box(modifier, contentAlignment = Alignment.Center) {
             val bitmap = prepared.bitmap
             if (bitmap != null) {
