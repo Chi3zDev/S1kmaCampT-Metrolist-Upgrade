@@ -512,8 +512,22 @@ private fun StoryRow(
     artwork: String?,
     artist: Boolean = false,
 ) {
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text(rank.toString(), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+    Row(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(18.dp))
+                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.36f))
+                .padding(horizontal = 12.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Text(
+            rank.toString(),
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.primary,
+        )
         AsyncImage(
             model = artwork,
             contentDescription = null,
