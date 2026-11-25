@@ -265,8 +265,8 @@ android {
         applicationId = "com.chi3zdev.metrolist"
         minSdk = 24
         targetSdk = 37
-        versionCode = 163
-        versionName = "$appVersion-upgrade.$upgradeNumber-rc.6"
+        versionCode = 164
+        versionName = "$appVersion-upgrade.$upgradeNumber-rc.7"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
@@ -512,5 +512,6 @@ tasks.matching { it.name.endsWith("UnitTestJavaRes") }.configureEach {
 }
 
 tasks.withType<Test>().configureEach {
+    systemProperty("robolectric.dependency.repo.url", "https://repo.maven.apache.org/maven2")
     jvmArgs("--enable-native-access=ALL-UNNAMED", "--sun-misc-unsafe-memory-access=allow")
 }

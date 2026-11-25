@@ -35,6 +35,7 @@ import com.metrolist.shared.ui.navigation.LocalExpandGlassNavigation
 import com.metrolist.shared.ui.navigation.LocalGlassNavigationMorphProgress
 import com.metrolist.shared.ui.navigation.Screen
 import io.github.neoruaa.glasmio.core.GlasmioTheme
+import io.github.neoruaa.glasmio.core.GlassAppearance
 import io.github.neoruaa.glasmio.glass.GlasmioBackdropProvider
 import io.github.neoruaa.glasmio.glass.render.backdrops.LayerBackdrop
 import io.github.neoruaa.glasmio.icons.GlasmioIconProvider
@@ -93,7 +94,12 @@ fun GlasmioAppNavigation(
     val currentLongClick by rememberUpdatedState(onSearchLongClick)
     val currentLongRelease by rememberUpdatedState(onSearchLongRelease)
     AnimatedVisibility(visible = visible, modifier = modifier) {
-        GlasmioTheme(isDark = isDark, colorScheme = scheme, typography = typography) {
+        GlasmioTheme(
+            isDark = isDark,
+            colorScheme = scheme,
+            typography = typography,
+            appearance = GlassAppearance(liquidGlassEnabled = Settings.shared.glassStyle != "CLEAR"),
+        ) {
             GlasmioIconProvider(resolver = resolver) {
                 GlasmioBackdropProvider(backdrop) {
                     GlasmioNavigationBar(

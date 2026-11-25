@@ -860,6 +860,7 @@ tasks.withType<KotlinNativeSimulatorTest>().configureEach {
 }
 
 tasks.withType<Test>().configureEach {
+    systemProperty("robolectric.dependency.repo.url", "https://repo.maven.apache.org/maven2")
     jvmArgs("--enable-native-access=ALL-UNNAMED", "--sun-misc-unsafe-memory-access=allow")
     javaLauncher.set(
         javaToolchainService.launcherFor {

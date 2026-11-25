@@ -48,6 +48,7 @@ import dev.chrisbanes.haze.HazeInput
 import dev.chrisbanes.haze.blur.HazeBlurStyle
 import dev.chrisbanes.haze.blur.hazeBlur
 import io.github.neoruaa.glasmio.core.GlasmioTheme
+import io.github.neoruaa.glasmio.core.GlassAppearance
 import io.github.neoruaa.glasmio.glass.GlasmioBackdropProvider
 import io.github.neoruaa.glasmio.glass.GlassSurface
 import io.github.neoruaa.glasmio.glass.NavigationGlassMaterial
@@ -210,7 +211,12 @@ fun FloatingTopAppBar(
                     "FROSTED" -> 18.dp
                     else -> 5.dp
                 }
-            GlasmioTheme(isDark = scheme.surface.luminance() < 0.5f, colorScheme = scheme, typography = typography) {
+            GlasmioTheme(
+                isDark = scheme.surface.luminance() < 0.5f,
+                colorScheme = scheme,
+                typography = typography,
+                appearance = GlassAppearance(liquidGlassEnabled = Settings.shared.glassStyle != "CLEAR"),
+            ) {
                 GlasmioBackdropProvider(glasmioBackdrop) {
                     GlassSurface(
                         modifier = Modifier.weight(1f).height(FloatingBarElementSize),
