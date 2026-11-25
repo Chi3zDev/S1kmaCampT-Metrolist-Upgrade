@@ -1,5 +1,5 @@
 name: Polish verification
-# Verify sixth device candidate and glass integration.
+# Verify official Glasmio integration.
 
 on:
   workflow_dispatch:
