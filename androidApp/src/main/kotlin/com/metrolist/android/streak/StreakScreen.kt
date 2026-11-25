@@ -27,6 +27,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
@@ -62,10 +63,10 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.time.format.TextStyle
-import java.util.Locale
 
 @Composable
 fun StreakScreen(onBack: () -> Unit) {
+    val locale = LocalConfiguration.current.locales[0]
     val database: MusicDatabase = koinInject()
     val timestamps by remember(
         database,
@@ -218,7 +219,7 @@ fun StreakScreen(onBack: () -> Unit) {
                         val day = start.plusDays(offset.toLong())
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
-                                day.dayOfWeek.getDisplayName(TextStyle.NARROW_STANDALONE, Locale.getDefault()),
+                                day.dayOfWeek.getDisplayName(TextStyle.NARROW_STANDALONE, locale),
                                 style = MaterialTheme.typography.labelSmall,
                             )
                             StaggeredDayDot(day, today, listened, restored, offset, screenActive && streakMotionEnabled())
@@ -232,7 +233,7 @@ fun StreakScreen(onBack: () -> Unit) {
                 val month = YearMonth.from(today)
                 Text(stringResource(Res.string.streak_calendar), style = MaterialTheme.typography.titleMedium)
                 Text(
-                    "${month.month.getDisplayName(TextStyle.FULL, Locale.getDefault())} ${month.year}",
+                    "${month.month.getDisplayName(TextStyle.FULL, locale)} ${month.year}",
                     style = MaterialTheme.typography.bodyMedium,
                 )
                 Spacer(Modifier.height(8.dp))
@@ -347,7 +348,7 @@ internal fun DayDot(
                 else -> Res.string.streak_day_empty
             },
         )
-    val locale = Locale.getDefault()
+    val locale = LocalConfiguration.current.locales[0]
     val date = remember(day, locale) { day.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL).withLocale(locale)) }
     val todayLabel = if (day == today) stringResource(Res.string.streak_day_today) else null
     val description = listOfNotNull(date, status, todayLabel).joinToString(", ")

@@ -64,6 +64,7 @@ import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
@@ -116,7 +117,6 @@ import java.time.YearMonth
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
-import java.util.Locale
 
 @Composable
 fun RecapScreen(onBack: () -> Unit) {
@@ -208,6 +208,7 @@ private fun RecapStory(
     onPeriod: () -> Unit,
     paused: Boolean,
 ) {
+    val locale = LocalConfiguration.current.locales[0]
     val pages =
         buildList {
             add(0)
@@ -374,7 +375,7 @@ private fun RecapStory(
                                     LocalDate
                                         .parse(
                                             bucket.bucket,
-                                        ).format(DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG).withLocale(Locale.getDefault())),
+                                        ).format(DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG).withLocale(locale)),
                                     style = MaterialTheme.typography.headlineMedium,
                                 )
                                 Text(stringResource(Res.string.story_plays, bucket.playCount), style = MaterialTheme.typography.titleLarge)
@@ -389,7 +390,7 @@ private fun RecapStory(
                                     fontWeight = FontWeight.Bold,
                                 )
                                 Text(
-                                    String.format(Locale.getDefault(), "%02d:00", bucket.bucket.toInt()),
+                                    String.format(locale, "%02d:00", bucket.bucket.toInt()),
                                     style = MaterialTheme.typography.displayLarge,
                                     fontWeight = FontWeight.Bold,
                                 )
