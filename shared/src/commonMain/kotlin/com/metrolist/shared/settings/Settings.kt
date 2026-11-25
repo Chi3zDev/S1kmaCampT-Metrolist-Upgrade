@@ -469,6 +469,7 @@ class Settings(
     var glassNavbarMotion by preference("FULL")
     var glassPlayerBelow by preference(false)
     var streakRecoveryJson by preference("")
+    var streakLevelBackgroundEnabled by preference(true)
     var streakCelebrationEnabled by preference(true)
     var streakCelebrationShownDate by preference("")
     var floatingTopBar by preference(FloatingTopBarKey, false)

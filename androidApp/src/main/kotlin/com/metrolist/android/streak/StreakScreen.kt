@@ -33,6 +33,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -129,7 +130,17 @@ fun StreakScreen(onBack: () -> Unit) {
     var showLevels by remember { mutableStateOf(false) }
     var previewLevel by remember { mutableStateOf<StreakLevel?>(null) }
 
+    val backgroundEnabled = Settings.shared.streakLevelBackgroundEnabled
+    val pageSurface = MaterialTheme.colorScheme.surface
     LazyColumn(
+        modifier =
+            Modifier.fillMaxSize().background(
+                if (backgroundEnabled) {
+                    Brush.verticalGradient(listOf(flameColor.copy(alpha = 0.15f), pageSurface, pageSurface))
+                } else {
+                    Brush.verticalGradient(listOf(pageSurface, pageSurface))
+                },
+            ),
         contentPadding =
             PaddingValues(
                 start = 16.dp,
@@ -159,6 +170,17 @@ fun StreakScreen(onBack: () -> Unit) {
                         Modifier
                     },
             )
+        }
+        item {
+            val label = stringResource(Res.string.streak_level_background)
+            Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+                Text(label, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
+                Switch(
+                    checked = backgroundEnabled,
+                    onCheckedChange = { Settings.shared.streakLevelBackgroundEnabled = it },
+                    modifier = Modifier.semantics { contentDescription = label },
+                )
+            }
         }
         if (BuildConfig.DEBUG && showDebug) {
             item {
