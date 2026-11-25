@@ -22,13 +22,24 @@ Status: **belum dijalankan**. Pengguna akan melakukan uji perangkat pada tahap a
 
 Status: **belum diuji**. Untuk Modern, Vintage, Classic, Kartu Kaca dan Piringan, catat kaca ON/OFF, thumbnail Compact/Fullscreen/Canvas, tombol persegi panjang ON/OFF, tema terang/gelap, layar kecil/besar, serta font normal/besar. Tandai N/A hanya jika mode tidak berlaku (misalnya artwork piringan khusus), bukan sebagai lulus. Rincian matriks ada di `PLAYER-BUGS.md`.
 
-- [ ] Kaca OFF: panel gelap tanpa kilau; kaca ON: efek kaca tanpa panel ganda. Pada Piringan pastikan tidak ada kartu, termasuk landscape dan saat lirik dibuka.
+- [ ] Kaca OFF: tidak ada kartu kaca maupun kartu hitam. Kaca ON: hanya tipe Kartu Kaca yang boleh menampilkan kartu; Klasik, Vintage, Modern, dan Piringan tidak boleh menampilkan kartu, termasuk landscape dan saat lirik dibuka.
 - [ ] Fullscreen mengisi bidang tanpa pita, terpotong di tengah, scrim cukup; uji sampul kosong, lambat, gagal dan ganti lagu/crossfade tanpa kedip. Periksa juga Canvas dan video, serta Compact.
 - [ ] Tombol atas: satu outline dan segmen headphone/video tidak bertumpuk. Uji kedua aksi, ukuran sentuh dan TalkBack.
 - [ ] Baris bawah: semua aksi terlihat atau tersedia di menu overflow, tidak terpotong dan target tidak bertumpuk. Coba teks timer panjang dan font besar.
 - [ ] Kartu Kaca: jarak sampul/judul serta scroll dan kontrol pada layar pendek. Piringan: crop kiri, ukuran label, alur/kilau, warna latar, judul/artis, tiga kontrol dan seekbar.
 - [ ] Piringan berputar sekitar 5–6 detik per putaran, melambat saat jeda; tonearm mengikuti progres dan kembali istirahat. Uji latar depan/belakang, sistem animasi mati dan mode ringan.
 - [ ] Simpan screenshot sebelum/sesudah untuk setiap gaya kaca ON/OFF jika perangkat dan kondisi sebelum tersedia. Jangan mengganti bukti dengan gambar sintetis.
+
+## Tambahan Streak dan Recap kandidat 3
+
+Status: **belum diuji**. Musik latar lagu teratas Recap dan pemulihan pemutaran sebelumnya **belum diimplementasikan**; jangan menandainya lulus pada kandidat ini.
+
+- [ ] Streak: cek galeri level, preview, latar level OFF secara default (pada instalasi baru), countdown, titik jatah, tanggal reset, dan kondisi api padam. Jangan mengubah riwayat atau memaksa pemulihan untuk membuat data.
+- [ ] Putar lagu dan periksa cincin Hari ini bergerak; cek centang hanya setelah hari benar-benar tercatat. Sentuh api dan periksa percikan dan haptic, lalu ulangi saat animasi sistem dimatikan dan Mode ringan menyala.
+- [ ] Bagikan kartu persegi dan Story dengan masing-masing latar (warna level, tema, gelap polos). Cek proporsi, teks, tujuh hari, nama level, angka dan Terpanjang; pastikan tidak ada data akun atau daftar lagu pribadi.
+- [ ] Pengingat: aktifkan switch dan izin, atur waktu dekat, gunakan streak aktif yang belum terhitung hari ini, dan periksa notifikasi maksimal sekali sehari. WorkManager dapat menunda waktu; tidak diperlukan dan tidak boleh memalsukan history. Uji juga streak padam, hari sudah terhitung, izin ditolak, dan switch dimatikan bila kondisi alami tersedia.
+- [ ] Video: pada Kartu Kaca, uji portrait/landscape, rotasi, thumbnail Fullscreen dan mode video; gambar tidak boleh keluar dari kartu atau mengubah bentuk thumbnail kartu.
+- [ ] Uji kepadatan/ukuran tampilan kecil dan besar beserta font besar; periksa ruang kosong, ukuran sentuh, keterbacaan, dan agar kontrol tidak terpotong.
 
 ## Aksesibilitas dan performa
 
