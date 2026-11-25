@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- Glasmio entry points are invoked only on API 31+; the app retains API 24 support. -->
+    <uses-sdk tools:overrideLibrary="io.github.neoruaa.glasmio.core,io.github.neoruaa.glasmio.glass,io.github.neoruaa.glasmio.icons,io.github.neoruaa.glasmio.ui,io.github.neoruaa.glasmio.scaffold" />
+
     <uses-feature
         android:name="android.software.leanback"
         android:required="false" />

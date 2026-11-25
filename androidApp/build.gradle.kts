@@ -447,6 +447,7 @@ configurations
 
 dependencies {
     implementation(project(":shared"))
+    implementation("io.github.neoruaa.glasmio:glasmio-scaffold:0.1.4")
 
     implementation(libs.activity)
     implementation(libs.lifecycle.process)

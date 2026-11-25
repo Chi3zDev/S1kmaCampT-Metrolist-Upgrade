@@ -405,6 +405,8 @@ import com.metrolist.shared.viewmodels.PlayerViewModel
 import com.metrolist.shared.youtube.playback.PlaybackNetworkStateStore
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
+import io.github.neoruaa.glasmio.glass.render.backdrops.layerBackdrop
+import io.github.neoruaa.glasmio.glass.render.backdrops.rememberLayerBackdrop
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -845,7 +847,12 @@ fun MetrolistApp(
                 Build.VERSION.SDK_INT > Build.VERSION_CODES.S_V2 &&
                     !(context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager).isLowRamDevice
             }
-        val glassBackdrop = if (useGlass && canBlurGlass && !Settings.shared.glassLightMode) hazeState else null
+        val useGlasmio =
+            useGlassNavigation && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !Settings.shared.glassLightMode &&
+                !(context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager).isLowRamDevice
+        val glasmioBackdrop = if (useGlasmio) rememberLayerBackdrop() else null
+        // A single recording source: do not also capture the Haze backdrop when Glasmio is active.
+        val glassBackdrop = if (useGlass && !useGlasmio && canBlurGlass && !Settings.shared.glassLightMode) hazeState else null
         val isImeVisible = WindowInsets.ime.asPaddingValues().calculateBottomPadding() > 0.dp
         val shouldHideMiniPlayerForIme = isLandscape && isImeVisible
         // Recap owns its own preview controls; hide the mini player without altering playback.
@@ -1573,6 +1580,7 @@ fun MetrolistApp(
                                 adaptiveLayout = adaptiveLayout,
                                 navigationSuiteType = navigationSuiteType,
                                 navigationVisible = shouldShowNavigationBar,
+                                glasmioBackdrop = glasmioBackdrop,
                                 containerColor = if (backgroundImageReady) Color.Transparent else appBackground,
                                 onSearchLongClick = { navigator.navigate(Screen.Recognition) },
                                 onAccountClick = { navigator.navigate(Screen.Profile) },
@@ -1808,6 +1816,7 @@ fun MetrolistApp(
                                             Modifier
                                                 .fillMaxSize()
                                                 .then(if (glassBackdrop != null) Modifier.hazeSource(glassBackdrop) else Modifier)
+                                                .then(if (glasmioBackdrop != null) Modifier.layerBackdrop(glasmioBackdrop) else Modifier)
                                                 .consumeWindowInsets(scaffoldPadding)
                                                 .consumeWindowInsets(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)),
                                         ) {

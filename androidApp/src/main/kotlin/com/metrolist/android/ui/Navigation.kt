@@ -60,6 +60,7 @@ import com.metrolist.shared.ui.navigation.Screen
 import com.metrolist.shared.ui.navigation.isNavigationBar
 import com.metrolist.shared.ui.navigation.visibleSidebarScreens
 import com.metrolist.shared.ui.tv.tvFocusHighlight
+import io.github.neoruaa.glasmio.glass.render.backdrops.LayerBackdrop
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
@@ -118,6 +119,7 @@ fun MetrolistNavigationScaffold(
     navigationSuiteType: NavigationSuiteType,
     navigationVisible: Boolean,
     containerColor: Color,
+    glasmioBackdrop: LayerBackdrop? = null,
     onSearchLongClick: () -> Unit,
     onAccountClick: () -> Unit = {},
     showAccountInBottomBar: Boolean = false,
@@ -217,6 +219,32 @@ fun MetrolistNavigationScaffold(
         modifier = modifier.background(containerColor),
         navigationVisible = navigationVisible,
         floatingNavigation = useFloatingNavigation,
+        floatingNavigationOverride =
+            if (glasmioBackdrop != null) {
+                { barItems, barSelected, barSelect, visible, barModifier ->
+                    GlasmioAppNavigation(
+                        items = barItems,
+                        selected = barSelected,
+                        onSelect = barSelect,
+                        visible = visible,
+                        backdrop = glasmioBackdrop,
+                        modifier = barModifier,
+                        onSearchLongClick = {
+                            suppressSearchClick = true
+                            hapticManager.perform(HapticEvent.LONG_PRESS)
+                            onSearchLongClick()
+                        },
+                        onSearchLongRelease = {
+                            scope.launch {
+                                delay(100.milliseconds)
+                                suppressSearchClick = false
+                            }
+                        },
+                    )
+                }
+            } else {
+                null
+            },
         onFloatingNavigationOccupiedHeightChanged = onFloatingNavigationOccupiedHeightChanged,
         floatingSeparateKey = Screen.Search.takeIf { it in screens },
         navigationSuiteType = navigationSuiteType,

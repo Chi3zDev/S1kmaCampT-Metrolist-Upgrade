@@ -291,6 +291,7 @@ fun <T> AdaptiveNavigationScaffold(
     navigationVisible: Boolean = true,
     floatingNavigation: Boolean = false,
     floatingSeparateKey: T? = null,
+    floatingNavigationOverride: (@Composable (List<AdaptiveNavigationItem<T>>, T?, (T) -> Unit, Boolean, Modifier) -> Unit)? = null,
     onFloatingNavigationHeightChanged: (Dp) -> Unit = {},
     onFloatingNavigationOccupiedHeightChanged: (Dp) -> Unit = {},
     navigationSuiteType: NavigationSuiteType = layout.navigationSuiteType,
@@ -410,17 +411,22 @@ fun <T> AdaptiveNavigationScaffold(
                                         onFloatingNavigationOccupiedHeightChanged(with(density) { size.height.toDp() })
                                     }.padding(bottom = LocalGlassNavbarBottomOffset.current),
                         ) {
-                            val width = if (glass) glassMorphNavWidth(maxWidth.value, morph).dp else maxWidth
-                            FloatingNavigation(
-                                items = visibleItems,
-                                selectedKey = selectedKey,
-                                onSelect = onSelect,
-                                navigationVisible = navigationVisible,
-                                separateKey = floatingSeparateKey,
-                                itemModifier = itemModifier,
-                                onBarHeightChanged = onFloatingNavigationHeightChanged,
-                                modifier = if (glass) Modifier.width(width) else Modifier,
-                            )
+                            val width =
+                                if (glass && floatingNavigationOverride == null) glassMorphNavWidth(maxWidth.value, morph).dp else maxWidth
+                            if (glass && floatingNavigationOverride != null) {
+                                floatingNavigationOverride(visibleItems, selectedKey, onSelect, navigationVisible, Modifier.width(width))
+                            } else {
+                                FloatingNavigation(
+                                    items = visibleItems,
+                                    selectedKey = selectedKey,
+                                    onSelect = onSelect,
+                                    navigationVisible = navigationVisible,
+                                    separateKey = floatingSeparateKey,
+                                    itemModifier = itemModifier,
+                                    onBarHeightChanged = onFloatingNavigationHeightChanged,
+                                    modifier = if (glass) Modifier.width(width) else Modifier,
+                                )
+                            }
                         }
                     }
                 }
