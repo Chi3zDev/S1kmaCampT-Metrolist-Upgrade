@@ -1,0 +1,1 @@
+Upgrade 1 beta 1: preview the updated player, vinyl artwork, lyrics poster, listening streak and recap. Includes glass appearance options and the Nunito font. This is a beta; visual and device verification is still in progress.
