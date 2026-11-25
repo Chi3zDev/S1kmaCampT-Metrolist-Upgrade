@@ -1,0 +1,8 @@
+Glasmio (https://github.com/NEORUAA/Glasmio)
+Copyright 2026 NEORUAA. Licensed under the Apache License, Version 2.0.
+Navigation glass motion and material approaches were used as a reference and adapted
+for this fork. This fork uses its own components and maintains its own navigation,
+rendering, reduced-motion and device-performance policies. No Glasmio fonts,
+icons, imagery, or bundled Apple assets are included by this adaptation.
+Reference revision: 04a88189b23c3a9ce0642a944469bf191d1fdea3.
+The Apache License is included alongside this notice as Glasmio-Apache-2.0.txt.

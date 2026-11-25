@@ -76,6 +76,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.metrolist.shared.BuildConfig
 import com.metrolist.shared.generated.resources.Res
+import com.metrolist.shared.generated.resources.about_glasmio_credit
 import com.metrolist.shared.generated.resources.about_nunito_credit
 import com.metrolist.shared.generated.resources.about_play_favorite_song
 import com.metrolist.shared.generated.resources.about_upgrade_candidate_five
@@ -320,6 +321,13 @@ fun AboutScreen(
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Center,
                     color = colorScheme.onSurfaceVariant,
+                )
+                Text(
+                    text = stringResource(Res.string.about_glasmio_credit),
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center,
+                    color = colorScheme.onSurfaceVariant,
+                    modifier = Modifier.clickable { uriHandler.openUri("https://github.com/NEORUAA/Glasmio") }.padding(8.dp),
                 )
             }
 

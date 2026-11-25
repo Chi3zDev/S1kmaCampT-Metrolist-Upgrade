@@ -5625,6 +5625,7 @@
     <string name="app_background_choose">Choose image from gallery</string>
     <string name="app_background_reset">Remove background image</string>
     <string name="app_background_error">Could not retain access to this image. Please choose another image.</string>
+    <string name="about_glasmio_credit">Glass motion reference: Glasmio by NEORUAA (Apache 2.0)</string>
     <string name="liquid_glass_theme">Liquid Glass theme</string>
     <string name="liquid_glass_theme_description">Use glass surfaces throughout the app, independently of light or dark mode.</string>
     <string name="glass_settings_title">Liquid glass</string>
