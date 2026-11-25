@@ -17,9 +17,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -327,7 +327,12 @@ fun StreakScreen(onBack: () -> Unit) {
                     if (!unlocked) Text(stringResource(Res.string.streak_level_locked))
                 }
             },
-            confirmButton = { TextButton(onClick = { previewLevel = null; showLevels = true }) { Text(stringResource(Res.string.back)) } },
+            confirmButton = {
+                TextButton(onClick = {
+                    previewLevel = null
+                    showLevels = true
+                }) { Text(stringResource(Res.string.back)) }
+            },
         )
     }
     if (confirmation && plan != null && !simulated) {
@@ -390,7 +395,10 @@ private fun StreakLevelGallery(
                                 modifier = Modifier.size(54.dp),
                             )
                             Text(stringResource(level.title), style = MaterialTheme.typography.labelMedium, textAlign = TextAlign.Center)
-                            Text(stringResource(Res.string.streak_level_requirement, level.minimumDays), style = MaterialTheme.typography.labelSmall)
+                            Text(
+                                stringResource(Res.string.streak_level_requirement, level.minimumDays),
+                                style = MaterialTheme.typography.labelSmall,
+                            )
                             if (!unlocked) Text(stringResource(Res.string.streak_level_locked), style = MaterialTheme.typography.labelSmall)
                         }
                     }
