@@ -10,6 +10,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -24,6 +25,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
@@ -40,10 +42,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -63,6 +67,8 @@ import com.metrolist.shared.ui.LocalPlayerEffectsAllowed
 import com.metrolist.shared.ui.PolishMotion
 import com.metrolist.shared.ui.components.glassCardBorder
 import com.metrolist.shared.ui.components.glassCardColor
+import com.metrolist.shared.ui.haptics.HapticEvent
+import com.metrolist.shared.ui.haptics.rememberMetrolistHaptics
 import com.metrolist.shared.ui.navigation.LocalContentObscured
 import com.metrolist.shared.ui.navigation.LocalRootContentActive
 import kotlinx.coroutines.CancellationException
@@ -372,30 +378,13 @@ fun StreakScreen(onBack: () -> Unit) {
                         animationSpec = tween(if (motionEnabled) PolishMotion.durationMillis else 0),
                         label = "streakTodayProgress",
                     )
-                    Box(Modifier.size(132.dp), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator(
-                            progress = { ringProgress },
-                            modifier = Modifier.fillMaxSize(),
-                            color = flameColor,
-                            trackColor = flameColor.copy(alpha = 0.18f),
-                            strokeWidth = 6.dp,
-                        )
-                        Flame(
-                            flameColor,
-                            animate = motionEnabled,
-                            particles = !extinguished,
-                            extinguished = extinguished,
-                        )
-                        AnimatedVisibility(
-                            visible = streak.todayCounted,
-                            modifier = Modifier.align(Alignment.BottomEnd),
-                            enter =
-                                fadeIn(tween(if (motionEnabled) 300 else 0)) +
-                                    scaleIn(tween(if (motionEnabled) 300 else 0), initialScale = if (motionEnabled) 0.6f else 1f),
-                        ) {
-                            Text("✓", color = flameColor, style = MaterialTheme.typography.titleLarge)
-                        }
-                    }
+                    InteractiveStreakFlame(
+                        color = flameColor,
+                        extinguished = extinguished,
+                        animate = motionEnabled,
+                        progress = ringProgress,
+                        counted = streak.todayCounted,
+                    )
                     StreakTodayBadge(streak.todayCounted, flameColor, motionEnabled)
                     StreakCount(streak.current, screenActive && streakMotionEnabled(), MaterialTheme.typography.displayMedium)
                     TextButton(onClick = { showLevels = true }) {
@@ -577,6 +566,76 @@ fun StreakScreen(onBack: () -> Unit) {
             },
             dismissButton = { TextButton(onClick = { confirmation = false }) { Text(stringResource(Res.string.cancel)) } },
         )
+    }
+}
+
+@Composable
+private fun InteractiveStreakFlame(
+    color: Color,
+    extinguished: Boolean,
+    animate: Boolean,
+    progress: Float,
+    counted: Boolean,
+) {
+    val scope = rememberCoroutineScope()
+    val haptics = rememberMetrolistHaptics()
+    val burst = remember { Animatable(0f) }
+    var touch by remember { mutableStateOf(Offset.Zero) }
+    val label = stringResource(Res.string.streak_flame_interaction)
+
+    fun trigger(offset: Offset) {
+        haptics.perform(HapticEvent.PRESS)
+        if (animate && !extinguished) {
+            touch = offset
+            scope.launch {
+                burst.snapTo(1f)
+                burst.animateTo(0f, tween(600))
+            }
+        }
+    }
+    Box(
+        Modifier
+            .size(132.dp)
+            .pointerInput(animate, extinguished) { detectTapGestures { trigger(it) } }
+            .semantics {
+                contentDescription = label
+                onClick {
+                    trigger(Offset.Zero)
+                    true
+                }
+            },
+        contentAlignment = Alignment.Center,
+    ) {
+        CircularProgressIndicator(
+            progress = { progress },
+            modifier = Modifier.fillMaxSize(),
+            color = color,
+            trackColor = color.copy(alpha = 0.18f),
+            strokeWidth = 6.dp,
+        )
+        Flame(color, animate = animate, particles = !extinguished, extinguished = extinguished)
+        Canvas(Modifier.fillMaxSize()) {
+            val strength = burst.value
+            if (strength > 0f) {
+                val center = if (touch == Offset.Zero) this.center else touch
+                drawCircle(color.copy(alpha = 0.25f * strength), radius = size.minDimension * 0.30f, center = center)
+                repeat(8) { i ->
+                    val angle = i * kotlin.math.PI.toFloat() / 4f
+                    val distance = size.minDimension * (0.06f + 0.25f * (1f - strength))
+                    drawCircle(
+                        color.copy(alpha = strength),
+                        radius = size.minDimension * 0.018f,
+                        center = center + Offset(kotlin.math.cos(angle) * distance, kotlin.math.sin(angle) * distance),
+                    )
+                }
+            }
+        }
+        AnimatedVisibility(
+            visible = counted,
+            modifier = Modifier.align(Alignment.BottomEnd),
+            enter =
+                fadeIn(tween(if (animate) 300 else 0)) + scaleIn(tween(if (animate) 300 else 0), initialScale = if (animate) 0.6f else 1f),
+        ) { Text("✓", color = color, style = MaterialTheme.typography.titleLarge) }
     }
 }
 

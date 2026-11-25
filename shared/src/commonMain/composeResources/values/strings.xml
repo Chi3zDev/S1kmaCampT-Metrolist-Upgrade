@@ -5733,4 +5733,5 @@
     <string name="streak_share_solid">Solid dark</string>
     <string name="streak_share_story">Story</string>
     <string name="streak_share_square">Square</string>
+    <string name="streak_flame_interaction">Streak flame; tap for a spark</string>
 </resources>
