@@ -7,6 +7,7 @@
 
 package com.metrolist.android.ui.component
 
+import android.os.Build
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -38,6 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.unit.dp
 import com.metrolist.shared.settings.Settings
 import com.metrolist.shared.ui.components.glassEdgeBrush
@@ -45,6 +47,11 @@ import com.metrolist.shared.ui.navigation.LocalGlassNavigationState
 import dev.chrisbanes.haze.HazeInput
 import dev.chrisbanes.haze.blur.HazeBlurStyle
 import dev.chrisbanes.haze.blur.hazeBlur
+import io.github.neoruaa.glasmio.core.GlasmioTheme
+import io.github.neoruaa.glasmio.glass.GlasmioBackdropProvider
+import io.github.neoruaa.glasmio.glass.GlassSurface
+import io.github.neoruaa.glasmio.glass.NavigationGlassMaterial
+import io.github.neoruaa.glasmio.glass.render.backdrops.LayerBackdrop
 
 private val FloatingBarElementSize = 48.dp
 private val FloatingBarElementShadow = 4.dp
@@ -140,6 +147,7 @@ fun FloatingTopAppBar(
     title: @Composable () -> Unit,
     modifier: Modifier = Modifier,
     glass: Boolean = false,
+    glasmioBackdrop: LayerBackdrop? = null,
     subtitle: @Composable () -> Unit = {},
     actions: @Composable RowScope.() -> Unit,
 ) {
@@ -180,23 +188,7 @@ fun FloatingTopAppBar(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Surface(
-            modifier =
-                Modifier.weight(1f).height(FloatingBarElementSize).then(
-                    if (glass &&
-                        backdrop != null
-                    ) {
-                        Modifier.clip(CircleShape).hazeBlur(HazeInput.Backdrop(backdrop), blurStyle)
-                    } else {
-                        Modifier
-                    },
-                ),
-            shape = CircleShape,
-            color = tint,
-            border = border,
-            contentColor = MaterialTheme.colorScheme.onSurface,
-            shadowElevation = FloatingBarElementShadow,
-        ) {
+        val titleContent: @Composable () -> Unit = {
             Row(
                 modifier = Modifier.padding(horizontal = 20.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -206,6 +198,46 @@ fun FloatingTopAppBar(
                     Row(modifier = Modifier.padding(start = 8.dp)) { subtitle() }
                 }
             }
+        }
+        if (glass && glasmioBackdrop != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val scheme = MaterialTheme.colorScheme
+            val typography = MaterialTheme.typography
+            val material =
+                if (Settings.shared.glassStyle == "CLEAR") NavigationGlassMaterial.Clear else NavigationGlassMaterial.RegularSmall
+            val frost =
+                when (Settings.shared.glassStyle) {
+                    "CLEAR" -> 0.75.dp
+                    "FROSTED" -> 18.dp
+                    else -> 5.dp
+                }
+            GlasmioTheme(isDark = scheme.surface.luminance() < 0.5f, colorScheme = scheme, typography = typography) {
+                GlasmioBackdropProvider(glasmioBackdrop) {
+                    GlassSurface(
+                        modifier = Modifier.weight(1f).height(FloatingBarElementSize),
+                        backdrop = glasmioBackdrop,
+                        shape = CircleShape,
+                        material = material,
+                        frostRadius = frost,
+                        contentAlignment = Alignment.CenterStart,
+                    ) { titleContent() }
+                }
+            }
+        } else {
+            Surface(
+                modifier =
+                    Modifier.weight(1f).height(FloatingBarElementSize).then(
+                        if (glass && backdrop != null) {
+                            Modifier.clip(CircleShape).hazeBlur(HazeInput.Backdrop(backdrop), blurStyle)
+                        } else {
+                            Modifier
+                        },
+                    ),
+                shape = CircleShape,
+                color = tint,
+                border = border,
+                contentColor = MaterialTheme.colorScheme.onSurface,
+                shadowElevation = FloatingBarElementShadow,
+            ) { titleContent() }
         }
         actions()
     }

@@ -848,7 +848,7 @@ fun MetrolistApp(
                     !(context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager).isLowRamDevice
             }
         val useGlasmio =
-            useGlassNavigation && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !Settings.shared.glassLightMode &&
+            useGlass && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !Settings.shared.glassLightMode &&
                 !(context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager).isLowRamDevice
         val glasmioBackdrop = if (useGlasmio) rememberLayerBackdrop() else null
         // A single recording source: do not also capture the Haze backdrop when Glasmio is active.
@@ -1772,6 +1772,7 @@ fun MetrolistApp(
                                                 if (useFloatingTopBar) {
                                                     FloatingTopAppBar(
                                                         glass = useGlassTopBar,
+                                                        glasmioBackdrop = glasmioBackdrop,
                                                         title = topBarTitle,
                                                         subtitle = topBarSubtitle,
                                                         actions = topBarActions,

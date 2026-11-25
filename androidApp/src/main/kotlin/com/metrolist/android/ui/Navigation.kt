@@ -1,5 +1,6 @@
 package com.metrolist.android.ui
 
+import android.os.Build
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -220,7 +221,7 @@ fun MetrolistNavigationScaffold(
         navigationVisible = navigationVisible,
         floatingNavigation = useFloatingNavigation,
         floatingNavigationOverride =
-            if (glasmioBackdrop != null) {
+            if (glasmioBackdrop != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 { barItems, barSelected, barSelect, visible, barModifier ->
                     GlasmioAppNavigation(
                         items = barItems,
