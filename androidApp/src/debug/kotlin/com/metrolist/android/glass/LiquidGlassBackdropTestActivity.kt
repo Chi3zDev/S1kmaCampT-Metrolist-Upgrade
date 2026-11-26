@@ -2,37 +2,44 @@ package com.metrolist.android.glass
 
 import android.os.Bundle
 import android.view.View
-import android.view.ViewGroup
-import android.widget.FrameLayout
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.ComposeView
-import com.example.liquidglass.LiquidGlassView
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.dp
+import com.metrolist.android.ui.glass.QweBackdropSource
+import com.metrolist.android.ui.glass.QweGlassOverlay
 import com.metrolist.android.ui.glass.QweGlassStyle
-import com.metrolist.android.ui.glass.QweGlassView
 
-/** Test-only host: a separate Compose backdrop and a sibling glass, not the application UI. */
+/** Test-only host: a separate Compose backdrop and glass, not the application UI. */
 class LiquidGlassBackdropTestActivity : ComponentActivity() {
     var backdropColor by mutableStateOf(Color.Red)
     var stripedBackdrop by mutableStateOf(false)
-    lateinit var glass: LiquidGlassView
+    var glass: View? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val root = FrameLayout(this)
-        val backdrop =
-            ComposeView(this).apply {
-                setContent {
+        setContent {
+            var source by remember { mutableStateOf<View?>(null) }
+            val glassSize = with(LocalDensity.current) { 160.toDp() }
+            Box(Modifier.fillMaxSize()) {
+                QweBackdropSource(
+                    onViewChanged = { source = it },
+                    modifier = Modifier.fillMaxSize(),
+                ) {
                     if (stripedBackdrop) {
                         Canvas(Modifier.fillMaxSize()) {
                             val stripeWidth = 4f
@@ -52,26 +59,20 @@ class LiquidGlassBackdropTestActivity : ComponentActivity() {
                         Box(Modifier.fillMaxSize().background(backdropColor))
                     }
                 }
-            }
-        root.addView(backdrop, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
-        // Mask the real backdrop so a transparent or missing glass cannot pass the pixel test.
-        root.addView(
-            View(this).apply { setBackgroundColor(android.graphics.Color.GREEN) },
-            FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT),
-        )
-        glass =
-            QweGlassView(this).apply {
-                configure(
-                    source = backdrop,
+                // A transparent or missing glass cannot pass by merely showing the backdrop.
+                Box(Modifier.fillMaxSize().background(Color.Green))
+                QweGlassOverlay(
+                    source = source,
                     style = QweGlassStyle.FROSTED,
-                    radiusPx = 24f,
-                    tintArgb = android.graphics.Color.TRANSPARENT,
+                    radius = 24.dp,
+                    tint = Color.Transparent,
                     dynamic = true,
+                    lightMode = false,
+                    refractionAllowed = false,
+                    modifier = Modifier.align(Alignment.Center).size(glassSize),
+                    onViewChanged = { glass = it },
                 )
-                // Exercise the non-AGSL path, including the Android 12 renderer.
-                useShaderPipeline = false
             }
-        root.addView(glass, FrameLayout.LayoutParams(160, 160, android.view.Gravity.CENTER))
-        setContentView(root)
+        }
     }
 }

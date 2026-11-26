@@ -1,5 +1,7 @@
 package com.metrolist.android.glass
 
+import android.app.ActivityManager
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Build
@@ -21,8 +23,11 @@ class LiquidGlassBackdropTest {
     /** Demonstrates that a moving Compose sibling is actually sampled; it does not certify visual quality. */
     @Test
     fun dynamicGlassUpdatesWhenSeparateComposeBackdropChanges() {
-        assumeTrue("PixelCopy requires Android 8", Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+        assumeTrue("Glass bridge uses the lightweight fallback below Android 12", Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
         val instrumentation = InstrumentationRegistry.getInstrumentation()
+        val activityManager = instrumentation.targetContext.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        assumeTrue("Glass bridge uses the lightweight fallback on low-RAM devices", !activityManager.isLowRamDevice)
+        assumeTrue("QWEA0 native library is unavailable for this process ABI", runCatching { System.loadLibrary("nativegauss") }.isSuccess)
         val intent =
             Intent(instrumentation.targetContext, LiquidGlassBackdropTestActivity::class.java)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -71,9 +76,14 @@ class LiquidGlassBackdropTest {
         assertTrue("PixelCopy timed out", latch.await(5, TimeUnit.SECONDS))
         assertEquals(PixelCopy.SUCCESS, result)
         val position = IntArray(2)
-        InstrumentationRegistry.getInstrumentation().runOnMainSync { activity.glass.getLocationInWindow(position) }
-        val centerX = position[0] + activity.glass.width / 2
-        val centerY = position[1] + activity.glass.height / 2
+        var centerX = 0
+        var centerY = 0
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            val glass = checkNotNull(activity.glass) { "QWEA0 glass view was not created" }
+            glass.getLocationInWindow(position)
+            centerX = position[0] + glass.width / 2
+            centerY = position[1] + glass.height / 2
+        }
         val pixels = List(count) { index -> bitmap.getPixel(centerX - count / 2 + index, centerY) }
         bitmap.recycle()
         return pixels
