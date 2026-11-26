@@ -37,13 +37,30 @@ class LiquidGlassBackdropTest {
             val blue = captureCenter(activity)
             assertTrue("red backdrop must reach glass: $red", AndroidColor.red(red) > AndroidColor.blue(red) + 20)
             assertTrue("updated blue backdrop must reach glass: $blue", AndroidColor.blue(blue) > AndroidColor.red(blue) + 20)
+
+            instrumentation.runOnMainSync { activity.stripedBackdrop = true }
+            instrumentation.waitForIdleSync()
+            Thread.sleep(1000)
+            val stripeSamples = captureCenterRow(activity, 32)
+            val redValues = stripeSamples.map(AndroidColor::red)
+            val blueValues = stripeSamples.map(AndroidColor::blue)
+            assertTrue("blurred stripes should contain red", redValues.average() > 25)
+            assertTrue("blurred stripes should contain blue", blueValues.average() > 25)
+            assertTrue("red stripes should be smoothed by blur: $redValues", redValues.max() - redValues.min() < 130)
+            assertTrue("blue stripes should be smoothed by blur: $blueValues", blueValues.max() - blueValues.min() < 130)
         } finally {
             instrumentation.runOnMainSync { activity.finish() }
         }
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    private fun captureCenter(activity: LiquidGlassBackdropTestActivity): Int {
+    private fun captureCenter(activity: LiquidGlassBackdropTestActivity): Int = captureCenterRow(activity, 1).single()
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun captureCenterRow(
+        activity: LiquidGlassBackdropTestActivity,
+        count: Int,
+    ): List<Int> {
         val bitmap = Bitmap.createBitmap(activity.window.decorView.width, activity.window.decorView.height, Bitmap.Config.ARGB_8888)
         val latch = CountDownLatch(1)
         var result = -1
@@ -55,8 +72,10 @@ class LiquidGlassBackdropTest {
         assertEquals(PixelCopy.SUCCESS, result)
         val position = IntArray(2)
         InstrumentationRegistry.getInstrumentation().runOnMainSync { activity.glass.getLocationInWindow(position) }
-        val color = bitmap.getPixel(position[0] + activity.glass.width / 2, position[1] + activity.glass.height / 2)
+        val centerX = position[0] + activity.glass.width / 2
+        val centerY = position[1] + activity.glass.height / 2
+        val pixels = List(count) { index -> bitmap.getPixel(centerX - count / 2 + index, centerY) }
         bitmap.recycle()
-        return color
+        return pixels
     }
 }
