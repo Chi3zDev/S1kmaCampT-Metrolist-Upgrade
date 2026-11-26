@@ -274,6 +274,7 @@ fun FloatingTopAppBar(
                         backdrop = glasmioBackdrop,
                         shape = CircleShape,
                         material = material,
+                        navigationSurfaceColor = tint,
                         frostRadius = radius,
                         contentAlignment = Alignment.CenterStart,
                     ) { titleContent() }
