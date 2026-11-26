@@ -77,6 +77,8 @@ import com.metrolist.shared.generated.resources.*
 import com.metrolist.shared.settings.Settings
 import com.metrolist.shared.ui.LocalIsTv
 import com.metrolist.shared.ui.components.focusOutline
+import com.metrolist.shared.ui.components.glassCardBorder
+import com.metrolist.shared.ui.components.glassCardColor
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import com.metrolist.shared.ui.utils.DragScrollableColumn
 import com.metrolist.shared.ui.utils.desktopArrowScroll
@@ -116,7 +118,13 @@ internal fun SettingsSearchField(
                 .height(56.dp)
                 .focusOutline(CircleShape, focused = isFocused),
         shape = CircleShape,
-        color = MaterialTheme.colorScheme.surfaceContainerHighest,
+        color =
+            if (Settings.shared.liquidGlassTheme) {
+                glassCardColor(MaterialTheme.colorScheme.surfaceContainerHighest)
+            } else {
+                MaterialTheme.colorScheme.surfaceContainerHighest
+            },
+        border = if (Settings.shared.liquidGlassTheme) glassCardBorder() else null,
     ) {
         Row(
             modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
@@ -249,7 +257,13 @@ internal fun SearchResultRow(
         onClick = { onResultSelected(result.page.id, result.item?.id) },
         modifier = Modifier.fillMaxWidth(),
         shape = connectedShape(first, last, outer = 20.dp, inner = 5.dp),
-        color = MaterialTheme.colorScheme.surfaceContainer,
+        color =
+            if (Settings.shared.liquidGlassTheme) {
+                glassCardColor(MaterialTheme.colorScheme.surfaceContainer)
+            } else {
+                MaterialTheme.colorScheme.surfaceContainer
+            },
+        border = if (Settings.shared.liquidGlassTheme) glassCardBorder() else null,
     ) {
         Row(
             modifier = Modifier.heightIn(min = 72.dp).padding(horizontal = 16.dp, vertical = 16.dp),

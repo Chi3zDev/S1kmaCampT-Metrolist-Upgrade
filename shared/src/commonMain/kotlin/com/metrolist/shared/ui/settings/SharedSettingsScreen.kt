@@ -106,6 +106,7 @@ import com.metrolist.shared.generated.resources.*
 import com.metrolist.shared.settings.Settings
 import com.metrolist.shared.ui.LocalIsTv
 import com.metrolist.shared.ui.components.ExpressiveSwitch
+import com.metrolist.shared.ui.components.LocalAppBackgroundVisible
 import com.metrolist.shared.ui.components.SwipeBackLayout
 import com.metrolist.shared.ui.components.appPageBackground
 import com.metrolist.shared.ui.components.focusOutline
@@ -410,8 +411,18 @@ private fun CompactSettingsHome(
                 },
                 colors =
                     TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.surface,
-                        scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                        containerColor =
+                            if (Settings.shared.liquidGlassTheme) {
+                                appPageBackground(MaterialTheme.colorScheme.surface)
+                            } else {
+                                MaterialTheme.colorScheme.surface
+                            },
+                        scrolledContainerColor =
+                            if (Settings.shared.liquidGlassTheme && LocalAppBackgroundVisible.current) {
+                                MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.82f)
+                            } else {
+                                MaterialTheme.colorScheme.surfaceContainer
+                            },
                     ),
                 scrollBehavior = scrollBehavior,
             )
@@ -487,8 +498,18 @@ private fun CompactSettingsDetail(
                 },
                 colors =
                     TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.surface,
-                        scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                        containerColor =
+                            if (Settings.shared.liquidGlassTheme) {
+                                appPageBackground(MaterialTheme.colorScheme.surface)
+                            } else {
+                                MaterialTheme.colorScheme.surface
+                            },
+                        scrolledContainerColor =
+                            if (Settings.shared.liquidGlassTheme && LocalAppBackgroundVisible.current) {
+                                MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.82f)
+                            } else {
+                                MaterialTheme.colorScheme.surfaceContainer
+                            },
                     ),
                 scrollBehavior = scrollBehavior,
             )
