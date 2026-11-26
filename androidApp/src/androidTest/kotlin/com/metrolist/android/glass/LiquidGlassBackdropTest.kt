@@ -63,6 +63,11 @@ class LiquidGlassBackdropTest {
             assertFalse("refraction can be disabled", glass.useShaderPipeline)
             instrumentation.runOnMainSync {
                 val source = checkNotNull(glass.backdropSource)
+                assertTrue("visible dynamic glass should redraw", glass.enableDynamicBackground)
+                glass.onVisibilityAggregated(false)
+                assertFalse("aggregated invisibility should stop redraw", glass.enableDynamicBackground)
+                glass.onVisibilityAggregated(true)
+                assertTrue("visible glass should resume redraw", glass.enableDynamicBackground)
                 glass.configure(
                     source = source,
                     style = QweGlassStyle.CLEAR,

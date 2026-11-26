@@ -16,6 +16,7 @@ internal class QweGlassView(
     context: Context,
 ) : LiquidGlassView(context) {
     private var dynamicRequested = false
+    private var aggregatedVisible = true
 
     init {
         isClickable = false
@@ -76,6 +77,7 @@ internal class QweGlassView(
 
     override fun onVisibilityAggregated(isVisible: Boolean) {
         super.onVisibilityAggregated(isVisible)
+        aggregatedVisible = isVisible
         updateDynamicState()
     }
 
@@ -90,7 +92,7 @@ internal class QweGlassView(
     }
 
     private fun updateDynamicState() {
-        enableDynamicBackground = dynamicRequested && isAttachedToWindow && isShown && windowVisibility == View.VISIBLE
+        enableDynamicBackground = dynamicRequested && aggregatedVisible && isAttachedToWindow && isShown && windowVisibility == View.VISIBLE
     }
 
     private fun isAncestor(
