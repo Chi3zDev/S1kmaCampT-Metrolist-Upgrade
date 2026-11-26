@@ -98,7 +98,8 @@ fun GlasmioAppNavigation(
             isDark = isDark,
             colorScheme = scheme,
             typography = typography,
-            appearance = GlassAppearance(liquidGlassEnabled = Settings.shared.glassStyle != "CLEAR"),
+            // Clear changes the material, not whether the navigation lens can refract.
+            appearance = GlassAppearance(),
         ) {
             GlasmioIconProvider(resolver = resolver) {
                 GlasmioBackdropProvider(backdrop) {
