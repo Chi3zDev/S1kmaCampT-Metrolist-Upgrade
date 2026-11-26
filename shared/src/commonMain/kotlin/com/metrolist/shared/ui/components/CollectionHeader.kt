@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import com.metrolist.shared.generated.resources.Res
 import com.metrolist.shared.generated.resources.go_back
 import com.metrolist.shared.generated.resources.more_options
+import com.metrolist.shared.settings.Settings
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import com.metrolist.shared.ui.navigation.navigationPopupSource
 import com.metrolist.shared.ui.theme.uiEnhanced
@@ -94,13 +95,20 @@ fun CollectionInfoCard(
     modifier: Modifier = Modifier,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        shape = collectionInfoCardShape(),
-        color = glassCardColor(MaterialTheme.colorScheme.surfaceContainerHigh),
-        border = glassCardBorder(),
-    ) {
-        Column(modifier = Modifier.padding(16.dp), content = content)
+    val backdrop = LocalThemeGlassBackdrop.current.takeIf { Settings.shared.liquidGlassTheme }
+    Box(modifier.fillMaxWidth()) {
+        backdrop?.Background(
+            radius = uiEnhanced(8.dp, 20.dp),
+            modifier = Modifier.matchParentSize(),
+        )
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = collectionInfoCardShape(),
+            color = glassCardColor(MaterialTheme.colorScheme.surfaceContainerHigh),
+            border = glassCardBorder(),
+        ) {
+            Column(modifier = Modifier.padding(16.dp), content = content)
+        }
     }
 }
 
