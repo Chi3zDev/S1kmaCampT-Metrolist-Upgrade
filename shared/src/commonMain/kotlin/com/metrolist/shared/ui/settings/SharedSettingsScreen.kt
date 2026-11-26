@@ -107,6 +107,7 @@ import com.metrolist.shared.settings.Settings
 import com.metrolist.shared.ui.LocalIsTv
 import com.metrolist.shared.ui.components.ExpressiveSwitch
 import com.metrolist.shared.ui.components.LocalAppBackgroundVisible
+import com.metrolist.shared.ui.components.LocalThemeGlassBackdrop
 import com.metrolist.shared.ui.components.SwipeBackLayout
 import com.metrolist.shared.ui.components.appPageBackground
 import com.metrolist.shared.ui.components.focusOutline
@@ -919,21 +920,26 @@ private fun SettingsRootGroup(
             fontWeight = FontWeight.Medium,
             modifier = Modifier.padding(start = 16.dp, end = 32.dp, top = 8.dp, bottom = 12.dp),
         )
-        Column(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-        ) {
-            group.pages.forEachIndexed { index, pageId ->
-                registry[pageId]?.let { page ->
-                    SettingsNavigationRow(
-                        title = page.title,
-                        subtitle = page.subtitle,
-                        icon = page.icon,
-                        customIcon = customPageIcons[pageId],
-                        first = index == 0,
-                        last = index == group.pages.lastIndex,
-                        onClick = { onPageSelected(pageId) },
-                    )
+        Box(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+            if (Settings.shared.liquidGlassTheme) {
+                LocalThemeGlassBackdrop.current?.Background(radius = 20.dp, modifier = Modifier.matchParentSize())
+            }
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                group.pages.forEachIndexed { index, pageId ->
+                    registry[pageId]?.let { page ->
+                        SettingsNavigationRow(
+                            title = page.title,
+                            subtitle = page.subtitle,
+                            icon = page.icon,
+                            customIcon = customPageIcons[pageId],
+                            first = index == 0,
+                            last = index == group.pages.lastIndex,
+                            onClick = { onPageSelected(pageId) },
+                        )
+                    }
                 }
             }
         }

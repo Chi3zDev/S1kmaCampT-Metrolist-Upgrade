@@ -141,40 +141,45 @@ fun CollectionFilterBar(
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         if (showSearch) {
-            Surface(
-                shape = SearchBarDefaults.inputFieldShape,
-                content = {
-                    SearchBarDefaults.InputField(
-                        textFieldState = textFieldState,
-                        searchBarState = searchBarState,
-                        onSearch = { focusManager.clearFocus() },
-                        modifier = Modifier.fillMaxWidth(),
-                        placeholder = { Text(text.searchLabel, maxLines = 1, overflow = TextOverflow.Ellipsis) },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = MetrolistIcons.Default.Search,
-                                contentDescription = null,
-                            )
-                        },
-                        trailingIcon = {
-                            if (query.isNotEmpty()) {
-                                IconButton(onClick = { onQueryChange("") }, shapes = IconButtonDefaults.shapes()) {
-                                    Icon(
-                                        imageVector = MetrolistIcons.Default.Clear,
-                                        contentDescription = stringResource(Res.string.clear_search),
-                                    )
+            Box(Modifier.fillMaxWidth()) {
+                if (Settings.shared.liquidGlassTheme) {
+                    LocalThemeGlassBackdrop.current?.Background(radius = 28.dp, modifier = Modifier.matchParentSize())
+                }
+                Surface(
+                    shape = SearchBarDefaults.inputFieldShape,
+                    content = {
+                        SearchBarDefaults.InputField(
+                            textFieldState = textFieldState,
+                            searchBarState = searchBarState,
+                            onSearch = { focusManager.clearFocus() },
+                            modifier = Modifier.fillMaxWidth(),
+                            placeholder = { Text(text.searchLabel, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = MetrolistIcons.Default.Search,
+                                    contentDescription = null,
+                                )
+                            },
+                            trailingIcon = {
+                                if (query.isNotEmpty()) {
+                                    IconButton(onClick = { onQueryChange("") }, shapes = IconButtonDefaults.shapes()) {
+                                        Icon(
+                                            imageVector = MetrolistIcons.Default.Clear,
+                                            contentDescription = stringResource(Res.string.clear_search),
+                                        )
+                                    }
                                 }
-                            }
-                        },
-                        colors = searchBarColors.inputFieldColors,
-                    )
-                },
-                modifier = Modifier.fillMaxWidth(),
-                color = searchBarColors.containerColor,
-                border = if (Settings.shared.liquidGlassTheme) glassCardBorder() else null,
-                tonalElevation = 0.dp,
-                shadowElevation = 0.dp,
-            )
+                            },
+                            colors = searchBarColors.inputFieldColors,
+                        )
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    color = searchBarColors.containerColor,
+                    border = if (Settings.shared.liquidGlassTheme) glassCardBorder() else null,
+                    tonalElevation = 0.dp,
+                    shadowElevation = 0.dp,
+                )
+            }
         }
         val effectiveSort = resolveCollectionFilterSort(sort, text.sortLabels.keys)
         val controlsRowModifier =

@@ -76,6 +76,7 @@ import androidx.compose.ui.unit.dp
 import com.metrolist.shared.generated.resources.*
 import com.metrolist.shared.settings.Settings
 import com.metrolist.shared.ui.LocalIsTv
+import com.metrolist.shared.ui.components.LocalThemeGlassBackdrop
 import com.metrolist.shared.ui.components.focusOutline
 import com.metrolist.shared.ui.components.glassCardBorder
 import com.metrolist.shared.ui.components.glassCardColor
@@ -111,67 +112,68 @@ internal fun SettingsSearchField(
     var tvKeyboardRequested by remember { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
-    Surface(
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .height(56.dp)
-                .focusOutline(CircleShape, focused = isFocused),
-        shape = CircleShape,
-        color =
-            if (Settings.shared.liquidGlassTheme) {
-                glassCardColor(MaterialTheme.colorScheme.surfaceContainerHighest)
-            } else {
-                MaterialTheme.colorScheme.surfaceContainerHighest
-            },
-        border = if (Settings.shared.liquidGlassTheme) glassCardBorder() else null,
-    ) {
-        Row(
-            modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
+    Box(modifier.fillMaxWidth().height(56.dp)) {
+        if (Settings.shared.liquidGlassTheme) {
+            LocalThemeGlassBackdrop.current?.Background(radius = 28.dp, modifier = Modifier.matchParentSize())
+        }
+        Surface(
+            modifier = Modifier.fillMaxSize().focusOutline(CircleShape, focused = isFocused),
+            shape = CircleShape,
+            color =
+                if (Settings.shared.liquidGlassTheme) {
+                    glassCardColor(MaterialTheme.colorScheme.surfaceContainerHighest)
+                } else {
+                    MaterialTheme.colorScheme.surfaceContainerHighest
+                },
+            border = if (Settings.shared.liquidGlassTheme) glassCardBorder() else null,
         ) {
-            Icon(MetrolistIcons.Outlined.Search, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
-            Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
-                if (query.isEmpty()) {
-                    Text(
-                        searchLabel,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+            Row(
+                modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Icon(MetrolistIcons.Outlined.Search, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
+                    if (query.isEmpty()) {
+                        Text(
+                            searchLabel,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    BasicTextField(
+                        state = textFieldState,
+                        lineLimits = TextFieldLineLimits.SingleLine,
+                        textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface),
+                        cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                        interactionSource = interactionSource,
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search, showKeyboardOnFocus = !isTv || tvKeyboardRequested),
+                        onKeyboardAction = { focusManager.clearFocus() },
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .onFocusChanged { if (!it.isFocused) tvKeyboardRequested = false }
+                                .onPreviewKeyEvent { event ->
+                                    if (isTv && (event.key == Key.DirectionCenter || event.key == Key.Enter)) {
+                                        if (event.type == KeyEventType.KeyUp) {
+                                            tvKeyboardRequested = true
+                                            keyboardController?.show()
+                                        }
+                                        return@onPreviewKeyEvent true
+                                    }
+                                    if (event.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false
+                                    when (event.key) {
+                                        Key.DirectionUp -> focusManager.moveFocus(FocusDirection.Up)
+                                        Key.DirectionDown -> focusManager.moveFocus(FocusDirection.Down)
+                                        else -> false
+                                    }
+                                }.semantics { contentDescription = searchLabel },
                     )
                 }
-                BasicTextField(
-                    state = textFieldState,
-                    lineLimits = TextFieldLineLimits.SingleLine,
-                    textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface),
-                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                    interactionSource = interactionSource,
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search, showKeyboardOnFocus = !isTv || tvKeyboardRequested),
-                    onKeyboardAction = { focusManager.clearFocus() },
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .onFocusChanged { if (!it.isFocused) tvKeyboardRequested = false }
-                            .onPreviewKeyEvent { event ->
-                                if (isTv && (event.key == Key.DirectionCenter || event.key == Key.Enter)) {
-                                    if (event.type == KeyEventType.KeyUp) {
-                                        tvKeyboardRequested = true
-                                        keyboardController?.show()
-                                    }
-                                    return@onPreviewKeyEvent true
-                                }
-                                if (event.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false
-                                when (event.key) {
-                                    Key.DirectionUp -> focusManager.moveFocus(FocusDirection.Up)
-                                    Key.DirectionDown -> focusManager.moveFocus(FocusDirection.Down)
-                                    else -> false
-                                }
-                            }.semantics { contentDescription = searchLabel },
-                )
-            }
-            if (query.isNotEmpty()) {
-                IconButton(onClick = { onQueryChange("") }, modifier = Modifier.size(36.dp), shapes = IconButtonDefaults.shapes()) {
-                    Icon(MetrolistIcons.Default.Close, stringResource(Res.string.close), modifier = Modifier.size(20.dp))
+                if (query.isNotEmpty()) {
+                    IconButton(onClick = { onQueryChange("") }, modifier = Modifier.size(36.dp), shapes = IconButtonDefaults.shapes()) {
+                        Icon(MetrolistIcons.Default.Close, stringResource(Res.string.close), modifier = Modifier.size(20.dp))
+                    }
                 }
             }
         }

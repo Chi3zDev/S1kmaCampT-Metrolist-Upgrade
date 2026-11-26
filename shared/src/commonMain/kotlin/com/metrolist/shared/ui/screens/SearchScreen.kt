@@ -82,6 +82,7 @@ import com.metrolist.shared.model.SongItem
 import com.metrolist.shared.model.YTItem
 import com.metrolist.shared.settings.Settings
 import com.metrolist.shared.ui.LocalIsTv
+import com.metrolist.shared.ui.components.LocalThemeGlassBackdrop
 import com.metrolist.shared.ui.components.glassCardBorder
 import com.metrolist.shared.ui.components.glassCardColor
 import com.metrolist.shared.ui.icons.MetrolistIcons
@@ -272,6 +273,9 @@ fun SearchBar(
                 .padding(horizontal = 16.dp, vertical = 2.dp),
         contentAlignment = Alignment.Center,
     ) {
+        if (Settings.shared.liquidGlassTheme) {
+            LocalThemeGlassBackdrop.current?.Background(radius = 28.dp, modifier = Modifier.matchParentSize())
+        }
         val isWide = maxWidth > 480.dp
         val searchSurface =
             if (Settings.shared.liquidGlassTheme) {
