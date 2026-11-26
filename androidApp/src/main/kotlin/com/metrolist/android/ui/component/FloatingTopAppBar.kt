@@ -215,7 +215,7 @@ fun FloatingTopAppBar(
                 isDark = scheme.surface.luminance() < 0.5f,
                 colorScheme = scheme,
                 typography = typography,
-                appearance = GlassAppearance(liquidGlassEnabled = Settings.shared.glassStyle != "CLEAR"),
+                appearance = GlassAppearance(),
             ) {
                 GlasmioBackdropProvider(glasmioBackdrop) {
                     GlassSurface(
