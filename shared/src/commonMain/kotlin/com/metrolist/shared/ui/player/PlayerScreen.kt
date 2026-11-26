@@ -1084,6 +1084,11 @@ fun PlayerScreen(
                         contentActive && bottomSheetState.isSettledExpanded && !isFullscreen && !isInPipMode &&
                             playerType == PlayerType.GLASS_CARD && Settings.shared.glassNavigation && Settings.shared.glassPlayer &&
                             !uiState.isLyricsVisible && !Settings.shared.glassLightMode && LocalPlayerEffectsAllowed.current,
+                    // The native overlay has not yet been proven under scroll clipping or
+                    // GraphicsLayer export. Keep the Compose path for those cases.
+                    preferCompose =
+                        capturePlayerForShare || useLandscapeLayout ||
+                            maxHeight < MinPortraitPlayerHeight + if (playerType == PlayerType.GLASS_CARD) 96.dp else 0.dp,
                 )
             val hasVisibleVideoTransitionIndicator =
                 isVideoModeResolving &&
@@ -1167,7 +1172,7 @@ fun PlayerScreen(
                             .onPlaced { playerRootCoordinates = it }
                             .onSizeChanged { playerRootHeightPx = it.height.toFloat() },
                 ) {
-                    Box(Modifier.fillMaxSize().then(playerGlassMaterial?.sourceModifier ?: Modifier)) {
+                    PlayerBackgroundSource(playerGlassMaterial) {
                         Box(
                             modifier =
                                 Modifier
@@ -1374,6 +1379,8 @@ fun PlayerScreen(
                             }
                         }
                     }
+
+                    playerGlassMaterial?.Overlay(Modifier.fillMaxSize())
 
                     SharedTransitionLayout(
                         modifier =

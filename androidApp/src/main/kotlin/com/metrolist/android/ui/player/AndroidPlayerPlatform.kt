@@ -47,6 +47,7 @@ import com.metrolist.android.playback.PlayerConnection
 import com.metrolist.android.playback.SongDownloadManager
 import com.metrolist.android.ui.component.AdaptiveModalBottomSheet
 import com.metrolist.android.ui.download.rememberDownloadPermissionGate
+import com.metrolist.android.ui.glass.rememberQweGlassAvailable
 import com.metrolist.android.ui.screens.PlayerDeviceConnectSheet
 import com.metrolist.android.ui.theme.SystemBarAppearance
 import com.metrolist.android.utils.shareImage
@@ -99,8 +100,14 @@ class AndroidPlayerPlatform(
     override val supportsCasting = true
 
     @Composable
-    override fun rememberPlayerGlassMaterial(enabled: Boolean): PlayerGlassMaterial? {
+    override fun rememberPlayerGlassMaterial(
+        enabled: Boolean,
+        preferCompose: Boolean,
+    ): PlayerGlassMaterial? {
         if (!enabled || Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return null
+        val useQwe = rememberQweGlassAvailable(enabled = !preferCompose, lightMode = Settings.shared.glassLightMode)
+        if (useQwe) return remember { QwePlayerGlassMaterial() }
+        // Preserve the existing Compose renderer for image capture and clipped layouts.
         val backdrop = rememberLayerBackdrop()
         return remember(backdrop) { AndroidPlayerGlassMaterial(backdrop) }
     }

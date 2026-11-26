@@ -1,6 +1,9 @@
 package com.metrolist.shared.ui.player
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.staticCompositionLocalOf
@@ -27,6 +30,14 @@ interface PlayerGlassMaterial {
     val sourceModifier: Modifier
 
     @Composable
+    fun Background(content: @Composable BoxScope.() -> Unit) {
+        Box(Modifier.fillMaxSize().then(sourceModifier), content = content)
+    }
+
+    @Composable
+    fun Overlay(modifier: Modifier = Modifier) {}
+
+    @Composable
     fun cardModifier(
         topInset: Dp,
         bottomInset: Dp,
@@ -37,10 +48,25 @@ interface PlayerGlassMaterial {
 
 val LocalPlayerGlassMaterial = staticCompositionLocalOf<PlayerGlassMaterial?> { null }
 
+@Composable
+internal fun PlayerBackgroundSource(
+    material: PlayerGlassMaterial?,
+    content: @Composable BoxScope.() -> Unit,
+) {
+    if (material == null) {
+        Box(Modifier.fillMaxSize(), content = content)
+    } else {
+        material.Background(content)
+    }
+}
+
 @Stable
 interface PlayerPlatform {
     @Composable
-    fun rememberPlayerGlassMaterial(enabled: Boolean): PlayerGlassMaterial? = null
+    fun rememberPlayerGlassMaterial(
+        enabled: Boolean,
+        preferCompose: Boolean = false,
+    ): PlayerGlassMaterial? = null
 
     val supportsPictureInPicture: Boolean
     val supportsVideoPlayback: Boolean
