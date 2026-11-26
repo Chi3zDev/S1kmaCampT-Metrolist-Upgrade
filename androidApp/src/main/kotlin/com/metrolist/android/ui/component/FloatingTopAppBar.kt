@@ -205,12 +205,6 @@ fun FloatingTopAppBar(
             val typography = MaterialTheme.typography
             val material =
                 if (Settings.shared.glassStyle == "CLEAR") NavigationGlassMaterial.Clear else NavigationGlassMaterial.RegularSmall
-            val frost =
-                when (Settings.shared.glassStyle) {
-                    "CLEAR" -> 0.75.dp
-                    "FROSTED" -> 18.dp
-                    else -> 5.dp
-                }
             GlasmioTheme(
                 isDark = scheme.surface.luminance() < 0.5f,
                 colorScheme = scheme,
@@ -223,7 +217,7 @@ fun FloatingTopAppBar(
                         backdrop = glasmioBackdrop,
                         shape = CircleShape,
                         material = material,
-                        frostRadius = frost,
+                        frostRadius = radius,
                         contentAlignment = Alignment.CenterStart,
                     ) { titleContent() }
                 }
