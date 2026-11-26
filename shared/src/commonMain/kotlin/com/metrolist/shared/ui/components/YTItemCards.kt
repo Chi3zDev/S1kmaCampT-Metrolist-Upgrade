@@ -10,6 +10,7 @@ package com.metrolist.shared.ui.components
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -109,6 +110,7 @@ import com.metrolist.shared.model.previewAspectRatio
 import com.metrolist.shared.model.previewThumbnailUrl
 import com.metrolist.shared.model.thumbnailAspectRatio
 import com.metrolist.shared.settings.ArtistNameAliases
+import com.metrolist.shared.settings.Settings
 import com.metrolist.shared.settings.displayName
 import com.metrolist.shared.settings.displayTitle
 import com.metrolist.shared.state.SongMetadataState
@@ -271,15 +273,20 @@ fun SongListItem(
     val artworkShape = animatedCurrentSongArtworkShape(isCurrent, RoundedCornerShape(4.dp))
     val artworkRotation by rememberCurrentSongArtworkRotation(isCurrent, isPlaying)
     val numberedArtwork = index != null && !showThumbnail && leadingContent == null
+    val rowShape = if (isCurrent) CircleShape else RoundedCornerShape(8.dp)
+    val rowGlass = Settings.shared.liquidGlassTheme && !isCurrent
+    val rowBackground = if (rowGlass) glassCardColor(colors.container) else colors.container
+    val rowBorder = if (rowGlass) glassCardBorder() else null
     Row(
         modifier =
             modifier
                 .fillMaxWidth()
                 .heightIn(min = 56.dp)
                 .alpha(if (enabled) 1f else 0.38f)
-                .clip(if (isCurrent) CircleShape else RoundedCornerShape(8.dp))
-                .background(colors.container)
-                .focusOutline(if (isCurrent) CircleShape else RoundedCornerShape(8.dp))
+                .clip(rowShape)
+                .background(rowBackground)
+                .then(if (rowBorder != null) Modifier.border(rowBorder, rowShape) else Modifier)
+                .focusOutline(rowShape)
                 .currentSongSemantics(isCurrent, isPlaying)
                 .combinedClickable(
                     onClick = {
@@ -778,6 +785,10 @@ fun YTListItem(
     val itemEnabled = enabled && !item.isUnavailable
     val currentSong = isCurrent && (item is SongItem || item is EpisodeItem)
     val colors = animateCurrentSongColors(currentSong)
+    val rowShape = if (currentSong) CircleShape else RoundedCornerShape(4.dp)
+    val rowGlass = Settings.shared.liquidGlassTheme && !currentSong
+    val rowBackground = if (rowGlass) glassCardColor(colors.container) else colors.container
+    val rowBorder = if (rowGlass) glassCardBorder() else null
     val contentColor = colors.content
     val subtitleColor = colors.subtitle
     val linkColor = colors.link
@@ -787,9 +798,10 @@ fun YTListItem(
                 .fillMaxWidth()
                 .heightIn(min = 48.dp)
                 .alpha(if (itemEnabled) 1f else 0.38f)
-                .clip(if (currentSong) CircleShape else RoundedCornerShape(4.dp))
-                .background(colors.container)
-                .focusOutline(if (currentSong) CircleShape else RoundedCornerShape(4.dp))
+                .clip(rowShape)
+                .background(rowBackground)
+                .then(if (rowBorder != null) Modifier.border(rowBorder, rowShape) else Modifier)
+                .focusOutline(rowShape)
                 .currentSongSemantics(currentSong, isPlaying)
                 .then(if (pageArtwork != null) Modifier.navigationPageSource(pageArtwork.token) else Modifier)
                 .combinedClickable(
