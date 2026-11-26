@@ -26,6 +26,11 @@ internal fun pageBackgroundColor(
 @Composable
 fun appPageBackground(fallback: Color): Color = pageBackgroundColor(fallback, LocalAppBackgroundVisible.current)
 
+/** Keep toolbar text legible while allowing the selected wallpaper to show through. */
+@Composable
+fun appTopBarBackground(fallback: Color): Color =
+    if (LocalAppBackgroundVisible.current && Settings.shared.liquidGlassTheme) fallback.copy(alpha = 0.82f) else fallback
+
 /** Highlights remain luminous in both themes; use only a subtle tinted lower edge. */
 fun glassEdgeColors(
     surface: Color,

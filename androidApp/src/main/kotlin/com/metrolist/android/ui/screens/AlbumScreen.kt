@@ -89,6 +89,7 @@ import com.metrolist.shared.ui.components.ContainedLoadingIndicator
 import com.metrolist.shared.ui.components.PopupContent
 import com.metrolist.shared.ui.components.PopupVisibility
 import com.metrolist.shared.ui.components.SongSelectionControls
+import com.metrolist.shared.ui.components.appTopBarBackground
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import com.metrolist.shared.ui.navigation.navigationPopupSource
 import com.metrolist.shared.ui.screens.AlbumContent
@@ -287,7 +288,14 @@ fun AlbumScreen(
                     },
                     colors =
                         TopAppBarDefaults.topAppBarColors(
-                            containerColor = if (isTopBarCollapsed) MaterialTheme.colorScheme.surface else Color.Transparent,
+                            containerColor =
+                                if (isTopBarCollapsed) {
+                                    appTopBarBackground(
+                                        MaterialTheme.colorScheme.surface,
+                                    )
+                                } else {
+                                    Color.Transparent
+                                },
                             scrolledContainerColor = if (isTopBarCollapsed) MaterialTheme.colorScheme.surface else Color.Transparent,
                         ),
                     scrollBehavior = scrollBehavior,

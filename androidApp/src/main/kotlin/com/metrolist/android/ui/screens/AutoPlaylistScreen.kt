@@ -175,6 +175,7 @@ import com.metrolist.shared.ui.components.RefreshIndicator
 import com.metrolist.shared.ui.components.SongSelectionControls
 import com.metrolist.shared.ui.components.TopPlaylistOrderControls
 import com.metrolist.shared.ui.components.appPageBackground
+import com.metrolist.shared.ui.components.appTopBarBackground
 import com.metrolist.shared.ui.components.images.AsyncImage
 import com.metrolist.shared.ui.components.libraryCover
 import com.metrolist.shared.ui.components.rememberDownloadPlaylistFilter
@@ -808,7 +809,7 @@ fun AutoPlaylistScreen(
                             }
                         }
                     },
-                    colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface),
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = appTopBarBackground(MaterialTheme.colorScheme.surface)),
                 )
             }
         },
