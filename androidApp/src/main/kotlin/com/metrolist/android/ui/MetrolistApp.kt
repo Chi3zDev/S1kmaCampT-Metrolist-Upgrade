@@ -1797,7 +1797,13 @@ fun MetrolistApp(
                                                         }
                                                     }
                                                     if (!hasDesktopCaption && !useBottomAccount) {
-                                                        appAccountButton(if (useFloatingTopBar) Modifier.floatingBarCircle() else Modifier)
+                                                        appAccountButton(
+                                                            if (useFloatingTopBar) {
+                                                                Modifier.floatingBarCircle(useGlassTopBar, glasmioBackdrop)
+                                                            } else {
+                                                                Modifier
+                                                            },
+                                                        )
                                                     }
                                                 }
                                                 if (useFloatingTopBar) {

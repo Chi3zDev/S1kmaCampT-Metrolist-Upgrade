@@ -62,11 +62,46 @@ private val FloatingBarElementShadow = 4.dp
 
 /** Modifier that makes any 48dp action (such as the account button) look like a floating circle. */
 @Composable
-fun Modifier.floatingBarCircle(): Modifier =
-    this
-        .size(FloatingBarElementSize)
-        .shadow(FloatingBarElementShadow, CircleShape)
-        .background(MaterialTheme.colorScheme.surfaceContainerHigh, CircleShape)
+fun Modifier.floatingBarCircle(
+    glass: Boolean = false,
+    glasmioBackdrop: LayerBackdrop? = null,
+): Modifier {
+    val hazeBackdrop = LocalGlassNavigationState.current
+    val style = Settings.shared.glassStyle
+    val surface = MaterialTheme.colorScheme.surfaceContainerHigh
+    val tint = surface.copy(alpha = (Settings.shared.glassTintStrength / 100f * 0.7f).coerceIn(0.2f, 0.85f))
+    val radius =
+        (
+            Settings.shared.glassBlurStrength.coerceIn(0f, 100f) / 100f *
+                when (style) {
+                    "FROSTED" -> 24f
+                    "CLEAR" -> 8f
+                    else -> 20f
+                }
+        ).dp
+    val base = this.size(FloatingBarElementSize).shadow(FloatingBarElementShadow, CircleShape)
+    if (!glass) return base.background(surface, CircleShape)
+    if (glasmioBackdrop != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        val shadows = rememberNavigationInnerShadows(enabled = style != "CLEAR", renderScale = 0.5f)
+        return base.navigationGlassBackground(
+            backdrop = glasmioBackdrop,
+            shape = { CircleShape },
+            containerColor = tint,
+            navigationMaterial = true,
+            innerShadows = shadows,
+            isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f,
+            appearance = GlassAppearance(),
+            blurRadius = radius,
+            material = if (style == "CLEAR") NavigationGlassMaterial.Clear else NavigationGlassMaterial.RegularSmall,
+        )
+    }
+    val blurStyle = remember(radius) { HazeBlurStyle { blurRadius(radius) } }
+    return base
+        .clip(CircleShape)
+        .then(if (hazeBackdrop != null) Modifier.hazeBlur(HazeInput.Backdrop(hazeBackdrop), blurStyle) else Modifier)
+        .background(tint, CircleShape)
+        .border(BorderStroke(1.dp, glassEdgeBrush(style == "CLEAR")), CircleShape)
+}
 
 /**
  * Icon button used by the top bar. Renders as a plain [IconButton] in the classic top bar,
