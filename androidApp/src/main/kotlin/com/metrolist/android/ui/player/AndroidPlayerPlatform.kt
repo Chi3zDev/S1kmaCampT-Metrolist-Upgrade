@@ -72,9 +72,11 @@ import com.metrolist.shared.ui.components.PlayerMenuAction
 import com.metrolist.shared.ui.components.PopupContent
 import com.metrolist.shared.ui.components.lyrics.LyricsShareDialog
 import com.metrolist.shared.ui.player.PlayerArtworkCrossfade
+import com.metrolist.shared.ui.player.PlayerGlassMaterial
 import com.metrolist.shared.ui.player.PlayerPlatform
 import com.metrolist.shared.viewmodels.PlayerViewModel
 import com.metrolist.shared.youtube.playback.PlaybackResource
+import io.github.neoruaa.glasmio.glass.render.backdrops.rememberLayerBackdrop
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getPluralString
 import org.jetbrains.compose.resources.stringResource
@@ -95,6 +97,13 @@ class AndroidPlayerPlatform(
     override val supportsPictureInPicture = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
     override val supportsVideoPlayback = true
     override val supportsCasting = true
+
+    @Composable
+    override fun rememberPlayerGlassMaterial(enabled: Boolean): PlayerGlassMaterial? {
+        if (!enabled || Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return null
+        val backdrop = rememberLayerBackdrop()
+        return remember(backdrop) { AndroidPlayerGlassMaterial(backdrop) }
+    }
 
     @Composable
     override fun SystemMusicVolume(

@@ -1078,6 +1078,13 @@ fun PlayerScreen(
             val queueSlideDirection = if (LocalLayoutDirection.current == LayoutDirection.Rtl) -1f else 1f
             val queueCoversPlayer = !useLandscapeLayout && queueSheetState.isSettledExpanded
             val contentActive = playerContentState.isActive && !queueCoversPlayer
+            val playerGlassMaterial =
+                platform.rememberPlayerGlassMaterial(
+                    enabled =
+                        contentActive && bottomSheetState.isSettledExpanded && !isFullscreen && !isInPipMode &&
+                            playerType == PlayerType.GLASS_CARD && Settings.shared.glassNavigation && Settings.shared.glassPlayer &&
+                            !uiState.isLyricsVisible && !Settings.shared.glassLightMode && LocalPlayerEffectsAllowed.current,
+                )
             val hasVisibleVideoTransitionIndicator =
                 isVideoModeResolving &&
                     showVideoButton &&
@@ -1148,6 +1155,7 @@ fun PlayerScreen(
                 LocalPlayerTrackArtwork provides trackPresentation.artwork,
                 LocalPlayerArtworkPrefetchUrls provides if (isScreenVisible) artworkPrefetchUrls else emptyList(),
                 LocalPlayerContentActive provides contentActive,
+                LocalPlayerGlassMaterial provides playerGlassMaterial,
                 LocalPlayerPositionActive provides (playerContentState.isPositionActive && !queueCoversPlayer),
                 LocalPlayerBackgroundAnimating provides
                     (contentActive && isPlaying && !Settings.shared.glassLightMode && LocalPlayerEffectsAllowed.current),
@@ -1159,198 +1167,210 @@ fun PlayerScreen(
                             .onPlaced { playerRootCoordinates = it }
                             .onSizeChanged { playerRootHeightPx = it.height.toFloat() },
                 ) {
-                    Box(
-                        modifier =
-                            Modifier
-                                .fillMaxSize()
-                                .background(backgroundColor),
-                    )
+                    Box(Modifier.fillMaxSize().then(playerGlassMaterial?.sourceModifier ?: Modifier)) {
+                        Box(
+                            modifier =
+                                Modifier
+                                    .fillMaxSize()
+                                    .background(backgroundColor),
+                        )
 
-                    if (isPlayerContentVisible && !isInPipMode && !isFullscreen) {
-                        Box(Modifier.fillMaxSize().graphicsLayer { alpha = if (queueCoversPlayer) 0f else 1f }) {
-                            if (playerBackground == PlayerBackgroundStyle.BLURRED_ARTWORK && currentSong?.displayThumbnail != null &&
-                                (playerType != PlayerType.VINYL || uiState.isLyricsVisible)
-                            ) {
-                                PlayerBackgroundArtwork(currentSong.displayThumbnail!!, artworkCrossfade) { backgroundUrl ->
-                                    PlayerBlurredArtworkBackground(
-                                        thumbnailUrl = backgroundUrl,
-                                        alpha = 1f,
-                                        isLyricsVisible = uiState.isLyricsVisible,
-                                    )
-                                }
-                            } else if (playerBackground == PlayerBackgroundStyle.LIQUID && currentSong?.displayThumbnail != null &&
-                                (playerType != PlayerType.VINYL || uiState.isLyricsVisible) &&
-                                !(showFullscreenThumbnailBackground && !uiState.isLyricsVisible && !showVideoSurface)
-                            ) {
-                                LiquidBackground(
-                                    artworkUrl = currentSong.displayThumbnail,
-                                    modifier = Modifier.fillMaxSize(),
-                                    animate = LocalPlayerBackgroundAnimating.current,
-                                )
-                            } else if (uiState.isLyricsVisible) {
-                                LyricsPlayerBackground(
-                                    playerBackground = playerBackground,
-                                    thumbnailUrl = currentSong?.displayThumbnail,
-                                    backgroundColor = backgroundColor,
-                                    gradientColorStops = gradientColorStops,
-                                    alpha = 1f,
-                                    artworkCrossfade = artworkCrossfade,
-                                )
-                            }
-                            if (playerBackground != PlayerBackgroundStyle.SOLID) {
-                                val hasArtwork =
-                                    playerBackground == PlayerBackgroundStyle.BLURRED_ARTWORK ||
-                                        playerBackground == PlayerBackgroundStyle.LIQUID
-                                val isLiquid = playerBackground == PlayerBackgroundStyle.LIQUID
-                                if (!hasArtwork || currentSong?.displayThumbnail != null) {
-                                    LyricsContrastScrim(
-                                        backgroundColors =
-                                            if (!hasArtwork) {
-                                                gradientColorStops
-                                                    .map { (_, color) ->
-                                                        Color.Black.copy(alpha = 0.2f).compositeOver(color.compositeOver(backgroundColor))
-                                                    }.ifEmpty { listOf(backgroundColor) }
-                                            } else {
-                                                listOf(backgroundColor)
-                                            },
-                                        artworkUrl = currentSong?.displayThumbnail.takeIf { hasArtwork },
-                                        artworkScrimAlpha = 0.3f,
-                                        artworkWhiteAlpha = 0.12f,
-                                        isLiquid = isLiquid,
-                                        visible = uiState.isLyricsVisible,
-                                        foregroundColor = textBackgroundColor,
-                                    )
-                                }
-                            }
-                            if (playerType == PlayerType.VINYL && !uiState.isLyricsVisible) {
-                                val coverTint = gradientColorStops.firstOrNull()?.second ?: MaterialTheme.colorScheme.primary
-                                val vinylBase =
-                                    androidx.compose.ui.graphics.lerp(
-                                        if (lightPlayerSurface) MaterialTheme.colorScheme.surfaceContainerHigh else Color(0xFF303034),
-                                        coverTint,
-                                        0.06f,
-                                    )
-                                val vinylEdge =
-                                    androidx.compose.ui.graphics.lerp(
-                                        if (lightPlayerSurface) MaterialTheme.colorScheme.surface else Color(0xFF171719),
-                                        coverTint,
-                                        0.06f,
-                                    )
-                                Box(Modifier.fillMaxSize().background(Brush.radialGradient(listOf(vinylBase, vinylEdge))))
-                            } else if (lightPlayerSurface && playerType == PlayerType.GLASS_CARD) {
-                                Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface.copy(alpha = 0.88f)))
-                            }
-                            if (!uiState.isLyricsVisible) {
-                                if (showFullscreenThumbnailBackground && currentSong?.displayThumbnail != null && !showVideoSurface) {
-                                    FullscreenBackgroundBounds(fullscreenTransitionBounds) { transitionBounds ->
-                                        FullscreenThumbnailBackground(
-                                            thumbnailUrl = currentSong.displayThumbnail!!,
-                                            playerBackground = playerBackground,
-                                            backgroundColor = backgroundColor,
-                                            gradientColorStops = gradientColorStops,
-                                            alpha = 1f,
-                                            transitionBounds = transitionBounds,
-                                            isLandscape = useLandscapeLayout,
-                                            canvasReady = animatedCoverReady && isArtworkCover,
-                                            canvasKey = currentCanvasLayer?.key,
-                                            canvasTall = currentCanvasLayer?.tall == true,
-                                            artworkCrossfade = artworkCrossfade,
-                                            canvasContent =
-                                                if (renderAnimatedCover && !uiState.isLyricsVisible && isArtworkCover) {
-                                                    { modifier, onFrame ->
-                                                        canvasLayers.Render(
-                                                            current = currentCanvasLayer,
-                                                            playing = true,
-                                                            onError = { layer -> viewModel.retryMusicVideoCanvas(layer.songId, layer.url) },
-                                                            modifier = modifier,
-                                                            onFrame = onFrame,
-                                                        )
-                                                    }
-                                                } else {
-                                                    null
-                                                },
-                                        )
-                                    }
-                                } else if (
-                                    playerBackground != PlayerBackgroundStyle.BLURRED_ARTWORK &&
-                                    usesFullscreenThumbnail && showVideoSurface && currentSong?.displayThumbnail != null
+                        if (isPlayerContentVisible && !isInPipMode && !isFullscreen) {
+                            Box(Modifier.fillMaxSize().graphicsLayer { alpha = if (queueCoversPlayer) 0f else 1f }) {
+                                if (playerBackground == PlayerBackgroundStyle.BLURRED_ARTWORK && currentSong?.displayThumbnail != null &&
+                                    (playerType != PlayerType.VINYL || uiState.isLyricsVisible)
                                 ) {
                                     PlayerBackgroundArtwork(currentSong.displayThumbnail!!, artworkCrossfade) { backgroundUrl ->
-                                        BlurredArtworkBackground(
-                                            url = backgroundUrl,
-                                            modifier = Modifier.fillMaxSize(),
-                                            blurRadiusPx = playerBackgroundBlurRadiusPx,
-                                            pendingScrimAlpha = 0.5f,
+                                        PlayerBlurredArtworkBackground(
+                                            thumbnailUrl = backgroundUrl,
+                                            alpha = 1f,
+                                            isLyricsVisible = uiState.isLyricsVisible,
                                         )
                                     }
-                                    Box(
-                                        modifier =
-                                            Modifier
-                                                .fillMaxSize()
-                                                .background(Color.Black.copy(alpha = 0.3f)),
-                                    )
-                                }
-
-                                if (
-                                    !showFullscreenThumbnailBackground &&
-                                    gradientColorStops.isNotEmpty() &&
-                                    (
-                                        playerBackground == PlayerBackgroundStyle.GRADIENT ||
-                                            playerBackground == PlayerBackgroundStyle.ANIMATED_GRADIENT
-                                    )
+                                } else if (playerBackground == PlayerBackgroundStyle.LIQUID && currentSong?.displayThumbnail != null &&
+                                    (playerType != PlayerType.VINYL || uiState.isLyricsVisible) &&
+                                    !(showFullscreenThumbnailBackground && !uiState.isLyricsVisible && !showVideoSurface)
                                 ) {
-                                    val stops =
-                                        rememberAnimatedGradientStops(
-                                            gradientColorStops = gradientColorStops,
-                                            animate = playerBackground == PlayerBackgroundStyle.ANIMATED_GRADIENT,
-                                        )
-                                    Box(
-                                        Modifier
-                                            .fillMaxSize()
-                                            .drawBehind { drawRect(Brush.verticalGradient(colorStops = stops())) }
-                                            .background(Color.Black.copy(alpha = 0.2f)),
+                                    LiquidBackground(
+                                        artworkUrl = currentSong.displayThumbnail,
+                                        modifier = Modifier.fillMaxSize(),
+                                        animate = LocalPlayerBackgroundAnimating.current,
+                                    )
+                                } else if (uiState.isLyricsVisible) {
+                                    LyricsPlayerBackground(
+                                        playerBackground = playerBackground,
+                                        thumbnailUrl = currentSong?.displayThumbnail,
+                                        backgroundColor = backgroundColor,
+                                        gradientColorStops = gradientColorStops,
+                                        alpha = 1f,
+                                        artworkCrossfade = artworkCrossfade,
                                     )
                                 }
-
-                                if (canRenderCanvasThumbnail && renderAnimatedCover && !showVideoSurface) {
-                                    Box(Modifier.fillMaxSize()) {
-                                        canvasLayers.Render(
-                                            current = currentCanvasLayer,
-                                            playing = true,
-                                            onError = { layer -> viewModel.retryMusicVideoCanvas(layer.songId, layer.url) },
-                                            modifier = Modifier.fillMaxSize(),
+                                if (playerBackground != PlayerBackgroundStyle.SOLID) {
+                                    val hasArtwork =
+                                        playerBackground == PlayerBackgroundStyle.BLURRED_ARTWORK ||
+                                            playerBackground == PlayerBackgroundStyle.LIQUID
+                                    val isLiquid = playerBackground == PlayerBackgroundStyle.LIQUID
+                                    if (!hasArtwork || currentSong?.displayThumbnail != null) {
+                                        LyricsContrastScrim(
+                                            backgroundColors =
+                                                if (!hasArtwork) {
+                                                    gradientColorStops
+                                                        .map { (_, color) ->
+                                                            Color.Black
+                                                                .copy(
+                                                                    alpha = 0.2f,
+                                                                ).compositeOver(
+                                                                    color.compositeOver(backgroundColor),
+                                                                )
+                                                        }.ifEmpty { listOf(backgroundColor) }
+                                                } else {
+                                                    listOf(backgroundColor)
+                                                },
+                                            artworkUrl = currentSong?.displayThumbnail.takeIf { hasArtwork },
+                                            artworkScrimAlpha = 0.3f,
+                                            artworkWhiteAlpha = 0.12f,
+                                            isLiquid = isLiquid,
+                                            visible = uiState.isLyricsVisible,
+                                            foregroundColor = textBackgroundColor,
                                         )
-                                        if (usesCanvasThumbnail) {
-                                            Box(
+                                    }
+                                }
+                                if (playerType == PlayerType.VINYL && !uiState.isLyricsVisible) {
+                                    val coverTint = gradientColorStops.firstOrNull()?.second ?: MaterialTheme.colorScheme.primary
+                                    val vinylBase =
+                                        androidx.compose.ui.graphics.lerp(
+                                            if (lightPlayerSurface) MaterialTheme.colorScheme.surfaceContainerHigh else Color(0xFF303034),
+                                            coverTint,
+                                            0.06f,
+                                        )
+                                    val vinylEdge =
+                                        androidx.compose.ui.graphics.lerp(
+                                            if (lightPlayerSurface) MaterialTheme.colorScheme.surface else Color(0xFF171719),
+                                            coverTint,
+                                            0.06f,
+                                        )
+                                    Box(Modifier.fillMaxSize().background(Brush.radialGradient(listOf(vinylBase, vinylEdge))))
+                                } else if (lightPlayerSurface && playerType == PlayerType.GLASS_CARD) {
+                                    Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface.copy(alpha = 0.88f)))
+                                }
+                                if (!uiState.isLyricsVisible) {
+                                    if (showFullscreenThumbnailBackground && currentSong?.displayThumbnail != null && !showVideoSurface) {
+                                        FullscreenBackgroundBounds(fullscreenTransitionBounds) { transitionBounds ->
+                                            FullscreenThumbnailBackground(
+                                                thumbnailUrl = currentSong.displayThumbnail!!,
+                                                playerBackground = playerBackground,
+                                                backgroundColor = backgroundColor,
+                                                gradientColorStops = gradientColorStops,
+                                                alpha = 1f,
+                                                transitionBounds = transitionBounds,
+                                                isLandscape = useLandscapeLayout,
+                                                canvasReady = animatedCoverReady && isArtworkCover,
+                                                canvasKey = currentCanvasLayer?.key,
+                                                canvasTall = currentCanvasLayer?.tall == true,
+                                                artworkCrossfade = artworkCrossfade,
+                                                canvasContent =
+                                                    if (renderAnimatedCover && !uiState.isLyricsVisible && isArtworkCover) {
+                                                        { modifier, onFrame ->
+                                                            canvasLayers.Render(
+                                                                current = currentCanvasLayer,
+                                                                playing = true,
+                                                                onError = { layer ->
+                                                                    viewModel.retryMusicVideoCanvas(
+                                                                        layer.songId,
+                                                                        layer.url,
+                                                                    )
+                                                                },
+                                                                modifier = modifier,
+                                                                onFrame = onFrame,
+                                                            )
+                                                        }
+                                                    } else {
+                                                        null
+                                                    },
+                                            )
+                                        }
+                                    } else if (
+                                        playerBackground != PlayerBackgroundStyle.BLURRED_ARTWORK &&
+                                        usesFullscreenThumbnail && showVideoSurface && currentSong?.displayThumbnail != null
+                                    ) {
+                                        PlayerBackgroundArtwork(currentSong.displayThumbnail!!, artworkCrossfade) { backgroundUrl ->
+                                            BlurredArtworkBackground(
+                                                url = backgroundUrl,
+                                                modifier = Modifier.fillMaxSize(),
+                                                blurRadiusPx = playerBackgroundBlurRadiusPx,
+                                                pendingScrimAlpha = 0.5f,
+                                            )
+                                        }
+                                        Box(
+                                            modifier =
                                                 Modifier
                                                     .fillMaxSize()
-                                                    .background(
-                                                        Brush.verticalGradient(
-                                                            0f to Color.Black.copy(alpha = 0.65f),
-                                                            0.12f to Color.Black.copy(alpha = 0.45f),
-                                                            0.3f to Color.Black.copy(alpha = 0.2f),
-                                                            0.48f to Color.Black.copy(alpha = 0.2f),
-                                                            0.64f to Color.Black.copy(alpha = 0.65f),
-                                                            1f to Color.Black.copy(alpha = 0.8f),
-                                                        ),
-                                                    ),
+                                                    .background(Color.Black.copy(alpha = 0.3f)),
+                                        )
+                                    }
+
+                                    if (
+                                        !showFullscreenThumbnailBackground &&
+                                        gradientColorStops.isNotEmpty() &&
+                                        (
+                                            playerBackground == PlayerBackgroundStyle.GRADIENT ||
+                                                playerBackground == PlayerBackgroundStyle.ANIMATED_GRADIENT
+                                        )
+                                    ) {
+                                        val stops =
+                                            rememberAnimatedGradientStops(
+                                                gradientColorStops = gradientColorStops,
+                                                animate = playerBackground == PlayerBackgroundStyle.ANIMATED_GRADIENT,
                                             )
+                                        Box(
+                                            Modifier
+                                                .fillMaxSize()
+                                                .drawBehind { drawRect(Brush.verticalGradient(colorStops = stops())) }
+                                                .background(Color.Black.copy(alpha = 0.2f)),
+                                        )
+                                    }
+
+                                    if (canRenderCanvasThumbnail && renderAnimatedCover && !showVideoSurface) {
+                                        Box(Modifier.fillMaxSize()) {
+                                            canvasLayers.Render(
+                                                current = currentCanvasLayer,
+                                                playing = true,
+                                                onError = { layer -> viewModel.retryMusicVideoCanvas(layer.songId, layer.url) },
+                                                modifier = Modifier.fillMaxSize(),
+                                            )
+                                            if (usesCanvasThumbnail) {
+                                                Box(
+                                                    Modifier
+                                                        .fillMaxSize()
+                                                        .background(
+                                                            Brush.verticalGradient(
+                                                                0f to Color.Black.copy(alpha = 0.65f),
+                                                                0.12f to Color.Black.copy(alpha = 0.45f),
+                                                                0.3f to Color.Black.copy(alpha = 0.2f),
+                                                                0.48f to Color.Black.copy(alpha = 0.2f),
+                                                                0.64f to Color.Black.copy(alpha = 0.65f),
+                                                                1f to Color.Black.copy(alpha = 0.8f),
+                                                            ),
+                                                        ),
+                                                )
+                                            }
                                         }
                                     }
                                 }
-                            }
-                            if (!showVideoSurface && playerType != PlayerType.VINYL &&
-                                playerAuraAllowed(
-                                    Settings.shared.playerAuraEnabled,
-                                    Settings.shared.glassLightMode,
-                                    LocalPlayerEffectsAllowed.current,
-                                )
-                            ) {
-                                PlayerAura(
-                                    colors = gradientColors,
-                                    fallback = palette.primary,
-                                    animate = contentActive && isPlaying && !queueCoversPlayer,
-                                )
+                                if (!showVideoSurface && playerType != PlayerType.VINYL &&
+                                    playerAuraAllowed(
+                                        Settings.shared.playerAuraEnabled,
+                                        Settings.shared.glassLightMode,
+                                        LocalPlayerEffectsAllowed.current,
+                                    )
+                                ) {
+                                    PlayerAura(
+                                        colors = gradientColors,
+                                        fallback = palette.primary,
+                                        animate = contentActive && isPlaying && !queueCoversPlayer,
+                                    )
+                                }
                             }
                         }
                     }
