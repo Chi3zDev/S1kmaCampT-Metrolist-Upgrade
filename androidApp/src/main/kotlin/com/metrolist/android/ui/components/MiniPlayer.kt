@@ -439,7 +439,7 @@ fun MiniPlayer(
                             navigationMaterial = true,
                             innerShadows = shadows,
                             isDark = surface.luminance() < 0.5f,
-                            appearance = GlassAppearance(liquidGlassEnabled = settings.glassStyle != "CLEAR"),
+                            appearance = GlassAppearance(),
                             blurRadius = radius,
                             material =
                                 if (settings.glassStyle ==
@@ -832,7 +832,7 @@ internal fun MiniPlayerCard(
                 navigationMaterial = true,
                 innerShadows = miniGlassShadows,
                 isDark = surfaceColor.luminance() < 0.5f,
-                appearance = GlassAppearance(liquidGlassEnabled = glassSettings.glassStyle != "CLEAR"),
+                appearance = GlassAppearance(),
                 blurRadius = glassRadius,
                 material =
                     if (glassSettings.glassStyle == "CLEAR") {
