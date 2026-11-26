@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -83,6 +84,13 @@ internal class QwePlayerGlassMaterial : PlayerGlassMaterial {
         val bottomPx = with(density) { bottomInset.toPx() }
         val tintStrength = (Settings.shared.glassTintStrength.coerceIn(0f, 100f) / 100f * 0.35f).coerceIn(0.1f, 0.35f)
         val tint = if (contentColor.luminance() > 0.5f) Color.Black.copy(alpha = tintStrength) else Color.White.copy(alpha = tintStrength)
+        // Settings and theme can change without a new layout pass.
+        SideEffect {
+            val current = bounds
+            if (current != null && current.token === token && (current.tint != tint || current.radius != cornerRadius)) {
+                bounds = current.copy(tint = tint, radius = cornerRadius)
+            }
+        }
         DisposableEffect(token) {
             onDispose { if (bounds?.token === token) bounds = null }
         }
