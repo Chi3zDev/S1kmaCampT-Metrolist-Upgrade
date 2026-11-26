@@ -261,20 +261,25 @@ fun AboutScreen(
             }
 
             if (upgradeNumber != null) {
-                Surface(
-                    onClick = { showUpgradeNotes = true },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(20.dp),
-                    color = glassCardColor(colorScheme.surfaceContainer),
-                    border = glassCardBorder(),
-                ) {
-                    Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            stringResource(Res.string.about_upgrade_whats_new),
-                            Modifier.weight(1f),
-                            style = MaterialTheme.typography.titleMedium,
-                        )
-                        Icon(MetrolistIcons.Outlined.ChevronRight, contentDescription = null)
+                Box(Modifier.fillMaxWidth()) {
+                    if (Settings.shared.liquidGlassTheme) {
+                        LocalThemeGlassBackdrop.current?.Background(radius = 20.dp, modifier = Modifier.matchParentSize())
+                    }
+                    Surface(
+                        onClick = { showUpgradeNotes = true },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(20.dp),
+                        color = glassCardColor(colorScheme.surfaceContainer),
+                        border = glassCardBorder(),
+                    ) {
+                        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                stringResource(Res.string.about_upgrade_whats_new),
+                                Modifier.weight(1f),
+                                style = MaterialTheme.typography.titleMedium,
+                            )
+                            Icon(MetrolistIcons.Outlined.ChevronRight, contentDescription = null)
+                        }
                     }
                 }
             }
@@ -604,28 +609,33 @@ private fun UpgradeDeveloperCard(
             color = colorScheme.primary,
             modifier = Modifier.padding(top = 8.dp, bottom = 12.dp).semantics { heading() },
         )
-        Surface(
-            onClick = onClick,
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(20.dp),
-            color = glassCardColor(colorScheme.surfaceContainer),
-            border = glassCardBorder(),
-        ) {
-            Row(
-                Modifier.padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
+        Box(Modifier.fillMaxWidth()) {
+            if (Settings.shared.liquidGlassTheme) {
+                LocalThemeGlassBackdrop.current?.Background(radius = 20.dp, modifier = Modifier.matchParentSize())
+            }
+            Surface(
+                onClick = onClick,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(20.dp),
+                color = glassCardColor(colorScheme.surfaceContainer),
+                border = glassCardBorder(),
             ) {
-                Image(
-                    painter = painterResource(Res.drawable.chi3zdev_avatar),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.size(64.dp).clip(CircleShape),
-                )
-                Column(Modifier.weight(1f)) {
-                    Text("Chi3zDev", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                    Text(stringResource(Res.string.about_upgrade_developer), style = MaterialTheme.typography.bodyMedium)
-                    Text(stringResource(Res.string.about_upgrade_version, upgradeNumber), style = MaterialTheme.typography.labelMedium)
+                Row(
+                    Modifier.padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    Image(
+                        painter = painterResource(Res.drawable.chi3zdev_avatar),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.size(64.dp).clip(CircleShape),
+                    )
+                    Column(Modifier.weight(1f)) {
+                        Text("Chi3zDev", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                        Text(stringResource(Res.string.about_upgrade_developer), style = MaterialTheme.typography.bodyMedium)
+                        Text(stringResource(Res.string.about_upgrade_version, upgradeNumber), style = MaterialTheme.typography.labelMedium)
+                    }
                 }
             }
         }
