@@ -80,7 +80,10 @@ import com.metrolist.shared.model.AlbumItem
 import com.metrolist.shared.model.SearchFilter
 import com.metrolist.shared.model.SongItem
 import com.metrolist.shared.model.YTItem
+import com.metrolist.shared.settings.Settings
 import com.metrolist.shared.ui.LocalIsTv
+import com.metrolist.shared.ui.components.glassCardBorder
+import com.metrolist.shared.ui.components.glassCardColor
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import com.metrolist.shared.ui.tv.tvFocusHighlight
 import com.metrolist.shared.viewmodels.SearchViewModel
@@ -270,11 +273,18 @@ fun SearchBar(
         contentAlignment = Alignment.Center,
     ) {
         val isWide = maxWidth > 480.dp
+        val searchSurface =
+            if (Settings.shared.liquidGlassTheme) {
+                glassCardColor(MaterialTheme.colorScheme.surfaceContainerHigh)
+            } else {
+                MaterialTheme.colorScheme.surfaceContainerHigh
+            }
+        val searchBorder = if (Settings.shared.liquidGlassTheme) glassCardBorder() else null
 
         if (!isWide && !isTv) {
             val searchBarColors =
                 SearchBarDefaults.colors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    containerColor = searchSurface,
                 )
             Surface(
                 shape = SearchBarDefaults.inputFieldShape,
@@ -329,6 +339,7 @@ fun SearchBar(
                 },
                 modifier = Modifier.fillMaxWidth(),
                 color = searchBarColors.containerColor,
+                border = searchBorder,
                 tonalElevation = 0.dp,
                 shadowElevation = 0.dp,
             )
@@ -342,7 +353,8 @@ fun SearchBar(
                     Modifier
                         .fillMaxWidth()
                         .height(barHeight)
-                        .background(MaterialTheme.colorScheme.surfaceContainerHigh, CircleShape),
+                        .background(searchSurface, CircleShape)
+                        .then(if (searchBorder != null) Modifier.border(searchBorder, CircleShape) else Modifier),
                 contentAlignment = Alignment.Center,
             ) {
                 Row(
