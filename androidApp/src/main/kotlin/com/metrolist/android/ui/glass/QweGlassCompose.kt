@@ -62,7 +62,8 @@ internal fun QweGlassOverlay(
 ) {
     val context = LocalContext.current
     val lowRam = remember(context) { (context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager).isLowRamDevice }
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S || lowRam || lightMode || source == null) return
+    if (!shouldAttemptQweGlass(Build.VERSION.SDK_INT, lowRam, lightMode, source != null)) return
+    source ?: return
     val nativeAvailable =
         remember {
             // QWEA0 currently ships native libraries only for ARM. A software fallback may
