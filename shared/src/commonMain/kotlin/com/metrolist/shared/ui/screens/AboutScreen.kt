@@ -11,6 +11,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
@@ -109,6 +110,7 @@ import com.metrolist.shared.generated.resources.devtools_enabled
 import com.metrolist.shared.generated.resources.play
 import com.metrolist.shared.generated.resources.stands_with_palestine
 import com.metrolist.shared.settings.Settings
+import com.metrolist.shared.ui.components.LocalThemeGlassBackdrop
 import com.metrolist.shared.ui.components.appPageBackground
 import com.metrolist.shared.ui.components.glassCardBorder
 import com.metrolist.shared.ui.components.glassCardColor
@@ -385,87 +387,92 @@ private fun AppHeaderCard(
     colorScheme: ColorScheme,
     onLogoClick: () -> Unit,
 ) {
-    Card(
-        shape = RoundedCornerShape(28.dp),
-        colors = CardDefaults.cardColors(containerColor = glassCardColor(colorScheme.surfaceContainer)),
-        border = glassCardBorder(),
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .logoStripes(logo, colorScheme.primary.copy(alpha = 0.08f))
-                    .padding(horizontal = 24.dp, vertical = 28.dp),
+    Box(Modifier.fillMaxWidth()) {
+        if (Settings.shared.liquidGlassTheme) {
+            LocalThemeGlassBackdrop.current?.Background(radius = 28.dp, modifier = Modifier.matchParentSize())
+        }
+        Card(
+            shape = RoundedCornerShape(28.dp),
+            colors = CardDefaults.cardColors(containerColor = glassCardColor(colorScheme.surfaceContainer)),
+            border = glassCardBorder(),
+            modifier = Modifier.fillMaxWidth(),
         ) {
-            Surface(
-                onClick = onLogoClick,
-                shape = RoundedCornerShape(28.dp),
-                color = colorScheme.primaryContainer,
-                modifier = Modifier.size(112.dp),
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .logoStripes(logo, colorScheme.primary.copy(alpha = 0.08f))
+                        .padding(horizontal = 24.dp, vertical = 28.dp),
             ) {
-                Image(
-                    painter = logo,
-                    contentDescription = stringResource(Res.string.app_name),
-                    colorFilter = ColorFilter.tint(colorScheme.onPrimaryContainer, BlendMode.SrcIn),
-                    modifier = Modifier.padding(12.dp),
+                Surface(
+                    onClick = onLogoClick,
+                    shape = RoundedCornerShape(28.dp),
+                    color = colorScheme.primaryContainer,
+                    modifier = Modifier.size(112.dp),
+                ) {
+                    Image(
+                        painter = logo,
+                        contentDescription = stringResource(Res.string.app_name),
+                        colorFilter = ColorFilter.tint(colorScheme.onPrimaryContainer, BlendMode.SrcIn),
+                        modifier = Modifier.padding(12.dp),
+                    )
+                }
+
+                Spacer(Modifier.height(16.dp))
+
+                Text(
+                    text = appName.ifBlank { stringResource(Res.string.app_name) },
+                    style = MaterialTheme.typography.headlineLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = colorScheme.onSurface,
+                    textAlign = TextAlign.Center,
                 )
-            }
 
-            Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(12.dp))
 
-            Text(
-                text = appName.ifBlank { stringResource(Res.string.app_name) },
-                style = MaterialTheme.typography.headlineLarge,
-                fontWeight = FontWeight.Bold,
-                color = colorScheme.onSurface,
-                textAlign = TextAlign.Center,
-            )
-
-            Spacer(Modifier.height(12.dp))
-
-            FlowRow(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-                InfoBadge(
-                    version,
-                    colorScheme.surfaceContainerHighest,
-                    colorScheme.onSurfaceVariant,
-                )
-                InfoBadge(architecture, colorScheme.surfaceContainerHighest, colorScheme.onSurfaceVariant)
-                if (upgradeNumber != null) {
+                FlowRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
                     InfoBadge(
-                        stringResource(
-                            if (isUpgradeCandidateSix(version)) {
-                                Res.string.about_upgrade_candidate_six
-                            } else if (isUpgradeCandidateFive(version)) {
-                                Res.string.about_upgrade_candidate_five
-                            } else if (isUpgradeCandidateFour(version)) {
-                                Res.string.about_upgrade_candidate_four
-                            } else if (isUpgradeCandidateThree(version)) {
-                                Res.string.about_upgrade_candidate_three
-                            } else if (isUpgradeCandidateTwo(
-                                    version,
-                                )
-                            ) {
-                                Res.string.about_upgrade_candidate_two
-                            } else {
-                                Res.string.about_upgrade_version
-                            },
-                            upgradeNumber,
-                        ),
+                        version,
+                        colorScheme.surfaceContainerHighest,
+                        colorScheme.onSurfaceVariant,
+                    )
+                    InfoBadge(architecture, colorScheme.surfaceContainerHighest, colorScheme.onSurfaceVariant)
+                    if (upgradeNumber != null) {
+                        InfoBadge(
+                            stringResource(
+                                if (isUpgradeCandidateSix(version)) {
+                                    Res.string.about_upgrade_candidate_six
+                                } else if (isUpgradeCandidateFive(version)) {
+                                    Res.string.about_upgrade_candidate_five
+                                } else if (isUpgradeCandidateFour(version)) {
+                                    Res.string.about_upgrade_candidate_four
+                                } else if (isUpgradeCandidateThree(version)) {
+                                    Res.string.about_upgrade_candidate_three
+                                } else if (isUpgradeCandidateTwo(
+                                        version,
+                                    )
+                                ) {
+                                    Res.string.about_upgrade_candidate_two
+                                } else {
+                                    Res.string.about_upgrade_version
+                                },
+                                upgradeNumber,
+                            ),
+                            colorScheme.secondaryContainer,
+                            colorScheme.onSecondaryContainer,
+                        )
+                    }
+                    InfoBadge(
+                        stringResource(if (isDebug) Res.string.build_type_debug else Res.string.build_type_release),
                         colorScheme.secondaryContainer,
                         colorScheme.onSecondaryContainer,
                     )
                 }
-                InfoBadge(
-                    stringResource(if (isDebug) Res.string.build_type_debug else Res.string.build_type_release),
-                    colorScheme.secondaryContainer,
-                    colorScheme.onSecondaryContainer,
-                )
             }
         }
     }

@@ -1288,7 +1288,7 @@ fun MetrolistApp(
                             (
                                 currentRoute is Screen.Album || currentRoute is Screen.Playlist || currentRoute is Screen.AutoPlaylist ||
                                     currentRoute == Screen.Search || currentRoute == Screen.Library || currentRoute == Screen.Settings ||
-                                    currentRoute is Screen.SettingsPage
+                                    currentRoute == Screen.About || currentRoute is Screen.SettingsPage
                             )
                     val useQweThemeGlass =
                         rememberQweGlassAvailable(enabled = themeGlassRequested, lightMode = Settings.shared.glassLightMode)
