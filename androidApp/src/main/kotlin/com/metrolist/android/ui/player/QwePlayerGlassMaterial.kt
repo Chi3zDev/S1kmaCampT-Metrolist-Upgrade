@@ -61,6 +61,7 @@ internal class QwePlayerGlassMaterial : PlayerGlassMaterial {
                 dynamic = true,
                 lightMode = Settings.shared.glassLightMode,
                 refractionAllowed = true,
+                blurStrength = Settings.shared.glassBlurStrength,
                 modifier =
                     Modifier
                         .absoluteOffset { IntOffset(x, y) }

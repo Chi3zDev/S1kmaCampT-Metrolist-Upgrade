@@ -33,6 +33,7 @@ internal class QweThemeGlassBackdrop(
             lightMode = settings.glassLightMode,
             refractionAllowed = true,
             modifier = modifier,
+            blurStrength = settings.glassBlurStrength,
             sourceRevision = sourceRevision,
         )
     }

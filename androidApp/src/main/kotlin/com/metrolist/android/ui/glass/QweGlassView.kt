@@ -36,6 +36,7 @@ internal class QweGlassView(
         tintArgb: Int,
         dynamic: Boolean,
         refractionAllowed: Boolean = true,
+        blurStrength: Float = 65f,
     ) {
         if (source === this || isAncestor(source, this) || isAncestor(this, source)) {
             // Do not fall back to the parent: that can recursively capture the glass itself.
@@ -48,12 +49,10 @@ internal class QweGlassView(
         backdropSource = source
         material = if (style == QweGlassStyle.CLEAR) GlassMaterial.CLEAR else GlassMaterial.REGULAR
         useShaderPipeline = refractionAllowed && style != QweGlassStyle.CLEAR && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
-        blurAmount =
-            when (style) {
-                QweGlassStyle.CLEAR -> 0.05f
-                QweGlassStyle.REGULAR -> 0.18f
-                QweGlassStyle.FROSTED -> 0.4f
-            }
+        val requestedBlur = qweBlurAmount(style, blurStrength)
+        // QWE adds a base radius even when blurAmount is zero.
+        enableBackdropBlur = requestedBlur > 0f
+        blurAmount = requestedBlur
         cornerRadius = radiusPx.coerceAtLeast(0f)
         glassTint = tintArgb
         dynamicRequested = dynamic

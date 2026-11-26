@@ -74,6 +74,7 @@ internal fun QweGlassOverlay(
     lightMode: Boolean,
     refractionAllowed: Boolean,
     modifier: Modifier = Modifier,
+    blurStrength: Float = 65f,
     sourceRevision: Any? = null,
     onViewChanged: (View?) -> Unit = {},
 ) {
@@ -93,7 +94,7 @@ internal fun QweGlassOverlay(
                 latestCallback(view)
             }
         },
-        update = { view -> view.configure(source, style, radiusPx, tintArgb, dynamic, refractionAllowed) },
+        update = { view -> view.configure(source, style, radiusPx, tintArgb, dynamic, refractionAllowed, blurStrength) },
         onRelease = { view ->
             view.enableDynamicBackground = false
             view.backdropSource = null
