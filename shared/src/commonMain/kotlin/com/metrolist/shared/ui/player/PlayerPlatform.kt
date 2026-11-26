@@ -22,8 +22,26 @@ data class PlayerArtworkCrossfade(
     val progress: Float get() = progressProvider()
 }
 
+/** Optional platform material; only its background layer may be used as a backdrop source. */
+interface PlayerGlassMaterial {
+    val sourceModifier: Modifier
+
+    @Composable
+    fun cardModifier(
+        topInset: Dp,
+        bottomInset: Dp,
+        cornerRadius: Dp,
+        contentColor: Color,
+    ): Modifier
+}
+
+val LocalPlayerGlassMaterial = staticCompositionLocalOf<PlayerGlassMaterial?> { null }
+
 @Stable
 interface PlayerPlatform {
+    @Composable
+    fun rememberPlayerGlassMaterial(enabled: Boolean): PlayerGlassMaterial? = null
+
     val supportsPictureInPicture: Boolean
     val supportsVideoPlayback: Boolean
     val supportsCasting: Boolean

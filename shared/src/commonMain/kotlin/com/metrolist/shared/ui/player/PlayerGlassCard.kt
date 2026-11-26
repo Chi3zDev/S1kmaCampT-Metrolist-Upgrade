@@ -53,7 +53,10 @@ internal fun Modifier.playerGlassCard(
 ): Modifier {
     val settings = Settings.shared
     val roundness = settings.glassCornerRoundness.coerceIn(0f, 100f)
-    val shape = RoundedCornerShape((12f + roundness * 0.28f).dp)
+    val radius = (12f + roundness * 0.28f).dp
+    val material = LocalPlayerGlassMaterial.current
+    if (glass && material != null) return this.then(material.cardModifier(0.dp, 0.dp, radius, contentColor))
+    val shape = RoundedCornerShape(radius)
     val base =
         if (glass) {
             if (contentColor.luminance() > 0.5f) Color.Black else Color.White
@@ -95,6 +98,9 @@ internal fun Modifier.portraitPlayerGlassCard(
     glass: Boolean,
 ): Modifier {
     val settings = Settings.shared
+    val radius = (12f + settings.glassCornerRoundness.coerceIn(0f, 100f) * 0.28f).dp
+    val material = LocalPlayerGlassMaterial.current
+    if (glass && material != null) return this.then(material.cardModifier(topInset, bottomInset, radius, contentColor))
     val base =
         if (glass) {
             if (contentColor.luminance() > 0.5f) Color.Black else Color.White
@@ -102,7 +108,6 @@ internal fun Modifier.portraitPlayerGlassCard(
             lerp(Color.Black, MaterialTheme.colorScheme.primary, 0.08f)
         }
     val opacity = if (glass) playerGlassOpacity(settings.glassStyle, settings.glassTintStrength) else 0.86f
-    val radius = (12f + settings.glassCornerRoundness.coerceIn(0f, 100f) * 0.28f).dp
     val edgeBrush = glassEdgeBrush(settings.glassStyle == "CLEAR")
     return this.drawBehind {
         val top = topInset.toPx().coerceIn(0f, size.height)
