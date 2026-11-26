@@ -5,6 +5,7 @@ import android.content.Context
 import android.os.Build
 import android.view.View
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCompositionContext
@@ -12,6 +13,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -72,6 +74,7 @@ internal fun QweGlassOverlay(
     lightMode: Boolean,
     refractionAllowed: Boolean,
     modifier: Modifier = Modifier,
+    sourceRevision: Any? = null,
     onViewChanged: (View?) -> Unit = {},
 ) {
     if (!rememberQweGlassAvailable(enabled = source != null, lightMode = lightMode)) return
@@ -79,13 +82,22 @@ internal fun QweGlassOverlay(
     val radiusPx = with(LocalDensity.current) { radius.toPx() }
     val tintArgb = tint.toArgb()
     val latestCallback by rememberUpdatedState(onViewChanged)
+    val viewRef = remember { arrayOfNulls<QweGlassView>(1) }
+    LaunchedEffect(sourceRevision) { viewRef[0]?.invalidate() }
     AndroidView(
-        modifier = modifier,
-        factory = { QweGlassView(it).also { view -> latestCallback(view) } },
+        // A static wallpaper still needs a new sample when its glass moves during scroll.
+        modifier = modifier.onGloballyPositioned { if (!dynamic) viewRef[0]?.invalidate() },
+        factory = { context ->
+            QweGlassView(context).also { view ->
+                viewRef[0] = view
+                latestCallback(view)
+            }
+        },
         update = { view -> view.configure(source, style, radiusPx, tintArgb, dynamic, refractionAllowed) },
         onRelease = { view ->
             view.enableDynamicBackground = false
             view.backdropSource = null
+            viewRef[0] = null
             latestCallback(null)
         },
     )

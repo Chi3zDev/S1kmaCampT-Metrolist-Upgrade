@@ -1282,15 +1282,23 @@ fun MetrolistApp(
                     }
 
                     val isInPipMode = LocalIsInPipMode.current
-                    val collectionGlassRequested =
+                    val themeGlassRequested =
                         Settings.shared.liquidGlassTheme && !usesDirectionalNavigation && !isPlayerExpandedOrExpanding && !isInPipMode &&
-                            (currentRoute is Screen.Album || currentRoute is Screen.Playlist || currentRoute is Screen.AutoPlaylist)
-                    val useQweCollectionGlass =
-                        rememberQweGlassAvailable(enabled = collectionGlassRequested, lightMode = Settings.shared.glassLightMode)
+                            (
+                                currentRoute is Screen.Album || currentRoute is Screen.Playlist || currentRoute is Screen.AutoPlaylist ||
+                                    currentRoute == Screen.Search || currentRoute == Screen.Library || currentRoute == Screen.Settings ||
+                                    currentRoute is Screen.SettingsPage
+                            )
+                    val useQweThemeGlass =
+                        rememberQweGlassAvailable(enabled = themeGlassRequested, lightMode = Settings.shared.glassLightMode)
                     var qweBackdropSource by remember { mutableStateOf<View?>(null) }
                     val qweThemeBackdrop =
-                        if (useQweCollectionGlass) {
-                            qweBackdropSource?.let { source -> remember(source) { QweThemeGlassBackdrop(source) } }
+                        if (useQweThemeGlass) {
+                            qweBackdropSource?.let { source ->
+                                remember(source, backgroundUri, backgroundImageReady) {
+                                    QweThemeGlassBackdrop(source, backgroundUri to backgroundImageReady)
+                                }
+                            }
                         } else {
                             null
                         }
@@ -1864,7 +1872,7 @@ fun MetrolistApp(
                                                     }
                                                 }
                                             }
-                                            if (useQweCollectionGlass) {
+                                            if (useQweThemeGlass) {
                                                 QweBackdropSource(
                                                     onViewChanged = { qweBackdropSource = it },
                                                     modifier = Modifier.fillMaxSize(),

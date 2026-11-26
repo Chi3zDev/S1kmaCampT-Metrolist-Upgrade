@@ -8,10 +8,12 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.view.PixelCopy
+import android.view.View
 import androidx.annotation.RequiresApi
 import androidx.compose.ui.graphics.Color
 import androidx.test.platform.app.InstrumentationRegistry
-import com.example.liquidglass.LiquidGlassView
+import com.metrolist.android.ui.glass.QweGlassStyle
+import com.metrolist.android.ui.glass.QweGlassView
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -57,9 +59,20 @@ class LiquidGlassBackdropTest {
             assertTrue("red stripes should be smoothed by blur: $redValues", redValues.max() - redValues.min() < 130)
             assertTrue("blue stripes should be smoothed by blur: $blueValues", blueValues.max() - blueValues.min() < 130)
 
-            val glass = checkNotNull(activity.glass) as LiquidGlassView
+            val glass = checkNotNull(activity.glass) as QweGlassView
             assertFalse("refraction can be disabled", glass.useShaderPipeline)
-            instrumentation.runOnMainSync { activity.lightMode = true }
+            instrumentation.runOnMainSync {
+                glass.configure(
+                    source = activity.window.decorView,
+                    style = QweGlassStyle.REGULAR,
+                    radiusPx = 24f,
+                    tintArgb = AndroidColor.TRANSPARENT,
+                    dynamic = true,
+                )
+                assertEquals("an ancestor must not be captured", View.INVISIBLE, glass.visibility)
+                assertFalse("unsafe capture must stop dynamic redraw", glass.enableDynamicBackground)
+                activity.lightMode = true
+            }
             instrumentation.waitForIdleSync()
             Thread.sleep(500)
             instrumentation.runOnMainSync {

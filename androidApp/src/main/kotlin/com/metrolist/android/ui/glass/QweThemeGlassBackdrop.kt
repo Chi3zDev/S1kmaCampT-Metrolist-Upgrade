@@ -10,6 +10,7 @@ import com.metrolist.shared.ui.components.ThemeGlassBackdrop
 
 internal class QweThemeGlassBackdrop(
     private val source: View,
+    private val sourceRevision: Any,
 ) : ThemeGlassBackdrop {
     @Composable
     override fun Background(
@@ -28,10 +29,11 @@ internal class QweThemeGlassBackdrop(
             style = style,
             radius = radius,
             tint = Color.Transparent,
-            dynamic = true,
+            dynamic = false,
             lightMode = settings.glassLightMode,
             refractionAllowed = true,
             modifier = modifier,
+            sourceRevision = sourceRevision,
         )
     }
 }

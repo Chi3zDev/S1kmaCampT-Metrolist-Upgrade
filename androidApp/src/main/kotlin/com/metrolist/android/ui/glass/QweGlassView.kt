@@ -37,7 +37,14 @@ internal class QweGlassView(
         dynamic: Boolean,
         refractionAllowed: Boolean = true,
     ) {
-        require(source !== this) { "Glass cannot sample itself" }
+        if (source === this || isAncestor(source, this) || isAncestor(this, source)) {
+            // Do not fall back to the parent: that can recursively capture the glass itself.
+            dynamicRequested = false
+            enableDynamicBackground = false
+            visibility = View.INVISIBLE
+            return
+        }
+        visibility = View.VISIBLE
         backdropSource = source
         material = if (style == QweGlassStyle.CLEAR) GlassMaterial.CLEAR else GlassMaterial.REGULAR
         useShaderPipeline = refractionAllowed && style != QweGlassStyle.CLEAR && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
@@ -58,6 +65,13 @@ internal class QweGlassView(
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
+        val source = backdropSource
+        if (source != null && (source === this || isAncestor(source, this) || isAncestor(this, source))) {
+            dynamicRequested = false
+            enableDynamicBackground = false
+            visibility = View.INVISIBLE
+            return
+        }
         updateDynamicState()
     }
 
@@ -78,6 +92,18 @@ internal class QweGlassView(
 
     private fun updateDynamicState() {
         enableDynamicBackground = dynamicRequested && isAttachedToWindow && isShown && windowVisibility == View.VISIBLE
+    }
+
+    private fun isAncestor(
+        ancestor: View,
+        descendant: View,
+    ): Boolean {
+        var parent = descendant.parent
+        while (parent is View) {
+            if (parent === ancestor) return true
+            parent = parent.parent
+        }
+        return false
     }
 }
 
