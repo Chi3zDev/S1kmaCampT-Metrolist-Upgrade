@@ -62,6 +62,17 @@ class LiquidGlassBackdropTest {
             val glass = checkNotNull(activity.glass) as QweGlassView
             assertFalse("refraction can be disabled", glass.useShaderPipeline)
             instrumentation.runOnMainSync {
+                val source = checkNotNull(glass.backdropSource)
+                glass.configure(
+                    source = source,
+                    style = QweGlassStyle.CLEAR,
+                    radiusPx = 24f,
+                    tintArgb = AndroidColor.TRANSPARENT,
+                    dynamic = false,
+                    blurStrength = 0f,
+                )
+                assertEquals("Clear enables the lens on Android 13+", Build.VERSION.SDK_INT >= 33, glass.useShaderPipeline)
+                assertFalse("zero blur must disable QWE's built-in base blur", glass.enableBackdropBlur)
                 glass.configure(
                     source = activity.window.decorView,
                     style = QweGlassStyle.REGULAR,

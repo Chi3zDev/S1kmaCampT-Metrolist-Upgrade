@@ -28,7 +28,7 @@ internal class QweGlassView(
         enableAdaptiveTint = false
     }
 
-    /** Radius is in pixels. Clear never enables the expensive refractive shader path. */
+    /** Radius is in pixels. The caller may explicitly disable the refractive shader path. */
     fun configure(
         source: View,
         style: QweGlassStyle,
@@ -48,7 +48,7 @@ internal class QweGlassView(
         visibility = View.VISIBLE
         backdropSource = source
         material = if (style == QweGlassStyle.CLEAR) GlassMaterial.CLEAR else GlassMaterial.REGULAR
-        useShaderPipeline = refractionAllowed && style != QweGlassStyle.CLEAR && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+        useShaderPipeline = refractionAllowed && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
         val requestedBlur = qweBlurAmount(style, blurStrength)
         // QWE adds a base radius even when blurAmount is zero.
         enableBackdropBlur = requestedBlur > 0f
