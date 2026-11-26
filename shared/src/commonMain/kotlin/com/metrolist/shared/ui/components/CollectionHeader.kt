@@ -97,7 +97,8 @@ fun CollectionInfoCard(
     Surface(
         modifier = modifier.fillMaxWidth(),
         shape = collectionInfoCardShape(),
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        color = glassCardColor(MaterialTheme.colorScheme.surfaceContainerHigh),
+        border = glassCardBorder(),
     ) {
         Column(modifier = Modifier.padding(16.dp), content = content)
     }
