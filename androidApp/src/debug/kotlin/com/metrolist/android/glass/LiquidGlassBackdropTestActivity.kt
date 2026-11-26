@@ -28,6 +28,7 @@ import com.metrolist.android.ui.glass.QweGlassStyle
 class LiquidGlassBackdropTestActivity : ComponentActivity() {
     var backdropColor by mutableStateOf(Color.Red)
     var stripedBackdrop by mutableStateOf(false)
+    var lightMode by mutableStateOf(false)
     var glass: View? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -67,7 +68,7 @@ class LiquidGlassBackdropTestActivity : ComponentActivity() {
                     radius = 24.dp,
                     tint = Color.Transparent,
                     dynamic = true,
-                    lightMode = false,
+                    lightMode = lightMode,
                     refractionAllowed = false,
                     modifier = Modifier.align(Alignment.Center).size(glassSize),
                     onViewChanged = { glass = it },

@@ -11,7 +11,10 @@ import android.view.PixelCopy
 import androidx.annotation.RequiresApi
 import androidx.compose.ui.graphics.Color
 import androidx.test.platform.app.InstrumentationRegistry
+import com.example.liquidglass.LiquidGlassView
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Assume.assumeTrue
 import org.junit.Test
@@ -53,6 +56,17 @@ class LiquidGlassBackdropTest {
             assertTrue("blurred stripes should contain blue", blueValues.average() > 25)
             assertTrue("red stripes should be smoothed by blur: $redValues", redValues.max() - redValues.min() < 130)
             assertTrue("blue stripes should be smoothed by blur: $blueValues", blueValues.max() - blueValues.min() < 130)
+
+            val glass = checkNotNull(activity.glass) as LiquidGlassView
+            assertFalse("refraction can be disabled", glass.useShaderPipeline)
+            instrumentation.runOnMainSync { activity.lightMode = true }
+            instrumentation.waitForIdleSync()
+            Thread.sleep(500)
+            instrumentation.runOnMainSync {
+                assertNull("light mode should remove the glass", activity.glass)
+                assertFalse("light mode should stop dynamic capture", glass.enableDynamicBackground)
+                assertFalse("light mode should detach the glass", glass.isAttachedToWindow)
+            }
         } finally {
             instrumentation.runOnMainSync { activity.finish() }
         }
