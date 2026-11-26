@@ -59,6 +59,8 @@ internal class AndroidPlayerGlassMaterial(
         val dark = contentColor.luminance() > 0.5f
         val tint = (Settings.shared.glassTintStrength.coerceIn(0f, 100f) / 100f * 0.35f).coerceIn(0.1f, 0.35f)
         val shadows = rememberNavigationInnerShadows(enabled = true, renderScale = 0.5f)
+        val blurStrength = Settings.shared.glassBlurStrength
+        val blurRadius = (12f * (if (blurStrength.isFinite()) blurStrength.coerceIn(0f, 100f) else 0f) / 65f).dp
         return Modifier.navigationGlassBackground(
             backdrop = backdrop,
             shape = { shape },
@@ -68,7 +70,7 @@ internal class AndroidPlayerGlassMaterial(
             isDark = dark,
             appearance = GlassAppearance(),
             material = NavigationGlassMaterial.RegularMedium,
-            blurRadius = 12.dp,
+            blurRadius = blurRadius,
         )
     }
 }
