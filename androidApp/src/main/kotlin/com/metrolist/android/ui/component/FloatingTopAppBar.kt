@@ -39,6 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.unit.dp
 import com.metrolist.shared.settings.Settings
@@ -52,6 +53,8 @@ import io.github.neoruaa.glasmio.core.GlassAppearance
 import io.github.neoruaa.glasmio.glass.GlasmioBackdropProvider
 import io.github.neoruaa.glasmio.glass.GlassSurface
 import io.github.neoruaa.glasmio.glass.NavigationGlassMaterial
+import io.github.neoruaa.glasmio.glass.navigationGlassBackground
+import io.github.neoruaa.glasmio.glass.rememberNavigationInnerShadows
 import io.github.neoruaa.glasmio.glass.render.backdrops.LayerBackdrop
 
 private val FloatingBarElementSize = 48.dp
@@ -75,6 +78,7 @@ fun TopBarIconButton(
     floating: Boolean,
     glass: Boolean = false,
     modifier: Modifier = Modifier,
+    glasmioBackdrop: LayerBackdrop? = null,
     content: @Composable () -> Unit,
 ) {
     val backdrop = LocalGlassNavigationState.current
@@ -105,6 +109,25 @@ fun TopBarIconButton(
         } else {
             MaterialTheme.colorScheme.surfaceContainerHigh
         }
+    val useGlasmio = floating && glass && glasmioBackdrop != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+    val glassModifier =
+        if (useGlasmio && glasmioBackdrop != null) {
+            val shadows = rememberNavigationInnerShadows(enabled = Settings.shared.glassStyle != "CLEAR", renderScale = 0.5f)
+            Modifier.navigationGlassBackground(
+                backdrop = glasmioBackdrop,
+                shape = { CircleShape },
+                containerColor = tint,
+                navigationMaterial = true,
+                innerShadows = shadows,
+                isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f,
+                appearance = GlassAppearance(),
+                blurRadius = radius,
+                material =
+                    if (Settings.shared.glassStyle == "CLEAR") NavigationGlassMaterial.Clear else NavigationGlassMaterial.RegularSmall,
+            )
+        } else {
+            Modifier
+        }
     if (floating) {
         FilledTonalIconButton(
             onClick = onClick,
@@ -112,19 +135,18 @@ fun TopBarIconButton(
                 modifier
                     .size(FloatingBarElementSize)
                     .shadow(FloatingBarElementShadow, CircleShape)
+                    .then(glassModifier)
                     .then(
-                        if (glass &&
-                            backdrop != null
-                        ) {
+                        if (glass && !useGlasmio && backdrop != null) {
                             Modifier.clip(CircleShape).hazeBlur(HazeInput.Backdrop(backdrop), blurStyle)
                         } else {
                             Modifier
                         },
-                    ).then(if (border != null) Modifier.border(border, CircleShape) else Modifier),
+                    ).then(if (border != null && !useGlasmio) Modifier.border(border, CircleShape) else Modifier),
             shape = CircleShape,
             colors =
                 IconButtonDefaults.filledTonalIconButtonColors(
-                    containerColor = tint,
+                    containerColor = if (useGlasmio) Color.Transparent else tint,
                     contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
                 ),
             content = content,

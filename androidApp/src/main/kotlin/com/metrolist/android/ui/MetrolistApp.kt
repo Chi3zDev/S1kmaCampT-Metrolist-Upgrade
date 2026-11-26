@@ -1725,6 +1725,7 @@ fun MetrolistApp(
                                                         TopBarIconButton(
                                                             floating = useFloatingTopBar,
                                                             glass = useGlassTopBar,
+                                                            glasmioBackdrop = glasmioBackdrop,
                                                             onClick = { navigator.navigate(Screen.History) },
                                                             modifier =
                                                                 Modifier.tvFocusHighlight(
@@ -1746,6 +1747,7 @@ fun MetrolistApp(
                                                         TopBarIconButton(
                                                             floating = useFloatingTopBar,
                                                             glass = useGlassTopBar,
+                                                            glasmioBackdrop = glasmioBackdrop,
                                                             onClick = { navigator.navigate(Screen.Downloads) },
                                                         ) {
                                                             Icon(
@@ -1758,6 +1760,7 @@ fun MetrolistApp(
                                                         TopBarIconButton(
                                                             floating = useFloatingTopBar,
                                                             glass = useGlassTopBar,
+                                                            glasmioBackdrop = glasmioBackdrop,
                                                             onClick = { navigator.navigate(Screen.Devtools) },
                                                             modifier =
                                                                 Modifier.tvFocusHighlight(
@@ -1777,6 +1780,7 @@ fun MetrolistApp(
                                                         TopBarIconButton(
                                                             floating = useFloatingTopBar,
                                                             glass = useGlassTopBar,
+                                                            glasmioBackdrop = glasmioBackdrop,
                                                             onClick = { navigator.navigate(Screen.ListenTogether) },
                                                             modifier =
                                                                 Modifier.tvFocusHighlight(
