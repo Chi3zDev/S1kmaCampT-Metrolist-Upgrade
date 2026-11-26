@@ -10,6 +10,7 @@ import android.content.res.Configuration
 import android.nfc.NfcAdapter
 import android.os.Build
 import android.provider.MediaStore
+import android.view.View
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalSharedTransitionApi
@@ -201,6 +202,9 @@ import com.metrolist.android.ui.components.calculateMiniPlayerInsets
 import com.metrolist.android.ui.components.calculateNavigationContentInset
 import com.metrolist.android.ui.components.shouldUseDesktopCaption
 import com.metrolist.android.ui.components.shouldUseDesktopMiniPlayer
+import com.metrolist.android.ui.glass.QweBackdropSource
+import com.metrolist.android.ui.glass.QweThemeGlassBackdrop
+import com.metrolist.android.ui.glass.rememberQweGlassAvailable
 import com.metrolist.android.ui.player.AndroidPlayerPlatform
 import com.metrolist.android.ui.player.MusicVideoSurface
 import com.metrolist.android.ui.player.PictureInPictureHelper
@@ -331,6 +335,7 @@ import com.metrolist.shared.ui.components.DISMISSED_ANCHOR
 import com.metrolist.shared.ui.components.EXPANDED_ANCHOR
 import com.metrolist.shared.ui.components.LocalAppBackgroundVisible
 import com.metrolist.shared.ui.components.LocalDownloadedSongIds
+import com.metrolist.shared.ui.components.LocalThemeGlassBackdrop
 import com.metrolist.shared.ui.components.PopupContent
 import com.metrolist.shared.ui.components.PopupVisibility
 import com.metrolist.shared.ui.components.UnavailableSongSnackbar
@@ -1277,6 +1282,18 @@ fun MetrolistApp(
                     }
 
                     val isInPipMode = LocalIsInPipMode.current
+                    val collectionGlassRequested =
+                        Settings.shared.liquidGlassTheme && !usesDirectionalNavigation && !isPlayerExpandedOrExpanding && !isInPipMode &&
+                            (currentRoute is Screen.Album || currentRoute is Screen.Playlist || currentRoute is Screen.AutoPlaylist)
+                    val useQweCollectionGlass =
+                        rememberQweGlassAvailable(enabled = collectionGlassRequested, lightMode = Settings.shared.glassLightMode)
+                    var qweBackdropSource by remember { mutableStateOf<View?>(null) }
+                    val qweThemeBackdrop =
+                        if (useQweCollectionGlass) {
+                            qweBackdropSource?.let { source -> remember(source) { QweThemeGlassBackdrop(source) } }
+                        } else {
+                            null
+                        }
                     val contentObscured by remember(playerBottomSheetState) {
                         derivedStateOf { playerBackgroundOpaque && playerBottomSheetState.isSettledExpanded }
                     }
@@ -1554,6 +1571,7 @@ fun MetrolistApp(
                             }
                         CompositionLocalProvider(
                             LocalAppBackgroundVisible provides backgroundImageReady,
+                            LocalThemeGlassBackdrop provides qweThemeBackdrop,
                             LocalContentObscured provides (isInPipMode || contentObscured),
                             LocalFloatingNavBar provides useFloatingNavBar,
                             LocalGlassNavbarBottomOffset provides
@@ -1830,17 +1848,30 @@ fun MetrolistApp(
                                                 .consumeWindowInsets(scaffoldPadding)
                                                 .consumeWindowInsets(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)),
                                         ) {
-                                            if (backgroundUri.isNotEmpty()) {
-                                                CoilAsyncImage(
-                                                    model = android.net.Uri.parse(backgroundUri),
-                                                    contentDescription = null,
-                                                    contentScale = ContentScale.Crop,
-                                                    onSuccess = { backgroundImageReady = true },
-                                                    onError = { backgroundImageReady = false },
+                                            val pageBackground: @Composable () -> Unit = {
+                                                Box(Modifier.fillMaxSize().background(appBackground)) {
+                                                    if (backgroundUri.isNotEmpty()) {
+                                                        CoilAsyncImage(
+                                                            model = android.net.Uri.parse(backgroundUri),
+                                                            contentDescription = null,
+                                                            contentScale = ContentScale.Crop,
+                                                            onSuccess = { backgroundImageReady = true },
+                                                            onError = { backgroundImageReady = false },
+                                                            modifier = Modifier.fillMaxSize(),
+                                                        )
+                                                        // Preserve text contrast over arbitrary user-selected photographs.
+                                                        Box(Modifier.fillMaxSize().background(appBackground.copy(alpha = 0.78f)))
+                                                    }
+                                                }
+                                            }
+                                            if (useQweCollectionGlass) {
+                                                QweBackdropSource(
+                                                    onViewChanged = { qweBackdropSource = it },
                                                     modifier = Modifier.fillMaxSize(),
+                                                    content = pageBackground,
                                                 )
-                                                // Preserve text contrast over arbitrary user-selected photographs.
-                                                Box(Modifier.fillMaxSize().background(appBackground.copy(alpha = 0.78f)))
+                                            } else {
+                                                pageBackground()
                                             }
                                             Box(
                                                 modifier =

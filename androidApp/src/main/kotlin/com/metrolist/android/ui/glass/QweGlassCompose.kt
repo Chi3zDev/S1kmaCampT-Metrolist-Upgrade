@@ -44,6 +44,20 @@ internal fun QweBackdropSource(
     )
 }
 
+@Composable
+internal fun rememberQweGlassAvailable(
+    enabled: Boolean,
+    lightMode: Boolean,
+): Boolean {
+    val context = LocalContext.current
+    val lowRam = remember(context) { (context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager).isLowRamDevice }
+    if (!enabled || !shouldAttemptQweGlass(Build.VERSION.SDK_INT, lowRam, lightMode, hasSource = true)) return false
+    return remember {
+        // The library's CPU fallback can load nativegauss even on newer Android.
+        runCatching { System.loadLibrary("nativegauss") }.isSuccess
+    }
+}
+
 /**
  * Draws QWEA0's real View-based glass on a separate source, behind Compose controls.
  * Callers must provide a normal surface fallback whenever this returns without a view.
@@ -60,17 +74,8 @@ internal fun QweGlassOverlay(
     modifier: Modifier = Modifier,
     onViewChanged: (View?) -> Unit = {},
 ) {
-    val context = LocalContext.current
-    val lowRam = remember(context) { (context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager).isLowRamDevice }
-    if (!shouldAttemptQweGlass(Build.VERSION.SDK_INT, lowRam, lightMode, source != null)) return
+    if (!rememberQweGlassAvailable(enabled = source != null, lightMode = lightMode)) return
     source ?: return
-    val nativeAvailable =
-        remember {
-            // QWEA0 currently ships native libraries only for ARM. A software fallback may
-            // load nativegauss even on newer Android, so check the actual process ABI.
-            runCatching { System.loadLibrary("nativegauss") }.isSuccess
-        }
-    if (!nativeAvailable) return
     val radiusPx = with(LocalDensity.current) { radius.toPx() }
     val tintArgb = tint.toArgb()
     val latestCallback by rememberUpdatedState(onViewChanged)
