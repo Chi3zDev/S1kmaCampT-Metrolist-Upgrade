@@ -175,6 +175,7 @@ import dev.chrisbanes.haze.blur.hazeBlur
 import io.github.neoruaa.glasmio.core.GlassAppearance
 import io.github.neoruaa.glasmio.glass.NavigationGlassMaterial
 import io.github.neoruaa.glasmio.glass.navigationGlassBackground
+import io.github.neoruaa.glasmio.glass.rememberNavigationInnerShadows
 import io.github.neoruaa.glasmio.glass.render.backdrops.LayerBackdrop
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -746,6 +747,11 @@ internal fun MiniPlayerCard(
             16.dp
         }
 
+    val miniGlassShadows =
+        rememberNavigationInnerShadows(
+            enabled = glassEnabled && glasmioBackdrop != null && glassSettings.glassStyle != "CLEAR",
+            renderScale = 0.5f,
+        )
     val miniGlassModifier =
         if (glassEnabled && glasmioBackdrop != null) {
             val shape = RoundedCornerShape(cornerRadius)
@@ -754,7 +760,7 @@ internal fun MiniPlayerCard(
                 shape = { shape },
                 containerColor = backgroundColor,
                 navigationMaterial = true,
-                innerShadows = null,
+                innerShadows = miniGlassShadows,
                 isDark = surfaceColor.luminance() < 0.5f,
                 appearance = GlassAppearance(liquidGlassEnabled = glassSettings.glassStyle != "CLEAR"),
                 blurRadius = glassRadius,
