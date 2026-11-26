@@ -8,6 +8,13 @@ internal fun shouldAttemptQweGlass(
     hasSource: Boolean,
 ): Boolean = sdkInt >= 31 && !lowRam && !lightMode && hasSource
 
+internal fun qweGlassStyle(style: String): QweGlassStyle =
+    when (style) {
+        "CLEAR" -> QweGlassStyle.CLEAR
+        "FROSTED" -> QweGlassStyle.FROSTED
+        else -> QweGlassStyle.REGULAR
+    }
+
 /** QWE's default strength is preserved at the app's default slider value of 65. */
 internal fun qweBlurAmount(
     style: QweGlassStyle,

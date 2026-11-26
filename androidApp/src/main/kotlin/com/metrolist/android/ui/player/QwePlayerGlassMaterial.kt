@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import com.metrolist.android.ui.glass.QweBackdropSource
 import com.metrolist.android.ui.glass.QweGlassOverlay
-import com.metrolist.android.ui.glass.QweGlassStyle
+import com.metrolist.android.ui.glass.qweGlassStyle
 import com.metrolist.shared.settings.Settings
 import com.metrolist.shared.ui.player.PlayerGlassMaterial
 import kotlin.math.roundToInt
@@ -56,7 +56,7 @@ internal class QwePlayerGlassMaterial : PlayerGlassMaterial {
         Box(modifier) {
             QweGlassOverlay(
                 source = sourceView,
-                style = QweGlassStyle.REGULAR,
+                style = qweGlassStyle(Settings.shared.glassStyle),
                 radius = card.radius,
                 tint = card.tint,
                 dynamic = true,

@@ -7,6 +7,14 @@ import org.junit.Test
 
 class QweGlassPolicyTest {
     @Test
+    fun mapsGlassStylesWithRegularFallback() {
+        assertEquals(QweGlassStyle.CLEAR, qweGlassStyle("CLEAR"))
+        assertEquals(QweGlassStyle.FROSTED, qweGlassStyle("FROSTED"))
+        assertEquals(QweGlassStyle.REGULAR, qweGlassStyle("BLUR"))
+        assertEquals(QweGlassStyle.REGULAR, qweGlassStyle("UNKNOWN"))
+    }
+
+    @Test
     fun blurStrengthPreservesDefaultsAndClampsInvalidValues() {
         assertEquals(0.05f, qweBlurAmount(QweGlassStyle.CLEAR, 65f), 0.0001f)
         assertEquals(0.18f, qweBlurAmount(QweGlassStyle.REGULAR, 65f), 0.0001f)

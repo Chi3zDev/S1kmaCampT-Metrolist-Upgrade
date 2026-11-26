@@ -18,12 +18,7 @@ internal class QweThemeGlassBackdrop(
         modifier: Modifier,
     ) {
         val settings = Settings.shared
-        val style =
-            when (settings.glassStyle) {
-                "CLEAR" -> QweGlassStyle.CLEAR
-                "FROSTED" -> QweGlassStyle.FROSTED
-                else -> QweGlassStyle.REGULAR
-            }
+        val style = qweGlassStyle(settings.glassStyle)
         QweGlassOverlay(
             source = source,
             style = style,
