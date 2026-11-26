@@ -160,6 +160,7 @@ import com.metrolist.shared.ui.components.sliders.collectPlaybackDisplayState
 import com.metrolist.shared.ui.components.sliders.progressAtPixel
 import com.metrolist.shared.ui.design.expressive.components.ExpressiveMiniPlayer
 import com.metrolist.shared.ui.design.expressive.components.ExpressiveMiniPlayerHeight
+import com.metrolist.shared.ui.design.expressive.theme.ExpressiveMiniPlayerShape
 import com.metrolist.shared.ui.haptics.HapticEvent
 import com.metrolist.shared.ui.haptics.MetrolistHaptics
 import com.metrolist.shared.ui.haptics.rememberMetrolistHaptics
@@ -221,8 +222,8 @@ fun MiniPlayer(
     val isLive = currentSong?.isLive == true || playbackResource?.isLive == true
     val lifecycleState by LocalLifecycleOwner.current.lifecycle.currentStateAsState()
     val miniPlayerActive = bottomSheetState?.isCollapsed != false && lifecycleState == Lifecycle.State.RESUMED
-    val isExpressiveMiniPlayer = !glassEnabled && Settings.shared.miniPlayerType == MiniPlayerType.EXPRESSIVE && !useDesktopLayout
-    val isModern = (glassEnabled || Settings.shared.miniPlayerType == MiniPlayerType.MODERN) && !useDesktopLayout
+    val isExpressiveMiniPlayer = Settings.shared.miniPlayerType == MiniPlayerType.EXPRESSIVE && !useDesktopLayout
+    val isModern = !isExpressiveMiniPlayer && (glassEnabled || Settings.shared.miniPlayerType == MiniPlayerType.MODERN) && !useDesktopLayout
     val expressiveProgressEnabled = isExpressiveMiniPlayer && Settings.shared.showExpressiveMiniPlayerProgress
     val progressActive = miniPlayerActive && (!isExpressiveMiniPlayer || expressiveProgressEnabled) && !useDesktopLayout && !isLive
     var progressWidthPx by remember { mutableIntStateOf(0) }
@@ -401,8 +402,77 @@ fun MiniPlayer(
             val subscribedMessage = stringResource(Res.string.subscribed_to_artist, artist?.displayName.orEmpty())
             val subscriptionError = stringResource(Res.string.error_occurred)
             val addToPlaylist = LocalPlaylistAdder.current
+            val settings = Settings.shared
+            val surface = MaterialTheme.colorScheme.surfaceContainer
+            val tintStrength =
+                (
+                    settings.glassTintStrength.coerceIn(0f, 100f) / 100f *
+                        when (settings.glassStyle) {
+                            "CLEAR" -> 0.45f
+                            "FROSTED" -> 0.9f
+                            else -> 0.7f
+                        }
+                ).coerceIn(0.12f, 0.9f)
+            val tint = surface.copy(alpha = tintStrength)
+            val radius =
+                (
+                    settings.glassBlurStrength.coerceIn(0f, 100f) / 100f *
+                        when (settings.glassStyle) {
+                            "CLEAR" -> 8f
+                            "FROSTED" -> 24f
+                            else -> 20f
+                        }
+                ).dp
+            val shape = remember { ExpressiveMiniPlayerShape(32.dp, smoothnessPercent = 60) }
+            val shadows =
+                rememberNavigationInnerShadows(
+                    enabled = glassEnabled && glasmioBackdrop != null && settings.glassStyle != "CLEAR",
+                    renderScale = 0.5f,
+                )
+            val glassModifier =
+                when {
+                    glassEnabled && glasmioBackdrop != null -> {
+                        Modifier.navigationGlassBackground(
+                            backdrop = glasmioBackdrop,
+                            shape = { shape },
+                            containerColor = tint,
+                            navigationMaterial = true,
+                            innerShadows = shadows,
+                            isDark = surface.luminance() < 0.5f,
+                            appearance = GlassAppearance(liquidGlassEnabled = settings.glassStyle != "CLEAR"),
+                            blurRadius = radius,
+                            material =
+                                if (settings.glassStyle ==
+                                    "CLEAR"
+                                ) {
+                                    NavigationGlassMaterial.Clear
+                                } else {
+                                    NavigationGlassMaterial.RegularMedium
+                                },
+                        )
+                    }
+
+                    glassEnabled && glassState != null -> {
+                        val hazeStyle = remember(radius) { HazeBlurStyle { blurRadius(radius) } }
+                        Modifier.clip(shape).hazeBlur(HazeInput.Backdrop(glassState), hazeStyle)
+                    }
+
+                    else -> {
+                        Modifier
+                    }
+                }
             ExpressiveMiniPlayer(
                 song = song,
+                surfaceModifier = glassModifier,
+                surfaceColor =
+                    if (!glassEnabled) {
+                        null
+                    } else if (glasmioBackdrop != null) {
+                        Color.Transparent
+                    } else {
+                        tint
+                    },
+                surfaceContentColor = if (glassEnabled) MaterialTheme.colorScheme.onSurface else null,
                 isPlaying = isPlaying,
                 isLoading = isPlaybackLoading && miniPlayerActive,
                 active = miniPlayerActive,

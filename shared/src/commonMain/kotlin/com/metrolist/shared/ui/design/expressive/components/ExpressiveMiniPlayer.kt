@@ -130,13 +130,16 @@ fun ExpressiveMiniPlayer(
     onDpadExpand: () -> Unit = onExpand,
     playbackActionLabel: String? = null,
     playbackActionIcon: ImageVector? = null,
+    surfaceModifier: Modifier = Modifier,
+    surfaceColor: Color? = null,
+    surfaceContentColor: Color? = null,
 ) {
     val settings = Settings.shared
     val buttons = settings.expressiveMiniPlayerButtons
     val haptics = rememberMetrolistHaptics()
     val scheme = MaterialTheme.colorScheme
-    val containerColor = scheme.primaryContainer
-    val onContainer = scheme.onPrimaryContainer
+    val containerColor = surfaceColor ?: scheme.primaryContainer
+    val onContainer = surfaceContentColor ?: scheme.onPrimaryContainer
     val artworkShape = if (settings.expressiveMiniPlayerCookieArtwork) currentSongArtworkShape() else CircleShape
     val marquee = rememberTrackMarquee(song.id, active, 3_000L)
     val layoutDirection = LocalLayoutDirection.current
@@ -169,7 +172,8 @@ fun ExpressiveMiniPlayer(
                 .graphicsLayer {
                     translationX = dragOffsetX
                     alpha = if (isVisible) 1f else 0f
-                }.then(
+                }.then(surfaceModifier)
+                .then(
                     if (swipeEnabled) {
                         Modifier.pointerInput(canSkipNext, canSkipPrevious, layoutDirection, swipeThresholdPx) {
                             detectHorizontalDragGestures(

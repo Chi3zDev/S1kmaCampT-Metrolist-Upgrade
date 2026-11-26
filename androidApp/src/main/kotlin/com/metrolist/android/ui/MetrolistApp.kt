@@ -992,9 +992,10 @@ fun MetrolistApp(
                 label = "navigationVisibility",
             )
         val hasBottomNavigation = navigationSuiteType.isNavigationBar
-        val isExpressiveMiniPlayer =
-            !useGlassMiniPlayer && Settings.shared.miniPlayerType == MiniPlayerType.EXPRESSIVE && !useDesktopMiniPlayer
-        val isModernMiniPlayer = (useGlassMiniPlayer || Settings.shared.miniPlayerType == MiniPlayerType.MODERN) && !useDesktopMiniPlayer
+        val isExpressiveMiniPlayer = Settings.shared.miniPlayerType == MiniPlayerType.EXPRESSIVE && !useDesktopMiniPlayer
+        val isModernMiniPlayer =
+            !isExpressiveMiniPlayer && (useGlassMiniPlayer || Settings.shared.miniPlayerType == MiniPlayerType.MODERN) &&
+                !useDesktopMiniPlayer
         val miniPlayerBottomSpacing =
             when {
                 isExpressiveMiniPlayer -> ModernMiniPlayerBottomSpacing
