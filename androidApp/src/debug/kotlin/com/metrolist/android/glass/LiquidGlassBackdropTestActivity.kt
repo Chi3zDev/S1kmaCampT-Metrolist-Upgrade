@@ -17,8 +17,9 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
-import com.example.liquidglass.GlassMaterial
 import com.example.liquidglass.LiquidGlassView
+import com.metrolist.android.ui.glass.QweGlassStyle
+import com.metrolist.android.ui.glass.QweGlassView
 
 /** Test-only host: a separate Compose backdrop and a sibling glass, not the application UI. */
 class LiquidGlassBackdropTestActivity : ComponentActivity() {
@@ -59,14 +60,15 @@ class LiquidGlassBackdropTestActivity : ComponentActivity() {
             FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT),
         )
         glass =
-            LiquidGlassView(this).apply {
-                backdropSource = backdrop
-                material = GlassMaterial.REGULAR
-                blurAmount = 0.4f
-                enableDynamicBackground = true
-                enableChromaticAberration = false
-                enableChromaticDispersion = false
-                enableSensorHighlight = false
+            QweGlassView(this).apply {
+                configure(
+                    source = backdrop,
+                    style = QweGlassStyle.FROSTED,
+                    radiusPx = 24f,
+                    tintArgb = android.graphics.Color.TRANSPARENT,
+                    dynamic = true,
+                )
+                // Exercise the non-AGSL path, including the Android 12 renderer.
                 useShaderPipeline = false
             }
         root.addView(glass, FrameLayout.LayoutParams(160, 160, android.view.Gravity.CENTER))
