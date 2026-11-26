@@ -59,6 +59,7 @@ import com.metrolist.shared.generated.resources.playlist_direction_descending
 import com.metrolist.shared.model.CollectionSort
 import com.metrolist.shared.model.SortDirection
 import com.metrolist.shared.model.allowsReordering
+import com.metrolist.shared.settings.Settings
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import com.metrolist.shared.ui.menu.ExpressiveSelectionMenu
 import com.metrolist.shared.ui.menu.trackPressPosition
@@ -126,7 +127,12 @@ fun CollectionFilterBar(
 
     val searchBarColors =
         SearchBarDefaults.colors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            containerColor =
+                if (Settings.shared.liquidGlassTheme) {
+                    glassCardColor(MaterialTheme.colorScheme.surfaceContainerHigh)
+                } else {
+                    MaterialTheme.colorScheme.surfaceContainerHigh
+                },
         )
     val filterScrollState = rememberScrollState()
 
@@ -165,6 +171,7 @@ fun CollectionFilterBar(
                 },
                 modifier = Modifier.fillMaxWidth(),
                 color = searchBarColors.containerColor,
+                border = if (Settings.shared.liquidGlassTheme) glassCardBorder() else null,
                 tonalElevation = 0.dp,
                 shadowElevation = 0.dp,
             )
