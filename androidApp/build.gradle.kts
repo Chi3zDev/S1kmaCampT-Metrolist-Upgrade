@@ -447,6 +447,7 @@ configurations
 
 dependencies {
     implementation(project(":shared"))
+    implementation("com.github.QWEA0:liquidglass:v2.0.11")
     implementation("io.github.neoruaa.glasmio:glasmio-scaffold:0.1.4") {
         // The app already owns Navigation3; Glasmio's Miuix copy duplicates its classes.
         exclude(group = "top.yukonga.miuix.kmp", module = "miuix-navigation3-ui-android")

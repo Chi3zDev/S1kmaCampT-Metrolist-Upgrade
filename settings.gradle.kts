@@ -40,6 +40,7 @@ dependencyResolutionManagement {
                 includeGroup("com.github.nyxiereal.glyphmind")
                 includeGroup("com.github.MetrolistGroup.innertubex")
                 includeGroup("com.github.MetrolistGroup.quackjs")
+                includeGroup("com.github.QWEA0")
             }
         }
         maven { setUrl("https://maven.aliyun.com/repository/public") }
