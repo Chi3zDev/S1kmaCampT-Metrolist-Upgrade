@@ -35,11 +35,12 @@ internal class QweGlassView(
         radiusPx: Float,
         tintArgb: Int,
         dynamic: Boolean,
+        refractionAllowed: Boolean = true,
     ) {
         require(source !== this) { "Glass cannot sample itself" }
         backdropSource = source
         material = if (style == QweGlassStyle.CLEAR) GlassMaterial.CLEAR else GlassMaterial.REGULAR
-        useShaderPipeline = style != QweGlassStyle.CLEAR && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+        useShaderPipeline = refractionAllowed && style != QweGlassStyle.CLEAR && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
         blurAmount =
             when (style) {
                 QweGlassStyle.CLEAR -> 0.05f
