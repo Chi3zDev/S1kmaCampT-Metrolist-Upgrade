@@ -36,6 +36,7 @@ import com.metrolist.shared.ui.navigation.LocalGlassNavigationMorphProgress
 import com.metrolist.shared.ui.navigation.Screen
 import io.github.neoruaa.glasmio.core.GlasmioTheme
 import io.github.neoruaa.glasmio.core.GlassAppearance
+import io.github.neoruaa.glasmio.core.defaultGlassColors
 import io.github.neoruaa.glasmio.glass.GlasmioBackdropProvider
 import io.github.neoruaa.glasmio.glass.render.backdrops.LayerBackdrop
 import io.github.neoruaa.glasmio.icons.GlasmioIconProvider
@@ -88,6 +89,18 @@ fun GlasmioAppNavigation(
     val scheme = MaterialTheme.colorScheme
     val typography = MaterialTheme.typography
     val isDark = scheme.surface.luminance() < 0.5f
+    val defaultGlassColors = defaultGlassColors(isDark, scheme.primary)
+    val tintStrength = Settings.shared.glassTintStrength.coerceIn(0f, 100f) / 100f
+    val tintMultiplier =
+        when (Settings.shared.glassStyle) {
+            "CLEAR" -> 0.45f
+            "FROSTED" -> 0.9f
+            else -> 0.7f
+        }
+    val glassColors =
+        defaultGlassColors.copy(
+            container = defaultGlassColors.container.copy(alpha = (tintStrength * tintMultiplier).coerceIn(0.12f, 0.9f)),
+        )
     val recognizeLabel = stringResource(Res.string.recognize_nearby_music)
     var searchBounds by remember { mutableStateOf<Rect?>(null) }
     var coordinates by remember { mutableStateOf<LayoutCoordinates?>(null) }
@@ -98,7 +111,8 @@ fun GlasmioAppNavigation(
             isDark = isDark,
             colorScheme = scheme,
             typography = typography,
-            // Clear changes the material, not whether the navigation lens can refract.
+            colors = glassColors,
+            // Style does not disable the navigation lens or its press animation.
             appearance = GlassAppearance(),
         ) {
             GlasmioIconProvider(resolver = resolver) {
