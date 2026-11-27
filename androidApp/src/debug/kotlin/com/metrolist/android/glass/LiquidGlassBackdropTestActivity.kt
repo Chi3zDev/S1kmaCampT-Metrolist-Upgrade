@@ -7,8 +7,8 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -83,7 +83,7 @@ class LiquidGlassBackdropTestActivity : ComponentActivity() {
                     dynamic = !staticGlass,
                     lightMode = lightMode,
                     refractionAllowed = false,
-                    modifier = Modifier.align(Alignment.Center).offset(x = glassOffsetDp.dp).size(glassSize),
+                    modifier = Modifier.align(Alignment.Center).absoluteOffset(x = glassOffsetDp.dp).size(glassSize),
                     sourceRevision = Triple(backdropColor, stripedBackdrop, splitBackdrop),
                     onViewChanged = { glass = it },
                 )
