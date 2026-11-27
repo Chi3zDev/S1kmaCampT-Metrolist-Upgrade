@@ -139,6 +139,14 @@ class LiquidGlassBackdropTest {
             val right = captureCenter(activity)
             assertTrue("left sample should be red: $left", AndroidColor.red(left) > AndroidColor.blue(left) + 20)
             assertTrue("moved sample should be blue: $right", AndroidColor.blue(right) > AndroidColor.red(right) + 20)
+            instrumentation.runOnMainSync { activity.splitBackdrop = false }
+            instrumentation.waitForIdleSync()
+            Thread.sleep(1000)
+            val updated = captureCenter(activity)
+            assertTrue(
+                "a changed source revision should refresh static glass: $updated",
+                AndroidColor.red(updated) > AndroidColor.blue(updated) + 20,
+            )
             instrumentation.runOnMainSync {
                 assertFalse(
                     "static glass must not redraw continuously",

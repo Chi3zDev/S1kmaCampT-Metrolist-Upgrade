@@ -84,6 +84,7 @@ class LiquidGlassBackdropTestActivity : ComponentActivity() {
                     lightMode = lightMode,
                     refractionAllowed = false,
                     modifier = Modifier.align(Alignment.Center).offset(x = glassOffsetDp.dp).size(glassSize),
+                    sourceRevision = Triple(backdropColor, stripedBackdrop, splitBackdrop),
                     onViewChanged = { glass = it },
                 )
             }
