@@ -23,6 +23,20 @@ class GlassScrollMotionTest {
     }
 
     @Test
+    fun reverseScrollInsideListKeepsBarCompact() {
+        val compact = GlassScrollMotion(compact = true)
+        val reversed = updateGlassScrollMotion(compact, 80f, 0f, 64f)
+        assertTrue(reversed.compact)
+        assertEquals(0f, reversed.distance)
+    }
+
+    @Test
+    fun reachingTopDuringConsumedScrollExpandsBar() {
+        val compact = GlassScrollMotion(compact = true)
+        assertEquals(GlassScrollMotion(), updateGlassScrollMotion(compact, 10f, 5f, 64f))
+    }
+
+    @Test
     fun reversalResetsAccumulatedDistance() {
         val down = updateGlassScrollMotion(GlassScrollMotion(), -50f, 0f, 64f)
         val reverse = updateGlassScrollMotion(down, 20f, 0f, 64f)
