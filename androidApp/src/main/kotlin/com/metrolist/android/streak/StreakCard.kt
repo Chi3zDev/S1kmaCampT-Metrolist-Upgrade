@@ -1,6 +1,7 @@
 package com.metrolist.android.streak
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -35,6 +36,7 @@ import com.metrolist.shared.generated.resources.streak_longest
 import com.metrolist.shared.generated.resources.streak_next
 import com.metrolist.shared.generated.resources.streak_previous
 import com.metrolist.shared.settings.Settings
+import com.metrolist.shared.ui.components.LocalThemeGlassBackdrop
 import com.metrolist.shared.ui.components.glassCardBorder
 import com.metrolist.shared.ui.components.glassCardColor
 import com.metrolist.shared.ui.navigation.LocalContentObscured
@@ -93,70 +95,78 @@ fun StreakCard(
         } else {
             ((streak.current - currentLevel.minimumDays).toFloat() / (nextLevel.minimumDays - currentLevel.minimumDays)).coerceIn(0f, 1f)
         }
-    Card(
-        onClick = onClick,
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = glassCardColor(MaterialTheme.colorScheme.surfaceContainerHigh)),
-        border = glassCardBorder(),
-    ) {
-        Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                val lifecycle by LocalLifecycleOwner.current.lifecycle.currentStateAsState()
-                val showMotion =
-                    lifecycle == Lifecycle.State.RESUMED && LocalRootContentActive.current && !LocalContentObscured.current &&
-                        streakMotionEnabled()
-                Flame(
-                    flameTint,
-                    animate = showMotion,
-                    particles = !extinguished,
-                    extinguished = extinguished,
-                    modifier = Modifier.size(40.dp),
-                    variant = currentLevel.flameVariant,
-                )
-                Column {
-                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        StreakCount(streak.current, showMotion, MaterialTheme.typography.headlineMedium)
-                        Text(
-                            stringResource(Res.string.streak_days),
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onSurface,
-                        )
+    Box(modifier.fillMaxWidth()) {
+        LocalThemeGlassBackdrop.current?.Background(radius = 24.dp, modifier = Modifier.matchParentSize())
+        Card(
+            onClick = onClick,
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(containerColor = glassCardColor(MaterialTheme.colorScheme.surfaceContainerHigh)),
+            border = glassCardBorder(),
+        ) {
+            Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    val lifecycle by LocalLifecycleOwner.current.lifecycle.currentStateAsState()
+                    val showMotion =
+                        lifecycle == Lifecycle.State.RESUMED && LocalRootContentActive.current && !LocalContentObscured.current &&
+                            streakMotionEnabled()
+                    Flame(
+                        flameTint,
+                        animate = showMotion,
+                        particles = !extinguished,
+                        extinguished = extinguished,
+                        modifier = Modifier.size(40.dp),
+                        variant = currentLevel.flameVariant,
+                    )
+                    Column {
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            StreakCount(streak.current, showMotion, MaterialTheme.typography.headlineMedium)
+                            Text(
+                                stringResource(Res.string.streak_days),
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.onSurface,
+                            )
+                        }
+                        Text(level, style = MaterialTheme.typography.labelLarge, color = flameTint)
                     }
-                    Text(level, style = MaterialTheme.typography.labelLarge, color = flameTint)
                 }
-            }
-            Text(
-                stringResource(
-                    when {
-                        extinguished -> Res.string.streak_extinguished
-                        streak.todayCounted -> Res.string.streak_active
-                        else -> Res.string.streak_inactive
-                    },
-                ),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-            if (extinguished) Text(stringResource(Res.string.streak_previous, state.lastStreak), style = MaterialTheme.typography.bodySmall)
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                if (nextLevel !=
-                    null
-                ) {
+                Text(
+                    stringResource(
+                        when {
+                            extinguished -> Res.string.streak_extinguished
+                            streak.todayCounted -> Res.string.streak_active
+                            else -> Res.string.streak_inactive
+                        },
+                    ),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                if (extinguished) {
                     Text(
-                        stringResource(Res.string.streak_next, stringResource(nextLevel.title)),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        stringResource(Res.string.streak_previous, state.lastStreak),
+                        style = MaterialTheme.typography.bodySmall,
                     )
                 }
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    if (nextLevel !=
+                        null
+                    ) {
+                        Text(
+                            stringResource(Res.string.streak_next, stringResource(nextLevel.title)),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+                LinearProgressIndicator(progress = {
+                    progress
+                }, modifier = Modifier.fillMaxWidth(), color = flameTint, trackColor = MaterialTheme.colorScheme.surfaceVariant)
+                Text(
+                    stringResource(Res.string.streak_longest, streak.longest),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
-            LinearProgressIndicator(progress = {
-                progress
-            }, modifier = Modifier.fillMaxWidth(), color = flameTint, trackColor = MaterialTheme.colorScheme.surfaceVariant)
-            Text(
-                stringResource(Res.string.streak_longest, streak.longest),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
         }
     }
 }

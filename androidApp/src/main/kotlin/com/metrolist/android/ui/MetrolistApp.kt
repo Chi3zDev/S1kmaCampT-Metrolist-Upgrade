@@ -1288,7 +1288,7 @@ fun MetrolistApp(
                             (
                                 currentRoute is Screen.Album || currentRoute is Screen.Playlist || currentRoute is Screen.AutoPlaylist ||
                                     currentRoute is Screen.Artist || currentRoute is Screen.Browse ||
-                                    currentRoute == Screen.Search || currentRoute == Screen.Library ||
+                                    currentRoute == Screen.Home || currentRoute == Screen.Search || currentRoute == Screen.Library ||
                                     currentRoute == Screen.Settings ||
                                     currentRoute == Screen.About || currentRoute is Screen.SettingsPage
                             )
