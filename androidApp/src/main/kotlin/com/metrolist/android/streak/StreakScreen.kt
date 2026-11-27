@@ -231,6 +231,7 @@ fun StreakScreen(onBack: () -> Unit) {
                                     val image =
                                         withContext(Dispatchers.Default) {
                                             renderStreakShare(
+                                                context,
                                                 streak.current,
                                                 longestLabel,
                                                 levelLabel,

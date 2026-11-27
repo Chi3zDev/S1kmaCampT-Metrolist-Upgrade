@@ -1,20 +1,25 @@
 package com.metrolist.android.streak
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.ColorMatrix
+import android.graphics.ColorMatrixColorFilter
 import android.graphics.LinearGradient
 import android.graphics.Paint
-import android.graphics.Path
 import android.graphics.Shader
 import android.graphics.Typeface
 import android.text.TextPaint
 import android.text.TextUtils
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asAndroidPath
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.toArgb
 
 /** Only aggregate streak information and weekday labels are rendered; no account or listening history. */
 internal fun renderStreakShare(
+    context: Context,
     current: Int,
     longestLabel: String,
     level: String,
@@ -50,60 +55,28 @@ internal fun renderStreakShare(
         val text = TextUtils.ellipsize(value, TextPaint(paint), 960f, TextUtils.TruncateAt.END).toString()
         canvas.drawText(text, x, y, paint)
     }
-    // Use the same original normalized contour as the live flame.
-    val geometry = flameShape(variant)
-    val left = 350f
-    val flameTop = top + 40f
-    val side = 380f
-
-    fun x(value: Float) = left + side * value
-
-    fun y(value: Float) = flameTop + side * value
-    val flame =
-        Path().apply {
-            moveTo(x(geometry.tipX), y(geometry.tipY))
-            cubicTo(x(.42f), y(.25f), x(geometry.notchX), y(.27f), x(geometry.notchX), y(geometry.notchY))
-            cubicTo(x(.70f), y(.46f), x(geometry.rightX), y(.39f), x(geometry.rightX), y(geometry.rightY))
-            cubicTo(x(.93f), y(.60f), x(.84f), y(.91f), x(.56f), y(.93f))
-            cubicTo(x(.23f), y(.97f), x(.12f), y(.76f), x(.24f), y(.53f))
-            cubicTo(x(geometry.leftControlX), y(.40f), x(.40f), y(.30f), x(geometry.tipX), y(geometry.tipY))
-            close()
-        }
-    val tip = if (variant < 4) Color.rgb(255, 72, 182) else Color.rgb(207, 185, 255)
+    // Reuse the exact supplied vector paths used by the live flame.
+    val artwork = loadFlameArtwork(context)[variant.coerceIn(0, 6)]
+    val factor = 380f / 180f
+    canvas.save()
+    canvas.translate(350f + (380f - 140f * factor) / 2f + 10f * factor, top + 40f + 40f * factor)
+    canvas.scale(factor, factor)
     if (extinguished) {
-        paint.color = accent
-    } else {
-        paint.shader = LinearGradient(0f, y(.08f), 0f, y(.94f), tip, accent, Shader.TileMode.CLAMP)
+        paint.colorFilter = ColorMatrixColorFilter(ColorMatrix().apply { setSaturation(0f) })
+        paint.alpha = 153
     }
-    canvas.drawPath(flame, paint)
+    artwork.layers.forEach { layer ->
+        val bounds = layer.path.getBounds()
+        paint.shader = LinearGradient(0f, bounds.top, 0f, bounds.bottom, layer.top.toArgb(), layer.bottom.toArgb(), Shader.TileMode.CLAMP)
+        canvas.drawPath(layer.path.asAndroidPath(), paint)
+    }
     paint.shader = null
-    val inner =
-        Path().apply {
-            moveTo(x(.50f), y(geometry.middleTipY))
-            cubicTo(x(.38f), y(.48f), x(.27f), y(.64f), x(.32f), y(.77f))
-            cubicTo(x(.37f), y(.91f), x(.66f), y(.91f), x(.70f), y(.76f))
-            cubicTo(x(.73f), y(.65f), x(.66f), y(.53f), x(.61f), y(geometry.middleNotchY))
-            cubicTo(x(.63f), y(.62f), x(.55f), y(.60f), x(.50f), y(geometry.middleTipY))
-            close()
-        }
-    if (extinguished) {
-        paint.color = accent
-    } else {
-        paint.shader = LinearGradient(0f, y(.32f), 0f, y(.91f), accent, Color.WHITE, Shader.TileMode.CLAMP)
-    }
-    canvas.drawPath(inner, paint)
-    paint.shader = null
-    val core =
-        Path().apply {
-            moveTo(x(.51f), y(geometry.coreTipY))
-            cubicTo(x(.42f), y(.69f), x(.40f), y(.84f), x(.51f), y(.87f))
-            cubicTo(x(.62f), y(.85f), x(.63f), y(.74f), x(.51f), y(geometry.coreTipY))
-            close()
-        }
-    if (!extinguished) {
-        paint.color = Color.WHITE
-        canvas.drawPath(core, paint)
-    }
+    paint.color = Color.WHITE
+    paint.alpha = if (extinguished) 43 else (artwork.highlightAlpha * 255).toInt()
+    canvas.drawPath(artwork.highlight.asAndroidPath(), paint)
+    paint.alpha = 255
+    paint.colorFilter = null
+    canvas.restore()
     label(current.toString(), 540f, top + 510f, 112f, foreground)
     label(daysLabel, 540f, top + 560f, 38f, foreground)
     label(level, 540f, top + 630f, 52f, accent)

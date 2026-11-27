@@ -1,5 +1,6 @@
 package com.metrolist.android.streak
 
+import android.content.Context
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -36,19 +37,19 @@ internal data class StreakFlameState(
     val particles: Boolean,
 )
 
-private data class FlameLayer(
+internal data class FlameLayer(
     val path: Path,
     val top: Color,
     val bottom: Color,
 )
 
-private data class FlameSpark(
+internal data class FlameSpark(
     val x: Float,
     val y: Float,
     val radius: Float,
 )
 
-private data class FlameArtwork(
+internal data class FlameArtwork(
     val glowX: Float,
     val glowY: Float,
     val glowRx: Float,
@@ -99,6 +100,17 @@ private fun parseFlameArtwork(json: String): List<FlameArtwork> {
     }
 }
 
+private var cachedFlameArtwork: List<FlameArtwork>? = null
+
+@Synchronized
+internal fun loadFlameArtwork(context: Context): List<FlameArtwork> =
+    cachedFlameArtwork ?: parseFlameArtwork(
+        context.applicationContext.assets
+            .open("api-level.json")
+            .bufferedReader()
+            .use { it.readText() },
+    ).also { cachedFlameArtwork = it }
+
 /** Seven original path-based flames. Coordinates use the supplied viewBox and baseline y=136. */
 @Composable
 internal fun StreakFlame(
@@ -108,15 +120,7 @@ internal fun StreakFlame(
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
-    val artwork =
-        remember(context) {
-            parseFlameArtwork(
-                context.assets
-                    .open("api-level.json")
-                    .bufferedReader()
-                    .use { it.readText() },
-            )
-        }[level.coerceIn(1, 7) - 1]
+    val artwork = remember(context) { loadFlameArtwork(context) }[level.coerceIn(1, 7) - 1]
     // No infinite transition is composed when motion is disabled or the flame is extinguished.
     val transition = if (state.animate && !state.extinguished) rememberInfiniteTransition(label = "streakFlame") else null
 
