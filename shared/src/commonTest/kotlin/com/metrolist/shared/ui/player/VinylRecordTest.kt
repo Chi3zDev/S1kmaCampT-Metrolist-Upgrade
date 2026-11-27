@@ -22,9 +22,12 @@ class VinylRecordTest {
         assertEquals(start, vinylArmContact(-1f))
         assertEquals(end, vinylArmContact(2f))
         assertEquals(start, vinylArmContact(Float.NaN))
-        // With the record centred at (0.35, 0.5), the stylus stays outside the 58% label.
-        val dx = end.x - 0.35f
+        // With the record centred on the deck, the stylus stays outside the label.
+        val dx = end.x - 0.5f
         val dy = end.y - 0.5f
-        assertTrue(dx * dx + dy * dy > (0.58f * 1.05f / 2f) * (0.58f * 1.05f / 2f))
+        assertTrue(
+            dx * dx + dy * dy >
+                (VINYL_LABEL_SIZE_FRACTION * VINYL_DISC_SIZE_FRACTION / 2f) * (VINYL_LABEL_SIZE_FRACTION * VINYL_DISC_SIZE_FRACTION / 2f),
+        )
     }
 }

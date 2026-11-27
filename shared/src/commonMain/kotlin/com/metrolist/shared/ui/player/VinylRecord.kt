@@ -20,11 +20,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.MotionDurationScale
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
@@ -50,6 +54,8 @@ internal fun vinylArmContact(progress: Float): Offset {
 }
 
 internal const val VINYL_PLAYING_DEGREES_PER_SECOND = 65f
+internal const val VINYL_DISC_SIZE_FRACTION = 0.78f
+internal const val VINYL_LABEL_SIZE_FRACTION = 0.58f
 
 internal fun vinylArmTarget(
     progress: Float,
@@ -105,11 +111,29 @@ internal fun VinylRecord(
     )
 
     Box(modifier.fillMaxWidth().aspectRatio(1f), contentAlignment = Alignment.Center) {
+        Canvas(Modifier.fillMaxSize()) {
+            val corner = size.minDimension * 0.075f
+            val plate = Path().apply { addRoundRect(RoundRect(0f, 0f, size.width, size.height, CornerRadius(corner))) }
+            drawRoundRect(
+                brush = Brush.linearGradient(listOf(Color(0xFFBFC5C7), Color(0xFF858D90), Color(0xFFCED2D3))),
+                cornerRadius = CornerRadius(corner),
+            )
+            clipPath(plate) {
+                // Stable deterministic grain: the texture does not shimmer during playback.
+                repeat(900) { index ->
+                    val x = ((index * 73 + 29) % 997) / 997f * size.width
+                    val y = ((index * 137 + 17) % 991) / 991f * size.height
+                    val tone = if (index % 3 == 0) Color.White else Color.Black
+                    drawCircle(tone.copy(alpha = 0.055f), size.minDimension * 0.0012f, Offset(x, y))
+                }
+            }
+            drawCircle(
+                Brush.radialGradient(listOf(Color(0xFF242629), Color(0xFF777E80), Color(0xFF323638))),
+                radius = size.minDimension * 0.425f,
+            )
+        }
         Box(
-            Modifier.fillMaxSize().graphicsLayer {
-                translationX = -size.width * 0.15f
-                scaleX = 1.05f
-                scaleY = 1.05f
+            Modifier.fillMaxSize(VINYL_DISC_SIZE_FRACTION).graphicsLayer {
                 rotationZ = angle.floatValue
             },
             contentAlignment = Alignment.Center,
@@ -151,8 +175,8 @@ internal fun VinylRecord(
                     radius,
                 )
             }
-            Box(Modifier.fillMaxSize(0.58f).clip(CircleShape)) { artwork() }
-            Canvas(Modifier.fillMaxSize(0.58f)) {
+            Box(Modifier.fillMaxSize(VINYL_LABEL_SIZE_FRACTION).clip(CircleShape)) { artwork() }
+            Canvas(Modifier.fillMaxSize(VINYL_LABEL_SIZE_FRACTION)) {
                 val r = size.minDimension / 2f
                 drawCircle(Color.Black.copy(alpha = 0.35f), r * 0.98f, style = Stroke(r * 0.035f))
                 drawCircle(Color.White.copy(alpha = 0.35f), r * 0.91f, style = Stroke(r * 0.012f))
