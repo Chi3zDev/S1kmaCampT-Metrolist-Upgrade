@@ -299,8 +299,9 @@ fun BrowseContent(
                                             .padding(horizontal = if (categoriesOnly) 6.dp else 22.dp)
                                             .padding(bottom = if (isDesktop) 0.dp else 3.dp),
                                     ) {
-                                        // One static source per visible complete row, not one renderer per tile.
-                                        if (items.size == categoryColumns) {
+                                        // One static source per visible row, not one renderer per tile.
+                                        // On phones the final single tile occupies only half the row.
+                                        if (isDesktop || items.size == categoryColumns) {
                                             LocalThemeGlassBackdrop.current?.Background(
                                                 radius = 5.dp,
                                                 modifier = Modifier.matchParentSize(),
@@ -312,18 +313,34 @@ fun BrowseContent(
                                         ) {
                                             items.forEachIndexed { column, item ->
                                                 val lastRow = row == categoryRows.lastIndex
-                                                GenreCard(
-                                                    title = item.title,
-                                                    onClick = { onItemClick(item, songs) },
-                                                    shape =
-                                                        RoundedCornerShape(
-                                                            topStart = if (row == 0 && column == 0) 12.dp else 5.dp,
-                                                            topEnd = if (row == 0 && column == items.lastIndex) 12.dp else 5.dp,
-                                                            bottomStart = if (lastRow && column == 0) 12.dp else 5.dp,
-                                                            bottomEnd = if (lastRow && column == items.lastIndex) 12.dp else 5.dp,
-                                                        ),
-                                                    modifier = Modifier.weight(1f),
-                                                )
+                                                val shape =
+                                                    RoundedCornerShape(
+                                                        topStart = if (row == 0 && column == 0) 12.dp else 5.dp,
+                                                        topEnd = if (row == 0 && column == items.lastIndex) 12.dp else 5.dp,
+                                                        bottomStart = if (lastRow && column == 0) 12.dp else 5.dp,
+                                                        bottomEnd = if (lastRow && column == items.lastIndex) 12.dp else 5.dp,
+                                                    )
+                                                if (!isDesktop && items.size == 1) {
+                                                    Box(Modifier.weight(1f)) {
+                                                        LocalThemeGlassBackdrop.current?.Background(
+                                                            radius = 5.dp,
+                                                            modifier = Modifier.matchParentSize(),
+                                                        )
+                                                        GenreCard(
+                                                            title = item.title,
+                                                            onClick = { onItemClick(item, songs) },
+                                                            shape = shape,
+                                                            modifier = Modifier.fillMaxWidth(),
+                                                        )
+                                                    }
+                                                } else {
+                                                    GenreCard(
+                                                        title = item.title,
+                                                        onClick = { onItemClick(item, songs) },
+                                                        shape = shape,
+                                                        modifier = Modifier.weight(1f),
+                                                    )
+                                                }
                                             }
                                             if (!isDesktop && items.size == 1) Spacer(Modifier.weight(1f))
                                         }
