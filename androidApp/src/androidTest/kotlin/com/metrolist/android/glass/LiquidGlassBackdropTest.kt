@@ -87,6 +87,7 @@ class LiquidGlassBackdropTest {
                 )
                 assertEquals("an ancestor must not be captured", View.INVISIBLE, glass.visibility)
                 assertFalse("unsafe capture must stop dynamic redraw", glass.enableDynamicBackground)
+                assertNull("unsafe capture must release the previous source", glass.backdropSource)
                 glass.configure(
                     source = source,
                     style = QweGlassStyle.REGULAR,

@@ -44,6 +44,7 @@ internal class QweGlassView(
             dynamicRequested = false
             enableDynamicBackground = false
             visibility = View.INVISIBLE
+            backdropSource = null
             return
         }
         visibility = View.VISIBLE
@@ -70,6 +71,7 @@ internal class QweGlassView(
             dynamicRequested = false
             enableDynamicBackground = false
             visibility = View.INVISIBLE
+            backdropSource = null
             return
         }
         updateDynamicState()
