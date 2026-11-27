@@ -101,6 +101,44 @@ class LiquidGlassBackdropTest {
         }
     }
 
+    /** Lazy rows use static capture; moving one must sample the new screen position. */
+    @Test
+    fun staticGlassResamplesWhenMovedAcrossBackdrop() {
+        assumeTrue("Glass bridge uses the lightweight fallback below Android 12", Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        val activityManager = instrumentation.targetContext.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        assumeTrue("Glass bridge uses the lightweight fallback on low-RAM devices", !activityManager.isLowRamDevice)
+        assumeTrue("QWEA0 native library is unavailable for this process ABI", runCatching { System.loadLibrary("nativegauss") }.isSuccess)
+        val intent =
+            Intent(instrumentation.targetContext, LiquidGlassBackdropTestActivity::class.java)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        val activity = instrumentation.startActivitySync(intent) as LiquidGlassBackdropTestActivity
+        try {
+            instrumentation.runOnMainSync {
+                activity.splitBackdrop = true
+                activity.staticGlass = true
+                activity.glassOffsetDp = -72
+            }
+            instrumentation.waitForIdleSync()
+            Thread.sleep(1000)
+            val left = captureCenter(activity)
+            instrumentation.runOnMainSync { activity.glassOffsetDp = 72 }
+            instrumentation.waitForIdleSync()
+            Thread.sleep(1000)
+            val right = captureCenter(activity)
+            assertTrue("left sample should be red: $left", AndroidColor.red(left) > AndroidColor.blue(left) + 20)
+            assertTrue("moved sample should be blue: $right", AndroidColor.blue(right) > AndroidColor.red(right) + 20)
+            instrumentation.runOnMainSync {
+                assertFalse(
+                    "static glass must not redraw continuously",
+                    (checkNotNull(activity.glass) as QweGlassView).enableDynamicBackground,
+                )
+            }
+        } finally {
+            instrumentation.runOnMainSync { activity.finish() }
+        }
+    }
+
     @RequiresApi(Build.VERSION_CODES.O)
     private fun captureCenter(activity: LiquidGlassBackdropTestActivity): Int = captureCenterRow(activity, 1).single()
 

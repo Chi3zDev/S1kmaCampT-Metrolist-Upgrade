@@ -8,6 +8,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -28,6 +29,9 @@ import com.metrolist.android.ui.glass.QweGlassStyle
 class LiquidGlassBackdropTestActivity : ComponentActivity() {
     var backdropColor by mutableStateOf(Color.Red)
     var stripedBackdrop by mutableStateOf(false)
+    var splitBackdrop by mutableStateOf(false)
+    var staticGlass by mutableStateOf(false)
+    var glassOffsetDp by mutableStateOf(0)
     var lightMode by mutableStateOf(false)
     var glass: View? = null
 
@@ -41,7 +45,16 @@ class LiquidGlassBackdropTestActivity : ComponentActivity() {
                     onViewChanged = { source = it },
                     modifier = Modifier.fillMaxSize(),
                 ) {
-                    if (stripedBackdrop) {
+                    if (splitBackdrop) {
+                        Canvas(Modifier.fillMaxSize()) {
+                            drawRect(color = Color.Red, size = Size(size.width / 2f, size.height))
+                            drawRect(
+                                color = Color.Blue,
+                                topLeft = Offset(size.width / 2f, 0f),
+                                size = Size(size.width / 2f, size.height),
+                            )
+                        }
+                    } else if (stripedBackdrop) {
                         Canvas(Modifier.fillMaxSize()) {
                             val stripeWidth = 4f
                             var left = 0f
@@ -67,10 +80,10 @@ class LiquidGlassBackdropTestActivity : ComponentActivity() {
                     style = QweGlassStyle.FROSTED,
                     radius = 24.dp,
                     tint = Color.Transparent,
-                    dynamic = true,
+                    dynamic = !staticGlass,
                     lightMode = lightMode,
                     refractionAllowed = false,
-                    modifier = Modifier.align(Alignment.Center).size(glassSize),
+                    modifier = Modifier.align(Alignment.Center).offset(x = glassOffsetDp.dp).size(glassSize),
                     onViewChanged = { glass = it },
                 )
             }
