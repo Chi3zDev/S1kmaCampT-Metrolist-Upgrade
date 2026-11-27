@@ -1298,8 +1298,8 @@ fun MetrolistApp(
                     val qweThemeBackdrop =
                         if (useQweThemeGlass) {
                             qweBackdropSource?.let { source ->
-                                remember(source, backgroundUri, backgroundImageReady) {
-                                    QweThemeGlassBackdrop(source, backgroundUri to backgroundImageReady)
+                                remember(source, backgroundUri, backgroundImageReady, appBackground) {
+                                    QweThemeGlassBackdrop(source, Triple(backgroundUri, backgroundImageReady, appBackground))
                                 }
                             }
                         } else {
