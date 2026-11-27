@@ -114,20 +114,16 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.luminance
-import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
@@ -502,7 +498,7 @@ fun PlayerScreen(
     requestPlayPauseFocus: Boolean = false,
     onPlayPauseFocusRequested: () -> Unit = {},
     onLyricsVisibleChange: (Boolean) -> Unit = {},
-    onSharePlayerImage: (suspend (ImageBitmap) -> Unit)? = null,
+    onSharePlayerImage: (suspend (PlayerViewModel.SongUiModel, Long, Long, Boolean) -> Unit)? = null,
     onSharePlayerImageError: () -> Unit = {},
     isScreenVisible: Boolean = true,
 ) {
@@ -544,24 +540,22 @@ fun PlayerScreen(
     val displaysPlayingSong = currentSong?.id == uiState.currentSong?.id
     val toggleDisplayedLike = { if (displaysPlayingSong) viewModel.toggleLike() }
     val shareScope = rememberCoroutineScope()
-    val shareLayer = rememberGraphicsLayer()
-    var capturePlayerForShare by remember { mutableStateOf(false) }
+    var sharingPlayerImage by remember { mutableStateOf(false) }
     val shareDisplayedSong = {
-        if (displaysPlayingSong && !capturePlayerForShare) {
-            if (Settings.shared.playerType == PlayerType.GLASS_CARD && onSharePlayerImage != null) {
-                capturePlayerForShare = true
+        if (displaysPlayingSong && !sharingPlayerImage) {
+            if (Settings.shared.playerType == PlayerType.GLASS_CARD && onSharePlayerImage != null && currentSong != null) {
+                sharingPlayerImage = true
+                val song = currentSong
+                val position = viewModel.currentPosition.value
                 shareScope.launch {
                     try {
-                        // Request a fresh recorded frame only when sharing, not during playback.
-                        withFrameNanos { }
-                        withFrameNanos { }
-                        onSharePlayerImage(shareLayer.toImageBitmap())
+                        onSharePlayerImage(song, position, duration, uiState.isPlaying)
                     } catch (error: CancellationException) {
                         throw error
                     } catch (error: Exception) {
                         onSharePlayerImageError()
                     } finally {
-                        capturePlayerForShare = false
+                        sharingPlayerImage = false
                     }
                 }
             } else {
@@ -946,14 +940,7 @@ fun PlayerScreen(
             modifier =
                 modifier
                     .fillMaxSize()
-                    .drawWithContent {
-                        if (capturePlayerForShare) {
-                            shareLayer.record { this@drawWithContent.drawContent() }
-                            drawLayer(shareLayer)
-                        } else {
-                            drawContent()
-                        }
-                    }.focusGroup(),
+                    .focusGroup(),
         ) {
             val screenWidth = this.maxWidth
             val maxHeight = this.maxHeight
@@ -1084,10 +1071,9 @@ fun PlayerScreen(
                         contentActive && bottomSheetState.isSettledExpanded && !isFullscreen && !isInPipMode &&
                             playerType == PlayerType.GLASS_CARD && Settings.shared.glassNavigation && Settings.shared.glassPlayer &&
                             !uiState.isLyricsVisible && !Settings.shared.glassLightMode && LocalPlayerEffectsAllowed.current,
-                    // The native overlay has not yet been proven under scroll clipping or
-                    // GraphicsLayer export. Keep the Compose path for those cases.
+                    // The native overlay has not yet been proven under scroll clipping.
                     preferCompose =
-                        capturePlayerForShare || useLandscapeLayout ||
+                        useLandscapeLayout ||
                             maxHeight < MinPortraitPlayerHeight + if (playerType == PlayerType.GLASS_CARD) 96.dp else 0.dp,
                 )
             val hasVisibleVideoTransitionIndicator =

@@ -208,6 +208,7 @@ import com.metrolist.android.ui.glass.rememberQweGlassAvailable
 import com.metrolist.android.ui.player.AndroidPlayerPlatform
 import com.metrolist.android.ui.player.MusicVideoSurface
 import com.metrolist.android.ui.player.PictureInPictureHelper
+import com.metrolist.android.ui.player.renderMusicSharePoster
 import com.metrolist.android.ui.screens.AboutArtistScreen
 import com.metrolist.android.ui.screens.AlbumScreen
 import com.metrolist.android.ui.screens.ArtistScreenHost
@@ -2198,7 +2199,10 @@ fun MetrolistApp(
                             val sharePlayerLabel = stringResource(Res.string.share)
                             val sharePlayerError = stringResource(Res.string.statistics_share_failed)
                             PlayerScreen(
-                                onSharePlayerImage = { image -> shareImage(context, image, sharePlayerLabel) },
+                                onSharePlayerImage = { song, position, duration, playing ->
+                                    val image = renderMusicSharePoster(context, song, position, duration, playing)
+                                    shareImage(context, image, sharePlayerLabel)
+                                },
                                 onSharePlayerImageError = { Toast.makeText(context, sharePlayerError, Toast.LENGTH_SHORT).show() },
                                 isScreenVisible = playerLifecycleState.isAtLeast(Lifecycle.State.STARTED),
                                 viewModel = playerViewModel,
