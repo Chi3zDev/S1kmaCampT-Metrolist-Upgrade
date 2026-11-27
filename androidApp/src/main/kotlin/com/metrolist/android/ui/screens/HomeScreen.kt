@@ -79,6 +79,7 @@ import com.metrolist.android.recap.RecapEntry
 import com.metrolist.android.streak.StreakCard
 import com.metrolist.android.streak.rememberListeningStreak
 import com.metrolist.android.ui.component.AdaptiveModalBottomSheet
+import com.metrolist.android.ui.component.glassScreenViewport
 import com.metrolist.android.ui.component.tabContentTopPadding
 import com.metrolist.android.ui.components.ErrorBox
 import com.metrolist.android.ui.components.handleItemClick
@@ -311,12 +312,11 @@ fun HomeScreen(
             listState = listState,
             contentPadding =
                 PaddingValues(
-                    top = topPadding,
                     bottom = miniPlayerInset + 16.dp + if (glassActions && !isTv) 148.dp else 0.dp,
                 ),
             modifier =
                 Modifier
-                    .fillMaxSize()
+                    .glassScreenViewport(topPadding)
                     .onGloballyPositioned {
                         startupPresentation?.homeLaidOut = true
                     }.focusGroup()

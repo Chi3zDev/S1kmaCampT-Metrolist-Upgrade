@@ -190,6 +190,7 @@ import com.metrolist.android.streak.StreakScreen
 import com.metrolist.android.ui.component.BottomSheetMenu
 import com.metrolist.android.ui.component.FloatingTopAppBar
 import com.metrolist.android.ui.component.LocalMenuState
+import com.metrolist.android.ui.component.LocalTabContentTopPadding
 import com.metrolist.android.ui.component.MenuState
 import com.metrolist.android.ui.component.TabTopBarHeight
 import com.metrolist.android.ui.component.TopBarIconButton
@@ -872,6 +873,9 @@ fun MetrolistApp(
 
         val useGlassTopBar = useGlass && Settings.shared.glassTopBar && !hasDesktopCaption
         val useFloatingTopBar = (Settings.shared.floatingTopBar || useGlassTopBar) && !hasDesktopCaption
+        // Resolve status-bar clearance before Scaffold consumes insets for the content subtree.
+        val screenTopInset = WindowInsets.safeDrawing.asPaddingValues().calculateTopPadding()
+        val screenTopPadding = screenTopInset + if (shouldShowTopBar) TabTopBarHeight else 0.dp
         val topAppBarScrollBehavior = appBarScrollBehavior()
         val selectedRailFocusRequester = remember { FocusRequester() }
         val contentFocusRequester = remember { FocusRequester() }
@@ -1583,6 +1587,7 @@ fun MetrolistApp(
                             }
                         CompositionLocalProvider(
                             LocalAppBackgroundVisible provides backgroundImageReady,
+                            LocalTabContentTopPadding provides screenTopPadding,
                             LocalThemeGlassBackdrop provides qweThemeBackdrop,
                             LocalContentObscured provides (isInPipMode || contentObscured),
                             LocalFloatingNavBar provides useFloatingNavBar,
