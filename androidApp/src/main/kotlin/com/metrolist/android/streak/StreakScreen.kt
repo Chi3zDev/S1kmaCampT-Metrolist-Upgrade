@@ -594,7 +594,7 @@ private fun InteractiveStreakFlame(
             touch = offset
             scope.launch {
                 burst.snapTo(1f)
-                burst.animateTo(0f, tween(600))
+                burst.animateTo(0f, PolishMotion.interactiveSpring())
             }
         }
     }
