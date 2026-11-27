@@ -155,6 +155,7 @@ import com.metrolist.shared.model.YTItem
 import com.metrolist.shared.model.isVideoShelf
 import com.metrolist.shared.model.previewAspectRatio
 import com.metrolist.shared.model.previewThumbnailUrl
+import com.metrolist.shared.settings.Settings
 import com.metrolist.shared.settings.displayName
 import com.metrolist.shared.settings.displayTitle
 import com.metrolist.shared.state.SongMetadataState
@@ -165,6 +166,7 @@ import com.metrolist.shared.ui.components.ExplicitBadge
 import com.metrolist.shared.ui.components.FittingText
 import com.metrolist.shared.ui.components.ListItemTitle
 import com.metrolist.shared.ui.components.LocalDownloadedSongIds
+import com.metrolist.shared.ui.components.LocalThemeGlassBackdrop
 import com.metrolist.shared.ui.components.RefreshIndicator
 import com.metrolist.shared.ui.components.SectionTitle
 import com.metrolist.shared.ui.components.SubscribeConfetti
@@ -176,6 +178,8 @@ import com.metrolist.shared.ui.components.animatedCurrentSongArtworkShape
 import com.metrolist.shared.ui.components.appPageBackground
 import com.metrolist.shared.ui.components.carouselArtworkShape
 import com.metrolist.shared.ui.components.currentSongSemantics
+import com.metrolist.shared.ui.components.glassCardBorder
+import com.metrolist.shared.ui.components.glassCardColor
 import com.metrolist.shared.ui.components.images.AsyncImage
 import com.metrolist.shared.ui.components.loadingShimmer
 import com.metrolist.shared.ui.components.rememberCurrentSongArtworkRotation
@@ -1772,34 +1776,62 @@ private fun ArtistAboutCard(
                 isWide = isWide,
             )
             Spacer(Modifier.height(10.dp))
-            Surface(
-                onClick = onClick,
-                modifier = artistCardModifier(isWide).navigationPageSource(),
-                shape = RoundedCornerShape(28.dp),
-                color = if (photoUrl.isNullOrBlank()) MaterialTheme.colorScheme.surfaceContainer else Color.Transparent,
-            ) {
-                Box(contentAlignment = Alignment.BottomStart) {
-                    if (!photoUrl.isNullOrBlank()) {
-                        val gradient by navGradientStrength(settled = 1f)
-                        ArtistAboutPhoto(
-                            url = photoUrl,
-                            gradient = { gradient },
-                            modifier = Modifier.artistPhotoNavTransition(photoUrl, RoundedCornerShape(28.dp)).fillMaxWidth().height(420.dp),
-                            alignment = BiasAlignment(0f, -0.44f),
-                        )
-                    }
-                    Row(
-                        modifier = Modifier.artistPhotoNavOverlayContent().fillMaxWidth().padding(horizontal = 28.dp, vertical = 24.dp),
-                        horizontalArrangement = Arrangement.spacedBy(20.dp),
-                        verticalAlignment = Alignment.Bottom,
-                    ) {
-                        ArtistAboutCardText(artist, description, descriptionLines, Modifier.weight(1f))
-                        Icon(
-                            MetrolistIcons.AutoMirrored.Filled.ArrowForward,
-                            contentDescription = null,
-                            modifier = Modifier.padding(bottom = 2.dp).size(28.dp),
-                            tint = MaterialTheme.colorScheme.onSurface,
-                        )
+            Box(artistCardModifier(isWide)) {
+                val glassCard = photoUrl.isNullOrBlank() && Settings.shared.liquidGlassTheme
+                if (glassCard) {
+                    LocalThemeGlassBackdrop.current?.Background(radius = 28.dp, modifier = Modifier.matchParentSize())
+                }
+                Surface(
+                    onClick = onClick,
+                    modifier = Modifier.fillMaxWidth().navigationPageSource(),
+                    shape = RoundedCornerShape(28.dp),
+                    color =
+                        if (photoUrl.isNullOrBlank()) {
+                            if (glassCard) {
+                                glassCardColor(
+                                    MaterialTheme.colorScheme.surfaceContainer,
+                                )
+                            } else {
+                                MaterialTheme.colorScheme.surfaceContainer
+                            }
+                        } else {
+                            Color.Transparent
+                        },
+                    border = if (glassCard) glassCardBorder() else null,
+                ) {
+                    Box(contentAlignment = Alignment.BottomStart) {
+                        if (!photoUrl.isNullOrBlank()) {
+                            val gradient by navGradientStrength(settled = 1f)
+                            ArtistAboutPhoto(
+                                url = photoUrl,
+                                gradient = { gradient },
+                                modifier =
+                                    Modifier
+                                        .artistPhotoNavTransition(
+                                            photoUrl,
+                                            RoundedCornerShape(28.dp),
+                                        ).fillMaxWidth()
+                                        .height(420.dp),
+                                alignment = BiasAlignment(0f, -0.44f),
+                            )
+                        }
+                        Row(
+                            modifier =
+                                Modifier
+                                    .artistPhotoNavOverlayContent()
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 28.dp, vertical = 24.dp),
+                            horizontalArrangement = Arrangement.spacedBy(20.dp),
+                            verticalAlignment = Alignment.Bottom,
+                        ) {
+                            ArtistAboutCardText(artist, description, descriptionLines, Modifier.weight(1f))
+                            Icon(
+                                MetrolistIcons.AutoMirrored.Filled.ArrowForward,
+                                contentDescription = null,
+                                modifier = Modifier.padding(bottom = 2.dp).size(28.dp),
+                                tint = MaterialTheme.colorScheme.onSurface,
+                            )
+                        }
                     }
                 }
             }
