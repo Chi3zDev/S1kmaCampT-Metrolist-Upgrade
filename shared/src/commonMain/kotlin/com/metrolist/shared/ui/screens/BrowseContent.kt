@@ -71,6 +71,7 @@ import com.metrolist.shared.model.homeSectionLayout
 import com.metrolist.shared.model.toSongItem
 import com.metrolist.shared.ui.components.ContainedLoadingIndicator
 import com.metrolist.shared.ui.components.GenreCard
+import com.metrolist.shared.ui.components.LocalThemeGlassBackdrop
 import com.metrolist.shared.ui.components.SectionTitle
 import com.metrolist.shared.ui.components.YTGridItem
 import com.metrolist.shared.ui.components.YTListItem
@@ -292,30 +293,40 @@ fun BrowseContent(
                                     span = { _, _ -> GridItemSpan(maxLineSpan) },
                                     contentType = { _, _ -> "category_row" },
                                 ) { row, items ->
-                                    Row(
+                                    Box(
                                         Modifier
                                             .fillMaxWidth()
-                                            .padding(
-                                                horizontal = if (categoriesOnly) 6.dp else 22.dp,
-                                            ).padding(bottom = if (isDesktop) 0.dp else 3.dp),
-                                        horizontalArrangement = Arrangement.spacedBy(if (isDesktop) GridTileSpacing else 3.dp),
+                                            .padding(horizontal = if (categoriesOnly) 6.dp else 22.dp)
+                                            .padding(bottom = if (isDesktop) 0.dp else 3.dp),
                                     ) {
-                                        items.forEachIndexed { column, item ->
-                                            val lastRow = row == categoryRows.lastIndex
-                                            GenreCard(
-                                                title = item.title,
-                                                onClick = { onItemClick(item, songs) },
-                                                shape =
-                                                    RoundedCornerShape(
-                                                        topStart = if (row == 0 && column == 0) 12.dp else 5.dp,
-                                                        topEnd = if (row == 0 && column == items.lastIndex) 12.dp else 5.dp,
-                                                        bottomStart = if (lastRow && column == 0) 12.dp else 5.dp,
-                                                        bottomEnd = if (lastRow && column == items.lastIndex) 12.dp else 5.dp,
-                                                    ),
-                                                modifier = Modifier.weight(1f),
+                                        // One static source per visible complete row, not one renderer per tile.
+                                        if (items.size == categoryColumns) {
+                                            LocalThemeGlassBackdrop.current?.Background(
+                                                radius = 5.dp,
+                                                modifier = Modifier.matchParentSize(),
                                             )
                                         }
-                                        if (!isDesktop && items.size == 1) Spacer(Modifier.weight(1f))
+                                        Row(
+                                            Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.spacedBy(if (isDesktop) GridTileSpacing else 3.dp),
+                                        ) {
+                                            items.forEachIndexed { column, item ->
+                                                val lastRow = row == categoryRows.lastIndex
+                                                GenreCard(
+                                                    title = item.title,
+                                                    onClick = { onItemClick(item, songs) },
+                                                    shape =
+                                                        RoundedCornerShape(
+                                                            topStart = if (row == 0 && column == 0) 12.dp else 5.dp,
+                                                            topEnd = if (row == 0 && column == items.lastIndex) 12.dp else 5.dp,
+                                                            bottomStart = if (lastRow && column == 0) 12.dp else 5.dp,
+                                                            bottomEnd = if (lastRow && column == items.lastIndex) 12.dp else 5.dp,
+                                                        ),
+                                                    modifier = Modifier.weight(1f),
+                                                )
+                                            }
+                                            if (!isDesktop && items.size == 1) Spacer(Modifier.weight(1f))
+                                        }
                                     }
                                 }
                             } else {

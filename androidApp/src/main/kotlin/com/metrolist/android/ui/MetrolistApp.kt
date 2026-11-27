@@ -1287,7 +1287,8 @@ fun MetrolistApp(
                         Settings.shared.liquidGlassTheme && !usesDirectionalNavigation && !isPlayerExpandedOrExpanding && !isInPipMode &&
                             (
                                 currentRoute is Screen.Album || currentRoute is Screen.Playlist || currentRoute is Screen.AutoPlaylist ||
-                                    currentRoute == Screen.Search || currentRoute == Screen.Library || currentRoute == Screen.Settings ||
+                                    currentRoute is Screen.Browse || currentRoute == Screen.Search || currentRoute == Screen.Library ||
+                                    currentRoute == Screen.Settings ||
                                     currentRoute == Screen.About || currentRoute is Screen.SettingsPage
                             )
                     val useQweThemeGlass =
