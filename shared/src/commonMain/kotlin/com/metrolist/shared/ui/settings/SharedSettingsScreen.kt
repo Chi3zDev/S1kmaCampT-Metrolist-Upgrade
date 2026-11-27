@@ -785,6 +785,18 @@ private fun SettingsPageList(
                                     .padding(horizontal = 16.dp)
                                     .padding(bottom = if (index == group.items.lastIndex) 0.dp else 4.dp),
                             ) {
+                                // Each lazy row is composed only while visible; never capture the scrolling host itself.
+                                if (Settings.shared.liquidGlassTheme && item.id != highlightedItemId &&
+                                    item.control != SettingsControl.MAIN_SWITCH && item.control != SettingsControl.CUSTOM
+                                ) {
+                                    LocalThemeGlassBackdrop.current?.Background(
+                                        radius = 5.dp,
+                                        modifier =
+                                            Modifier
+                                                .matchParentSize()
+                                                .clip(connectedShape(index == 0, index == group.items.lastIndex, 20.dp, 5.dp)),
+                                    )
+                                }
                                 SettingsItemRow(
                                     item =
                                         if (group.enabled &&
