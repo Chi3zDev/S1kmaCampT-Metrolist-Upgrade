@@ -12,7 +12,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -30,6 +29,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.metrolist.android.LocalMiniPlayerBottomInset
+import com.metrolist.android.ui.component.glassScreenViewport
 import com.metrolist.android.ui.component.tabContentTopPadding
 import com.metrolist.shared.BuildConfig
 import com.metrolist.shared.auth.AuthManager
@@ -49,6 +49,8 @@ import com.metrolist.shared.generated.resources.settings
 import com.metrolist.shared.generated.resources.statistics
 import com.metrolist.shared.generated.resources.streak_page_title
 import com.metrolist.shared.settings.Settings
+import com.metrolist.shared.ui.components.LiquidGlassButton
+import com.metrolist.shared.ui.components.LiquidGlassSurface
 import com.metrolist.shared.ui.components.glassEdgeBrush
 import com.metrolist.shared.ui.components.images.AsyncImage
 import com.metrolist.shared.ui.icons.MetrolistIcons
@@ -67,7 +69,7 @@ fun ProfileScreen(
     onIntegrations: () -> Unit,
     onSettings: () -> Unit,
 ) {
-    val glass = (Settings.shared.glassNavigation || Settings.shared.liquidGlassTheme) && Settings.shared.glassProfile
+    val glass = Settings.shared.liquidGlassTheme || (Settings.shared.glassNavigation && Settings.shared.glassProfile)
     val surface = MaterialTheme.colorScheme.surfaceContainerHigh
     val tintMultiplier =
         when (Settings.shared.glassStyle) {
@@ -92,68 +94,83 @@ fun ProfileScreen(
     var confirmLogout by remember { mutableStateOf(false) }
 
     LazyColumn(
+        modifier = Modifier.glassScreenViewport(tabContentTopPadding()),
         contentPadding =
             PaddingValues(
                 start = 16.dp,
                 end = 16.dp,
-                top = tabContentTopPadding() + 16.dp,
+                top = 16.dp,
                 bottom =
                     LocalMiniPlayerBottomInset.current + 24.dp,
             ),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item {
-            Card(
-                colors = CardDefaults.cardColors(containerColor = color),
-                border = border,
-                shape = shape,
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                        if (authManager.accountThumbnail.isNotBlank()) {
-                            AsyncImage(
-                                url = authManager.accountThumbnail,
-                                contentDescription = null,
-                                modifier = Modifier.size(56.dp).clip(CircleShape),
-                            )
-                        } else {
-                            Icon(MetrolistIcons.Outlined.AccountCircle, contentDescription = null, modifier = Modifier.size(56.dp))
-                        }
-                        Column(Modifier.weight(1f)) {
-                            Text(
-                                if (authManager.isLoggedIn) {
-                                    authManager.accountName
-                                } else {
-                                    stringResource(
-                                        Res.string.glass_profile_signed_out,
-                                    )
-                                },
-                                style = MaterialTheme.typography.titleLarge,
-                            )
-                            if (authManager.isLoggedIn) {
-                                Text(
-                                    authManager.accountChannelHandle.ifBlank {
-                                        authManager.accountEmail
-                                    },
-                                    style = MaterialTheme.typography.bodyMedium,
+            LiquidGlassSurface(radius = 24.dp, modifier = Modifier.fillMaxWidth()) {
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = color),
+                    border = border,
+                    shape = shape,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                            if (authManager.accountThumbnail.isNotBlank()) {
+                                AsyncImage(
+                                    url = authManager.accountThumbnail,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(56.dp).clip(CircleShape),
                                 )
+                            } else {
+                                Icon(MetrolistIcons.Outlined.AccountCircle, contentDescription = null, modifier = Modifier.size(56.dp))
+                            }
+                            Column(Modifier.weight(1f)) {
+                                Text(
+                                    if (authManager.isLoggedIn) {
+                                        authManager.accountName
+                                    } else {
+                                        stringResource(
+                                            Res.string.glass_profile_signed_out,
+                                        )
+                                    },
+                                    style = MaterialTheme.typography.titleLarge,
+                                )
+                                if (authManager.isLoggedIn) {
+                                    Text(
+                                        authManager.accountChannelHandle.ifBlank {
+                                            authManager.accountEmail
+                                        },
+                                        style = MaterialTheme.typography.bodyMedium,
+                                    )
+                                }
                             }
                         }
-                    }
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Button(onClick = if (authManager.isLoggedIn) onSwitchAccount else onLogin, modifier = Modifier.weight(1f)) {
-                            Text(stringResource(if (authManager.isLoggedIn) Res.string.menu_switch_account else Res.string.account_sign_in))
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            LiquidGlassButton(
+                                onClick = if (authManager.isLoggedIn) onSwitchAccount else onLogin,
+                                modifier = Modifier.weight(1f),
+                            ) {
+                                Text(
+                                    stringResource(
+                                        if (authManager.isLoggedIn) Res.string.menu_switch_account else Res.string.account_sign_in,
+                                    ),
+                                )
+                            }
+                            if (Settings.shared.liquidGlassTheme) {
+                                LiquidGlassButton(onClick = onTokenLogin, modifier = Modifier.weight(1f)) {
+                                    Text(stringResource(Res.string.account_login_with_token))
+                                }
+                            } else {
+                                TextButton(onClick = onTokenLogin, modifier = Modifier.weight(1f)) {
+                                    Text(stringResource(Res.string.account_login_with_token))
+                                }
+                            }
                         }
-                        TextButton(
-                            onClick = onTokenLogin,
-                            modifier = Modifier.weight(1f),
-                        ) { Text(stringResource(Res.string.account_login_with_token)) }
-                    }
-                    if (authManager.isLoggedIn) {
-                        TextButton(
-                            onClick = { confirmLogout = true },
-                        ) { Text(stringResource(Res.string.action_logout)) }
+                        if (authManager.isLoggedIn) {
+                            TextButton(
+                                onClick = { confirmLogout = true },
+                            ) { Text(stringResource(Res.string.action_logout)) }
+                        }
                     }
                 }
             }
@@ -193,13 +210,15 @@ private fun ProfileRow(
     color: Color,
     border: BorderStroke?,
 ) {
-    Card(
-        onClick = onClick,
-        colors = CardDefaults.cardColors(containerColor = color),
-        border = border,
-        shape = RoundedCornerShape(20.dp),
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        Text(title, modifier = Modifier.padding(20.dp), style = MaterialTheme.typography.titleMedium)
+    LiquidGlassSurface(radius = 20.dp, modifier = Modifier.fillMaxWidth()) {
+        Card(
+            onClick = onClick,
+            colors = CardDefaults.cardColors(containerColor = color),
+            border = border,
+            shape = RoundedCornerShape(20.dp),
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text(title, modifier = Modifier.padding(20.dp), style = MaterialTheme.typography.titleMedium)
+        }
     }
 }
