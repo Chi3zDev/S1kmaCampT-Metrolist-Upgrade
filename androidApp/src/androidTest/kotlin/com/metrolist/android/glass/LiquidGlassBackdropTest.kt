@@ -99,6 +99,16 @@ class LiquidGlassBackdropTest {
                 assertTrue("a safe visible source should resume redraw", glass.enableDynamicBackground)
                 assertFalse("the visual layer must not intercept clicks", glass.isClickable)
                 assertFalse("the visual layer must not take focus", glass.isFocusable)
+                glass.configure(
+                    source = glass,
+                    style = QweGlassStyle.REGULAR,
+                    radiusPx = 24f,
+                    tintArgb = AndroidColor.TRANSPARENT,
+                    dynamic = true,
+                )
+                assertEquals("glass cannot sample itself", View.INVISIBLE, glass.visibility)
+                assertNull("a rejected self-source must release the previous source", glass.backdropSource)
+                assertFalse("a rejected self-source must stop redraw", glass.enableDynamicBackground)
                 activity.lightMode = true
             }
             instrumentation.waitForIdleSync()
