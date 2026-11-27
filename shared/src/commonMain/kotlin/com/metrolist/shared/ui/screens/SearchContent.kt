@@ -74,6 +74,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.focusRestorer
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
@@ -130,6 +131,7 @@ import com.metrolist.shared.ui.components.ChipShelf
 import com.metrolist.shared.ui.components.CollectionPreviews
 import com.metrolist.shared.ui.components.ContainedLoadingIndicator
 import com.metrolist.shared.ui.components.FittingText
+import com.metrolist.shared.ui.components.LocalThemeGlassBackdrop
 import com.metrolist.shared.ui.components.PlaylistCoverImage
 import com.metrolist.shared.ui.components.PopupContent
 import com.metrolist.shared.ui.components.PopupVisibility
@@ -137,6 +139,8 @@ import com.metrolist.shared.ui.components.SongThumbnailPlayingIndicator
 import com.metrolist.shared.ui.components.VideoShelf
 import com.metrolist.shared.ui.components.YTListItem
 import com.metrolist.shared.ui.components.focusOutline
+import com.metrolist.shared.ui.components.glassCardBorder
+import com.metrolist.shared.ui.components.glassCardColor
 import com.metrolist.shared.ui.components.images.AsyncImage
 import com.metrolist.shared.ui.components.squareArtworkSlot
 import com.metrolist.shared.ui.icons.MetrolistIcons
@@ -1222,9 +1226,14 @@ private fun TopResultCard(
                 .fillMaxWidth()
                 .padding(horizontal = 8.dp),
         shape = RoundedCornerShape(12.dp),
-        color = MaterialTheme.colorScheme.surfaceBright,
+        color = if (Settings.shared.liquidGlassTheme) Color.Transparent else MaterialTheme.colorScheme.surfaceBright,
+        border = glassCardBorder(),
     ) {
         Box(modifier = Modifier.fillMaxWidth()) {
+            if (Settings.shared.liquidGlassTheme) {
+                LocalThemeGlassBackdrop.current?.Background(radius = 12.dp, modifier = Modifier.matchParentSize())
+                Box(Modifier.matchParentSize().background(glassCardColor(MaterialTheme.colorScheme.surfaceBright)))
+            }
             if (mainItem.thumbnail != null) {
                 if (!supportsNativeBlur()) {
                     BlurredArtworkBackground(
@@ -1249,7 +1258,9 @@ private fun TopResultCard(
                         Modifier
                             .matchParentSize()
                             .background(
-                                MaterialTheme.colorScheme.surfaceBright.copy(alpha = 0.66f),
+                                MaterialTheme.colorScheme.surfaceBright.copy(
+                                    alpha = if (Settings.shared.liquidGlassTheme) 0.22f else 0.66f,
+                                ),
                             ),
                 )
             }
