@@ -44,7 +44,7 @@ import com.metrolist.shared.generated.resources.song_title
 import com.metrolist.shared.playlistimport.CsvColumnMapping
 import com.metrolist.shared.playlistimport.CsvPlaylist
 import com.metrolist.shared.ui.components.AlertDialog
-import com.metrolist.shared.ui.components.ExpressiveFilterChip
+import com.metrolist.shared.ui.components.LiquidGlassChip
 import com.metrolist.shared.ui.utils.carouselScroll
 import com.metrolist.shared.ui.utils.verticalScrollWithDrag
 import org.jetbrains.compose.resources.stringResource
@@ -158,7 +158,7 @@ private fun CsvColumnSelector(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             for (index in -1 until csv.columnCount) {
-                ExpressiveFilterChip(
+                LiquidGlassChip(
                     selected = selectedIndex == index,
                     onClick = { onSelected(index) },
                     label = {

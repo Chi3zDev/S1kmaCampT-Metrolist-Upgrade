@@ -128,8 +128,8 @@ import com.metrolist.shared.generated.resources.statistics_play_count_duration
 import com.metrolist.shared.generated.resources.statistics_plays
 import com.metrolist.shared.generated.resources.statistics_plays_label
 import com.metrolist.shared.generated.resources.statistics_time
-import com.metrolist.shared.ui.components.ExpressiveFilterChip
 import com.metrolist.shared.ui.components.HeaderPlaybackButtons
+import com.metrolist.shared.ui.components.LiquidGlassChip
 import com.metrolist.shared.ui.components.LoadingScreen
 import com.metrolist.shared.ui.components.RefreshIndicator
 import com.metrolist.shared.ui.components.ScrollingFabState
@@ -517,7 +517,7 @@ private fun PeriodButtons(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box {
-            ExpressiveFilterChip(selected = false, onClick = { expanded = true }, label = {
+            LiquidGlassChip(selected = false, onClick = { expanded = true }, label = {
                 Text(
                     stringResource(
                         if (state.dateRange !=

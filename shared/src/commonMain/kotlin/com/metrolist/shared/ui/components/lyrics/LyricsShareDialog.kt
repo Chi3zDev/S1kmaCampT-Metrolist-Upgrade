@@ -109,8 +109,8 @@ import com.metrolist.shared.generated.resources.text_color
 import com.metrolist.shared.settings.Settings
 import com.metrolist.shared.ui.components.ContainedLoadingIndicator
 import com.metrolist.shared.ui.components.Dialog
-import com.metrolist.shared.ui.components.ExpressiveFilterChip
 import com.metrolist.shared.ui.components.LazyListScrollbar
+import com.metrolist.shared.ui.components.LiquidGlassChip
 import com.metrolist.shared.ui.playback.retainPlaybackKeyFocus
 import com.metrolist.shared.ui.utils.DragScrollableColumn
 import com.metrolist.shared.ui.utils.carouselScroll
@@ -402,13 +402,13 @@ fun LyricsShareDialog(
                         item {
                             Text(stringResource(Res.string.lyrics_poster_style))
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                ExpressiveFilterChip(
+                                LiquidGlassChip(
                                     selected = style.posterStyle == LyricsPosterStyle.CLASSIC,
                                     enabled = !busy,
                                     onClick = { style = style.copy(posterStyle = LyricsPosterStyle.CLASSIC) },
                                     label = { Text(stringResource(Res.string.lyrics_poster_classic)) },
                                 )
-                                ExpressiveFilterChip(
+                                LiquidGlassChip(
                                     selected = style.posterStyle == LyricsPosterStyle.GLASS_CARD,
                                     enabled = !busy,
                                     onClick = {
@@ -442,7 +442,7 @@ fun LyricsShareDialog(
                                             style.posterStyle != LyricsPosterStyle.GLASS_CARD ||
                                                 it != LyricsImageBackground.GLASS
                                         }.forEach { background ->
-                                            ExpressiveFilterChip(
+                                            LiquidGlassChip(
                                                 selected = style.background == background,
                                                 enabled = !busy && (background == LyricsImageBackground.SOLID || artwork != null),
                                                 onClick = { style = style.copy(background = background) },
@@ -468,10 +468,10 @@ fun LyricsShareDialog(
                         item {
                             Text(stringResource(Res.string.lyrics_poster_format))
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                ExpressiveFilterChip(selected = !useStoryLayout, enabled = !busy, onClick = {
+                                LiquidGlassChip(selected = !useStoryLayout, enabled = !busy, onClick = {
                                     useStoryLayout = false
                                 }, label = { Text(stringResource(Res.string.lyrics_share_square_image)) })
-                                ExpressiveFilterChip(selected = useStoryLayout, enabled = !busy, onClick = {
+                                LiquidGlassChip(selected = useStoryLayout, enabled = !busy, onClick = {
                                     useStoryLayout = true
                                 }, label = { Text(stringResource(Res.string.lyrics_share_story_image)) })
                             }
@@ -493,7 +493,7 @@ fun LyricsShareDialog(
                                             LyricsPosterFont.NUNITO_BOLD -> Res.string.app_font_nunito_bold
                                             LyricsPosterFont.NUNITO_EXTRABOLD -> Res.string.app_font_nunito_extrabold
                                         }
-                                    ExpressiveFilterChip(selected = style.font == font, enabled = !busy, onClick = {
+                                    LiquidGlassChip(selected = style.font == font, enabled = !busy, onClick = {
                                         style =
                                             style.copy(font = font)
                                     }, label = { Text(stringResource(label), maxLines = 1) })

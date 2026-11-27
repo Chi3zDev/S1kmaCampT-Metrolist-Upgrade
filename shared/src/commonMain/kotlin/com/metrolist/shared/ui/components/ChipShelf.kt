@@ -123,7 +123,7 @@ private fun ShelfChip(
     LaunchedEffect(selected) {
         if (selected) bringIntoViewRequester.bringIntoView()
     }
-    ExpressiveFilterChip(
+    LiquidGlassChip(
         selected = selected,
         onClick = onClick,
         modifier =
@@ -148,7 +148,7 @@ private fun ShelfChip(
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun ExpressiveFilterChip(
+fun LiquidGlassChip(
     selected: Boolean,
     onClick: () -> Unit,
     label: @Composable () -> Unit,

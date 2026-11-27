@@ -35,7 +35,7 @@ import com.metrolist.shared.generated.resources.playlist
 import com.metrolist.shared.generated.resources.refresh
 import com.metrolist.shared.generated.resources.retry
 import com.metrolist.shared.state.GlobalYouTubeRepository
-import com.metrolist.shared.ui.components.ExpressiveFilterChip
+import com.metrolist.shared.ui.components.LiquidGlassChip
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import com.metrolist.shared.ui.menu.ExpressiveSelectionMenu
 import com.metrolist.shared.ui.utils.carouselScroll
@@ -82,7 +82,7 @@ fun DownloadPlaylistFilterBar(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Box {
-                ExpressiveFilterChip(
+                LiquidGlassChip(
                     selected = state.playlist != null,
                     onClick = { expanded = true },
                     modifier = Modifier.menuAnchorSemantics(expanded),
@@ -104,12 +104,12 @@ fun DownloadPlaylistFilterBar(
                 )
             }
             if (state.playlist != null) {
-                ExpressiveFilterChip(
+                LiquidGlassChip(
                     selected = state.songIds != null && !state.exclude,
                     onClick = { filter.setExcluded(false) },
                     label = { Text(stringResource(Res.string.download_filter_in_playlist)) },
                 )
-                ExpressiveFilterChip(
+                LiquidGlassChip(
                     selected = state.songIds != null && state.exclude,
                     onClick = { filter.setExcluded(true) },
                     label = { Text(stringResource(Res.string.download_filter_not_in_playlist)) },

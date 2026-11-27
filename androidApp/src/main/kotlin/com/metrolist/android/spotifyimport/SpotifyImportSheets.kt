@@ -65,7 +65,7 @@ import com.metrolist.shared.generated.resources.spotify_preview_summary
 import com.metrolist.shared.generated.resources.spotify_selected_playlist_count
 import com.metrolist.shared.generated.resources.spotify_track_limit_warning
 import com.metrolist.shared.spotifyimport.SpotifyImportManager
-import com.metrolist.shared.ui.components.ExpressiveFilterChip
+import com.metrolist.shared.ui.components.LiquidGlassChip
 import com.metrolist.shared.ui.components.images.AsyncImage
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import meow.nyx.spotlib.PlaylistMeta
@@ -266,7 +266,7 @@ internal fun SpotifyPlaylistPreviewSheet(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     items(playlists, key = SpotifyImportManager.LoadedPlaylist::uri) { playlist ->
-                        ExpressiveFilterChip(
+                        LiquidGlassChip(
                             selected = playlist.uri == selectedPlaylist.uri,
                             onClick = { onPlaylistSelected(playlist.uri) },
                             label = {

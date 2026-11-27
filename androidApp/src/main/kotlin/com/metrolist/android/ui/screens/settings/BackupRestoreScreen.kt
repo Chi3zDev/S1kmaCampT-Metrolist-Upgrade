@@ -212,7 +212,7 @@ import com.metrolist.shared.spotifyimport.SpotifyImportManager
 import com.metrolist.shared.state.GlobalYouTubeRepository
 import com.metrolist.shared.tidalimport.TidalImportManager
 import com.metrolist.shared.ui.components.AlertDialog
-import com.metrolist.shared.ui.components.ExpressiveFilterChip
+import com.metrolist.shared.ui.components.LiquidGlassChip
 import com.metrolist.shared.ui.components.PopupContent
 import com.metrolist.shared.ui.components.PopupVisibility
 import com.metrolist.shared.ui.menu.CsvColumnMappingDialog
@@ -1210,7 +1210,7 @@ fun BackupRestoreScreen(onNavigateBack: () -> Unit) {
                         }
                         item {
                             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                ExpressiveFilterChip(
+                                LiquidGlassChip(
                                     selected = selectedDestinationPlaylist == null && destinationType == DestinationType.LOCAL,
                                     onClick = {
                                         selectedDestinationPlaylist = null
@@ -1218,7 +1218,7 @@ fun BackupRestoreScreen(onNavigateBack: () -> Unit) {
                                     },
                                     label = { Text(stringResource(Res.string.local_playlist)) },
                                 )
-                                ExpressiveFilterChip(
+                                LiquidGlassChip(
                                     selected = selectedDestinationPlaylist == null && destinationType == DestinationType.FAVORITES,
                                     onClick = {
                                         selectedDestinationPlaylist = null
@@ -1227,7 +1227,7 @@ fun BackupRestoreScreen(onNavigateBack: () -> Unit) {
                                     label = { Text(stringResource(Res.string.import_destination_favorites)) },
                                 )
                                 if (canManagePlaylists) {
-                                    ExpressiveFilterChip(
+                                    LiquidGlassChip(
                                         selected = selectedDestinationPlaylist == null && destinationType == DestinationType.SYNCED,
                                         onClick = {
                                             selectedDestinationPlaylist = null
