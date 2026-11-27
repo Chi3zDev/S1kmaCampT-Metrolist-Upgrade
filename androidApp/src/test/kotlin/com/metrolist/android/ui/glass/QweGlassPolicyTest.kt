@@ -26,6 +26,16 @@ class QweGlassPolicyTest {
     }
 
     @Test
+    fun blurStrengthIsMonotonicForEveryStyle() {
+        for (style in QweGlassStyle.entries) {
+            assertEquals(0f, qweBlurAmount(style, 0f), 0f)
+            assertEquals(0f, qweBlurAmount(style, Float.POSITIVE_INFINITY), 0f)
+            assertTrue(qweBlurAmount(style, 25f) < qweBlurAmount(style, 65f))
+            assertTrue(qweBlurAmount(style, 65f) < qweBlurAmount(style, 100f))
+        }
+    }
+
+    @Test
     fun skipsGlassOnOldLowRamAndLightModeDevices() {
         assertFalse(shouldAttemptQweGlass(sdkInt = 30, lowRam = false, lightMode = false, hasSource = true))
         assertFalse(shouldAttemptQweGlass(sdkInt = 35, lowRam = true, lightMode = false, hasSource = true))
