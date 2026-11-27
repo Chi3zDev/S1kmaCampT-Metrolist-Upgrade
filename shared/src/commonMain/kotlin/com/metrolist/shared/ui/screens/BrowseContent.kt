@@ -375,20 +375,30 @@ fun BrowseContent(
                                     val menu = onItemLongClick?.let { callback -> { callback(item) } }
                                     if (isList) {
                                         val row: @Composable () -> Unit = {
-                                            YTListItem(
-                                                item = item,
-                                                onClick = { onItemClick(item, songs) },
-                                                onLongClick = menu,
-                                                onShowMenu = menu,
-                                                onArtistClick = onArtistClick.takeIf { enabled },
-                                                onAlbumClick = onAlbumClick.takeIf { enabled },
-                                                onAlbumPlay = onAlbumPlay?.let { play -> (item as? AlbumItem)?.let { { play(it) } } },
-                                                isCurrent = playback.isCurrent,
-                                                isPlaying = playback.isPlaying,
-                                                enabled = enabled,
-                                                clickableMetadata = !sectionPage,
-                                                modifier = if (sectionPage) Modifier.tvFocusHighlight() else Modifier,
-                                            )
+                                            Box(Modifier.fillMaxWidth()) {
+                                                // Render only composed lazy-grid rows, including any prefetched rows.
+                                                val currentSong = playback.isCurrent && (item is SongItem || item is EpisodeItem)
+                                                if (!currentSong) {
+                                                    LocalThemeGlassBackdrop.current?.Background(
+                                                        radius = 4.dp,
+                                                        modifier = Modifier.matchParentSize(),
+                                                    )
+                                                }
+                                                YTListItem(
+                                                    item = item,
+                                                    onClick = { onItemClick(item, songs) },
+                                                    onLongClick = menu,
+                                                    onShowMenu = menu,
+                                                    onArtistClick = onArtistClick.takeIf { enabled },
+                                                    onAlbumClick = onAlbumClick.takeIf { enabled },
+                                                    onAlbumPlay = onAlbumPlay?.let { play -> (item as? AlbumItem)?.let { { play(it) } } },
+                                                    isCurrent = playback.isCurrent,
+                                                    isPlaying = playback.isPlaying,
+                                                    enabled = enabled,
+                                                    clickableMetadata = !sectionPage,
+                                                    modifier = if (sectionPage) Modifier.tvFocusHighlight() else Modifier,
+                                                )
+                                            }
                                         }
                                         if (item is SongItem && enabled) songContainer(item, row) else row()
                                     } else {
