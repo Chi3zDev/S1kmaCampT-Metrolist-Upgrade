@@ -64,6 +64,8 @@ import com.metrolist.shared.generated.resources.*
 import com.metrolist.shared.settings.Settings
 import com.metrolist.shared.ui.LocalPlayerEffectsAllowed
 import com.metrolist.shared.ui.PolishMotion
+import com.metrolist.shared.ui.components.LiquidGlassSurface
+import com.metrolist.shared.ui.components.appPageBackground
 import com.metrolist.shared.ui.components.glassCardBorder
 import com.metrolist.shared.ui.components.glassCardColor
 import com.metrolist.shared.ui.haptics.HapticEvent
@@ -265,7 +267,7 @@ fun StreakScreen(onBack: () -> Unit) {
     }
 
     val backgroundEnabled = Settings.shared.streakLevelBackgroundEnabled
-    val pageSurface = MaterialTheme.colorScheme.surface
+    val pageSurface = appPageBackground(MaterialTheme.colorScheme.surface)
     LazyColumn(
         modifier =
             Modifier.fillMaxSize().background(
@@ -735,13 +737,15 @@ private fun StreakLevelGallery(
 
 @Composable
 private fun StreakPanel(content: @Composable ColumnScope.() -> Unit) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = glassCardColor(MaterialTheme.colorScheme.surfaceContainerHigh)),
-        border = glassCardBorder(),
-    ) {
-        Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp), content = content)
+    LiquidGlassSurface(radius = 24.dp, modifier = Modifier.fillMaxWidth()) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(containerColor = glassCardColor(MaterialTheme.colorScheme.surfaceContainerHigh)),
+            border = glassCardBorder(),
+        ) {
+            Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp), content = content)
+        }
     }
 }
 

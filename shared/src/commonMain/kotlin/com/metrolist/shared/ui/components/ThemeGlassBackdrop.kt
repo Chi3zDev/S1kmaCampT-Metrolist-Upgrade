@@ -1,9 +1,12 @@
 package com.metrolist.shared.ui.components
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
+import com.metrolist.shared.settings.Settings
 
 /** Optional platform renderer backed by a source outside the card's own drawing tree. */
 interface ThemeGlassBackdrop {
@@ -15,3 +18,17 @@ interface ThemeGlassBackdrop {
 }
 
 val LocalThemeGlassBackdrop = staticCompositionLocalOf<ThemeGlassBackdrop?> { null }
+
+/** A bounded visual backdrop behind interactive Compose content; the platform can safely opt out. */
+@Composable
+fun LiquidGlassSurface(
+    radius: Dp,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = Settings.shared.liquidGlassTheme,
+    content: @Composable BoxScope.() -> Unit,
+) {
+    Box(modifier) {
+        if (enabled) LocalThemeGlassBackdrop.current?.Background(radius = radius, modifier = Modifier.matchParentSize())
+        content()
+    }
+}
