@@ -639,7 +639,14 @@ private fun SettingsHomeList(
         } else if (searchResults.isNotEmpty()) {
             items(searchResults.size, key = { "${searchResults[it].page.id}:${searchResults[it].item?.id}" }) { index ->
                 Box(Modifier.padding(horizontal = 16.dp)) {
-                    SearchResultRow(searchResults[index], query, index == 0, index == searchResults.lastIndex, onSearchResultSelected)
+                    SearchResultRow(
+                        searchResults[index],
+                        query,
+                        index == 0,
+                        index == searchResults.lastIndex,
+                        onSearchResultSelected,
+                        backdropEnabled = true,
+                    )
                 }
             }
         } else {

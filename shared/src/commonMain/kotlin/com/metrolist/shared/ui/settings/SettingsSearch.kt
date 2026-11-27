@@ -53,6 +53,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
@@ -227,6 +228,7 @@ internal fun SettingsSearchResults(
                     first = index == 0,
                     last = index == results.lastIndex,
                     onResultSelected = onResultSelected,
+                    backdropEnabled = true,
                 )
             }
         }
@@ -252,55 +254,64 @@ internal fun SearchResultRow(
     first: Boolean,
     last: Boolean,
     onResultSelected: (SettingsPageId, String?) -> Unit,
+    backdropEnabled: Boolean = false,
 ) {
     val title = result.item?.title ?: result.page.title
     val supportingText = result.context ?: if (result.item != null) result.page.title else result.page.subtitle
-    Surface(
-        onClick = { onResultSelected(result.page.id, result.item?.id) },
-        modifier = Modifier.fillMaxWidth(),
-        shape = connectedShape(first, last, outer = 20.dp, inner = 5.dp),
-        color =
-            if (Settings.shared.liquidGlassTheme) {
-                glassCardColor(MaterialTheme.colorScheme.surfaceContainer)
-            } else {
-                MaterialTheme.colorScheme.surfaceContainer
-            },
-        border = if (Settings.shared.liquidGlassTheme) glassCardBorder() else null,
-    ) {
-        Row(
-            modifier = Modifier.heightIn(min = 72.dp).padding(horizontal = 16.dp, vertical = 16.dp),
-            verticalAlignment = Alignment.CenterVertically,
+    Box(Modifier.fillMaxWidth()) {
+        if (backdropEnabled && Settings.shared.liquidGlassTheme) {
+            LocalThemeGlassBackdrop.current?.Background(
+                radius = 5.dp,
+                modifier = Modifier.matchParentSize().clip(connectedShape(first, last, outer = 20.dp, inner = 5.dp)),
+            )
+        }
+        Surface(
+            onClick = { onResultSelected(result.page.id, result.item?.id) },
+            modifier = Modifier.fillMaxWidth(),
+            shape = connectedShape(first, last, outer = 20.dp, inner = 5.dp),
+            color =
+                if (Settings.shared.liquidGlassTheme) {
+                    glassCardColor(MaterialTheme.colorScheme.surfaceContainer)
+                } else {
+                    MaterialTheme.colorScheme.surfaceContainer
+                },
+            border = if (Settings.shared.liquidGlassTheme) glassCardBorder() else null,
         ) {
-            Box(modifier = Modifier.size(32.dp), contentAlignment = Alignment.Center) {
-                Icon(
-                    imageVector = result.page.icon,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(24.dp),
-                )
-            }
-            Spacer(Modifier.width(16.dp))
-            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(
-                    highlightSearchMatches(title, query),
-                    style = MaterialTheme.typography.bodyLarge,
-                )
-                supportingText?.let {
-                    Text(
-                        highlightSearchMatches(it, query),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+            Row(
+                modifier = Modifier.heightIn(min = 72.dp).padding(horizontal = 16.dp, vertical = 16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Box(modifier = Modifier.size(32.dp), contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = result.page.icon,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(24.dp),
                     )
                 }
-                if (result.item != null && supportingText != result.page.title) {
+                Spacer(Modifier.width(16.dp))
+                Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                     Text(
-                        highlightSearchMatches(result.page.title, query),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        highlightSearchMatches(title, query),
+                        style = MaterialTheme.typography.bodyLarge,
                     )
+                    supportingText?.let {
+                        Text(
+                            highlightSearchMatches(it, query),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    if (result.item != null && supportingText != result.page.title) {
+                        Text(
+                            highlightSearchMatches(result.page.title, query),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
                 }
+                Icon(MetrolistIcons.Outlined.ChevronRight, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            Icon(MetrolistIcons.Outlined.ChevronRight, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
