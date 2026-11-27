@@ -39,9 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
@@ -619,7 +617,19 @@ private fun InteractiveStreakFlame(
             trackColor = color.copy(alpha = 0.18f),
             strokeWidth = 6.dp,
         )
-        Flame(color, animate = animate, particles = !extinguished, extinguished = extinguished, variant = variant)
+        Flame(
+            color,
+            animate = animate,
+            particles = !extinguished,
+            extinguished = extinguished,
+            variant = variant,
+            modifier =
+                Modifier.graphicsLayer {
+                    val scale = 1f + burst.value * 0.15f
+                    scaleX = scale
+                    scaleY = scale
+                },
+        )
         Canvas(Modifier.fillMaxSize()) {
             val strength = burst.value
             if (strength > 0f) {
@@ -790,119 +800,12 @@ internal fun Flame(
     modifier: Modifier = Modifier,
     variant: Int = 0,
 ) {
-    var entered by remember { mutableStateOf(!animate) }
-    LaunchedEffect(animate, extinguished) { entered = true }
-    val targetScale =
-        if (extinguished) {
-            .82f
-        } else if (!entered && animate) {
-            .72f
-        } else {
-            1f
-        }
-    val entranceScale by animateFloatAsState(
-        targetScale,
-        animationSpec =
-            if (animate &&
-                levelUp
-            ) {
-                PolishMotion.interactiveSpring()
-            } else {
-                tween(if (animate) PolishMotion.durationMillis else 0)
-            },
-        label = "flameEntrance",
+    StreakFlame(
+        level = variant + 1,
+        size = 100.dp,
+        state = StreakFlameState(animate = animate, extinguished = extinguished, particles = particles),
+        modifier = modifier,
     )
-    val phaseState =
-        if (animate) {
-            val transition = rememberInfiniteTransition(label = "flame")
-            transition.animateFloat(0f, 1f, infiniteRepeatable(tween(2400, easing = LinearEasing)), label = "flamePhase")
-        } else {
-            null
-        }
-    Canvas(
-        modifier.size(100.dp).graphicsLayer {
-            scaleX = entranceScale
-            scaleY = entranceScale
-        },
-    ) {
-        // Read the changing phase in draw, not composition, so only this Canvas is invalidated.
-        val phase = phaseState?.value ?: 0f
-        val flicker =
-            if (animate &&
-                !extinguished
-            ) {
-                kotlin.math.sin(phase * 6.283185f) * 0.035f + kotlin.math.sin(phase * 18.849556f) * 0.015f
-            } else {
-                0f
-            }
-        val w = size.width
-        val h = size.height
-        val shape = variant.coerceIn(0, 6)
-        val sway = if (animate && !extinguished) kotlin.math.sin(phase * 6.283185f) * .025f else 0f
-        val glow = if (extinguished) 0f else (0.22f + flicker).coerceIn(0.15f, 0.30f)
-        if (!extinguished) {
-            drawCircle(
-                Brush.radialGradient(
-                    listOf(color.copy(alpha = glow), color.copy(alpha = glow * .35f), Color.Transparent),
-                    center = Offset(w * .5f, h * .62f),
-                    radius = w * .49f,
-                ),
-                radius = w * .49f,
-                center = Offset(w * .5f, h * .62f),
-            )
-        }
-        if (animate && particles && !extinguished) {
-            repeat(4) { index ->
-                val step = (phase + index * .25f) % 1f
-                val x = w * (.30f + index * .13f) + kotlin.math.sin((phase + index) * 6.283185f) * w * .025f
-                val y = h * (.70f - step * .60f)
-                drawCircle(color.copy(alpha = (1f - step) * .65f), w * .012f, Offset(x, y))
-            }
-        }
-        // Original level-specific contours: increasingly forked flames, with subtle swaying tips.
-        val geometry = flameShape(shape)
-        val tipX = geometry.tipX + sway
-        val tipY = geometry.tipY
-        val notchX = geometry.notchX
-        val notchY = geometry.notchY
-        val rightTipX = geometry.rightX
-        val rightTipY = geometry.rightY
-        val outer =
-            Path().apply {
-                moveTo(w * tipX, h * tipY)
-                cubicTo(w * .42f, h * .25f, w * notchX, h * .27f, w * notchX, h * notchY)
-                cubicTo(w * .70f, h * .46f, w * rightTipX, h * .39f, w * rightTipX, h * rightTipY)
-                cubicTo(w * .93f, h * .60f, w * .84f, h * .91f, w * .56f, h * .93f)
-                cubicTo(w * .23f, h * .97f, w * .12f, h * .76f, w * .24f, h * .53f)
-                cubicTo(w * geometry.leftControlX, h * .40f, w * .40f, h * .30f, w * tipX, h * tipY)
-                close()
-            }
-        if (extinguished) {
-            drawPath(outer, color.copy(alpha = .58f))
-        } else {
-            val tip = if (shape < 4) lerp(color, Color(0xFFFF48B6), .46f) else lerp(color, Color(0xFFCFB9FF), .40f)
-            val rim = lerp(color, Color.White, .55f)
-            drawPath(outer, Brush.verticalGradient(listOf(tip, color, rim), startY = h * .08f, endY = h * .94f))
-            val middle =
-                Path().apply {
-                    moveTo(w * (.50f + sway * .4f), h * geometry.middleTipY)
-                    cubicTo(w * .38f, h * .48f, w * .27f, h * .64f, w * .32f, h * .77f)
-                    cubicTo(w * .37f, h * .91f, w * .66f, h * .91f, w * .70f, h * .76f)
-                    cubicTo(w * .73f, h * .65f, w * .66f, h * .53f, w * .61f, h * geometry.middleNotchY)
-                    cubicTo(w * .63f, h * .62f, w * .55f, h * .60f, w * (.50f + sway * .4f), h * geometry.middleTipY)
-                    close()
-                }
-            drawPath(middle, Brush.verticalGradient(listOf(color, lerp(color, Color.White, .75f)), startY = h * .32f, endY = h * .91f))
-            val core =
-                Path().apply {
-                    moveTo(w * .51f, h * geometry.coreTipY)
-                    cubicTo(w * .42f, h * .69f, w * .40f, h * .84f, w * .51f, h * .87f)
-                    cubicTo(w * .62f, h * .85f, w * .63f, h * .74f, w * .51f, h * geometry.coreTipY)
-                    close()
-                }
-            drawPath(core, Color.White.copy(alpha = .82f))
-        }
-    }
 }
 
 @Composable
