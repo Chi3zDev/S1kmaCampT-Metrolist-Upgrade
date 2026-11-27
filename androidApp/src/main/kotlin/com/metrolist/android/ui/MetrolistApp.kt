@@ -1288,15 +1288,10 @@ fun MetrolistApp(
                     }
 
                     val isInPipMode = LocalIsInPipMode.current
+                    // Provide one shared wallpaper source on every route; individual visible
+                    // surfaces choose whether to instantiate a glass renderer.
                     val themeGlassRequested =
-                        Settings.shared.liquidGlassTheme && !usesDirectionalNavigation && !isPlayerExpandedOrExpanding && !isInPipMode &&
-                            (
-                                currentRoute is Screen.Album || currentRoute is Screen.Playlist || currentRoute is Screen.AutoPlaylist ||
-                                    currentRoute is Screen.Artist || currentRoute is Screen.Browse ||
-                                    currentRoute == Screen.Home || currentRoute == Screen.Search || currentRoute == Screen.Library ||
-                                    currentRoute == Screen.Settings ||
-                                    currentRoute == Screen.About || currentRoute is Screen.SettingsPage
-                            )
+                        Settings.shared.liquidGlassTheme && !usesDirectionalNavigation && !isPlayerExpandedOrExpanding && !isInPipMode
                     val useQweThemeGlass =
                         rememberQweGlassAvailable(enabled = themeGlassRequested, lightMode = Settings.shared.glassLightMode)
                     var qweBackdropSource by remember { mutableStateOf<View?>(null) }
