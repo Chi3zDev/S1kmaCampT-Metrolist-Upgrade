@@ -27,7 +27,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
@@ -70,9 +69,15 @@ import com.metrolist.shared.model.isVideoType
 import com.metrolist.shared.playback.LocalPlayerSession
 import com.metrolist.shared.playback.SleepTimerState
 import com.metrolist.shared.ui.LocalIsTv
+import com.metrolist.shared.ui.components.LiquidGlassIconButton
+import com.metrolist.shared.ui.components.LiquidGlassSliderContainer
+import com.metrolist.shared.ui.components.LiquidGlassSurface
 import com.metrolist.shared.ui.components.PlayerConnectedButtonGroup
 import com.metrolist.shared.ui.components.focusOutline
 import com.metrolist.shared.ui.components.formatSleepTimerRemaining
+import com.metrolist.shared.ui.components.glassCardBorder
+import com.metrolist.shared.ui.components.glassCardColor
+import com.metrolist.shared.ui.components.liquidGlassBackdropReady
 import com.metrolist.shared.ui.components.playerControlBlend
 import com.metrolist.shared.ui.components.playerInactiveControlContainerColor
 import com.metrolist.shared.ui.haptics.HapticEvent
@@ -230,7 +235,7 @@ internal fun PlayerBottomControls(
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 if (isListenTogetherGuest) {
-                    IconButton(
+                    LiquidGlassIconButton(
                         onClick = {
                             hapticManager.perform(HapticEvent.PRESS)
                             if (volume > 0.01f) {
@@ -240,7 +245,6 @@ internal fun PlayerBottomControls(
                             }
                         },
                         modifier = Modifier.size(touchTarget),
-                        shapes = IconButtonDefaults.shapes(),
                     ) {
                         Icon(
                             imageVector =
@@ -256,29 +260,46 @@ internal fun PlayerBottomControls(
                     }
                 }
 
-                FilledTonalIconButton(
-                    onClick = {
-                        hapticManager.perform(HapticEvent.PRESS)
-                        onShowPlayerMenu()
-                    },
-                    shapes = IconButtonDefaults.shapes(shape = CircleShape),
-                    modifier =
-                        Modifier
-                            .size(touchTarget)
-                            .focusedPlayerBorder(CircleShape)
-                            .navigationPopupSource()
-                            .playerControlBlend(),
-                    colors =
-                        IconButtonDefaults.filledTonalIconButtonColors(
-                            containerColor = playerInactiveControlContainerColor(),
-                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                        ),
-                ) {
-                    Icon(
-                        MetrolistIcons.Default.MoreVert,
-                        contentDescription = stringResource(Res.string.more_options),
-                        modifier = Modifier.size(24.dp),
-                    )
+                val glass = liquidGlassBackdropReady()
+                val border = if (glass) glassCardBorder() else null
+                LiquidGlassSurface(radius = 24.dp, enabled = glass) {
+                    FilledTonalIconButton(
+                        onClick = {
+                            hapticManager.perform(HapticEvent.PRESS)
+                            onShowPlayerMenu()
+                        },
+                        shapes = IconButtonDefaults.shapes(shape = CircleShape),
+                        modifier =
+                            Modifier
+                                .size(touchTarget)
+                                .focusedPlayerBorder(CircleShape)
+                                .navigationPopupSource()
+                                .playerControlBlend()
+                                .then(if (border != null) Modifier.border(border, CircleShape) else Modifier),
+                        colors =
+                            IconButtonDefaults.filledTonalIconButtonColors(
+                                containerColor =
+                                    if (glass) {
+                                        glassCardColor(
+                                            MaterialTheme.colorScheme.surfaceContainer,
+                                        )
+                                    } else {
+                                        playerInactiveControlContainerColor()
+                                    },
+                                contentColor =
+                                    if (glass) {
+                                        MaterialTheme.colorScheme.onSurface
+                                    } else {
+                                        MaterialTheme.colorScheme.onSecondaryContainer
+                                    },
+                            ),
+                    ) {
+                        Icon(
+                            MetrolistIcons.Default.MoreVert,
+                            contentDescription = stringResource(Res.string.more_options),
+                            modifier = Modifier.size(24.dp),
+                        )
+                    }
                 }
             }
         }
@@ -299,11 +320,13 @@ internal fun PlayerVolumeControl() {
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Icon(MetrolistIcons.AutoMirrored.Filled.VolumeUp, contentDescription = null)
-        Slider(
-            state = sliderState,
-            onValueChange = playerConnection::setVolume,
-            modifier = Modifier.retainPlaybackKeyFocus().weight(1f).semantics { contentDescription = volumeDescription },
-        )
+        LiquidGlassSliderContainer(modifier = Modifier.weight(1f)) {
+            Slider(
+                state = sliderState,
+                onValueChange = playerConnection::setVolume,
+                modifier = Modifier.retainPlaybackKeyFocus().fillMaxWidth().semantics { contentDescription = volumeDescription },
+            )
+        }
     }
 }
 
