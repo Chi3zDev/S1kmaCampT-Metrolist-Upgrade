@@ -71,6 +71,10 @@ import com.metrolist.shared.generated.resources.milliseconds_unit
 import com.metrolist.shared.generated.resources.settings_reset_to_default
 import com.metrolist.shared.settings.Settings
 import com.metrolist.shared.ui.LocalIsTv
+import com.metrolist.shared.ui.components.LiquidGlassSliderContainer
+import com.metrolist.shared.ui.components.LiquidGlassSurface
+import com.metrolist.shared.ui.components.glassCardColor
+import com.metrolist.shared.ui.components.liquidGlassBackdropReady
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import com.metrolist.shared.ui.playback.retainPlaybackKeyFocus
 import com.metrolist.shared.ui.player.playerGlassCard
@@ -123,9 +127,10 @@ fun LyricsOffsetEditor(
         setOffset((value.toLong() + delta).coerceIn(Int.MIN_VALUE.toLong(), Int.MAX_VALUE.toLong()).toInt())
     }
 
+    val glass = liquidGlassBackdropReady()
     val buttonColors =
         IconButtonDefaults.filledTonalIconButtonColors(
-            containerColor = contentColor.copy(alpha = 0.12f),
+            containerColor = if (glass) glassCardColor(MaterialTheme.colorScheme.surfaceContainer) else contentColor.copy(alpha = 0.12f),
             contentColor = contentColor,
         )
     Column(
@@ -146,24 +151,28 @@ fun LyricsOffsetEditor(
                 color = contentColor,
                 modifier = Modifier.weight(1f),
             )
-            IconButton(onClick = { setOffset(0) }, enabled = offsetMs != 0, shapes = IconButtonDefaults.shapes()) {
-                Icon(
-                    MetrolistIcons.Outlined.Replay,
-                    contentDescription = stringResource(Res.string.settings_reset_to_default),
-                    tint = contentColor.copy(alpha = if (offsetMs != 0) 1f else 0.38f),
-                )
+            LiquidGlassSurface(radius = 24.dp, enabled = glass) {
+                IconButton(onClick = { setOffset(0) }, enabled = offsetMs != 0, shapes = IconButtonDefaults.shapes()) {
+                    Icon(
+                        MetrolistIcons.Outlined.Replay,
+                        contentDescription = stringResource(Res.string.settings_reset_to_default),
+                        tint = contentColor.copy(alpha = if (offsetMs != 0) 1f else 0.38f),
+                    )
+                }
             }
             if (onDone != null) {
-                FilledTonalIconButton(
-                    onClick = {
-                        syncInput()
-                        focusManager.clearFocus()
-                        onDone()
-                    },
-                    colors = buttonColors,
-                    shapes = IconButtonDefaults.shapes(),
-                ) {
-                    Icon(MetrolistIcons.Filled.Check, contentDescription = stringResource(Res.string.done))
+                LiquidGlassSurface(radius = 24.dp, enabled = glass) {
+                    FilledTonalIconButton(
+                        onClick = {
+                            syncInput()
+                            focusManager.clearFocus()
+                            onDone()
+                        },
+                        colors = buttonColors,
+                        shapes = IconButtonDefaults.shapes(),
+                    ) {
+                        Icon(MetrolistIcons.Filled.Check, contentDescription = stringResource(Res.string.done))
+                    }
                 }
             }
         }
@@ -172,13 +181,18 @@ fun LyricsOffsetEditor(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            FilledTonalIconButton(
-                onClick = { adjustOffset(-OFFSET_STEP_MS) },
-                colors = buttonColors,
-                shapes = IconButtonDefaults.shapes(),
-                modifier = Modifier.size(56.dp),
-            ) {
-                Icon(MetrolistIcons.Filled.Remove, contentDescription = stringResource(Res.string.lyrics_offset_decrease, OFFSET_STEP_MS))
+            LiquidGlassSurface(radius = 28.dp, enabled = glass) {
+                FilledTonalIconButton(
+                    onClick = { adjustOffset(-OFFSET_STEP_MS) },
+                    colors = buttonColors,
+                    shapes = IconButtonDefaults.shapes(),
+                    modifier = Modifier.size(56.dp),
+                ) {
+                    Icon(
+                        MetrolistIcons.Filled.Remove,
+                        contentDescription = stringResource(Res.string.lyrics_offset_decrease, OFFSET_STEP_MS),
+                    )
+                }
             }
             Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
                 Row(verticalAlignment = Alignment.Bottom) {
@@ -272,35 +286,39 @@ fun LyricsOffsetEditor(
                     color = contentColor.copy(alpha = 0.7f),
                 )
             }
-            FilledTonalIconButton(
-                onClick = { adjustOffset(OFFSET_STEP_MS) },
-                colors = buttonColors,
-                shapes = IconButtonDefaults.shapes(),
-                modifier = Modifier.size(56.dp),
-            ) {
-                Icon(MetrolistIcons.Filled.Add, contentDescription = stringResource(Res.string.lyrics_offset_increase, OFFSET_STEP_MS))
+            LiquidGlassSurface(radius = 28.dp, enabled = glass) {
+                FilledTonalIconButton(
+                    onClick = { adjustOffset(OFFSET_STEP_MS) },
+                    colors = buttonColors,
+                    shapes = IconButtonDefaults.shapes(),
+                    modifier = Modifier.size(56.dp),
+                ) {
+                    Icon(MetrolistIcons.Filled.Add, contentDescription = stringResource(Res.string.lyrics_offset_increase, OFFSET_STEP_MS))
+                }
             }
         }
         val range = -OFFSET_SLIDER_LIMIT_MS.toFloat()..OFFSET_SLIDER_LIMIT_MS.toFloat()
         val sliderState =
             remember { SliderState(value = 0f, trackRange = range, steps = 2 * OFFSET_SLIDER_LIMIT_MS / OFFSET_STEP_MS - 1) }
         sliderState.value = offsetMs.toFloat().coerceIn(range)
-        Slider(
-            state = sliderState,
-            onValueChange = {
-                sliderState.value = it
-                setOffset((it / OFFSET_STEP_MS).roundToInt() * OFFSET_STEP_MS)
-            },
-            colors =
-                SliderDefaults.colors(
-                    thumbColor = contentColor,
-                    activeTrackColor = contentColor,
-                    inactiveTrackColor = contentColor.copy(alpha = 0.24f),
-                    activeTickColor = Color.Transparent,
-                    inactiveTickColor = Color.Transparent,
-                ),
-            modifier = Modifier.retainPlaybackKeyFocus().fillMaxWidth().semantics { contentDescription = title },
-        )
+        LiquidGlassSliderContainer(modifier = Modifier.fillMaxWidth()) {
+            Slider(
+                state = sliderState,
+                onValueChange = {
+                    sliderState.value = it
+                    setOffset((it / OFFSET_STEP_MS).roundToInt() * OFFSET_STEP_MS)
+                },
+                colors =
+                    SliderDefaults.colors(
+                        thumbColor = contentColor,
+                        activeTrackColor = contentColor,
+                        inactiveTrackColor = contentColor.copy(alpha = 0.24f),
+                        activeTickColor = Color.Transparent,
+                        inactiveTickColor = Color.Transparent,
+                    ),
+                modifier = Modifier.retainPlaybackKeyFocus().fillMaxWidth().semantics { contentDescription = title },
+            )
+        }
     }
 }
 
