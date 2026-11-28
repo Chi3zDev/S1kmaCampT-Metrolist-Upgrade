@@ -182,6 +182,7 @@ import com.metrolist.shared.ui.components.HistoryEntryGroupPosition
 import com.metrolist.shared.ui.components.LiquidGlassIconButton
 import com.metrolist.shared.ui.components.LiquidGlassSurface
 import com.metrolist.shared.ui.components.LiquidGlassTextButton
+import com.metrolist.shared.ui.components.LocalThemeGlassBackdrop
 import com.metrolist.shared.ui.components.glassCardBorder
 import com.metrolist.shared.ui.components.glassCardColor
 import com.metrolist.shared.ui.components.liquidGlassBackdropReady
@@ -489,40 +490,52 @@ fun RecognitionHistoryContent(
             }
         }
 
+    val glass = liquidGlassBackdropReady()
     Column(Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Surface(
-                modifier = Modifier.weight(1f).height(56.dp),
-                shape = RoundedCornerShape(28.dp),
-                color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                tonalElevation = 0.dp,
-            ) {
-                SearchBarDefaults.InputField(
-                    textFieldState = textFieldState,
-                    searchBarState = searchBarState,
-                    onSearch = {},
+            Box(Modifier.weight(1f).height(56.dp).clip(RoundedCornerShape(28.dp))) {
+                if (glass) LocalThemeGlassBackdrop.current?.Background(radius = 28.dp, modifier = Modifier.matchParentSize())
+                Surface(
                     modifier = Modifier.fillMaxSize(),
-                    placeholder = {
-                        Text(stringResource(Res.string.search_recognized_songs))
-                    },
-                    leadingIcon = {
-                        Icon(
-                            imageVector = MetrolistIcons.Default.Search,
-                            contentDescription = null,
-                        )
-                    },
-                    trailingIcon = {
-                        if (query.isNotEmpty()) {
-                            LiquidGlassIconButton(onClick = { onQueryChange("") }) {
-                                Icon(
-                                    imageVector = MetrolistIcons.Default.Clear,
-                                    contentDescription = stringResource(Res.string.clear_search),
-                                )
+                    shape = RoundedCornerShape(28.dp),
+                    color =
+                        if (glass) {
+                            glassCardColor(
+                                MaterialTheme.colorScheme.surfaceContainerHigh,
+                            )
+                        } else {
+                            MaterialTheme.colorScheme.surfaceContainerHigh
+                        },
+                    border = if (glass) glassCardBorder() else null,
+                    tonalElevation = 0.dp,
+                ) {
+                    SearchBarDefaults.InputField(
+                        textFieldState = textFieldState,
+                        searchBarState = searchBarState,
+                        onSearch = {},
+                        modifier = Modifier.fillMaxSize(),
+                        placeholder = {
+                            Text(stringResource(Res.string.search_recognized_songs))
+                        },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = MetrolistIcons.Default.Search,
+                                contentDescription = null,
+                            )
+                        },
+                        trailingIcon = {
+                            if (query.isNotEmpty()) {
+                                LiquidGlassIconButton(onClick = { onQueryChange("") }) {
+                                    Icon(
+                                        imageVector = MetrolistIcons.Default.Clear,
+                                        contentDescription = stringResource(Res.string.clear_search),
+                                    )
+                                }
                             }
-                        }
-                    },
-                    colors = searchBarColors.inputFieldColors,
-                )
+                        },
+                        colors = searchBarColors.inputFieldColors,
+                    )
+                }
             }
         }
         Spacer(Modifier.height(8.dp))
@@ -595,58 +608,65 @@ private fun RecognitionHistoryRow(
             HistoryEntryGroupPosition.LAST -> RoundedCornerShape(topStart = 5.dp, topEnd = 5.dp, bottomStart = 20.dp, bottomEnd = 20.dp)
         }
 
-    Surface(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(vertical = 1.dp)
-                .clip(shape)
-                .clickable(enabled = playable, onClick = onPlay),
-        shape = shape,
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically,
+    val glass = liquidGlassBackdropReady()
+    Box(Modifier.fillMaxWidth().padding(vertical = 1.dp).clip(shape)) {
+        if (glass) LocalThemeGlassBackdrop.current?.Background(radius = 20.dp, modifier = Modifier.matchParentSize())
+        Surface(
+            modifier = Modifier.fillMaxWidth().clickable(enabled = playable, onClick = onPlay),
+            shape = shape,
+            color =
+                if (glass) {
+                    glassCardColor(
+                        MaterialTheme.colorScheme.surfaceContainerHigh,
+                    )
+                } else {
+                    MaterialTheme.colorScheme.surfaceContainerHigh
+                },
+            border = if (glass) glassCardBorder() else null,
         ) {
-            AsyncImage(
-                model = entry.coverArtHqUrl ?: entry.coverArtUrl,
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier =
-                    Modifier
-                        .size(56.dp)
-                        .clip(ComponentShapes.SmallThumbnailShape)
-                        .background(MaterialTheme.colorScheme.surfaceContainerHighest),
-            )
-            Spacer(Modifier.width(12.dp))
-            Column(Modifier.weight(1f)) {
-                Text(
-                    text = entry.title,
-                    style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
+            Row(
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                AsyncImage(
+                    model = entry.coverArtHqUrl ?: entry.coverArtUrl,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier =
+                        Modifier
+                            .size(56.dp)
+                            .clip(ComponentShapes.SmallThumbnailShape)
+                            .background(MaterialTheme.colorScheme.surfaceContainerHighest),
                 )
-                Text(
-                    text = "${entry.artist}${entry.album?.let { " ·\u00a0$it" }.orEmpty()}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-                Text(
-                    text = time,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            LiquidGlassIconButton(onClick = onDelete) {
-                Icon(
-                    imageVector = MetrolistIcons.Outlined.Delete,
-                    contentDescription = stringResource(Res.string.delete),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+                Spacer(Modifier.width(12.dp))
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        text = entry.title,
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    Text(
+                        text = "${entry.artist}${entry.album?.let { " ·\u00a0$it" }.orEmpty()}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    Text(
+                        text = time,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                LiquidGlassIconButton(onClick = onDelete) {
+                    Icon(
+                        imageVector = MetrolistIcons.Outlined.Delete,
+                        contentDescription = stringResource(Res.string.delete),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
             }
         }
     }
