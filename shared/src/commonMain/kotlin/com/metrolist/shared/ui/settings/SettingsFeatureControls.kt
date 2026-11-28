@@ -77,8 +77,11 @@ import com.metrolist.shared.settings.Settings
 import com.metrolist.shared.settings.SliderStyle
 import com.metrolist.shared.settings.ThemeMode
 import com.metrolist.shared.ui.components.ExpressiveSwitch
+import com.metrolist.shared.ui.components.LiquidGlassSurface
 import com.metrolist.shared.ui.components.ReorderMenu
 import com.metrolist.shared.ui.components.focusOutline
+import com.metrolist.shared.ui.components.glassCardBorder
+import com.metrolist.shared.ui.components.glassCardColor
 import com.metrolist.shared.ui.components.singleLineMarquee
 import com.metrolist.shared.ui.components.sliders.PlaybackProgressSlider
 import com.metrolist.shared.ui.haptics.HapticEvent
@@ -575,41 +578,55 @@ fun SettingsMainSwitch(
                 .toDp()
         }
     val height = if (density.fontScale > 1f) (labelHeight + 32.dp).coerceAtLeast(64.dp) else 64.dp
-    Row(
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .height(height)
-                .clip(CircleShape)
-                .background(if (checked) colors.primaryContainer else colors.settingsRowContainerColor())
-                .focusOutline(CircleShape)
-                .toggleable(
-                    value = checked,
-                    enabled = enabled,
-                    role = Role.Switch,
-                    interactionSource = interactionSource,
-                    indication = ripple(),
-                    onValueChange = {
-                        haptics.toggle(it)
-                        onCheckedChange(it)
-                    },
-                ).padding(start = 32.dp, end = 20.dp, top = 16.dp, bottom = 16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(23.dp),
-    ) {
-        Text(
-            title,
-            modifier = Modifier.weight(1f).singleLineMarquee(),
-            maxLines = 1,
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Medium,
-            color = (if (checked) colors.onPrimaryContainer else colors.onSurface).copy(alpha = if (enabled) 1f else 0.38f),
-        )
-        ExpressiveSwitch(
-            checked = checked,
-            onCheckedChange = null,
-            enabled = enabled,
-            modifier = Modifier.height(32.dp).clearAndSetSemantics {},
-        )
+    val glass = Settings.shared.liquidGlassTheme
+    val border = if (glass) glassCardBorder() else null
+    LiquidGlassSurface(radius = height / 2, modifier = modifier.fillMaxWidth()) {
+        Row(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(height)
+                    .clip(CircleShape)
+                    .background(
+                        if (glass && checked) {
+                            colors.primary.copy(alpha = 0.32f)
+                        } else if (glass) {
+                            glassCardColor(colors.settingsRowContainerColor())
+                        } else if (checked) {
+                            colors.primaryContainer
+                        } else {
+                            colors.settingsRowContainerColor()
+                        },
+                    ).then(if (border != null) Modifier.border(border, CircleShape) else Modifier)
+                    .focusOutline(CircleShape)
+                    .toggleable(
+                        value = checked,
+                        enabled = enabled,
+                        role = Role.Switch,
+                        interactionSource = interactionSource,
+                        indication = ripple(),
+                        onValueChange = {
+                            haptics.toggle(it)
+                            onCheckedChange(it)
+                        },
+                    ).padding(start = 32.dp, end = 20.dp, top = 16.dp, bottom = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(23.dp),
+        ) {
+            Text(
+                title,
+                modifier = Modifier.weight(1f).singleLineMarquee(),
+                maxLines = 1,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Medium,
+                color = (if (checked && !glass) colors.onPrimaryContainer else colors.onSurface).copy(alpha = if (enabled) 1f else 0.38f),
+            )
+            ExpressiveSwitch(
+                checked = checked,
+                onCheckedChange = null,
+                enabled = enabled,
+                modifier = Modifier.height(32.dp).clearAndSetSemantics {},
+            )
+        }
     }
 }
