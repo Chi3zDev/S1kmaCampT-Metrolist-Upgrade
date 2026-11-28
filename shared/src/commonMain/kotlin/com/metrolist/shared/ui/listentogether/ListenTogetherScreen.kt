@@ -255,10 +255,12 @@ import com.metrolist.shared.ui.components.Dialog
 import com.metrolist.shared.ui.components.LiquidGlassButton
 import com.metrolist.shared.ui.components.LiquidGlassCompactButton
 import com.metrolist.shared.ui.components.LiquidGlassIconButton
+import com.metrolist.shared.ui.components.LiquidGlassOutlinedButton
 import com.metrolist.shared.ui.components.LiquidGlassSurface
 import com.metrolist.shared.ui.components.LiquidGlassTextButton
 import com.metrolist.shared.ui.components.PopupVisibility
 import com.metrolist.shared.ui.components.appPageBackground
+import com.metrolist.shared.ui.components.glassCardBorder
 import com.metrolist.shared.ui.components.glassCardColor
 import com.metrolist.shared.ui.components.liquidGlassBackdropReady
 import com.metrolist.shared.ui.icons.MetrolistIcons
@@ -650,7 +652,7 @@ fun ListenTogetherServerScreen(
         SettingsSubScreenGroup(title = stringResource(Res.string.listen_together_servers)) {
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 servers.forEach { server ->
-                    Surface(
+                    ListenTogetherGlassPanel(
                         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
                         shape = GroupShape,
                         color = MaterialTheme.colorScheme.surfaceContainer,
@@ -1076,17 +1078,35 @@ private fun ExpressiveButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     colors: ButtonColors = ButtonDefaults.buttonColors(),
+    destructive: Boolean = false,
     content: @Composable () -> Unit,
 ) {
-    Button(
-        onClick = onClick,
-        modifier = modifier.heightIn(min = ButtonDefaults.MediumContainerHeight).tvFocusHighlight(CircleShape),
-        enabled = enabled,
-        shapes = ButtonDefaults.shapes(),
-        colors = colors,
-        contentPadding = ButtonDefaults.MediumContentPadding,
-    ) {
-        ProvideTextStyle(MaterialTheme.typography.titleMedium) { content() }
+    val glass = liquidGlassBackdropReady()
+    LiquidGlassSurface(radius = 32.dp, enabled = glass) {
+        Button(
+            onClick = onClick,
+            modifier = modifier.heightIn(min = ButtonDefaults.MediumContainerHeight).tvFocusHighlight(CircleShape),
+            enabled = enabled,
+            shapes = ButtonDefaults.shapes(),
+            colors =
+                if (glass) {
+                    ButtonDefaults.buttonColors(
+                        containerColor =
+                            if (destructive) {
+                                MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.55f)
+                            } else {
+                                glassCardColor(MaterialTheme.colorScheme.surfaceContainer)
+                            },
+                        contentColor = if (destructive) MaterialTheme.colorScheme.onErrorContainer else MaterialTheme.colorScheme.onSurface,
+                    )
+                } else {
+                    colors
+                },
+            border = if (glass) glassCardBorder() else null,
+            contentPadding = ButtonDefaults.MediumContentPadding,
+        ) {
+            ProvideTextStyle(MaterialTheme.typography.titleMedium) { content() }
+        }
     }
 }
 
@@ -1097,11 +1117,10 @@ private fun ExpressiveOutlinedButton(
     enabled: Boolean = true,
     content: @Composable () -> Unit,
 ) {
-    OutlinedButton(
+    LiquidGlassOutlinedButton(
         onClick = onClick,
         modifier = modifier.heightIn(min = 48.dp).tvFocusHighlight(CircleShape),
         enabled = enabled,
-        shapes = ButtonDefaults.shapes(),
     ) {
         ProvideTextStyle(MaterialTheme.typography.labelLarge) { content() }
     }
@@ -1167,13 +1186,33 @@ private fun ErrorText(message: String) {
 }
 
 @Composable
+private fun ListenTogetherGlassPanel(
+    modifier: Modifier = Modifier,
+    shape: Shape,
+    color: Color,
+    border: BorderStroke? = null,
+    content: @Composable () -> Unit,
+) {
+    val glass = liquidGlassBackdropReady()
+    LiquidGlassSurface(radius = 24.dp, modifier = modifier, enabled = glass) {
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = shape,
+            color = if (glass) glassCardColor(color) else color,
+            border = if (glass) glassCardBorder() else border,
+            content = content,
+        )
+    }
+}
+
+@Composable
 private fun UsernameRow(
     username: String,
     error: String?,
     onEdit: () -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Surface(
+        ListenTogetherGlassPanel(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(24.dp),
             color = MaterialTheme.colorScheme.surfaceContainer,
@@ -1733,7 +1772,7 @@ private fun NowPlayingCard(
     positionMs: Long,
 ) {
     val progress = if (track.duration > 0) (positionMs.toFloat() / track.duration).coerceIn(0f, 1f) else 0f
-    Surface(
+    ListenTogetherGlassPanel(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(28.dp),
         color = MaterialTheme.colorScheme.surfaceContainer,
@@ -1796,6 +1835,7 @@ private fun LeaveRoomButton(
         ExpressiveButton(
             onClick = onClick,
             modifier = Modifier.widthIn(min = 200.dp),
+            destructive = true,
             colors =
                 ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.errorContainer,
@@ -1899,7 +1939,7 @@ private fun RoomCodeCard(
     roomCode: String,
     onCopyCode: () -> Unit,
 ) {
-    Surface(
+    ListenTogetherGlassPanel(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(28.dp),
         color = MaterialTheme.colorScheme.surfaceContainer,
@@ -1942,7 +1982,7 @@ private fun ConnectedUsersCard(
     onBlock: (UserInfo) -> Unit,
 ) {
     val scrollState = rememberScrollState()
-    Surface(
+    ListenTogetherGlassPanel(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
         color = MaterialTheme.colorScheme.surfaceContainerLowest,
@@ -2346,7 +2386,7 @@ private fun ListenTogetherTextDialog(
     var error by remember(value) { mutableStateOf<String?>(null) }
     val requiredError = stringResource(Res.string.required)
     Dialog(onDismissRequest = onDismiss) {
-        Surface(
+        ListenTogetherGlassPanel(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(28.dp),
             color = MaterialTheme.colorScheme.surfaceContainerHigh,
