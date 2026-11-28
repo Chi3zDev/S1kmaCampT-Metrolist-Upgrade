@@ -5,6 +5,7 @@ import android.content.Context
 import android.os.Build
 import android.view.View
 import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -25,6 +26,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.viewinterop.AndroidView
 
 /** A single dedicated source; do not wrap every row or sample the host containing glass views. */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun QweBackdropSource(
     onViewChanged: (View?) -> Unit,
