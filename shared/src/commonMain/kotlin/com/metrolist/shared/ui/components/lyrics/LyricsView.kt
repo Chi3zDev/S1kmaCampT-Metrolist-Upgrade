@@ -12,6 +12,7 @@ package com.metrolist.shared.ui.components.lyrics
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -210,13 +211,11 @@ internal suspend fun animateLyricsItemAppearance(
     manualScrolling: Flow<Boolean>,
 ) {
     manualScrolling.collectLatest { manual ->
-        withContext(FixedMotionDurationScale) {
-            if (manual) {
-                alpha.animateTo(1f, tween(250))
-            } else if (alpha.value < 1f) {
-                delay(100L.milliseconds)
-                alpha.animateTo(1f, tween(200))
-            }
+        if (manual) {
+            alpha.animateTo(1f, tween(180, easing = FastOutSlowInEasing))
+        } else if (alpha.value < 1f) {
+            // Fade new lines in promptly without the visible hold before animation.
+            alpha.animateTo(1f, tween(280, easing = FastOutSlowInEasing))
         }
     }
 }
