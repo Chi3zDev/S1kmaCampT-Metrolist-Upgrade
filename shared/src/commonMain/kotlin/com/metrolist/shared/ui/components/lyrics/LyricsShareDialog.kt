@@ -89,7 +89,6 @@ import com.metrolist.shared.generated.resources.lyrics_share_auto_fit
 import com.metrolist.shared.generated.resources.lyrics_share_color
 import com.metrolist.shared.generated.resources.lyrics_share_content_scale
 import com.metrolist.shared.generated.resources.lyrics_share_failed
-import com.metrolist.shared.generated.resources.lyrics_share_scroll_options
 import com.metrolist.shared.generated.resources.lyrics_share_square_image
 import com.metrolist.shared.generated.resources.lyrics_share_story_image
 import com.metrolist.shared.generated.resources.lyrics_share_story_style
