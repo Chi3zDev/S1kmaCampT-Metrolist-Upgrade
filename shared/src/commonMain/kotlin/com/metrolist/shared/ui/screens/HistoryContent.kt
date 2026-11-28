@@ -24,8 +24,6 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -36,7 +34,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
@@ -110,14 +107,17 @@ import com.metrolist.shared.ui.components.HistoryEntryGroupPosition
 import com.metrolist.shared.ui.components.HistoryEntryRow
 import com.metrolist.shared.ui.components.HistoryFilterBar
 import com.metrolist.shared.ui.components.HistoryFilterBarText
+import com.metrolist.shared.ui.components.LiquidGlassCompactButton
 import com.metrolist.shared.ui.components.LiquidGlassIconButton
 import com.metrolist.shared.ui.components.LiquidGlassSurface
+import com.metrolist.shared.ui.components.LiquidGlassTextButton
 import com.metrolist.shared.ui.components.LocalThemeGlassBackdrop
 import com.metrolist.shared.ui.components.PopupContent
 import com.metrolist.shared.ui.components.PopupVisibility
 import com.metrolist.shared.ui.components.RefreshIndicator
 import com.metrolist.shared.ui.components.glassCardBorder
 import com.metrolist.shared.ui.components.glassCardColor
+import com.metrolist.shared.ui.components.liquidGlassBackdropReady
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import com.metrolist.shared.ui.menu.SongSelectionMenuSheet
 import com.metrolist.shared.ui.menu.historySelectionMenuModel
@@ -280,7 +280,7 @@ fun HistoryContent(
         if (error != null && !showFullScreenState) {
             Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                 Text(error, color = MaterialTheme.colorScheme.error, modifier = Modifier.weight(1f))
-                TextButton(onClick = onRefresh, shapes = ButtonDefaults.shapes()) { Text(stringResource(Res.string.retry)) }
+                LiquidGlassTextButton(onClick = onRefresh) { Text(stringResource(Res.string.retry)) }
             }
         }
         val historyBodyContent = @Composable {
@@ -292,7 +292,7 @@ fun HistoryContent(
                         verticalArrangement = Arrangement.Center,
                     ) {
                         Text(error, color = MaterialTheme.colorScheme.error)
-                        Button(onClick = onRefresh, shapes = ButtonDefaults.shapes()) { Text(stringResource(Res.string.retry)) }
+                        LiquidGlassCompactButton(onClick = onRefresh) { Text(stringResource(Res.string.retry)) }
                     }
                 }
 
@@ -551,8 +551,14 @@ private fun EmptyHistory(onRefresh: (() -> Unit)?) {
         )
         if (onRefresh != null) {
             Spacer(Modifier.height(MdSpacing.xs))
-            FilledTonalIconButton(onClick = onRefresh, shapes = IconButtonDefaults.shapes()) {
-                Icon(MetrolistIcons.Outlined.Refresh, stringResource(Res.string.history_refresh))
+            if (liquidGlassBackdropReady()) {
+                LiquidGlassIconButton(onClick = onRefresh) {
+                    Icon(MetrolistIcons.Outlined.Refresh, stringResource(Res.string.history_refresh))
+                }
+            } else {
+                FilledTonalIconButton(onClick = onRefresh, shapes = IconButtonDefaults.shapes()) {
+                    Icon(MetrolistIcons.Outlined.Refresh, stringResource(Res.string.history_refresh))
+                }
             }
         }
     }
@@ -596,7 +602,7 @@ fun EditHistoryDialog(
             }
         },
         confirmButton = {
-            Button(
+            LiquidGlassCompactButton(
                 onClick = {
                     if (title.isBlank()) {
                         showValidationErrors = true
@@ -604,10 +610,9 @@ fun EditHistoryDialog(
                         onSave(title.trim(), artists.trim(), album.trim().takeIf(String::isNotBlank))
                     }
                 },
-                shapes = ButtonDefaults.shapes(),
             ) { Text(stringResource(Res.string.save)) }
         },
-        dismissButton = { TextButton(onClick = onDismiss, shapes = ButtonDefaults.shapes()) { Text(stringResource(Res.string.cancel)) } },
+        dismissButton = { LiquidGlassTextButton(onClick = onDismiss) { Text(stringResource(Res.string.cancel)) } },
     )
 }
 
@@ -629,13 +634,12 @@ fun DeleteHistoryDialog(
             }
         },
         confirmButton = {
-            Button(
+            LiquidGlassCompactButton(
                 onClick = { onDelete(alsoRemote) },
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
-                shapes = ButtonDefaults.shapes(),
+                destructive = true,
             ) { Text(stringResource(Res.string.delete)) }
         },
-        dismissButton = { TextButton(onClick = onDismiss, shapes = ButtonDefaults.shapes()) { Text(stringResource(Res.string.cancel)) } },
+        dismissButton = { LiquidGlassTextButton(onClick = onDismiss) { Text(stringResource(Res.string.cancel)) } },
     )
 }
 
@@ -657,13 +661,12 @@ private fun BulkDeleteHistoryDialog(
             }
         },
         confirmButton = {
-            Button(
+            LiquidGlassCompactButton(
                 onClick = { onDelete(alsoRemote) },
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
-                shapes = ButtonDefaults.shapes(),
+                destructive = true,
             ) { Text(stringResource(Res.string.delete)) }
         },
-        dismissButton = { TextButton(onClick = onDismiss, shapes = ButtonDefaults.shapes()) { Text(stringResource(Res.string.cancel)) } },
+        dismissButton = { LiquidGlassTextButton(onClick = onDismiss) { Text(stringResource(Res.string.cancel)) } },
     )
 }
 
