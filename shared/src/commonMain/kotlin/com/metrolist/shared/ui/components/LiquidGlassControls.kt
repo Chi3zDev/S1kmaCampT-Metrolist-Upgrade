@@ -1,10 +1,15 @@
 package com.metrolist.shared.ui.components
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -58,3 +63,34 @@ fun liquidGlassTonalColors(selected: Boolean = false): ButtonColors =
     } else {
         ButtonDefaults.filledTonalButtonColors()
     }
+
+/** Circular action with a QWE backdrop, retaining ordinary IconButton behavior outside the theme. */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+fun LiquidGlassIconButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    content: @Composable () -> Unit,
+) {
+    val glass = Settings.shared.liquidGlassTheme
+    val border = if (glass) glassCardBorder() else null
+    LiquidGlassSurface(radius = 24.dp, modifier = modifier) {
+        IconButton(
+            onClick = onClick,
+            enabled = enabled,
+            modifier = if (border != null) Modifier.border(border, CircleShape) else Modifier,
+            shapes = IconButtonDefaults.shapes(),
+            colors =
+                if (glass) {
+                    IconButtonDefaults.iconButtonColors(
+                        containerColor = glassCardColor(MaterialTheme.colorScheme.surfaceContainer),
+                        contentColor = MaterialTheme.colorScheme.onSurface,
+                    )
+                } else {
+                    IconButtonDefaults.iconButtonColors()
+                },
+            content = content,
+        )
+    }
+}

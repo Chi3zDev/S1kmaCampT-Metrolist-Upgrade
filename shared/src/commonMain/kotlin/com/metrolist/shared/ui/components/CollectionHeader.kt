@@ -16,8 +16,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -118,10 +116,9 @@ fun DetailBackButton(
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    IconButton(
+    LiquidGlassIconButton(
         onClick = onBackClick,
         modifier = modifier.padding(start = 8.dp, top = 8.dp).tvFocusHighlight(CircleShape),
-        shapes = IconButtonDefaults.shapes(),
     ) {
         Icon(
             MetrolistIcons.AutoMirrored.Filled.ArrowBack,
@@ -154,7 +151,7 @@ fun CollectionHeaderNavigation(
                 }
                 DetailBackButton(onBackClick)
                 if (onMoreOptions != null) {
-                    IconButton(
+                    LiquidGlassIconButton(
                         onClick = onMoreOptions,
                         modifier =
                             Modifier
@@ -163,7 +160,6 @@ fun CollectionHeaderNavigation(
                                 ).padding(end = 8.dp, top = 8.dp)
                                 .tvFocusHighlight(CircleShape)
                                 .navigationPopupSource(),
-                        shapes = IconButtonDefaults.shapes(),
                     ) {
                         Icon(MetrolistIcons.Default.MoreVert, stringResource(Res.string.more_options))
                     }
