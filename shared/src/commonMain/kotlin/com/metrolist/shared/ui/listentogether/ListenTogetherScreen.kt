@@ -255,8 +255,12 @@ import com.metrolist.shared.ui.components.Dialog
 import com.metrolist.shared.ui.components.LiquidGlassButton
 import com.metrolist.shared.ui.components.LiquidGlassCompactButton
 import com.metrolist.shared.ui.components.LiquidGlassIconButton
+import com.metrolist.shared.ui.components.LiquidGlassSurface
 import com.metrolist.shared.ui.components.LiquidGlassTextButton
 import com.metrolist.shared.ui.components.PopupVisibility
+import com.metrolist.shared.ui.components.appPageBackground
+import com.metrolist.shared.ui.components.glassCardColor
+import com.metrolist.shared.ui.components.liquidGlassBackdropReady
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import com.metrolist.shared.ui.navigation.navigationPopupSource
 import com.metrolist.shared.ui.settings.SettingsChoice
@@ -1822,6 +1826,7 @@ private fun ListenTogetherScaffold(
     content: @Composable (PaddingValues) -> Unit,
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    val glass = liquidGlassBackdropReady()
     val navigationIcon: @Composable () -> Unit = {
         if (onNavigateBack != null) {
             LiquidGlassIconButton(onClick = onNavigateBack, modifier = Modifier.tvFocusHighlight(CircleShape)) {
@@ -1831,20 +1836,28 @@ private fun ListenTogetherScaffold(
     }
     val colors =
         TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.surface,
-            scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            containerColor = if (glass) glassCardColor(MaterialTheme.colorScheme.surface) else MaterialTheme.colorScheme.surface,
+            scrolledContainerColor =
+                if (glass) {
+                    glassCardColor(MaterialTheme.colorScheme.surfaceContainerHigh)
+                } else {
+                    MaterialTheme.colorScheme.surfaceContainerHigh
+                },
         )
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        containerColor = appPageBackground(MaterialTheme.colorScheme.background),
         topBar = {
             if (onNavigateBack != null || title.isNotBlank() || actions != null) {
-                TopAppBar(
-                    title = { Text(title, fontWeight = FontWeight.SemiBold) },
-                    navigationIcon = navigationIcon,
-                    actions = actions ?: {},
-                    colors = colors,
-                    scrollBehavior = scrollBehavior,
-                )
+                LiquidGlassSurface(radius = 0.dp, modifier = Modifier.fillMaxWidth(), enabled = glass) {
+                    TopAppBar(
+                        title = { Text(title, fontWeight = FontWeight.SemiBold) },
+                        navigationIcon = navigationIcon,
+                        actions = actions ?: {},
+                        colors = colors,
+                        scrollBehavior = scrollBehavior,
+                    )
+                }
             }
         },
         content = content,
