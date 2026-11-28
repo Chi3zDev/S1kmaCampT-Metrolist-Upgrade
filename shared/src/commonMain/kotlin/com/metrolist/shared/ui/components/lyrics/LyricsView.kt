@@ -44,14 +44,11 @@ import androidx.compose.foundation.lazy.LazyListItemInfo
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
@@ -129,6 +126,8 @@ import com.metrolist.shared.settings.PlayerBackgroundStyle
 import com.metrolist.shared.settings.Settings
 import com.metrolist.shared.settings.zoomedLyricsTextSize
 import com.metrolist.shared.ui.components.ContainedLoadingIndicator
+import com.metrolist.shared.ui.components.LiquidGlassTextButton
+import com.metrolist.shared.ui.components.LiquidGlassTonalButton
 import com.metrolist.shared.ui.components.expressiveEntrance
 import com.metrolist.shared.ui.components.lyrics.words.FixedMotionDurationScale
 import com.metrolist.shared.ui.components.lyrics.words.LocalLyricsAnimationVisible
@@ -1694,8 +1693,8 @@ fun LyricsView(
                             ),
                             modifier = Modifier.weight(1f).semantics { liveRegion = LiveRegionMode.Polite },
                         )
-                        TextButton(onClick = selection::clear, shapes = ButtonDefaults.shapes()) { Text(stringResource(Res.string.cancel)) }
-                        TextButton(
+                        LiquidGlassTextButton(onClick = selection::clear) { Text(stringResource(Res.string.cancel)) }
+                        LiquidGlassTextButton(
                             enabled =
                                 selectedIndices.isNotEmpty() && selectedIndices.size < shareableLineCount &&
                                     selectedTextLineCount in 1..LYRICS_SHARE_LINE_LIMIT,
@@ -1707,7 +1706,6 @@ fun LyricsView(
                                     ),
                                 )
                             },
-                            shapes = ButtonDefaults.shapes(),
                         ) {
                             Text(stringResource(Res.string.share))
                         }
@@ -1725,12 +1723,11 @@ fun LyricsView(
                     .align(Alignment.BottomCenter)
                     .padding(bottom = 32.dp),
         ) {
-            FilledTonalButton(
+            LiquidGlassTonalButton(
                 onClick = {
                     pendingSeekLineIndex = null
                     isAutoScrollEnabled = true
                 },
-                shapes = ButtonDefaults.shapes(shape = RoundedCornerShape(24.dp)),
             ) {
                 Icon(
                     imageVector = MetrolistIcons.Default.Sync,
