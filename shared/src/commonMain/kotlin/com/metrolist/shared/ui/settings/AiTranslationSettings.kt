@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.selectable
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -28,7 +27,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -52,6 +50,7 @@ import com.metrolist.shared.api.lyrics.AiProviderPreset
 import com.metrolist.shared.api.lyrics.AiProviderPresets
 import com.metrolist.shared.generated.resources.*
 import com.metrolist.shared.ui.components.BasicAlertDialog
+import com.metrolist.shared.ui.components.LiquidGlassTextButton
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import com.metrolist.shared.ui.menu.ExpressiveSelectionMenu
 import com.metrolist.shared.ui.menu.trackPressPosition
@@ -218,7 +217,7 @@ internal fun AiModelPicker(
         Column(Modifier.padding(top = 24.dp)) {
             Row(Modifier.padding(horizontal = 24.dp), verticalAlignment = Alignment.CenterVertically) {
                 Text(title, style = MaterialTheme.typography.headlineSmall, modifier = Modifier.weight(1f))
-                TextButton({ reload++ }, shapes = ButtonDefaults.shapes()) { Text(stringResource(Res.string.refresh)) }
+                LiquidGlassTextButton({ reload++ }) { Text(stringResource(Res.string.refresh)) }
             }
             OutlinedTextField(
                 value = query,
@@ -262,7 +261,7 @@ internal fun AiModelPicker(
                                     ),
                                     color = MaterialTheme.colorScheme.error,
                                 )
-                                TextButton({ reload++ }, shapes = ButtonDefaults.shapes()) { Text(stringResource(Res.string.retry)) }
+                                LiquidGlassTextButton({ reload++ }) { Text(stringResource(Res.string.retry)) }
                             }
                         }
                     }
@@ -294,7 +293,7 @@ internal fun AiModelPicker(
                 }
             }
             Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp), horizontalArrangement = Arrangement.End) {
-                TextButton({ open = false }, shapes = ButtonDefaults.shapes()) { Text(stringResource(Res.string.cancel)) }
+                LiquidGlassTextButton({ open = false }) { Text(stringResource(Res.string.cancel)) }
             }
         }
     }
