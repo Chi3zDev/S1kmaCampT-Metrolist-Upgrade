@@ -176,8 +176,10 @@ import com.metrolist.shared.ui.components.TopPlaylistOrderControls
 import com.metrolist.shared.ui.components.appPageBackground
 import com.metrolist.shared.ui.components.appTopBarBackground
 import com.metrolist.shared.ui.components.glassCardColor
+import com.metrolist.shared.ui.components.glassScreenViewport
 import com.metrolist.shared.ui.components.images.AsyncImage
 import com.metrolist.shared.ui.components.libraryCover
+import com.metrolist.shared.ui.components.liquidGlassBackdropReady
 import com.metrolist.shared.ui.components.rememberDownloadPlaylistFilter
 import com.metrolist.shared.ui.components.topPlaylistOrderControlsText
 import com.metrolist.shared.ui.icons.MetrolistIcons
@@ -734,6 +736,7 @@ fun AutoPlaylistScreen(
     var userRefreshing by remember { mutableStateOf(false) }
     val pullToRefreshState = rememberPullToRefreshState()
     val uploadingDescription = stringResource(Res.string.uploading)
+    val glass = liquidGlassBackdropReady()
 
     Scaffold(
         containerColor = appPageBackground(MaterialTheme.colorScheme.background),
@@ -818,7 +821,7 @@ fun AutoPlaylistScreen(
                         colors =
                             TopAppBarDefaults.topAppBarColors(
                                 containerColor =
-                                    if (Settings.shared.liquidGlassTheme) {
+                                    if (glass) {
                                         glassCardColor(
                                             MaterialTheme.colorScheme.surface,
                                         )
@@ -826,7 +829,7 @@ fun AutoPlaylistScreen(
                                         appTopBarBackground(MaterialTheme.colorScheme.surface)
                                     },
                                 scrolledContainerColor =
-                                    if (Settings.shared.liquidGlassTheme) {
+                                    if (glass) {
                                         glassCardColor(
                                             MaterialTheme.colorScheme.surface,
                                         )
@@ -839,6 +842,8 @@ fun AutoPlaylistScreen(
             }
         },
     ) { paddingValues ->
+        val contentTopPadding = if (glass) 0.dp else paddingValues.calculateTopPadding()
+        val viewport = if (glass) Modifier.glassScreenViewport(paddingValues.calculateTopPadding()) else Modifier.fillMaxSize()
         PullToRefreshBox(
             isRefreshing = userRefreshing,
             onRefresh = {
@@ -861,7 +866,7 @@ fun AutoPlaylistScreen(
                     modifier = Modifier.align(Alignment.TopCenter),
                 )
             },
-            modifier = Modifier.fillMaxSize(),
+            modifier = viewport,
         ) {
             Box(modifier = Modifier.fillMaxSize().padding(bottom = paddingValues.calculateBottomPadding())) {
                 PlaylistContent(
@@ -945,7 +950,7 @@ fun AutoPlaylistScreen(
                     },
                     contentPadding =
                         PaddingValues(
-                            top = paddingValues.calculateTopPadding(),
+                            top = contentTopPadding,
                             bottom = paddingValues.calculateBottomPadding() + miniPlayerInset,
                         ),
                     currentSongId = currentSong?.id,
@@ -1152,7 +1157,7 @@ fun AutoPlaylistScreen(
                         modifier =
                             Modifier
                                 .align(Alignment.TopCenter)
-                                .padding(top = paddingValues.calculateTopPadding()),
+                                .padding(top = contentTopPadding),
                     ) {
                         ContainedLoadingIndicator()
                     }
