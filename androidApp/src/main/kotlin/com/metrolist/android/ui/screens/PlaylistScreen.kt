@@ -142,6 +142,7 @@ import com.metrolist.shared.ui.components.CollectionLoadingPlaceholder
 import com.metrolist.shared.ui.components.CollectionPreviews
 import com.metrolist.shared.ui.components.CollectionSongsLoadingPlaceholder
 import com.metrolist.shared.ui.components.ContainedLoadingIndicator
+import com.metrolist.shared.ui.components.LiquidGlassIconButton
 import com.metrolist.shared.ui.components.LiquidGlassSurface
 import com.metrolist.shared.ui.components.PlaylistCoverImage
 import com.metrolist.shared.ui.components.PlaylistOrderControls
@@ -602,10 +603,9 @@ fun PlaylistScreen(
                             }
                         },
                         navigationIcon = {
-                            IconButton(
+                            LiquidGlassIconButton(
                                 onClick = onBackClick,
                                 modifier = Modifier.tvFocusHighlight(CircleShape),
-                                shapes = IconButtonDefaults.shapes(),
                             ) {
                                 Icon(
                                     MetrolistIcons.AutoMirrored.Filled.ArrowBack,
@@ -614,10 +614,9 @@ fun PlaylistScreen(
                             }
                         },
                         actions = {
-                            IconButton(
+                            LiquidGlassIconButton(
                                 modifier = Modifier.tvFocusHighlight(CircleShape).navigationPopupSource(),
                                 onClick = { showMenu = true },
-                                shapes = IconButtonDefaults.shapes(),
                             ) {
                                 Icon(MetrolistIcons.Default.MoreVert, contentDescription = stringResource(Res.string.more))
                             }
