@@ -11,6 +11,7 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -90,6 +91,36 @@ fun LiquidGlassIconButton(
                 } else {
                     IconButtonDefaults.iconButtonColors()
                 },
+            content = content,
+        )
+    }
+}
+
+/** Text action with a bounded backdrop rather than an opaque filled rectangle. */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+fun LiquidGlassTextButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    content: @Composable RowScope.() -> Unit,
+) {
+    val glass = Settings.shared.liquidGlassTheme && LocalThemeGlassBackdrop.current != null
+    LiquidGlassSurface(radius = 24.dp, modifier = modifier, enabled = glass) {
+        TextButton(
+            onClick = onClick,
+            enabled = enabled,
+            shapes = ButtonDefaults.shapes(),
+            colors =
+                if (glass) {
+                    ButtonDefaults.textButtonColors(
+                        containerColor = glassCardColor(MaterialTheme.colorScheme.surfaceContainer),
+                        contentColor = MaterialTheme.colorScheme.onSurface,
+                    )
+                } else {
+                    ButtonDefaults.textButtonColors()
+                },
+            border = if (glass) glassCardBorder() else null,
             content = content,
         )
     }
