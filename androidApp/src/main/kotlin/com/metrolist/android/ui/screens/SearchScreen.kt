@@ -25,6 +25,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -144,7 +145,11 @@ import com.metrolist.shared.state.GlobalYouTubeRepository
 import com.metrolist.shared.state.SongLikeState
 import com.metrolist.shared.ui.LocalIsTv
 import com.metrolist.shared.ui.components.CollectionPreviews
+import com.metrolist.shared.ui.components.LiquidGlassSurface
 import com.metrolist.shared.ui.components.PopupContent
+import com.metrolist.shared.ui.components.glassCardBorder
+import com.metrolist.shared.ui.components.glassCardColor
+import com.metrolist.shared.ui.components.liquidGlassBackdropReady
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import com.metrolist.shared.ui.menu.loadMediaItemSongs
 import com.metrolist.shared.ui.menu.rememberSongWithAlbum
@@ -599,16 +604,27 @@ fun SearchScreen(
                         .align(Alignment.BottomEnd)
                         .padding(end = 16.dp, bottom = maxOf(imeBottomInset, floatingActionsBottomInset.value) + 16.dp),
             ) {
-                FloatingActionButton(
-                    onClick = { navigator.navigate(Screen.Recognition) },
-                    shape = RoundedCornerShape(12.dp),
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                ) {
-                    Icon(
-                        imageVector = MetrolistIcons.Outlined.AudioCapture,
-                        contentDescription = stringResource(Res.string.recognize_music),
-                    )
+                val glass = liquidGlassBackdropReady()
+                val shape = RoundedCornerShape(12.dp)
+                val border = if (glass) glassCardBorder() else null
+                LiquidGlassSurface(radius = 12.dp, enabled = glass) {
+                    FloatingActionButton(
+                        onClick = { navigator.navigate(Screen.Recognition) },
+                        modifier = if (border != null) Modifier.border(border, shape) else Modifier,
+                        shape = shape,
+                        containerColor =
+                            if (glass) {
+                                glassCardColor(MaterialTheme.colorScheme.primaryContainer)
+                            } else {
+                                MaterialTheme.colorScheme.primaryContainer
+                            },
+                        contentColor = if (glass) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onPrimaryContainer,
+                    ) {
+                        Icon(
+                            imageVector = MetrolistIcons.Outlined.AudioCapture,
+                            contentDescription = stringResource(Res.string.recognize_music),
+                        )
+                    }
                 }
             }
         }
