@@ -27,7 +27,6 @@ import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
@@ -85,6 +84,10 @@ import com.metrolist.shared.repository.LyricsProviderSearch
 import com.metrolist.shared.settings.Settings
 import com.metrolist.shared.ui.components.AlertDialog
 import com.metrolist.shared.ui.components.GroupedListItem
+import com.metrolist.shared.ui.components.LiquidGlassIconButton
+import com.metrolist.shared.ui.components.LiquidGlassTextButton
+import com.metrolist.shared.ui.components.glassCardColor
+import com.metrolist.shared.ui.components.liquidGlassBackdropReady
 import com.metrolist.shared.ui.components.loadingShimmer
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import com.metrolist.shared.ui.tv.tvFocusHighlight
@@ -116,7 +119,7 @@ fun LyricsProviderDialog(
                     style = MaterialTheme.typography.headlineSmall,
                     modifier = Modifier.weight(1f),
                 )
-                IconButton(onClick = dismiss, shapes = IconButtonDefaults.shapes()) {
+                LiquidGlassIconButton(onClick = dismiss) {
                     Icon(MetrolistIcons.Default.Close, stringResource(Res.string.close))
                 }
             }
@@ -196,12 +199,12 @@ fun LyricsProviderDialog(
             }
         },
         dismissButton = {
-            TextButton(onClick = dismiss) {
+            LiquidGlassTextButton(onClick = dismiss) {
                 Text(stringResource(Res.string.cancel))
             }
         },
         confirmButton = {
-            TextButton(
+            LiquidGlassTextButton(
                 onClick = { selectedResult?.let { search?.select(it, onSelect) } },
                 enabled = selectedResult != null && search != null,
             ) {
@@ -223,11 +226,7 @@ private fun LyricsResultCard(
     GroupedListItem(index, count) {
         Surface(
             color =
-                if (selected) {
-                    MaterialTheme.colorScheme.secondaryContainer
-                } else {
-                    MaterialTheme.colorScheme.surfaceContainerHigh
-                },
+                providerSurfaceColor(selected),
         ) {
             Column(
                 Modifier
@@ -263,7 +262,12 @@ private fun LyricsResultCard(
                     ExpandButton(expanded) { expanded = !expanded }
                 }
                 Surface(
-                    color = MaterialTheme.colorScheme.surfaceContainerLowest,
+                    color =
+                        if (liquidGlassBackdropReady()) {
+                            glassCardColor(MaterialTheme.colorScheme.surfaceContainerLowest)
+                        } else {
+                            MaterialTheme.colorScheme.surfaceContainerLowest
+                        },
                     shape = MaterialTheme.shapes.small,
                     modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
                 ) {
@@ -281,20 +285,41 @@ private fun LyricsResultCard(
 }
 
 @Composable
+private fun providerSurfaceColor(selected: Boolean): androidx.compose.ui.graphics.Color =
+    if (liquidGlassBackdropReady()) {
+        if (selected) {
+            MaterialTheme.colorScheme.primary.copy(alpha = 0.32f)
+        } else {
+            glassCardColor(MaterialTheme.colorScheme.surfaceContainerHigh)
+        }
+    } else if (selected) {
+        MaterialTheme.colorScheme.secondaryContainer
+    } else {
+        MaterialTheme.colorScheme.surfaceContainerHigh
+    }
+
+@Composable
 private fun ExpandButton(
     expanded: Boolean,
     onClick: () -> Unit,
 ) {
     val state = stringResource(if (expanded) Res.string.expanded else Res.string.collapsed)
-    IconButton(
-        onClick = onClick,
-        shapes = IconButtonDefaults.shapes(),
-        colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
-        modifier = Modifier.tvFocusHighlight().semantics { stateDescription = state },
-    ) {
+    val modifier = Modifier.tvFocusHighlight().semantics { stateDescription = state }
+    val icon: @Composable () -> Unit = {
         Icon(
             if (expanded) MetrolistIcons.Outlined.KeyboardArrowUp else MetrolistIcons.Outlined.KeyboardArrowDown,
             stringResource(if (expanded) Res.string.collapse else Res.string.expand),
+        )
+    }
+    if (liquidGlassBackdropReady()) {
+        LiquidGlassIconButton(onClick = onClick, modifier = modifier, content = icon)
+    } else {
+        IconButton(
+            onClick = onClick,
+            shapes = IconButtonDefaults.shapes(),
+            colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+            modifier = modifier,
+            content = icon,
         )
     }
 }
@@ -410,7 +435,7 @@ fun LyricsRefreshDialog(
                     text = stringResource(Res.string.refetch),
                     style = MaterialTheme.typography.headlineSmall,
                 )
-                IconButton(onClick = onDismiss) {
+                LiquidGlassIconButton(onClick = onDismiss) {
                     Icon(
                         imageVector = MetrolistIcons.Outlined.Close,
                         contentDescription = stringResource(Res.string.close),
@@ -433,11 +458,7 @@ fun LyricsRefreshDialog(
                         selected = isAutoSelected,
                         modifier = Modifier.semantics { role = Role.RadioButton },
                         color =
-                            if (isAutoSelected) {
-                                MaterialTheme.colorScheme.secondaryContainer
-                            } else {
-                                MaterialTheme.colorScheme.surfaceContainerHigh
-                            },
+                            providerSurfaceColor(isAutoSelected),
                         onClick = { selectedProvider = null },
                     ) {
                         Row(
@@ -448,7 +469,7 @@ fun LyricsRefreshDialog(
                                 text = stringResource(Res.string.automatic),
                                 style = MaterialTheme.typography.titleSmall,
                                 color =
-                                    if (isAutoSelected) {
+                                    if (isAutoSelected && !liquidGlassBackdropReady()) {
                                         MaterialTheme.colorScheme.onSecondaryContainer
                                     } else {
                                         MaterialTheme.colorScheme.onSurface
@@ -465,11 +486,7 @@ fun LyricsRefreshDialog(
                             selected = isSelected,
                             modifier = Modifier.semantics { role = Role.RadioButton },
                             color =
-                                if (isSelected) {
-                                    MaterialTheme.colorScheme.secondaryContainer
-                                } else {
-                                    MaterialTheme.colorScheme.surfaceContainerHigh
-                                },
+                                providerSurfaceColor(isSelected),
                             onClick = { selectedProvider = provider },
                         ) {
                             Row(
@@ -480,7 +497,7 @@ fun LyricsRefreshDialog(
                                     text = providerName(provider),
                                     style = MaterialTheme.typography.titleSmall,
                                     color =
-                                        if (isSelected) {
+                                        if (isSelected && !liquidGlassBackdropReady()) {
                                             MaterialTheme.colorScheme.onSecondaryContainer
                                         } else {
                                             MaterialTheme.colorScheme.onSurface
@@ -493,12 +510,12 @@ fun LyricsRefreshDialog(
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            LiquidGlassTextButton(onClick = onDismiss) {
                 Text(stringResource(Res.string.cancel))
             }
         },
         confirmButton = {
-            TextButton(
+            LiquidGlassTextButton(
                 onClick = {
                     onDismiss()
                     val provider = selectedProvider
