@@ -9,6 +9,8 @@ import android.os.Handler
 import android.os.Looper
 import android.view.PixelCopy
 import android.view.View
+import android.view.ViewGroup
+import android.view.Window
 import androidx.annotation.RequiresApi
 import androidx.compose.ui.graphics.Color
 import androidx.test.platform.app.InstrumentationRegistry
@@ -167,6 +169,78 @@ class LiquidGlassBackdropTest {
         } finally {
             instrumentation.runOnMainSync { activity.finish() }
         }
+    }
+
+    /** A dialog must sample the real activity content, not just the wallpaper source. */
+    @Test
+    fun dialogGlassSamplesAndUpdatesActivityForeground() {
+        assumeTrue("Glass bridge requires Android 12", Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        val activityManager = instrumentation.targetContext.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        assumeTrue("Glass bridge skips low-RAM devices", !activityManager.isLowRamDevice)
+        assumeTrue("QWEA0 native library is unavailable", runCatching { System.loadLibrary("nativegauss") }.isSuccess)
+        val intent =
+            Intent(instrumentation.targetContext, LiquidGlassBackdropTestActivity::class.java)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        val activity = instrumentation.startActivitySync(intent) as LiquidGlassBackdropTestActivity
+        try {
+            instrumentation.runOnMainSync {
+                activity.backdropColor = Color.Red
+                activity.foregroundProbeColor = Color.Green
+                activity.crossWindowProbe = true
+            }
+            instrumentation.waitForIdleSync()
+            Thread.sleep(1000)
+            lateinit var window: Window
+            lateinit var glass: QweGlassView
+            instrumentation.runOnMainSync {
+                window = checkNotNull(activity.dialogWindow) { "Dialog window was not created" }
+                glass = checkNotNull(findGlass(window.decorView)) { "Dialog glass was not created" }
+                assertTrue("dialog glass must use activity content", glass.backdropSource === activity.window.decorView)
+                assertTrue("activity backdrop must update dynamically", glass.enableDynamicBackground)
+            }
+            val green = captureWindowGlassCenter(window, glass)
+            instrumentation.runOnMainSync { activity.foregroundProbeColor = Color.Blue }
+            instrumentation.waitForIdleSync()
+            Thread.sleep(1000)
+            val blue = captureWindowGlassCenter(window, glass)
+            assertTrue(
+                "foreground should replace red wallpaper in the glass: $green",
+                AndroidColor.green(green) > AndroidColor.red(green) + 20,
+            )
+            assertTrue("changed foreground should update the glass: $blue", AndroidColor.blue(blue) > AndroidColor.red(blue) + 20)
+        } finally {
+            instrumentation.runOnMainSync { activity.finish() }
+        }
+    }
+
+    private fun findGlass(view: View): QweGlassView? {
+        if (view is QweGlassView) return view
+        if (view is ViewGroup) {
+            for (index in 0 until view.childCount) findGlass(view.getChildAt(index))?.let { return it }
+        }
+        return null
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun captureWindowGlassCenter(
+        window: Window,
+        glass: View,
+    ): Int {
+        val bitmap = Bitmap.createBitmap(window.decorView.width, window.decorView.height, Bitmap.Config.ARGB_8888)
+        val latch = CountDownLatch(1)
+        var result = -1
+        PixelCopy.request(window, bitmap, {
+            result = it
+            latch.countDown()
+        }, Handler(Looper.getMainLooper()))
+        assertTrue("PixelCopy timed out", latch.await(5, TimeUnit.SECONDS))
+        assertEquals(PixelCopy.SUCCESS, result)
+        val position = IntArray(2)
+        InstrumentationRegistry.getInstrumentation().runOnMainSync { glass.getLocationInWindow(position) }
+        val pixel = bitmap.getPixel(position[0] + glass.width / 2, position[1] + glass.height / 2)
+        bitmap.recycle()
+        return pixel
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
