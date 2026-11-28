@@ -19,13 +19,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderState
@@ -56,7 +53,9 @@ import com.metrolist.shared.generated.resources.size_used
 import com.metrolist.shared.generated.resources.storage_in_total
 import com.metrolist.shared.storage.storageUsageFraction
 import com.metrolist.shared.ui.components.AlertDialog
+import com.metrolist.shared.ui.components.LiquidGlassCompactButton
 import com.metrolist.shared.ui.components.LiquidGlassIconButton
+import com.metrolist.shared.ui.components.LiquidGlassOutlinedButton
 import com.metrolist.shared.ui.components.LiquidGlassSliderContainer
 import com.metrolist.shared.ui.components.LocalThemeGlassBackdrop
 import com.metrolist.shared.ui.components.glassCardBorder
@@ -325,11 +324,10 @@ fun StorageConfirmationDialog(
         onDismissRequest = onDismiss,
         title = { Text(title) },
         text = { Text(message) },
-        confirmButton = { Button(onClick = onConfirm, shapes = ButtonDefaults.shapes()) { Text(confirmLabel) } },
+        confirmButton = { LiquidGlassCompactButton(onClick = onConfirm) { Text(confirmLabel) } },
         dismissButton = {
-            OutlinedButton(
+            LiquidGlassOutlinedButton(
                 onClick = onDismiss,
-                shapes = ButtonDefaults.shapes(),
             ) { Text(stringResource(Res.string.cancel)) }
         },
         containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
