@@ -34,13 +34,10 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ButtonGroup
-import androidx.compose.material3.ButtonGroupDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
@@ -59,7 +56,6 @@ import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.ToggleButton
 import androidx.compose.material3.pulltorefresh.pullToRefresh
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.ripple
@@ -141,7 +137,6 @@ import com.metrolist.shared.ui.components.glassCardBorder
 import com.metrolist.shared.ui.components.glassCardColor
 import com.metrolist.shared.ui.components.images.AsyncImage
 import com.metrolist.shared.ui.components.rememberScrollingFabState
-import com.metrolist.shared.ui.components.withStaticCorners
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import com.metrolist.shared.ui.menu.artworkMenuActions
 import com.metrolist.shared.ui.navigation.NavigationBackHandler
@@ -588,37 +583,12 @@ private fun PeriodButtons(
                 })
             }
         }
-        val labels = StatisticsPeriod.entries.map { periodLabel(it) }
-        ButtonGroup(
-            overflowIndicator = { ButtonGroupDefaults.OverflowIndicator(it) },
-            modifier = Modifier.selectableGroup(),
-            horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween),
-        ) {
-            StatisticsPeriod.entries.forEachIndexed { index, period ->
-                customItem(
-                    buttonGroupContent = {
-                        val interactions = remember { MutableInteractionSource() }
-                        val shapes =
-                            when (index) {
-                                0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
-                                StatisticsPeriod.entries.lastIndex -> ButtonGroupDefaults.connectedTrailingButtonShapes()
-                                else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
-                            }.withStaticCorners()
-                        ToggleButton(
-                            checked = state.dateRange == null && state.period == period,
-                            onCheckedChange = { onSelected(period) },
-                            interactionSource = interactions,
-                            shapes = shapes,
-                            modifier = Modifier.animateWidth(interactions).tvFocusHighlight(shapes.shape),
-                        ) {
-                            Text(labels[index], maxLines = 1, softWrap = false)
-                        }
-                    },
-                    menuContent = {
-                        DropdownMenuItem(text = { Text(labels[index]) }, onClick = { onSelected(period) })
-                    },
-                )
-            }
+        StatisticsPeriod.entries.forEach { period ->
+            LiquidGlassChip(
+                selected = state.dateRange == null && state.period == period,
+                onClick = { onSelected(period) },
+                label = { Text(periodLabel(period), maxLines = 1, softWrap = false) },
+            )
         }
     }
 }
