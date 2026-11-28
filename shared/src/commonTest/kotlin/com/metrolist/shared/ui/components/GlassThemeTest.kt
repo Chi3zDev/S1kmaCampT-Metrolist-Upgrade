@@ -7,6 +7,12 @@ import kotlin.test.assertTrue
 
 class GlassThemeTest {
     @Test
+    fun dialogTintMaintainsContrastWithoutDiscardingTheBackdrop() {
+        assertEquals(Color.White.copy(alpha = 0.86f), glassDialogTint(Color.White.copy(alpha = 0.3f)))
+        assertEquals(Color.Black.copy(alpha = 0.9f), glassDialogTint(Color.Black.copy(alpha = 0.9f)))
+    }
+
+    @Test
     fun pageFallsBackToThemeWhenImageIsUnavailable() {
         assertEquals(Color.Blue, pageBackgroundColor(Color.Blue, imageReady = false))
         assertEquals(Color.Transparent, pageBackgroundColor(Color.Blue, imageReady = true))

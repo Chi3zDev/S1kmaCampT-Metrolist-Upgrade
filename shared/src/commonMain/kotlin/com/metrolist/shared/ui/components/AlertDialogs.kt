@@ -80,7 +80,9 @@ fun AlertDialog(
     }
     val backdrop = LocalThemeGlassBackdrop.current.takeIf { Settings.shared.liquidGlassTheme }
     if (backdrop != null) {
-        val tint = glassCardColor(containerColor)
+        // Dialog text must remain readable over wallpaper and foreground content.
+        // QWE still supplies the live blurred backdrop under this translucent contrast layer.
+        val tint = glassDialogTint(glassCardColor(containerColor))
         MaterialBasicAlertDialog(onDismissRequest, modifier.popupMotion(), properties) {
             WithDensity(density) {
                 Surface(
@@ -146,3 +148,6 @@ private fun WithDensity(
     density: Density,
     content: @Composable () -> Unit,
 ) = CompositionLocalProvider(LocalDensity provides density, content = content)
+
+/** Prevent foreground or busy wallpaper from competing with dialog text in either theme. */
+internal fun glassDialogTint(color: Color): Color = color.copy(alpha = color.alpha.coerceAtLeast(0.86f))
