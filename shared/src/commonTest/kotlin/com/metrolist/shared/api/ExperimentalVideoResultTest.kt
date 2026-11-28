@@ -51,4 +51,27 @@ class ExperimentalVideoResultTest {
     fun emptyAndUnrelatedResponseHaveNoResults() {
         assertTrue(parseExperimentalVideoSearch(Json.parseToJsonElement("{\"contents\":[]}")).isEmpty())
     }
+
+    @Test
+    fun videoLinksAreRecognizedWithoutTreatingSearchTermsAsIds() {
+        val id = "dQw4w9WgXcQ"
+        listOf(
+            "https://www.youtube.com/watch?v=$id&t=20",
+            "https://youtu.be/$id?si=test",
+            "https://youtube.com/live/$id",
+            "https://music.youtube.com/watch?v=$id&list=PL123",
+            "youtube.com/embed/$id",
+        ).forEach { assertEquals(id, experimentalVideoLinkId(it), it) }
+        listOf(
+            "dQw4w9WgXcQ",
+            "https://youtube.com.evil.example/watch?v=$id",
+            "https://youtu.be.evil.example/$id",
+            "https://youtube.com/watch?v=bad",
+            "https://youtube.com/channel/$id",
+            "ftp://youtu.be/$id",
+            "https://youtube.com/shorts/$id",
+        ).forEach { assertEquals(null, experimentalVideoLinkId(it), it) }
+        assertFalse(looksLikeVideoLink("music videos"))
+        assertTrue(looksLikeVideoLink("https://youtube.com/watch?v=bad"))
+    }
 }

@@ -7,6 +7,7 @@ import com.metrolist.shared.model.MUSIC_VIDEO_TYPE_LIVE
 import com.metrolist.shared.model.MUSIC_VIDEO_TYPE_VIDEO
 import com.metrolist.shared.model.SongItem
 import com.metrolist.shared.state.GlobalYouTube
+import io.ktor.http.Url
 import io.ktor.http.isSuccess
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
@@ -43,6 +44,44 @@ enum class ExperimentalVideoFilter(
     VIDEOS("EgIQAQ=="),
     CHANNELS("EgIQAg=="),
     LIVE("EgJAAQ=="),
+}
+
+/** Only accept explicit YouTube URLs; ordinary keywords must remain search queries. */
+fun experimentalVideoLinkId(input: String): String? {
+    val text = input.trim()
+    if (text.isEmpty() || text.any(Char::isWhitespace)) return null
+    val url = runCatching { Url(if (text.contains("://")) text else "https://$text") }.getOrNull() ?: return null
+    if (url.protocol.name !in setOf("http", "https")) return null
+    val host = url.host.lowercase().removeSuffix(".")
+    val path = url.encodedPath.trim('/')
+    val id =
+        when {
+            host == "youtu.be" -> {
+                path.takeIf { '/' !in it }
+            }
+
+            host == "youtube.com" || host.endsWith(".youtube.com") -> {
+                when {
+                    path == "watch" -> url.parameters["v"]
+                    path.startsWith("live/") -> path.removePrefix("live/").takeIf { '/' !in it }
+                    path.startsWith("embed/") -> path.removePrefix("embed/").takeIf { '/' !in it }
+                    else -> null
+                }
+            }
+
+            else -> {
+                null
+            }
+        }
+    return id?.takeIf { it.matches(Regex("^[A-Za-z0-9_-]{11}$")) }
+}
+
+fun looksLikeVideoLink(input: String): Boolean {
+    val text = input.trim()
+    if (text.any(Char::isWhitespace)) return false
+    return text.contains("://") || text.startsWith("youtube.com/", true) ||
+        text.startsWith("www.youtube.com/", true) || text.startsWith("m.youtube.com/", true) ||
+        text.startsWith("music.youtube.com/", true) || text.startsWith("youtu.be/", true)
 }
 
 suspend fun searchExperimentalVideos(

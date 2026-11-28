@@ -50,6 +50,8 @@ import com.metrolist.android.ui.component.tabContentTopPadding
 import com.metrolist.android.ui.utils.playSong
 import com.metrolist.shared.api.ExperimentalVideoFilter
 import com.metrolist.shared.api.ExperimentalVideoResult
+import com.metrolist.shared.api.experimentalVideoLinkId
+import com.metrolist.shared.api.looksLikeVideoLink
 import com.metrolist.shared.api.searchExperimentalVideos
 import com.metrolist.shared.generated.resources.Res
 import com.metrolist.shared.generated.resources.back
@@ -58,6 +60,7 @@ import com.metrolist.shared.generated.resources.experimental_video_channels
 import com.metrolist.shared.generated.resources.experimental_video_empty
 import com.metrolist.shared.generated.resources.experimental_video_error
 import com.metrolist.shared.generated.resources.experimental_video_hint
+import com.metrolist.shared.generated.resources.experimental_video_invalid_link
 import com.metrolist.shared.generated.resources.experimental_video_live
 import com.metrolist.shared.generated.resources.experimental_video_not_ready
 import com.metrolist.shared.generated.resources.experimental_video_search
@@ -65,6 +68,7 @@ import com.metrolist.shared.generated.resources.experimental_video_title
 import com.metrolist.shared.generated.resources.experimental_video_videos
 import com.metrolist.shared.generated.resources.experimental_video_warning
 import com.metrolist.shared.generated.resources.search
+import com.metrolist.shared.state.GlobalYouTubeRepository
 import com.metrolist.shared.ui.components.LiquidGlassChip
 import com.metrolist.shared.ui.components.LiquidGlassCompactButton
 import kotlinx.coroutines.CancellationException
@@ -77,23 +81,52 @@ fun ExperimentalVideoScreen(
 ) {
     var input by rememberSaveable { mutableStateOf("") }
     var submitted by rememberSaveable { mutableStateOf("") }
-    var requestNumber by remember { mutableStateOf(0) }
+    var requestNumber by rememberSaveable { mutableStateOf(0) }
+    var lastOpenedLinkRequest by rememberSaveable { mutableStateOf(-1) }
     var filter by rememberSaveable { mutableStateOf(ExperimentalVideoFilter.ALL) }
     var results by remember { mutableStateOf<List<ExperimentalVideoResult>>(emptyList()) }
     var loading by remember { mutableStateOf(false) }
     var failed by remember { mutableStateOf(false) }
+    var invalidLink by remember { mutableStateOf(false) }
     val player = LocalPlayerConnection.current
     val context = LocalContext.current
     val keyboard = LocalSoftwareKeyboardController.current
     val scope = rememberCoroutineScope()
     val playerNotReady = stringResource(Res.string.experimental_video_not_ready)
-    LaunchedEffect(submitted, filter, requestNumber) {
+    val linkInput = looksLikeVideoLink(submitted)
+    LaunchedEffect(submitted, if (linkInput) null else filter, requestNumber) {
         results = emptyList()
         failed = false
+        invalidLink = false
         if (submitted.isNotBlank()) {
             loading = true
             try {
-                results = searchExperimentalVideos(submitted, filter)
+                if (linkInput) {
+                    val id = experimentalVideoLinkId(submitted)
+                    if (id == null) {
+                        invalidLink = true
+                    } else {
+                        val info = GlobalYouTubeRepository.instance.getSongPlayerInformation(id)
+                        val title = info?.title
+                        if (info == null || title.isNullOrBlank()) {
+                            failed = true
+                        } else {
+                            val video = ExperimentalVideoResult(id, title, info.thumbnail, info.artist, null, false, info.isLive)
+                            results = listOf(video)
+                            if (lastOpenedLinkRequest != requestNumber) {
+                                if (player == null) {
+                                    Toast.makeText(context, playerNotReady, Toast.LENGTH_SHORT).show()
+                                } else {
+                                    lastOpenedLinkRequest = requestNumber
+                                    onVideoSelected(id)
+                                    playSong(video.toSong(), player, scope, startVideo = true)
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    results = searchExperimentalVideos(submitted, filter)
+                }
             } catch (e: CancellationException) {
                 throw e
             } catch (_: Exception) {
@@ -169,8 +202,9 @@ fun ExperimentalVideoScreen(
                 }
             }
             if (loading) CircularProgressIndicator(Modifier.size(32.dp))
+            if (invalidLink) Text(stringResource(Res.string.experimental_video_invalid_link), color = MaterialTheme.colorScheme.error)
             if (failed) Text(stringResource(Res.string.experimental_video_error))
-            if (!loading && !failed && submitted.isNotBlank() &&
+            if (!loading && !failed && !invalidLink && submitted.isNotBlank() &&
                 results.isEmpty()
             ) {
                 Text(stringResource(Res.string.experimental_video_empty))
