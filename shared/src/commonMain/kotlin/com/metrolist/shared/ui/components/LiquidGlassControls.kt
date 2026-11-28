@@ -1,9 +1,11 @@
 package com.metrolist.shared.ui.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
@@ -14,6 +16,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 
 /** Filled action with a real platform backdrop when the Liquid Glass theme is enabled. */
@@ -124,6 +127,29 @@ fun LiquidGlassIconButton(
                 },
             content = content,
         )
+    }
+}
+
+/** Backdrop for a slider's full touch target without changing its gesture or accessibility semantics. */
+@Composable
+fun LiquidGlassSliderContainer(
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit,
+) {
+    val glass = liquidGlassBackdropReady()
+    val shape = RoundedCornerShape(24.dp)
+    val border = if (glass) glassCardBorder() else null
+    val tint = if (glass) glassCardColor(MaterialTheme.colorScheme.surfaceContainer) else androidx.compose.ui.graphics.Color.Transparent
+    LiquidGlassSurface(
+        radius = 24.dp,
+        modifier = if (glass) modifier.clip(shape) else modifier,
+        enabled = glass,
+    ) {
+        androidx.compose.foundation.layout.Box(
+            Modifier
+                .then(if (glass) Modifier.background(tint, shape) else Modifier)
+                .then(if (border != null) Modifier.border(border, shape) else Modifier),
+        ) { content() }
     }
 }
 
