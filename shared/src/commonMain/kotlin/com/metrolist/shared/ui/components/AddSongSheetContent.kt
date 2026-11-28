@@ -14,19 +14,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.SearchBarValue
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -136,49 +131,57 @@ fun AddSongSheetContent(
                 }
         }
 
+        val searchGlass = liquidGlassBackdropReady()
         val searchBarColors =
             SearchBarDefaults.colors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                containerColor =
+                    if (searchGlass) {
+                        glassCardColor(MaterialTheme.colorScheme.surfaceContainerHigh)
+                    } else {
+                        MaterialTheme.colorScheme.surfaceContainerHigh
+                    },
             )
 
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
             // Keep inline search editable; the collapsed SearchBar disables the keyboard.
-            Surface(
-                shape = SearchBarDefaults.inputFieldShape,
-                content = {
-                    SearchBarDefaults.InputField(
-                        textFieldState = textFieldState,
-                        searchBarState = searchBarState,
-                        onSearch = { search(textFieldState.text.toString()) },
-                        modifier = Modifier.weight(1f),
-                        placeholder = { Text(stringResource(Res.string.search_songs)) },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = MetrolistIcons.Default.Search,
-                                contentDescription = null,
-                            )
-                        },
-                        trailingIcon = {
-                            if (query.isNotEmpty()) {
-                                IconButton(onClick = { query = "" }, shapes = IconButtonDefaults.shapes()) {
-                                    Icon(
-                                        imageVector = MetrolistIcons.Default.Clear,
-                                        contentDescription = stringResource(Res.string.clear_search),
-                                    )
+            LiquidGlassSurface(radius = 28.dp, modifier = Modifier.weight(1f), enabled = searchGlass) {
+                Surface(
+                    shape = SearchBarDefaults.inputFieldShape,
+                    content = {
+                        SearchBarDefaults.InputField(
+                            textFieldState = textFieldState,
+                            searchBarState = searchBarState,
+                            onSearch = { search(textFieldState.text.toString()) },
+                            modifier = Modifier.fillMaxWidth(),
+                            placeholder = { Text(stringResource(Res.string.search_songs)) },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = MetrolistIcons.Default.Search,
+                                    contentDescription = null,
+                                )
+                            },
+                            trailingIcon = {
+                                if (query.isNotEmpty()) {
+                                    LiquidGlassIconButton(onClick = { query = "" }) {
+                                        Icon(
+                                            imageVector = MetrolistIcons.Default.Clear,
+                                            contentDescription = stringResource(Res.string.clear_search),
+                                        )
+                                    }
                                 }
-                            }
-                        },
-                        colors = searchBarColors.inputFieldColors,
-                    )
-                },
-                modifier = Modifier.weight(1f),
-                color = searchBarColors.containerColor,
-                tonalElevation = 0.dp,
-                shadowElevation = 0.dp,
-            )
-            Button(
+                            },
+                            colors = searchBarColors.inputFieldColors,
+                        )
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    color = searchBarColors.containerColor,
+                    border = if (searchGlass) glassCardBorder() else null,
+                    tonalElevation = 0.dp,
+                    shadowElevation = 0.dp,
+                )
+            }
+            LiquidGlassCompactButton(
                 onClick = { search(query) },
-                shapes = ButtonDefaults.shapes(),
             ) {
                 Text(stringResource(Res.string.search))
             }
@@ -218,17 +221,16 @@ fun AddSongSheetContent(
             title = { Text(stringResource(Res.string.duplicate_song)) },
             text = { Text(stringResource(Res.string.song_already_in_playlist, song.title)) },
             confirmButton = {
-                TextButton(
+                LiquidGlassTextButton(
                     onClick = {
                         onAddSong(song, true)
                         duplicateSong = null
                         onDismiss()
                     },
-                    shapes = ButtonDefaults.shapes(),
                 ) { Text(stringResource(Res.string.add_anyway)) }
             },
             dismissButton = {
-                TextButton(onClick = { duplicateSong = null }, shapes = ButtonDefaults.shapes()) { Text(stringResource(Res.string.skip)) }
+                LiquidGlassTextButton(onClick = { duplicateSong = null }) { Text(stringResource(Res.string.skip)) }
             },
         )
     }
