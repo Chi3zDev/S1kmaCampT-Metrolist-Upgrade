@@ -30,7 +30,6 @@ import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenuGroup
 import androidx.compose.material3.DropdownMenuItem
@@ -43,7 +42,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
@@ -147,6 +145,7 @@ import com.metrolist.shared.ui.components.ChipShelf
 import com.metrolist.shared.ui.components.FabMenuPopup
 import com.metrolist.shared.ui.components.LibraryItemContainer
 import com.metrolist.shared.ui.components.LiquidGlassSurface
+import com.metrolist.shared.ui.components.LiquidGlassTextButton
 import com.metrolist.shared.ui.components.PlaylistDeleteConfirmation
 import com.metrolist.shared.ui.components.PopupVisibility
 import com.metrolist.shared.ui.components.RefreshIndicator
@@ -927,7 +926,7 @@ fun LibraryScreen(
                 )
             },
             confirmButton = {
-                TextButton(
+                LiquidGlassTextButton(
                     enabled = !deleteConfirmation.isSubmitting(request),
                     onClick = {
                         deleteConfirmation.confirm(request, viewModel::deletePlaylist) {
@@ -936,15 +935,13 @@ fun LibraryScreen(
                             }
                         }
                     },
-                    shapes = ButtonDefaults.shapes(),
                 ) {
                     Text(stringResource(if (deletesPlaylist) Res.string.delete else Res.string.remove_from_library))
                 }
             },
             dismissButton = {
-                TextButton(
+                LiquidGlassTextButton(
                     onClick = { deleteConfirmation.dismiss(request) },
-                    shapes = ButtonDefaults.shapes(),
                 ) { Text(stringResource(Res.string.cancel)) }
             },
         )
@@ -1014,15 +1011,14 @@ private fun PlaylistNameDialog(
             }
         },
         confirmButton = {
-            TextButton(
+            LiquidGlassTextButton(
                 enabled = value.isNotBlank(),
                 onClick = onConfirm,
                 modifier = Modifier.tvFocusHighlight(CircleShape),
-                shapes = ButtonDefaults.shapes(),
             ) { Text(confirmLabel) }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss, modifier = Modifier.tvFocusHighlight(CircleShape), shapes = ButtonDefaults.shapes()) {
+            LiquidGlassTextButton(onClick = onDismiss, modifier = Modifier.tvFocusHighlight(CircleShape)) {
                 Text(stringResource(Res.string.cancel))
             }
         },
