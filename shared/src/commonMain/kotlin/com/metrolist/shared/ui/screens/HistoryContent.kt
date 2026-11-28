@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
@@ -30,7 +31,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -49,6 +49,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -102,15 +103,21 @@ import com.metrolist.shared.model.SortDirection
 import com.metrolist.shared.model.groupHistory
 import com.metrolist.shared.model.historyEntryTimeText
 import com.metrolist.shared.model.toggleDisplayedHistorySelection
+import com.metrolist.shared.settings.Settings
 import com.metrolist.shared.ui.components.AlertDialog
 import com.metrolist.shared.ui.components.ContainedLoadingIndicator
 import com.metrolist.shared.ui.components.HistoryEntryGroupPosition
 import com.metrolist.shared.ui.components.HistoryEntryRow
 import com.metrolist.shared.ui.components.HistoryFilterBar
 import com.metrolist.shared.ui.components.HistoryFilterBarText
+import com.metrolist.shared.ui.components.LiquidGlassIconButton
+import com.metrolist.shared.ui.components.LiquidGlassSurface
+import com.metrolist.shared.ui.components.LocalThemeGlassBackdrop
 import com.metrolist.shared.ui.components.PopupContent
 import com.metrolist.shared.ui.components.PopupVisibility
 import com.metrolist.shared.ui.components.RefreshIndicator
+import com.metrolist.shared.ui.components.glassCardBorder
+import com.metrolist.shared.ui.components.glassCardColor
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import com.metrolist.shared.ui.menu.SongSelectionMenuSheet
 import com.metrolist.shared.ui.menu.historySelectionMenuModel
@@ -233,27 +240,39 @@ fun HistoryContent(
                 moreEnabled = true,
             )
         } else if (onNavigateBack != null) {
-            Row(
-                Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
-                verticalAlignment = Alignment.CenterVertically,
+            val glass = Settings.shared.liquidGlassTheme && LocalThemeGlassBackdrop.current != null
+            LiquidGlassSurface(
+                radius = 24.dp,
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
+                enabled = glass,
             ) {
-                IconButton(
-                    onClick = onNavigateBack,
-                    modifier = Modifier.tvFocusHighlight(CircleShape),
-                    shapes = IconButtonDefaults.shapes(),
+                Surface(
+                    shape = RoundedCornerShape(24.dp),
+                    color = if (glass) glassCardColor(MaterialTheme.colorScheme.surfaceContainer) else Color.Transparent,
+                    border = if (glass) glassCardBorder() else null,
                 ) {
-                    Icon(
-                        MetrolistIcons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = stringResource(Res.string.back),
-                    )
+                    Row(
+                        Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        LiquidGlassIconButton(
+                            onClick = onNavigateBack,
+                            modifier = Modifier.tvFocusHighlight(CircleShape),
+                        ) {
+                            Icon(
+                                MetrolistIcons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = stringResource(Res.string.back),
+                            )
+                        }
+                        Text(
+                            stringResource(Res.string.history),
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.weight(1f),
+                        )
+                        headerActions()
+                    }
                 }
-                Text(
-                    stringResource(Res.string.history),
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.weight(1f),
-                )
-                headerActions()
             }
         } else {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) { headerActions() }
