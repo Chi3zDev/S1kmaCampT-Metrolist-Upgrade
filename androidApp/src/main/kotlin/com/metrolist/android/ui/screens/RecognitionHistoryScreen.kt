@@ -2,14 +2,10 @@
 
 package com.metrolist.android.ui.screens
 
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -28,6 +24,8 @@ import com.metrolist.shared.generated.resources.clear_recognition_history_descri
 import com.metrolist.shared.generated.resources.clear_recognition_history_question
 import com.metrolist.shared.generated.resources.recognition_history
 import com.metrolist.shared.ui.components.AlertDialog
+import com.metrolist.shared.ui.components.LiquidGlassIconButton
+import com.metrolist.shared.ui.components.LiquidGlassTextButton
 import com.metrolist.shared.ui.components.PopupVisibility
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import kotlinx.coroutines.Dispatchers
@@ -54,7 +52,7 @@ fun RecognitionHistoryScreen(onNavigateBack: () -> Unit) {
         title = stringResource(Res.string.recognition_history),
         onNavigateBack = onNavigateBack,
         actions = {
-            IconButton(onClick = { confirmClearHistory = true }, enabled = history.isNotEmpty(), shapes = IconButtonDefaults.shapes()) {
+            LiquidGlassIconButton(onClick = { confirmClearHistory = true }, enabled = history.isNotEmpty()) {
                 Icon(
                     imageVector = MetrolistIcons.Outlined.Delete,
                     contentDescription = stringResource(Res.string.clear),
@@ -84,18 +82,17 @@ fun RecognitionHistoryScreen(onNavigateBack: () -> Unit) {
             title = { Text(stringResource(Res.string.clear_recognition_history_question)) },
             text = { Text(stringResource(Res.string.clear_recognition_history_description)) },
             confirmButton = {
-                TextButton(
+                LiquidGlassTextButton(
                     onClick = {
                         confirmClearHistory = false
                         scope.launch(Dispatchers.IO) { database.dao().clearRecognitionHistory() }
                     },
-                    shapes = ButtonDefaults.shapes(),
                 ) {
                     Text(stringResource(Res.string.clear), color = MaterialTheme.colorScheme.error)
                 }
             },
             dismissButton = {
-                TextButton(onClick = { confirmClearHistory = false }, shapes = ButtonDefaults.shapes()) {
+                LiquidGlassTextButton(onClick = { confirmClearHistory = false }) {
                     Text(stringResource(Res.string.cancel))
                 }
             },
