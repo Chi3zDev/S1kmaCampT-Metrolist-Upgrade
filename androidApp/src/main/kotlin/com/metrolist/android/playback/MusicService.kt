@@ -557,7 +557,9 @@ class MusicService :
                     streamRecoveryVideoId = null
                     streamRecoveryBudget = null
                 },
-                onVideoSelected = { song -> videoMode.selectVideoForQueue(song) },
+                onQueueSelected = { song, startVideo ->
+                    videoMode.prepareQueueSelection(song, startVideo)
+                },
                 castState = { castManager.state.value },
             )
         transitions =

@@ -200,6 +200,17 @@ internal class AndroidVideoModeController(
         if ((_isVideoModeActive.value || _isVideoModeResolving.value) && song?.id != videoModeSongId) clearVideoMode()
     }
 
+    fun prepareQueueSelection(
+        song: SongItem,
+        startVideo: Boolean,
+    ) {
+        // General video should not leave the music player stuck in video mode for the next selection.
+        if (player.currentSong.value?.isGeneralVideo == true && !song.isGeneralVideo && !startVideo) {
+            clearVideoMode(resetViewerPreference = true)
+        }
+        if (startVideo) selectVideoForQueue(song)
+    }
+
     fun selectVideoForQueue(song: SongItem) {
         if (!song.isVideoSong || song.isPodcast || !Settings.shared.musicVideoPlaybackEnabled || song.isLocal ||
             song.id.startsWith("local_")

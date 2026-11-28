@@ -61,7 +61,7 @@ internal class AndroidQueueCoordinator(
     private val _shuffleModeEnabled: MutableStateFlow<Boolean>,
     private val onSave: () -> Unit,
     private val onSessionReset: () -> Unit,
-    private val onVideoSelected: (SongItem) -> Unit = {},
+    private val onQueueSelected: (SongItem, Boolean) -> Unit = { _, _ -> },
     private val castState: () -> CastState = { CastState() },
 ) {
     companion object {
@@ -372,7 +372,7 @@ internal class AndroidQueueCoordinator(
             return
         }
         replaceQueueSession(playableSongs, adjustedStartIndex, queueTitle, finite ?: true, playlistPage, radioQueue) {
-            if (startVideo && !fromRemote) onVideoSelected(playableSongs[adjustedStartIndex])
+            if (!fromRemote) onQueueSelected(playableSongs[adjustedStartIndex], startVideo)
             player.setQueue(
                 songs = playableSongs,
                 startIndex = adjustedStartIndex,
