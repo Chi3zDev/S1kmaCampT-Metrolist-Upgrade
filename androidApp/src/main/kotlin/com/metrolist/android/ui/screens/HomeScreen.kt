@@ -111,9 +111,11 @@ import com.metrolist.shared.ui.LocalPlayerEffectsAllowed
 import com.metrolist.shared.ui.PolishMotion
 import com.metrolist.shared.ui.components.ChipShelf
 import com.metrolist.shared.ui.components.HomeLoadingPlaceholder
+import com.metrolist.shared.ui.components.LiquidGlassSurface
 import com.metrolist.shared.ui.components.PopupVisibility
 import com.metrolist.shared.ui.components.RefreshIndicator
 import com.metrolist.shared.ui.components.glassEdgeBrush
+import com.metrolist.shared.ui.components.liquidGlassBackdropReady
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import com.metrolist.shared.ui.navigation.LocalRootContentActive
 import com.metrolist.shared.ui.screens.HomeContent
@@ -198,7 +200,10 @@ fun HomeScreen(
     var isRefreshing by remember { mutableStateOf(false) }
     val showTopRefreshIndicator = isRefreshing || uiState.isRefreshing
     val isTv = LocalIsTv.current
-    val glassActions = (Settings.shared.glassNavigation || Settings.shared.liquidGlassTheme) && Settings.shared.glassFloatingActions
+    val themeGlassActions = liquidGlassBackdropReady()
+    val glassActions =
+        themeGlassActions ||
+            (!Settings.shared.liquidGlassTheme && Settings.shared.glassNavigation && Settings.shared.glassFloatingActions)
     val glassActionTint =
         when (Settings.shared.glassStyle) {
             "FROSTED" -> 0.9f
@@ -450,31 +455,35 @@ fun HomeScreen(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    SmallFloatingActionButton(
-                        onClick = onNavigateToRecognition,
-                        modifier = if (glassActions) Modifier.border(glassActionBorder, RoundedCornerShape(16.dp)) else Modifier,
-                        shape = RoundedCornerShape(if (glassActions) 16.dp else 8.dp),
-                        containerColor = if (glassActions) glassActionColor else MaterialTheme.colorScheme.primaryContainer,
-                        contentColor =
-                            if (glassActions) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onPrimaryContainer,
-                    ) {
-                        Icon(
-                            imageVector = MetrolistIcons.Outlined.AudioCapture,
-                            contentDescription = stringResource(Res.string.recognize_music),
-                        )
+                    LiquidGlassSurface(radius = 16.dp, enabled = themeGlassActions) {
+                        SmallFloatingActionButton(
+                            onClick = onNavigateToRecognition,
+                            modifier = if (glassActions) Modifier.border(glassActionBorder, RoundedCornerShape(16.dp)) else Modifier,
+                            shape = RoundedCornerShape(if (glassActions) 16.dp else 8.dp),
+                            containerColor = if (glassActions) glassActionColor else MaterialTheme.colorScheme.primaryContainer,
+                            contentColor =
+                                if (glassActions) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onPrimaryContainer,
+                        ) {
+                            Icon(
+                                imageVector = MetrolistIcons.Outlined.AudioCapture,
+                                contentDescription = stringResource(Res.string.recognize_music),
+                            )
+                        }
                     }
-                    FloatingActionButton(
-                        onClick = ::shuffleHomeContent,
-                        modifier = if (glassActions) Modifier.border(glassActionBorder, RoundedCornerShape(16.dp)) else Modifier,
-                        shape = RoundedCornerShape(if (glassActions) 16.dp else 12.dp),
-                        containerColor = if (glassActions) glassActionColor else MaterialTheme.colorScheme.primaryContainer,
-                        contentColor =
-                            if (glassActions) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onPrimaryContainer,
-                    ) {
-                        Icon(
-                            imageVector = MetrolistIcons.Rounded.Shuffle,
-                            contentDescription = stringResource(Res.string.shuffle),
-                        )
+                    LiquidGlassSurface(radius = 16.dp, enabled = themeGlassActions) {
+                        FloatingActionButton(
+                            onClick = ::shuffleHomeContent,
+                            modifier = if (glassActions) Modifier.border(glassActionBorder, RoundedCornerShape(16.dp)) else Modifier,
+                            shape = RoundedCornerShape(if (glassActions) 16.dp else 12.dp),
+                            containerColor = if (glassActions) glassActionColor else MaterialTheme.colorScheme.primaryContainer,
+                            contentColor =
+                                if (glassActions) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onPrimaryContainer,
+                        ) {
+                            Icon(
+                                imageVector = MetrolistIcons.Rounded.Shuffle,
+                                contentDescription = stringResource(Res.string.shuffle),
+                            )
+                        }
                     }
                 }
             }
