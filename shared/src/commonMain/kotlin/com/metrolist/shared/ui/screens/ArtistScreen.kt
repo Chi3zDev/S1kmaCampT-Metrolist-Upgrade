@@ -164,6 +164,8 @@ import com.metrolist.shared.ui.components.CollectionPreviews
 import com.metrolist.shared.ui.components.ExpandableText
 import com.metrolist.shared.ui.components.ExplicitBadge
 import com.metrolist.shared.ui.components.FittingText
+import com.metrolist.shared.ui.components.LiquidGlassIconButton
+import com.metrolist.shared.ui.components.LiquidGlassSurface
 import com.metrolist.shared.ui.components.ListItemTitle
 import com.metrolist.shared.ui.components.LocalDownloadedSongIds
 import com.metrolist.shared.ui.components.LocalThemeGlassBackdrop
@@ -599,51 +601,62 @@ private fun ArtistScreenContent(
             }
             LaunchedEffect(showAppBar) { onAppBarVisibleChange(showAppBar) }
             val progress by animateFloatAsState(if (showAppBar) 1f else 0f, MaterialTheme.motionScheme.fastEffectsSpec())
-            val surface = MaterialTheme.colorScheme.surface
-            val iconColor = lerp(Color.White, MaterialTheme.colorScheme.onSurface, progress)
-            val buttonModifier = Modifier.drawBehind { drawCircle(Color.Black, alpha = 0.4f * (1f - progress)) }
-            TopAppBar(
-                title = {
-                    Text(
-                        artist.displayTitle,
-                        modifier =
-                            Modifier
-                                .graphicsLayer { alpha = progress }
-                                .then(if (isPlaceholder) Modifier.clearAndSetSemantics {} else Modifier),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
+            val glass = Settings.shared.liquidGlassTheme
+            val surface = if (glass) glassCardColor(MaterialTheme.colorScheme.surface) else MaterialTheme.colorScheme.surface
+            val iconColor =
+                if (glass) {
+                    MaterialTheme.colorScheme.onSurface
+                } else {
+                    lerp(
+                        Color.White,
+                        MaterialTheme.colorScheme.onSurface,
+                        progress,
                     )
-                },
-                navigationIcon = {
-                    if (onBackClick != null) {
-                        IconButton(onClick = onBackClick, modifier = buttonModifier, shapes = IconButtonDefaults.shapes()) {
-                            Icon(MetrolistIcons.AutoMirrored.Filled.ArrowBack, stringResource(Res.string.back), tint = iconColor)
+                }
+            val buttonModifier = if (glass) Modifier else Modifier.drawBehind { drawCircle(Color.Black, alpha = 0.4f * (1f - progress)) }
+            LiquidGlassSurface(radius = 0.dp, modifier = Modifier.fillMaxWidth()) {
+                TopAppBar(
+                    title = {
+                        Text(
+                            artist.displayTitle,
+                            modifier =
+                                Modifier
+                                    .graphicsLayer { alpha = progress }
+                                    .then(if (isPlaceholder) Modifier.clearAndSetSemantics {} else Modifier),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    },
+                    navigationIcon = {
+                        if (onBackClick != null) {
+                            LiquidGlassIconButton(onClick = onBackClick, modifier = buttonModifier) {
+                                Icon(MetrolistIcons.AutoMirrored.Filled.ArrowBack, stringResource(Res.string.back), tint = iconColor)
+                            }
                         }
-                    }
-                },
-                actions = {
-                    if (onRefreshClick != null) {
-                        IconButton(onClick = onRefreshClick, modifier = buttonModifier, shapes = IconButtonDefaults.shapes()) {
-                            Icon(MetrolistIcons.Outlined.Refresh, stringResource(Res.string.artist_refresh), tint = iconColor)
+                    },
+                    actions = {
+                        if (onRefreshClick != null) {
+                            LiquidGlassIconButton(onClick = onRefreshClick, modifier = buttonModifier) {
+                                Icon(MetrolistIcons.Outlined.Refresh, stringResource(Res.string.artist_refresh), tint = iconColor)
+                            }
                         }
-                    }
-                    if (barMenuClick != null) {
-                        IconButton(
-                            onClick = barMenuClick,
-                            modifier = buttonModifier.navigationPopupSource(),
-                            shapes = IconButtonDefaults.shapes(),
-                        ) {
-                            Icon(MetrolistIcons.Default.MoreVert, stringResource(Res.string.artist_actions), tint = iconColor)
+                        if (barMenuClick != null) {
+                            LiquidGlassIconButton(
+                                onClick = barMenuClick,
+                                modifier = buttonModifier.navigationPopupSource(),
+                            ) {
+                                Icon(MetrolistIcons.Default.MoreVert, stringResource(Res.string.artist_actions), tint = iconColor)
+                            }
                         }
-                    }
-                },
-                modifier =
-                    Modifier
-                        .onGloballyPositioned { appBarBottom.floatValue = it.boundsInWindow().bottom }
-                        .drawBehind { drawRect(surface, alpha = progress) },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
-                windowInsets = headerWindowInsets,
-            )
+                    },
+                    modifier =
+                        Modifier
+                            .onGloballyPositioned { appBarBottom.floatValue = it.boundsInWindow().bottom }
+                            .drawBehind { drawRect(surface, alpha = progress) },
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
+                    windowInsets = headerWindowInsets,
+                )
+            }
         }
     }
 }
