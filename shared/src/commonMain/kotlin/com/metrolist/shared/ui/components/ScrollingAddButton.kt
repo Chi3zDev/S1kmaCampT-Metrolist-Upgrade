@@ -9,6 +9,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
@@ -20,6 +21,7 @@ import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -150,6 +152,8 @@ fun ScrollingAddButton(
     val spatial = MaterialTheme.motionScheme.fastSpatialSpec<IntOffset>()
     val labelSpatial = MaterialTheme.motionScheme.fastSpatialSpec<IntSize>()
     val expanded = isTv || state == ScrollingFabState.Expanded
+    val glass = liquidGlassBackdropReady()
+    val border = if (glass) glassCardBorder() else null
     AnimatedVisibility(
         visible = visible && (isTv || state != ScrollingFabState.Hidden),
         modifier = modifier,
@@ -157,25 +161,44 @@ fun ScrollingAddButton(
         exit = fadeOut(effects) + slideOutVertically(spatial) { it / 2 },
     ) {
         Box {
-            FloatingActionButton(
-                onClick = onClick,
-                modifier =
-                    Modifier
-                        .navigationPopupSource(
-                            FloatingActionButtonDefaults.shape,
-                        ).tvFocusHighlight(FloatingActionButtonDefaults.shape),
-            ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
+            LiquidGlassSurface(radius = 16.dp, enabled = glass) {
+                FloatingActionButton(
+                    onClick = onClick,
+                    containerColor =
+                        if (glass) {
+                            glassCardColor(
+                                MaterialTheme.colorScheme.surfaceContainerHigh,
+                            )
+                        } else {
+                            FloatingActionButtonDefaults.containerColor
+                        },
+                    contentColor =
+                        if (glass) {
+                            MaterialTheme.colorScheme.onSurface
+                        } else {
+                            contentColorFor(
+                                FloatingActionButtonDefaults.containerColor,
+                            )
+                        },
+                    modifier =
+                        Modifier
+                            .navigationPopupSource(
+                                FloatingActionButtonDefaults.shape,
+                            ).tvFocusHighlight(FloatingActionButtonDefaults.shape)
+                            .then(if (border != null) Modifier.border(border, FloatingActionButtonDefaults.shape) else Modifier),
                 ) {
-                    Icon(MetrolistIcons.Default.Add, contentDescription = label.takeUnless { expanded })
-                    AnimatedVisibility(
-                        visible = expanded,
-                        enter = expandHorizontally(labelSpatial, expandFrom = Alignment.Start) + fadeIn(effects),
-                        exit = shrinkHorizontally(labelSpatial, shrinkTowards = Alignment.Start) + fadeOut(effects),
+                    Row(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Text(label, modifier = Modifier.padding(start = 12.dp, end = 4.dp), style = MaterialTheme.typography.labelLarge)
+                        Icon(MetrolistIcons.Default.Add, contentDescription = label.takeUnless { expanded })
+                        AnimatedVisibility(
+                            visible = expanded,
+                            enter = expandHorizontally(labelSpatial, expandFrom = Alignment.Start) + fadeIn(effects),
+                            exit = shrinkHorizontally(labelSpatial, shrinkTowards = Alignment.Start) + fadeOut(effects),
+                        ) {
+                            Text(label, modifier = Modifier.padding(start = 12.dp, end = 4.dp), style = MaterialTheme.typography.labelLarge)
+                        }
                     }
                 }
             }
