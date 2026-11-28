@@ -135,6 +135,7 @@ import com.metrolist.shared.ui.components.appPageBackground
 import com.metrolist.shared.ui.components.glassCardBorder
 import com.metrolist.shared.ui.components.glassCardColor
 import com.metrolist.shared.ui.components.images.AsyncImage
+import com.metrolist.shared.ui.components.liquidGlassBackdropReady
 import com.metrolist.shared.ui.components.rememberScrollingFabState
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import com.metrolist.shared.ui.menu.artworkMenuActions
@@ -294,13 +295,7 @@ fun StatisticsScreen(
                 Surface(Modifier.fillMaxSize(), color = appPageBackground(MaterialTheme.colorScheme.surface)) {
                     Box(Modifier.fillMaxSize()) {
                         Column(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.statusBars)) {
-                            Row(
-                                Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                onNavigateBack?.let { BackButton(it) }
-                                Spacer(Modifier.weight(1f))
-                            }
+                            StatisticsBackBar(onNavigateBack)
                             StatisticsRefreshIndicator(state.isLoading && state.hasLoaded)
                             state.errorMessage?.let {
                                 Text(
@@ -483,6 +478,28 @@ fun StatisticsScreen(
                         }
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun StatisticsBackBar(onBack: (() -> Unit)?) {
+    val glass = liquidGlassBackdropReady() && onBack != null
+    LiquidGlassSurface(
+        radius = 24.dp,
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
+        enabled = glass,
+    ) {
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(24.dp),
+            color = if (glass) glassCardColor(MaterialTheme.colorScheme.surfaceContainer) else Color.Transparent,
+            border = if (glass) glassCardBorder() else null,
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                onBack?.let { BackButton(it) }
+                Spacer(Modifier.weight(1f))
             }
         }
     }
@@ -701,7 +718,7 @@ fun StatisticsDetailScreen(
     val alpha by animateFloatAsState(if (isLoading) 0.7f else 1f, MaterialTheme.motionScheme.defaultEffectsSpec())
     Surface(modifier.fillMaxSize(), color = appPageBackground(MaterialTheme.colorScheme.surface)) {
         Column(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.statusBars)) {
-            Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp)) { BackButton(onNavigateBack) }
+            StatisticsBackBar(onNavigateBack)
             StatisticsRefreshIndicator(isLoading)
             errorMessage?.let { Text(it, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(16.dp)) }
             DragScrollableColumn(
