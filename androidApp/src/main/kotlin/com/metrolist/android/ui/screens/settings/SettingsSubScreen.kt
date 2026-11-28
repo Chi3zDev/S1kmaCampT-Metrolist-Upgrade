@@ -11,6 +11,7 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -37,8 +38,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -67,7 +66,13 @@ import com.metrolist.shared.generated.resources.Res
 import com.metrolist.shared.generated.resources.back
 import com.metrolist.shared.generated.resources.beta_tag
 import com.metrolist.shared.ui.LocalIsTv
+import com.metrolist.shared.ui.components.LiquidGlassIconButton
+import com.metrolist.shared.ui.components.LiquidGlassSurface
+import com.metrolist.shared.ui.components.LocalThemeGlassBackdrop
 import com.metrolist.shared.ui.components.appPageBackground
+import com.metrolist.shared.ui.components.glassCardBorder
+import com.metrolist.shared.ui.components.glassCardColor
+import com.metrolist.shared.ui.components.liquidGlassBackdropReady
 import com.metrolist.shared.ui.components.singleLineMarquee
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import com.metrolist.shared.ui.settings.LocalSettingsPageHasTopBar
@@ -91,6 +96,7 @@ fun SettingsSubScreen(
 ) {
     val scrollBehavior = rememberSettingsPageScrollBehavior(compactTopBar)
     val miniPlayerInset = LocalMiniPlayerBottomInset.current
+    val glass = liquidGlassBackdropReady()
 
     Scaffold(
         modifier = scrollBehavior?.let { modifier.nestedScroll(it.nestedScrollConnection) } ?: modifier,
@@ -100,40 +106,65 @@ fun SettingsSubScreen(
             if (LocalSettingsPageHasTopBar.current) {
                 Row(content = actions)
             } else if (compactTopBar) {
-                TopAppBar(
-                    title = {},
-                    navigationIcon = {
-                        IconButton(onClick = onNavigateBack, shapes = IconButtonDefaults.shapes()) {
-                            Icon(MetrolistIcons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(Res.string.back))
-                        }
-                    },
-                    actions = actions,
-                    colors =
-                        TopAppBarDefaults.topAppBarColors(
-                            containerColor = MaterialTheme.colorScheme.surface,
-                        ),
-                )
+                LiquidGlassSurface(radius = 0.dp, modifier = Modifier.fillMaxWidth(), enabled = glass) {
+                    TopAppBar(
+                        title = {},
+                        navigationIcon = {
+                            LiquidGlassIconButton(onClick = onNavigateBack) {
+                                Icon(MetrolistIcons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(Res.string.back))
+                            }
+                        },
+                        actions = actions,
+                        colors =
+                            TopAppBarDefaults.topAppBarColors(
+                                containerColor =
+                                    if (glass) {
+                                        glassCardColor(
+                                            MaterialTheme.colorScheme.surface,
+                                        )
+                                    } else {
+                                        MaterialTheme.colorScheme.surface
+                                    },
+                            ),
+                    )
+                }
             } else {
-                LargeFlexibleTopAppBar(
-                    title = {
-                        Text(
-                            text = title,
-                            fontWeight = MaterialTheme.typography.titleLargeEmphasized.fontWeight,
-                        )
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = onNavigateBack, shapes = IconButtonDefaults.shapes()) {
-                            Icon(MetrolistIcons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(Res.string.back))
-                        }
-                    },
-                    actions = actions,
-                    colors =
-                        TopAppBarDefaults.topAppBarColors(
-                            containerColor = MaterialTheme.colorScheme.surface,
-                            scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                        ),
-                    scrollBehavior = scrollBehavior,
-                )
+                LiquidGlassSurface(radius = 0.dp, modifier = Modifier.fillMaxWidth(), enabled = glass) {
+                    LargeFlexibleTopAppBar(
+                        title = {
+                            Text(
+                                text = title,
+                                fontWeight = MaterialTheme.typography.titleLargeEmphasized.fontWeight,
+                            )
+                        },
+                        navigationIcon = {
+                            LiquidGlassIconButton(onClick = onNavigateBack) {
+                                Icon(MetrolistIcons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(Res.string.back))
+                            }
+                        },
+                        actions = actions,
+                        colors =
+                            TopAppBarDefaults.topAppBarColors(
+                                containerColor =
+                                    if (glass) {
+                                        glassCardColor(
+                                            MaterialTheme.colorScheme.surface,
+                                        )
+                                    } else {
+                                        MaterialTheme.colorScheme.surface
+                                    },
+                                scrolledContainerColor =
+                                    if (glass) {
+                                        glassCardColor(
+                                            MaterialTheme.colorScheme.surfaceContainerHigh,
+                                        )
+                                    } else {
+                                        MaterialTheme.colorScheme.surfaceContainerHigh
+                                    },
+                            ),
+                        scrollBehavior = scrollBehavior,
+                    )
+                }
             }
         },
         floatingActionButton = {
@@ -260,7 +291,21 @@ internal fun SettingsSubScreenItemRow(
         label = "backgroundColor",
     )
 
+    val glass = liquidGlassBackdropReady()
+    val glassBorder = if (glass) glassCardBorder() else null
+    val tint =
+        when {
+            glass && isPressed -> MaterialTheme.colorScheme.primary.copy(alpha = 0.32f)
+            glass -> glassCardColor(backgroundColor)
+            else -> backgroundColor
+        }
     Box(item.modifier) {
+        if (glass) {
+            LocalThemeGlassBackdrop.current?.Background(
+                radius = 20.dp,
+                modifier = Modifier.matchParentSize().padding(horizontal = 16.dp).clip(shape),
+            )
+        }
         Row(
             modifier =
                 Modifier
@@ -269,9 +314,10 @@ internal fun SettingsSubScreenItemRow(
                     .padding(horizontal = 16.dp)
                     .clip(shape)
                     .background(
-                        color = backgroundColor,
+                        color = tint,
                         shape = shape,
-                    ).tvFocusHighlight(shape)
+                    ).then(if (glassBorder != null) Modifier.border(glassBorder, shape) else Modifier)
+                    .tvFocusHighlight(shape)
                     .then(
                         if (item.checked != null) {
                             Modifier.toggleable(
