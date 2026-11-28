@@ -16,20 +16,16 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -37,6 +33,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
@@ -111,8 +108,14 @@ fun ConnectedDevicesContent(
                         heading()
                     },
             )
-            FilledTonalIconButton(onClick = onClose, modifier = closeButtonModifier, shapes = IconButtonDefaults.shapes()) {
-                Icon(MetrolistIcons.Outlined.Close, stringResource(Res.string.close))
+            if (liquidGlassBackdropReady()) {
+                LiquidGlassIconButton(onClick = onClose, modifier = closeButtonModifier) {
+                    Icon(MetrolistIcons.Outlined.Close, stringResource(Res.string.close))
+                }
+            } else {
+                FilledTonalIconButton(onClick = onClose, modifier = closeButtonModifier, shapes = IconButtonDefaults.shapes()) {
+                    Icon(MetrolistIcons.Outlined.Close, stringResource(Res.string.close))
+                }
             }
         }
         if (empty) {
@@ -225,7 +228,7 @@ fun ConnectedDevicesContent(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Box {
-                    TextButton(onClick = { showDefaults = true }, shapes = ButtonDefaults.shapes()) {
+                    LiquidGlassTextButton(onClick = { showDefaults = true }) {
                         Text(pairedDevices.firstOrNull { it.deviceId == defaultDeviceId }?.deviceName ?: stringResource(Res.string.none))
                     }
                     LiquidGlassDropdownMenu(expanded = showDefaults, onDismissRequest = { showDefaults = false }) {
@@ -249,7 +252,7 @@ fun ConnectedDevicesContent(
                 }
             }
             if (!deviceState.enabled && onEnableDeviceConnect != null) {
-                Button(onClick = onEnableDeviceConnect, modifier = Modifier.fillMaxWidth(), shapes = ButtonDefaults.shapes()) {
+                LiquidGlassButton(onClick = onEnableDeviceConnect, modifier = Modifier.fillMaxWidth()) {
                     Text(
                         stringResource(
                             if (permissionRequired) Res.string.device_connect_grant_permission else Res.string.device_connect_enable,
@@ -329,37 +332,62 @@ private fun ConnectedDeviceRow(
     connecting: Boolean = false,
     enabled: Boolean = true,
 ) {
-    Surface(
-        onClick = onClick,
-        enabled = enabled,
-        color = MaterialTheme.colorScheme.surfaceContainerLowest,
-        shape =
-            RoundedCornerShape(
-                topStart = if (index == 0) 20.dp else 5.dp,
-                topEnd = if (index == 0) 20.dp else 5.dp,
-                bottomStart = if (index == count - 1) 20.dp else 5.dp,
-                bottomEnd = if (index == count - 1) 20.dp else 5.dp,
-            ),
-    ) {
-        Row(
-            Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
+    val glass = liquidGlassBackdropReady()
+    val shape =
+        RoundedCornerShape(
+            topStart = if (index == 0) 20.dp else 5.dp,
+            topEnd = if (index == 0) 20.dp else 5.dp,
+            bottomStart = if (index == count - 1) 20.dp else 5.dp,
+            bottomEnd = if (index == count - 1) 20.dp else 5.dp,
+        )
+    LiquidGlassSurface(radius = 20.dp, modifier = Modifier.fillMaxWidth().clip(shape), enabled = glass) {
+        Surface(
+            onClick = onClick,
+            enabled = enabled,
+            color =
+                if (glass) {
+                    glassCardColor(
+                        MaterialTheme.colorScheme.surfaceContainerLowest,
+                    )
+                } else {
+                    MaterialTheme.colorScheme.surfaceContainerLowest
+                },
+            border = if (glass) glassCardBorder() else null,
+            shape = shape,
         ) {
-            Box(
-                Modifier.size(40.dp).background(MaterialTheme.colorScheme.secondaryContainer, CircleShape),
-                contentAlignment = Alignment.Center,
+            Row(
+                Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                Icon(icon, null, tint = MaterialTheme.colorScheme.onSecondaryContainer)
-            }
-            Column(Modifier.weight(1f)) {
-                Text(name, style = MaterialTheme.typography.titleMedium)
-                Text(subtitle, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-            if (connecting) LoadingIndicator(Modifier.size(20.dp))
-            if (connected) {
-                IconButton(onClick = onClick, shapes = IconButtonDefaults.shapes()) {
-                    Icon(MetrolistIcons.Outlined.Close, stringResource(Res.string.disconnect_cast))
+                Box(
+                    Modifier.size(40.dp).background(
+                        if (glass) {
+                            glassCardColor(
+                                MaterialTheme.colorScheme.secondaryContainer,
+                            )
+                        } else {
+                            MaterialTheme.colorScheme.secondaryContainer
+                        },
+                        CircleShape,
+                    ),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        icon,
+                        null,
+                        tint = if (glass) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSecondaryContainer,
+                    )
+                }
+                Column(Modifier.weight(1f)) {
+                    Text(name, style = MaterialTheme.typography.titleMedium)
+                    Text(subtitle, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                if (connecting) LoadingIndicator(Modifier.size(20.dp))
+                if (connected) {
+                    LiquidGlassIconButton(onClick = onClick) {
+                        Icon(MetrolistIcons.Outlined.Close, stringResource(Res.string.disconnect_cast))
+                    }
                 }
             }
         }
