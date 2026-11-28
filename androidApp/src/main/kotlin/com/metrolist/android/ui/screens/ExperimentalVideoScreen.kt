@@ -18,6 +18,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -31,10 +33,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
@@ -60,6 +65,7 @@ import com.metrolist.shared.generated.resources.experimental_video_title
 import com.metrolist.shared.generated.resources.experimental_video_videos
 import com.metrolist.shared.generated.resources.search
 import com.metrolist.shared.ui.components.LiquidGlassChip
+import com.metrolist.shared.ui.components.LiquidGlassCompactButton
 import kotlinx.coroutines.CancellationException
 import org.jetbrains.compose.resources.stringResource
 
@@ -77,6 +83,7 @@ fun ExperimentalVideoScreen(
     var failed by remember { mutableStateOf(false) }
     val player = LocalPlayerConnection.current
     val context = LocalContext.current
+    val keyboard = LocalSoftwareKeyboardController.current
     val scope = rememberCoroutineScope()
     val playerNotReady = stringResource(Res.string.experimental_video_not_ready)
     LaunchedEffect(submitted, filter, requestNumber) {
@@ -111,18 +118,32 @@ fun ExperimentalVideoScreen(
     ) { viewport ->
         Column(viewport.padding(horizontal = 16.dp)) {
             Text(stringResource(Res.string.experimental_video_hint), style = MaterialTheme.typography.bodySmall)
-            Row {
+
+            fun submitSearch() {
+                if (input.isNotBlank()) {
+                    submitted = input.trim()
+                    requestNumber++
+                    keyboard?.hide()
+                }
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
                 OutlinedTextField(
                     value = input,
                     onValueChange = { input = it },
                     label = { Text(stringResource(Res.string.experimental_video_search)) },
                     singleLine = true,
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                    keyboardActions = KeyboardActions(onSearch = { submitSearch() }),
+                    shape = RoundedCornerShape(18.dp),
                     modifier = Modifier.weight(1f),
                 )
-                TextButton(onClick = {
-                    submitted = input.trim()
-                    requestNumber++
-                }, enabled = input.isNotBlank()) { Text(stringResource(Res.string.search)) }
+                LiquidGlassCompactButton(onClick = { submitSearch() }, enabled = input.isNotBlank()) {
+                    Text(stringResource(Res.string.search))
+                }
             }
             Row(modifier = Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 ExperimentalVideoFilter.entries.forEach { item ->
