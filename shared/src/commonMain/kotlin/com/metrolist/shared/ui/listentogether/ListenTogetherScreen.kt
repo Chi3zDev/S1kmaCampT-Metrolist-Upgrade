@@ -60,8 +60,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialShapes
@@ -73,7 +71,6 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.ToggleButton
 import androidx.compose.material3.ToggleButtonDefaults
 import androidx.compose.material3.ToggleButtonShapes
@@ -255,6 +252,10 @@ import com.metrolist.shared.listentogether.network.UserInfo
 import com.metrolist.shared.settings.Settings
 import com.metrolist.shared.ui.components.AlertDialog
 import com.metrolist.shared.ui.components.Dialog
+import com.metrolist.shared.ui.components.LiquidGlassButton
+import com.metrolist.shared.ui.components.LiquidGlassCompactButton
+import com.metrolist.shared.ui.components.LiquidGlassIconButton
+import com.metrolist.shared.ui.components.LiquidGlassTextButton
 import com.metrolist.shared.ui.components.PopupVisibility
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import com.metrolist.shared.ui.navigation.navigationPopupSource
@@ -394,16 +395,15 @@ fun ListenTogetherScreen(
                 Text(stringResource(Res.string.listen_together_invitation_leave_message, currentRoomCode, initialRoomCode))
             },
             confirmButton = {
-                TextButton(
+                LiquidGlassTextButton(
                     onClick = {
                         invitationHandled = true
                         manager.leaveRoom()
                     },
-                    shapes = ButtonDefaults.shapes(),
                 ) { Text(stringResource(Res.string.listen_together_leave)) }
             },
             dismissButton = {
-                TextButton(onClick = { invitationHandled = true }, shapes = ButtonDefaults.shapes()) {
+                LiquidGlassTextButton(onClick = { invitationHandled = true }) {
                     Text(stringResource(Res.string.cancel))
                 }
             },
@@ -432,20 +432,18 @@ fun ListenTogetherScreen(
                 )
             },
             confirmButton = {
-                TextButton(onClick = manager::addPendingQueueImport, shapes = ButtonDefaults.shapes()) {
+                LiquidGlassTextButton(onClick = manager::addPendingQueueImport) {
                     Text(stringResource(if (isHost) Res.string.add else Res.string.suggest))
                 }
             },
             dismissButton = {
                 Row {
-                    TextButton(
+                    LiquidGlassTextButton(
                         onClick = manager::cancelQueueImport,
-                        shapes = ButtonDefaults.shapes(),
                     ) { Text(stringResource(Res.string.cancel)) }
-                    TextButton(
+                    LiquidGlassTextButton(
                         enabled = isHost,
                         onClick = manager::replaceWithPendingQueueImport,
-                        shapes = ButtonDefaults.shapes(),
                     ) { Text(stringResource(Res.string.replace)) }
                 }
             },
@@ -485,7 +483,7 @@ fun ListenTogetherSettingsScreen(
                 }
             },
             confirmButton = {
-                TextButton(onClick = { showHelp = false }, shapes = ButtonDefaults.shapes()) {
+                LiquidGlassTextButton(onClick = { showHelp = false }) {
                     Text(stringResource(Res.string.ok))
                 }
             },
@@ -707,16 +705,15 @@ fun ListenTogetherServerScreen(
                 }
             },
             confirmButton = {
-                TextButton(
+                LiquidGlassTextButton(
                     enabled = name.isNotBlank() && operator.isNotBlank(),
                     onClick = {
                         if (manager.updateCustomServerMetadata(server.url, name, operator)) editingServer = null
                     },
-                    shapes = ButtonDefaults.shapes(),
                 ) { Text(stringResource(Res.string.save)) }
             },
             dismissButton = {
-                TextButton(onClick = { editingServer = null }, shapes = ButtonDefaults.shapes()) {
+                LiquidGlassTextButton(onClick = { editingServer = null }) {
                     Text(stringResource(Res.string.cancel))
                 }
             },
@@ -772,7 +769,7 @@ fun ListenTogetherBlockedUsersScreen(
                         SettingsSubScreenItem(
                             title = username,
                             trailingContent = {
-                                IconButton(onClick = { manager.unblockUser(username) }, shapes = IconButtonDefaults.shapes()) {
+                                LiquidGlassIconButton(onClick = { manager.unblockUser(username) }) {
                                     Icon(MetrolistIcons.Rounded.LockOpen, contentDescription = stringResource(Res.string.unblock))
                                 }
                             },
@@ -838,10 +835,9 @@ fun ListenTogetherLogsScreen(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             onShareText?.let { shareText ->
-                Button(
+                LiquidGlassButton(
                     onClick = { shareText(logText) },
                     modifier = Modifier.weight(1f).heightIn(min = 48.dp),
-                    shapes = ButtonDefaults.shapes(),
                 ) {
                     Icon(MetrolistIcons.Outlined.Share, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
@@ -849,10 +845,9 @@ fun ListenTogetherLogsScreen(
                 }
             }
             val logsLabel = stringResource(Res.string.listen_together_logs)
-            IconButton(
+            LiquidGlassIconButton(
                 onClick = { onCopyText(logsLabel, logText) },
                 modifier = Modifier.size(48.dp),
-                shapes = IconButtonDefaults.shapes(),
             ) {
                 Icon(MetrolistIcons.Default.ContentCopy, contentDescription = stringResource(Res.string.copy_logs))
             }
@@ -1012,7 +1007,7 @@ private fun ListenTogetherCreateJoinScreen(
                 }
                 if (joinRequestPending) {
                     item {
-                        TextButton(onClick = onCancelJoin, modifier = Modifier.fillMaxWidth(), shapes = ButtonDefaults.shapes()) {
+                        LiquidGlassTextButton(onClick = onCancelJoin, modifier = Modifier.fillMaxWidth()) {
                             Text(stringResource(Res.string.cancel))
                         }
                     }
@@ -1521,7 +1516,7 @@ private fun ListenTogetherRoomScreen(
                 val link = manager.roomLink(useParty = false) ?: ShareUrls.party(roomState.roomCode, false)
                 onCopyText(copyLinkLabel, link)
             }
-            IconButton(
+            LiquidGlassIconButton(
                 onClick = {
                     if (isShiftPressed) {
                         shareParty()
@@ -1529,7 +1524,6 @@ private fun ListenTogetherRoomScreen(
                         shareNormal()
                     }
                 },
-                shapes = IconButtonDefaults.shapes(),
                 modifier =
                     Modifier
                         .tvFocusHighlight(CircleShape)
@@ -1651,9 +1645,8 @@ private fun ListenTogetherRoomScreen(
                     item {
                         Column {
                             if (!isHost) Text(stringResource(Res.string.listen_together_connection_lost_guest))
-                            TextButton(
+                            LiquidGlassTextButton(
                                 onClick = manager::retryConnection,
-                                shapes = ButtonDefaults.shapes(),
                             ) { Text(stringResource(Res.string.retry)) }
                         }
                     }
@@ -1671,7 +1664,7 @@ private fun ListenTogetherRoomScreen(
                         Column {
                             Text(track.title, style = MaterialTheme.typography.titleMedium)
                             Text(stringResource(Res.string.listen_together_track_load_failed))
-                            TextButton(onClick = manager::retryRoomTrack, enabled = authenticated, shapes = ButtonDefaults.shapes()) {
+                            LiquidGlassTextButton(onClick = manager::retryRoomTrack, enabled = authenticated) {
                                 Text(stringResource(Res.string.retry))
                             }
                         }
@@ -1831,7 +1824,7 @@ private fun ListenTogetherScaffold(
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val navigationIcon: @Composable () -> Unit = {
         if (onNavigateBack != null) {
-            IconButton(onClick = onNavigateBack, modifier = Modifier.tvFocusHighlight(CircleShape), shapes = IconButtonDefaults.shapes()) {
+            LiquidGlassIconButton(onClick = onNavigateBack, modifier = Modifier.tvFocusHighlight(CircleShape)) {
                 Icon(MetrolistIcons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(Res.string.back))
             }
         }
@@ -2312,12 +2305,12 @@ private fun ServerRow(
             )
         }
         onEdit?.let {
-            IconButton(onClick = it, shapes = IconButtonDefaults.shapes()) {
+            LiquidGlassIconButton(onClick = it) {
                 Icon(MetrolistIcons.Default.Edit, contentDescription = stringResource(Res.string.listen_together_edit_server))
             }
         }
         onRemove?.let {
-            IconButton(onClick = it, shapes = IconButtonDefaults.shapes()) {
+            LiquidGlassIconButton(onClick = it) {
                 Icon(
                     MetrolistIcons.Default.Delete,
                     contentDescription = stringResource(Res.string.remove_server),
@@ -2374,8 +2367,8 @@ private fun ListenTogetherTextDialog(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End,
                 ) {
-                    TextButton(onClick = onDismiss, shapes = ButtonDefaults.shapes()) { Text(stringResource(Res.string.cancel)) }
-                    Button(
+                    LiquidGlassTextButton(onClick = onDismiss) { Text(stringResource(Res.string.cancel)) }
+                    LiquidGlassCompactButton(
                         onClick = {
                             if (text.isBlank()) {
                                 error = requiredError
@@ -2383,7 +2376,6 @@ private fun ListenTogetherTextDialog(
                                 onConfirm(text.trim())
                             }
                         },
-                        shapes = ButtonDefaults.shapes(),
                     ) { Text(confirmText) }
                 }
             }
