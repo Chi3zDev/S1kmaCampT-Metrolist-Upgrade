@@ -50,12 +50,10 @@ import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.FilledTonalToggleButton
 import androidx.compose.material3.FilledTonalToggleButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.carousel.CarouselDefaults
@@ -164,8 +162,10 @@ import com.metrolist.shared.ui.components.CollectionPreviews
 import com.metrolist.shared.ui.components.ExpandableText
 import com.metrolist.shared.ui.components.ExplicitBadge
 import com.metrolist.shared.ui.components.FittingText
+import com.metrolist.shared.ui.components.LiquidGlassCompactButton
 import com.metrolist.shared.ui.components.LiquidGlassIconButton
 import com.metrolist.shared.ui.components.LiquidGlassSurface
+import com.metrolist.shared.ui.components.LiquidGlassTextButton
 import com.metrolist.shared.ui.components.ListItemTitle
 import com.metrolist.shared.ui.components.LocalDownloadedSongIds
 import com.metrolist.shared.ui.components.LocalThemeGlassBackdrop
@@ -334,14 +334,14 @@ private fun ArtistScreenLayout(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(errorMessage, color = MaterialTheme.colorScheme.error, modifier = Modifier.weight(1f))
-                TextButton(onClick = onRefresh, enabled = !isLoading, shapes = ButtonDefaults.shapes()) {
+                LiquidGlassTextButton(onClick = onRefresh, enabled = !isLoading) {
                     Text(stringResource(Res.string.retry))
                 }
             }
         }
         if (!hasContent && !isLoading && onBackClick != null) {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = onBackClick, shapes = IconButtonDefaults.shapes()) {
+                LiquidGlassIconButton(onClick = onBackClick) {
                     Icon(MetrolistIcons.AutoMirrored.Filled.ArrowBack, stringResource(Res.string.back))
                 }
             }
@@ -356,7 +356,7 @@ private fun ArtistScreenLayout(
                     ) {
                         Text(stringResource(Res.string.error_occurred), color = MaterialTheme.colorScheme.error)
                         Text(errorMessage?.takeIf(String::isNotBlank) ?: stringResource(Res.string.error_unknown))
-                        Button(onClick = onRefresh, shapes = ButtonDefaults.shapes()) { Text(stringResource(Res.string.retry)) }
+                        LiquidGlassCompactButton(onClick = onRefresh) { Text(stringResource(Res.string.retry)) }
                     }
                 }
 
@@ -1429,7 +1429,7 @@ private fun ArtistSectionContent(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         if (onPlayItem != null) {
-                            Button(onClick = { onPlayItem(release) }, shapes = ButtonDefaults.shapes()) {
+                            LiquidGlassCompactButton(onClick = { onPlayItem(release) }) {
                                 Icon(MetrolistIcons.Filled.PlayArrow, null, modifier = Modifier.size(20.dp))
                                 Spacer(Modifier.width(6.dp))
                                 Text(stringResource(Res.string.play))
@@ -1774,7 +1774,7 @@ private fun ArtistSongListItem(
             overflow = TextOverflow.Ellipsis,
         )
         if (onLikeClick != null) {
-            IconButton(onClick = onLikeClick, modifier = Modifier.size(48.dp), shapes = IconButtonDefaults.shapes()) {
+            LiquidGlassIconButton(onClick = onLikeClick, modifier = Modifier.size(48.dp)) {
                 Icon(
                     imageVector = if (isLiked) MetrolistIcons.Filled.Favorite else MetrolistIcons.Outlined.FavoriteBorder,
                     contentDescription = stringResource(if (isLiked) Res.string.unlike else Res.string.action_like),
@@ -1790,7 +1790,7 @@ private fun ArtistSongListItem(
                 )
             }
         }
-        IconButton(onClick = onMenuClick, modifier = Modifier.size(48.dp).navigationPopupSource(), shapes = IconButtonDefaults.shapes()) {
+        LiquidGlassIconButton(onClick = onMenuClick, modifier = Modifier.size(48.dp).navigationPopupSource()) {
             Icon(
                 MetrolistIcons.Default.MoreVert,
                 stringResource(Res.string.artist_actions),
