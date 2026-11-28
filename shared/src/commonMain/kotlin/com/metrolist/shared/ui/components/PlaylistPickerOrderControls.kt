@@ -72,20 +72,21 @@ fun PlaylistPickerOrderControls(modifier: Modifier = Modifier) {
     val leadingFocusRequester = remember { FocusRequester() }
     val trailingFocusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
+    val glass = liquidGlassBackdropReady()
     Row(
         modifier = modifier.fillMaxWidth().heightIn(min = SplitButtonDefaults.MediumContainerHeight),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Box(Modifier.trackPressPosition { menuOffset = it.round() }) {
-            if (Settings.shared.liquidGlassTheme) {
+            if (glass) {
                 LocalThemeGlassBackdrop.current?.Background(radius = 24.dp, modifier = Modifier.matchParentSize())
             }
             SplitButtonLayout(
                 leadingButton = {
                     SplitButtonDefaults.TonalLeadingButton(
                         colors = liquidGlassTonalColors(),
-                        border = if (Settings.shared.liquidGlassTheme) glassCardBorder() else null,
+                        border = if (glass) glassCardBorder() else null,
                         onClick = {
                             if (!leadingFocusRequester.requestFocus()) focusManager.clearFocus()
                             menuExpanded = true
@@ -108,7 +109,7 @@ fun PlaylistPickerOrderControls(modifier: Modifier = Modifier) {
                     SplitButtonDefaults.TrailingButton(
                         enabled = sort != PlaylistPickerSort.LIBRARY && sort != PlaylistPickerSort.MANUAL,
                         colors = liquidGlassTonalColors(),
-                        border = if (Settings.shared.liquidGlassTheme) glassCardBorder() else null,
+                        border = if (glass) glassCardBorder() else null,
                         elevation = ButtonDefaults.filledTonalButtonElevation(),
                         onClick = {
                             if (!trailingFocusRequester.requestFocus()) focusManager.clearFocus()
