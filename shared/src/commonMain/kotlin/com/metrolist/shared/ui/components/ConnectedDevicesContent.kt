@@ -18,7 +18,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledTonalIconButton
@@ -229,7 +228,7 @@ fun ConnectedDevicesContent(
                     TextButton(onClick = { showDefaults = true }, shapes = ButtonDefaults.shapes()) {
                         Text(pairedDevices.firstOrNull { it.deviceId == defaultDeviceId }?.deviceName ?: stringResource(Res.string.none))
                     }
-                    DropdownMenu(expanded = showDefaults, onDismissRequest = { showDefaults = false }) {
+                    LiquidGlassDropdownMenu(expanded = showDefaults, onDismissRequest = { showDefaults = false }) {
                         DropdownMenuItem(
                             text = { Text(stringResource(Res.string.none)) },
                             onClick = {
