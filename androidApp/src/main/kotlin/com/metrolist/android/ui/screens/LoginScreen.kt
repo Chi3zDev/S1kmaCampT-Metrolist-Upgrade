@@ -33,17 +33,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -94,7 +89,13 @@ import com.metrolist.shared.ui.LocalIsTv
 import com.metrolist.shared.ui.components.AccountPickerList
 import com.metrolist.shared.ui.components.AlertDialog
 import com.metrolist.shared.ui.components.ContainedLoadingIndicator
+import com.metrolist.shared.ui.components.LiquidGlassCompactButton
+import com.metrolist.shared.ui.components.LiquidGlassIconButton
+import com.metrolist.shared.ui.components.LiquidGlassSurface
+import com.metrolist.shared.ui.components.LiquidGlassTextButton
 import com.metrolist.shared.ui.components.PopupVisibility
+import com.metrolist.shared.ui.components.glassCardColor
+import com.metrolist.shared.ui.components.liquidGlassBackdropReady
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import com.metrolist.shared.ui.sanitizeDataSyncId
 import com.metrolist.shared.ui.tv.tvFocusHighlight
@@ -429,31 +430,42 @@ fun LoginScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        stringResource(if (isSwitchingChannel) Res.string.switch_youtube_channel else Res.string.sign_in_to_youtube_music),
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack, shapes = IconButtonDefaults.shapes()) {
-                        Icon(MetrolistIcons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(Res.string.back))
-                    }
-                },
-                actions = {
-                    if (loginStage == LoginStage.BrowsingAccounts) {
-                        TextButton(
-                            onClick = { onPageFinishedForLogin(webViewRef?.url, completeSignIn = true) },
-                            enabled = !isLoading,
-                            shapes = ButtonDefaults.shapes(),
-                        ) { Text(stringResource(Res.string.complete_sign_in)) }
-                    }
-                },
-                colors =
-                    TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.surface,
-                    ),
-            )
+            val glass = liquidGlassBackdropReady()
+            LiquidGlassSurface(radius = 0.dp, modifier = Modifier.fillMaxWidth(), enabled = glass) {
+                TopAppBar(
+                    title = {
+                        Text(
+                            stringResource(
+                                if (isSwitchingChannel) Res.string.switch_youtube_channel else Res.string.sign_in_to_youtube_music,
+                            ),
+                        )
+                    },
+                    navigationIcon = {
+                        LiquidGlassIconButton(onClick = onNavigateBack) {
+                            Icon(MetrolistIcons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(Res.string.back))
+                        }
+                    },
+                    actions = {
+                        if (loginStage == LoginStage.BrowsingAccounts) {
+                            LiquidGlassTextButton(
+                                onClick = { onPageFinishedForLogin(webViewRef?.url, completeSignIn = true) },
+                                enabled = !isLoading,
+                            ) { Text(stringResource(Res.string.complete_sign_in)) }
+                        }
+                    },
+                    colors =
+                        TopAppBarDefaults.topAppBarColors(
+                            containerColor =
+                                if (glass) {
+                                    glassCardColor(
+                                        MaterialTheme.colorScheme.surface,
+                                    )
+                                } else {
+                                    MaterialTheme.colorScheme.surface
+                                },
+                        ),
+                )
+            }
         },
         bottomBar = {
             if (loginStage == LoginStage.BrowsingAccounts) {
@@ -626,26 +638,23 @@ fun LoginScreen(
                     text = { Text(stringResource(Res.string.tv_sign_in_warning)) },
                     dismissButton = {
                         Row {
-                            TextButton(
+                            LiquidGlassTextButton(
                                 onClick = onNavigateToTokenLogin,
                                 modifier = Modifier.tvFocusHighlight(RoundedCornerShape(100.dp)),
-                                shapes = ButtonDefaults.shapes(),
                             ) { Text(stringResource(Res.string.token_login)) }
-                            TextButton(
+                            LiquidGlassTextButton(
                                 onClick = onNavigateBack,
                                 modifier = Modifier.tvFocusHighlight(RoundedCornerShape(100.dp)),
-                                shapes = ButtonDefaults.shapes(),
                             ) { Text(stringResource(Res.string.cancel)) }
                         }
                     },
                     confirmButton = {
-                        Button(
+                        LiquidGlassCompactButton(
                             onClick = { tvWarningAccepted = true },
                             modifier =
                                 Modifier.tvFocusHighlight(
                                     RoundedCornerShape(100.dp),
                                 ),
-                            shapes = ButtonDefaults.shapes(),
                         ) { Text(stringResource(Res.string.continue_action)) }
                     },
                 )
@@ -670,14 +679,13 @@ fun LoginScreen(
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.error,
                     )
-                    Button(
+                    LiquidGlassCompactButton(
                         onClick = {
                             errorMessage = null
                             loginStage = LoginStage.Authenticating
                             webViewRef?.reload()
                         },
                         modifier = Modifier.padding(top = 16.dp),
-                        shapes = ButtonDefaults.shapes(),
                     ) {
                         Text(stringResource(Res.string.retry))
                     }
@@ -712,9 +720,9 @@ fun LoginScreen(
                             }
                         },
                         confirmButton = {
-                            Button(
+                            LiquidGlassCompactButton(
                                 onClick = {
-                                    val account = selectedAccount ?: return@Button
+                                    val account = selectedAccount ?: return@LiquidGlassCompactButton
                                     if (account.isSelected || account.selectionDataSyncId("") != null) {
                                         loginStage = LoginStage.Completing
                                         coroutineScope.launch {
@@ -741,7 +749,6 @@ fun LoginScreen(
                                         loginStage = LoginStage.Authenticating
                                     }
                                 },
-                                shapes = ButtonDefaults.shapes(),
                             ) {
                                 Text(stringResource(Res.string.continue_action))
                             }
