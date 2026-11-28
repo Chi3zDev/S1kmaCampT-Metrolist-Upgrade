@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -49,8 +48,10 @@ import com.metrolist.shared.generated.resources.settings
 import com.metrolist.shared.generated.resources.statistics
 import com.metrolist.shared.generated.resources.streak_page_title
 import com.metrolist.shared.settings.Settings
+import com.metrolist.shared.ui.components.AlertDialog
 import com.metrolist.shared.ui.components.LiquidGlassButton
 import com.metrolist.shared.ui.components.LiquidGlassSurface
+import com.metrolist.shared.ui.components.LiquidGlassTextButton
 import com.metrolist.shared.ui.components.glassEdgeBrush
 import com.metrolist.shared.ui.components.images.AsyncImage
 import com.metrolist.shared.ui.components.liquidGlassBackdropReady
@@ -162,7 +163,7 @@ fun ProfileScreen(
                                     ),
                                 )
                             }
-                            if (Settings.shared.liquidGlassTheme) {
+                            if (liquidGlassBackdropReady()) {
                                 LiquidGlassButton(onClick = onTokenLogin, modifier = Modifier.weight(1f)) {
                                     Text(stringResource(Res.string.account_login_with_token))
                                 }
@@ -173,7 +174,7 @@ fun ProfileScreen(
                             }
                         }
                         if (authManager.isLoggedIn) {
-                            TextButton(
+                            LiquidGlassTextButton(
                                 onClick = { confirmLogout = true },
                             ) { Text(stringResource(Res.string.action_logout)) }
                         }
@@ -199,12 +200,12 @@ fun ProfileScreen(
             title = { Text(stringResource(Res.string.action_logout)) },
             text = { Text(stringResource(Res.string.account_logout_confirm)) },
             confirmButton = {
-                TextButton(onClick = {
+                LiquidGlassTextButton(onClick = {
                     confirmLogout = false
                     onLogout()
                 }) { Text(stringResource(Res.string.action_logout)) }
             },
-            dismissButton = { TextButton(onClick = { confirmLogout = false }) { Text(stringResource(Res.string.cancel)) } },
+            dismissButton = { LiquidGlassTextButton(onClick = { confirmLogout = false }) { Text(stringResource(Res.string.cancel)) } },
         )
     }
 }
