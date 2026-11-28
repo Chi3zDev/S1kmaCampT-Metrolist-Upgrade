@@ -4,6 +4,7 @@ package com.metrolist.shared.ui.screens
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.calculateZoom
@@ -41,6 +42,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.ToggleButton
+import androidx.compose.material3.ToggleButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
@@ -119,11 +121,17 @@ import com.metrolist.shared.ui.components.CollectionPreviews
 import com.metrolist.shared.ui.components.ContainedLoadingIndicator
 import com.metrolist.shared.ui.components.ExpandableSearchBar
 import com.metrolist.shared.ui.components.GridCard
+import com.metrolist.shared.ui.components.LiquidGlassSurface
 import com.metrolist.shared.ui.components.ListCard
+import com.metrolist.shared.ui.components.LocalThemeGlassBackdrop
 import com.metrolist.shared.ui.components.ReorderMenu
 import com.metrolist.shared.ui.components.albumPlayOverlay
+import com.metrolist.shared.ui.components.glassCardBorder
+import com.metrolist.shared.ui.components.glassCardColor
 import com.metrolist.shared.ui.components.libraryArtwork
 import com.metrolist.shared.ui.components.libraryCover
+import com.metrolist.shared.ui.components.liquidGlassBackdropReady
+import com.metrolist.shared.ui.components.liquidGlassTonalColors
 import com.metrolist.shared.ui.components.menuAnchorSemantics
 import com.metrolist.shared.ui.components.rememberItemPlayback
 import com.metrolist.shared.ui.haptics.HapticEvent
@@ -657,6 +665,7 @@ private fun LibraryHeader(
     var sortMenuOffset by remember { mutableStateOf(IntOffset.Zero) }
     var gridSizeExpanded by remember { mutableStateOf(false) }
     var gridSizeMenuOffset by remember { mutableStateOf(IntOffset.Zero) }
+    val glass = liquidGlassBackdropReady()
     val sortingFilter = selectedFilter?.let { LibraryFilterType.valueOf(it.name) } ?: LibraryFilterType.ALL
     val sorting = Settings.shared.librarySorting(sortingFilter)
     val ascending = sorting.direction == SortDirection.ASCENDING
@@ -681,9 +690,12 @@ private fun LibraryHeader(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Box(Modifier.weight(1f, fill = false).trackPressPosition { sortMenuOffset = it.round() }) {
+                    if (glass) LocalThemeGlassBackdrop.current?.Background(radius = 24.dp, modifier = Modifier.matchParentSize())
                     SplitButtonLayout(
                         leadingButton = {
                             SplitButtonDefaults.TonalLeadingButton(
+                                colors = if (glass) liquidGlassTonalColors() else ButtonDefaults.filledTonalButtonColors(),
+                                border = if (glass) glassCardBorder() else null,
                                 onClick = { sortExpanded = true },
                                 modifier =
                                     Modifier
@@ -706,7 +718,8 @@ private fun LibraryHeader(
                         },
                         trailingButton = {
                             SplitButtonDefaults.TrailingButton(
-                                colors = ButtonDefaults.filledTonalButtonColors(),
+                                colors = if (glass) liquidGlassTonalColors() else ButtonDefaults.filledTonalButtonColors(),
+                                border = if (glass) glassCardBorder() else null,
                                 elevation = ButtonDefaults.filledTonalButtonElevation(),
                                 onClick = {
                                     Settings.shared.setLibrarySorting(
@@ -771,30 +784,42 @@ private fun LibraryHeader(
                         },
                     )
                 }
-                FilledTonalIconButton(
-                    onClick = onSearchToggle,
-                    modifier = Modifier.size(40.dp).tvFocusHighlight(CircleShape),
-                    colors =
-                        IconButtonDefaults.filledTonalIconButtonColors(
-                            containerColor =
-                                if (isSearchOpen) {
-                                    MaterialTheme.colorScheme.primaryContainer
-                                } else {
-                                    MaterialTheme.colorScheme.secondaryContainer
-                                },
-                            contentColor =
-                                if (isSearchOpen) {
-                                    MaterialTheme.colorScheme.onPrimaryContainer
-                                } else {
-                                    MaterialTheme.colorScheme.onSecondaryContainer
-                                },
-                        ),
-                    shapes = IconButtonDefaults.shapes(),
-                ) {
-                    Icon(
-                        if (isSearchOpen) MetrolistIcons.Default.Close else MetrolistIcons.Default.Search,
-                        contentDescription = text.search,
-                    )
+                LiquidGlassSurface(radius = 20.dp, enabled = glass) {
+                    FilledTonalIconButton(
+                        onClick = onSearchToggle,
+                        modifier =
+                            Modifier
+                                .size(40.dp)
+                                .tvFocusHighlight(CircleShape)
+                                .then(if (glass) glassCardBorder()?.let { Modifier.border(it, CircleShape) } ?: Modifier else Modifier),
+                        colors =
+                            IconButtonDefaults.filledTonalIconButtonColors(
+                                containerColor =
+                                    if (glass && isSearchOpen) {
+                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.32f)
+                                    } else if (glass) {
+                                        glassCardColor(MaterialTheme.colorScheme.surfaceContainer)
+                                    } else if (isSearchOpen) {
+                                        MaterialTheme.colorScheme.primaryContainer
+                                    } else {
+                                        MaterialTheme.colorScheme.secondaryContainer
+                                    },
+                                contentColor =
+                                    if (glass) {
+                                        MaterialTheme.colorScheme.onSurface
+                                    } else if (isSearchOpen) {
+                                        MaterialTheme.colorScheme.onPrimaryContainer
+                                    } else {
+                                        MaterialTheme.colorScheme.onSecondaryContainer
+                                    },
+                            ),
+                        shapes = IconButtonDefaults.shapes(),
+                    ) {
+                        Icon(
+                            if (isSearchOpen) MetrolistIcons.Default.Close else MetrolistIcons.Default.Search,
+                            contentDescription = text.search,
+                        )
+                    }
                 }
             }
             if (isDesktop && isGridView) {
@@ -817,38 +842,52 @@ private fun LibraryHeader(
                     )
                 }
             }
-            ButtonGroup(
-                overflowIndicator = { menuState -> ButtonGroupDefaults.OverflowIndicator(menuState) },
-                horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween),
-            ) {
-                listOf(false, true).forEachIndexed { index, grid ->
-                    val icon = if (grid) MetrolistIcons.Default.GridView else MetrolistIcons.AutoMirrored.Outlined.List
-                    val label = if (grid) text.grid else text.list
-                    customItem(
-                        buttonGroupContent = {
-                            val interactionSource = remember { MutableInteractionSource() }
-                            val shapes = if (index == 0) staticConnectedLeadingButtonShapes() else staticConnectedTrailingButtonShapes()
-                            ToggleButton(
-                                checked = isGridView == grid,
-                                interactionSource = interactionSource,
-                                onCheckedChange = { onGridViewChange(grid) },
-                                modifier = Modifier.size(40.dp).animateWidth(interactionSource, 12.dp).tvFocusHighlight(shapes.shape),
-                                shapes = shapes,
-                                contentPadding = PaddingValues(0.dp),
-                            ) {
-                                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                    Icon(icon, contentDescription = label, modifier = Modifier.size(20.dp))
+            LiquidGlassSurface(radius = 20.dp, enabled = glass) {
+                ButtonGroup(
+                    overflowIndicator = { menuState -> ButtonGroupDefaults.OverflowIndicator(menuState) },
+                    horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween),
+                ) {
+                    listOf(false, true).forEachIndexed { index, grid ->
+                        val icon = if (grid) MetrolistIcons.Default.GridView else MetrolistIcons.AutoMirrored.Outlined.List
+                        val label = if (grid) text.grid else text.list
+                        customItem(
+                            buttonGroupContent = {
+                                val interactionSource = remember { MutableInteractionSource() }
+                                val shapes = if (index == 0) staticConnectedLeadingButtonShapes() else staticConnectedTrailingButtonShapes()
+                                ToggleButton(
+                                    checked = isGridView == grid,
+                                    interactionSource = interactionSource,
+                                    onCheckedChange = { onGridViewChange(grid) },
+                                    modifier = Modifier.size(40.dp).animateWidth(interactionSource, 12.dp).tvFocusHighlight(shapes.shape),
+                                    shapes = shapes,
+                                    contentPadding = PaddingValues(0.dp),
+                                    colors =
+                                        if (glass) {
+                                            ToggleButtonDefaults.colors(
+                                                containerColor = glassCardColor(MaterialTheme.colorScheme.surfaceContainer),
+                                                contentColor = MaterialTheme.colorScheme.onSurface,
+                                                checkedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.32f),
+                                                checkedContentColor = MaterialTheme.colorScheme.onSurface,
+                                            )
+                                        } else {
+                                            ToggleButtonDefaults.colors()
+                                        },
+                                    border = if (glass) glassCardBorder() else null,
+                                ) {
+                                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                        Icon(icon, contentDescription = label, modifier = Modifier.size(20.dp))
+                                    }
                                 }
-                            }
-                        },
-                        menuContent = {
-                            DropdownMenuItem(
-                                leadingIcon = { Icon(icon, contentDescription = null) },
-                                text = { Text(label) },
-                                onClick = { onGridViewChange(grid) },
-                            )
-                        },
-                    )
+                            },
+                            menuContent = {
+                                DropdownMenuItem(
+                                    leadingIcon = { Icon(icon, contentDescription = null) },
+                                    text = { Text(label) },
+                                    onClick = { onGridViewChange(grid) },
+                                )
+                            },
+                        )
+                    }
                 }
             }
         }
