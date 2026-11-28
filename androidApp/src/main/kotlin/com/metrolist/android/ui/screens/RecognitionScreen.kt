@@ -52,14 +52,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ButtonGroupDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SearchBarDefaults
@@ -179,9 +176,11 @@ import com.metrolist.shared.state.SongLikeState
 import com.metrolist.shared.ui.LocalIsTv
 import com.metrolist.shared.ui.components.AlertDialog
 import com.metrolist.shared.ui.components.HistoryEntryGroupPosition
+import com.metrolist.shared.ui.components.LiquidGlassCompactButton
 import com.metrolist.shared.ui.components.LiquidGlassIconButton
 import com.metrolist.shared.ui.components.LiquidGlassSurface
 import com.metrolist.shared.ui.components.LiquidGlassTextButton
+import com.metrolist.shared.ui.components.LiquidGlassTonalButton
 import com.metrolist.shared.ui.components.LocalThemeGlassBackdrop
 import com.metrolist.shared.ui.components.glassCardBorder
 import com.metrolist.shared.ui.components.glassCardColor
@@ -270,7 +269,7 @@ fun RecognitionScreen(
             title = { Text(stringResource(Res.string.recognition_microphone_permission_not_granted)) },
             text = { Text(stringResource(Res.string.recognition_microphone_permission_description)) },
             confirmButton = {
-                Button(onClick = {
+                LiquidGlassCompactButton(onClick = {
                     showPermissionDialog = false
                     if (canRequestAgain) {
                         permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
@@ -279,7 +278,7 @@ fun RecognitionScreen(
                             Intent(AndroidSettings.ACTION_APPLICATION_DETAILS_SETTINGS, "package:${context.packageName}".toUri()),
                         )
                     }
-                }, shapes = ButtonDefaults.shapes()) {
+                }) {
                     Text(stringResource(if (canRequestAgain) Res.string.try_again else Res.string.shortcut_open_settings))
                 }
             },
@@ -961,10 +960,9 @@ private fun RecognitionCaptureFooter(
                     textAlign = TextAlign.Center,
                 )
                 Spacer(Modifier.height(24.dp))
-                FilledTonalButton(
+                LiquidGlassTonalButton(
                     onClick = onCancel,
                     modifier = Modifier.tvFocusHighlight(RoundedCornerShape(100.dp)),
-                    shapes = ButtonDefaults.shapes(),
                 ) {
                     Icon(
                         imageVector = MetrolistIcons.Outlined.Close,
@@ -1090,25 +1088,36 @@ private fun RecognitionSuccessState(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.padding(horizontal = 8.dp),
     ) {
-        Surface(
-            shape = RoundedCornerShape(8.dp),
-            color = MaterialTheme.colorScheme.secondaryContainer,
-            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-        ) {
-            Row(
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
+        val glass = liquidGlassBackdropReady()
+        LiquidGlassSurface(radius = 8.dp, enabled = glass) {
+            Surface(
+                shape = RoundedCornerShape(8.dp),
+                color =
+                    if (glass) {
+                        glassCardColor(
+                            MaterialTheme.colorScheme.secondaryContainer,
+                        )
+                    } else {
+                        MaterialTheme.colorScheme.secondaryContainer
+                    },
+                contentColor = if (glass) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSecondaryContainer,
+                border = if (glass) glassCardBorder() else null,
             ) {
-                Icon(
-                    imageVector = MetrolistIcons.Filled.Check,
-                    contentDescription = null,
-                    modifier = Modifier.size(16.dp),
-                )
-                Text(
-                    text = stringResource(Res.string.recognition_match_found),
-                    style = MaterialTheme.typography.labelLarge,
-                )
+                Row(
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    Icon(
+                        imageVector = MetrolistIcons.Filled.Check,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                    )
+                    Text(
+                        text = stringResource(Res.string.recognition_match_found),
+                        style = MaterialTheme.typography.labelLarge,
+                    )
+                }
             }
         }
 
@@ -1466,10 +1475,9 @@ private fun RecognitionMessageContent(
 
         if (onRetry != null) {
             Spacer(Modifier.height(24.dp))
-            Button(
+            LiquidGlassCompactButton(
                 onClick = onRetry,
                 modifier = Modifier.tvFocusHighlight(RoundedCornerShape(100.dp)),
-                shapes = ButtonDefaults.shapes(),
             ) {
                 Icon(
                     imageVector = MetrolistIcons.Outlined.Refresh,
