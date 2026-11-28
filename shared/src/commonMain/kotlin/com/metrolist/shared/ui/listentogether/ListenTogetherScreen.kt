@@ -640,7 +640,7 @@ fun ListenTogetherServerScreen(
         onNavigateBack = onNavigateBack,
         bottomInset = bottomInset,
         floatingActionButton = {
-            ExtendedFloatingActionButton(
+            ListenTogetherGlassFab(
                 modifier = Modifier.navigationPopupSource(),
                 onClick = { showCustomServerDialog = true },
                 shape = ButtonRadius,
@@ -751,7 +751,7 @@ fun ListenTogetherBlockedUsersScreen(
         onNavigateBack = onNavigateBack,
         bottomInset = bottomInset,
         floatingActionButton = {
-            ExtendedFloatingActionButton(
+            ListenTogetherGlassFab(
                 modifier = Modifier.navigationPopupSource(),
                 onClick = { showBlockDialog = true },
                 shape = ButtonRadius,
@@ -827,7 +827,7 @@ fun ListenTogetherLogsScreen(
         onNavigateBack = onNavigateBack,
         bottomInset = bottomInset,
         floatingActionButton = {
-            ExtendedFloatingActionButton(
+            ListenTogetherGlassFab(
                 onClick = { manager.clearLogs() },
                 shape = ButtonRadius,
                 icon = { Icon(MetrolistIcons.Filled.Close, contentDescription = null) },
@@ -1186,6 +1186,39 @@ private fun ErrorText(message: String) {
 }
 
 @Composable
+private fun ListenTogetherGlassFab(
+    onClick: () -> Unit,
+    shape: Shape,
+    icon: @Composable () -> Unit,
+    text: @Composable () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val glass = liquidGlassBackdropReady()
+    val border = if (glass) glassCardBorder() else null
+    LiquidGlassSurface(radius = 28.dp, enabled = glass) {
+        ExtendedFloatingActionButton(
+            onClick = onClick,
+            modifier = modifier.then(if (border != null) Modifier.border(border, shape) else Modifier),
+            shape = shape,
+            icon = icon,
+            text = text,
+            containerColor =
+                if (glass) {
+                    glassCardColor(MaterialTheme.colorScheme.primaryContainer)
+                } else {
+                    androidx.compose.material3.FloatingActionButtonDefaults.containerColor
+                },
+            contentColor =
+                if (glass) {
+                    MaterialTheme.colorScheme.onSurface
+                } else {
+                    androidx.compose.material3.contentColorFor(androidx.compose.material3.FloatingActionButtonDefaults.containerColor)
+                },
+        )
+    }
+}
+
+@Composable
 private fun ListenTogetherGlassPanel(
     modifier: Modifier = Modifier,
     shape: Shape,
@@ -1319,27 +1352,39 @@ private fun HostJoinTabs(
     onSelectHost: () -> Unit,
     onSelectJoin: () -> Unit,
 ) {
-    Row(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(32.dp))
-                .background(MaterialTheme.colorScheme.surfaceContainer)
-                .padding(4.dp),
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
-        ExpressiveTab(
-            text = stringResource(Res.string.listen_together_host_action),
-            selected = !joinSelected,
-            onClick = onSelectHost,
-            modifier = Modifier.weight(1f),
-        )
-        ExpressiveTab(
-            text = stringResource(Res.string.listen_together_join_tab),
-            selected = joinSelected,
-            onClick = onSelectJoin,
-            modifier = Modifier.weight(1f),
-        )
+    val glass = liquidGlassBackdropReady()
+    val border = if (glass) glassCardBorder() else null
+    LiquidGlassSurface(radius = 32.dp, modifier = Modifier.fillMaxWidth(), enabled = glass) {
+        Row(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(32.dp))
+                    .then(if (border != null) Modifier.border(border, RoundedCornerShape(32.dp)) else Modifier)
+                    .background(
+                        if (glass) {
+                            glassCardColor(
+                                MaterialTheme.colorScheme.surfaceContainer,
+                            )
+                        } else {
+                            MaterialTheme.colorScheme.surfaceContainer
+                        },
+                    ).padding(4.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            ExpressiveTab(
+                text = stringResource(Res.string.listen_together_host_action),
+                selected = !joinSelected,
+                onClick = onSelectHost,
+                modifier = Modifier.weight(1f),
+            )
+            ExpressiveTab(
+                text = stringResource(Res.string.listen_together_join_tab),
+                selected = joinSelected,
+                onClick = onSelectJoin,
+                modifier = Modifier.weight(1f),
+            )
+        }
     }
 }
 
@@ -1350,6 +1395,7 @@ private fun ExpressiveTab(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val glass = liquidGlassBackdropReady()
     ToggleButton(
         checked = selected,
         onCheckedChange = { onClick() },
@@ -1363,8 +1409,15 @@ private fun ExpressiveTab(
             ToggleButtonDefaults.colors(
                 containerColor = Color.Transparent,
                 contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                checkedContainerColor = MaterialTheme.colorScheme.primary,
-                checkedContentColor = MaterialTheme.colorScheme.onPrimary,
+                checkedContainerColor =
+                    if (glass) {
+                        MaterialTheme.colorScheme.primary.copy(
+                            alpha = 0.24f,
+                        )
+                    } else {
+                        MaterialTheme.colorScheme.primary
+                    },
+                checkedContentColor = if (glass) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onPrimary,
             ),
         modifier =
             modifier
