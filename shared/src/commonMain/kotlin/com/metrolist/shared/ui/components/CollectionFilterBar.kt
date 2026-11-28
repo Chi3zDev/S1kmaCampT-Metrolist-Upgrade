@@ -21,8 +21,6 @@ import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.SearchBarValue
@@ -30,7 +28,6 @@ import androidx.compose.material3.SplitButtonDefaults
 import androidx.compose.material3.SplitButtonLayout
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -59,7 +56,6 @@ import com.metrolist.shared.generated.resources.playlist_direction_descending
 import com.metrolist.shared.model.CollectionSort
 import com.metrolist.shared.model.SortDirection
 import com.metrolist.shared.model.allowsReordering
-import com.metrolist.shared.settings.Settings
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import com.metrolist.shared.ui.menu.ExpressiveSelectionMenu
 import com.metrolist.shared.ui.menu.trackPressPosition
@@ -125,10 +121,11 @@ fun CollectionFilterBar(
             }
     }
 
+    val glass = liquidGlassBackdropReady()
     val searchBarColors =
         SearchBarDefaults.colors(
             containerColor =
-                if (Settings.shared.liquidGlassTheme) {
+                if (glass) {
                     glassCardColor(MaterialTheme.colorScheme.surfaceContainerHigh)
                 } else {
                     MaterialTheme.colorScheme.surfaceContainerHigh
@@ -142,7 +139,7 @@ fun CollectionFilterBar(
     ) {
         if (showSearch) {
             Box(Modifier.fillMaxWidth()) {
-                if (Settings.shared.liquidGlassTheme) {
+                if (glass) {
                     LocalThemeGlassBackdrop.current?.Background(radius = 28.dp, modifier = Modifier.matchParentSize())
                 }
                 Surface(
@@ -162,7 +159,7 @@ fun CollectionFilterBar(
                             },
                             trailingIcon = {
                                 if (query.isNotEmpty()) {
-                                    IconButton(onClick = { onQueryChange("") }, shapes = IconButtonDefaults.shapes()) {
+                                    LiquidGlassIconButton(onClick = { onQueryChange("") }) {
                                         Icon(
                                             imageVector = MetrolistIcons.Default.Clear,
                                             contentDescription = stringResource(Res.string.clear_search),
@@ -175,7 +172,7 @@ fun CollectionFilterBar(
                     },
                     modifier = Modifier.fillMaxWidth(),
                     color = searchBarColors.containerColor,
-                    border = if (Settings.shared.liquidGlassTheme) glassCardBorder() else null,
+                    border = if (glass) glassCardBorder() else null,
                     tonalElevation = 0.dp,
                     shadowElevation = 0.dp,
                 )
@@ -201,14 +198,14 @@ fun CollectionFilterBar(
                     .then(if (canReorder) Modifier.weight(1f) else Modifier)
                     .trackPressPosition { sortMenuOffset = it.round() },
             ) {
-                if (Settings.shared.liquidGlassTheme) {
+                if (glass) {
                     LocalThemeGlassBackdrop.current?.Background(radius = 24.dp, modifier = Modifier.matchParentSize())
                 }
                 SplitButtonLayout(
                     leadingButton = {
                         SplitButtonDefaults.TonalLeadingButton(
                             colors = liquidGlassTonalColors(),
-                            border = if (Settings.shared.liquidGlassTheme) glassCardBorder() else null,
+                            border = if (glass) glassCardBorder() else null,
                             onClick = { sortExpanded = true },
                             enabled = !reorderMode,
                             modifier =
@@ -234,7 +231,7 @@ fun CollectionFilterBar(
                     trailingButton = {
                         SplitButtonDefaults.TrailingButton(
                             colors = liquidGlassTonalColors(),
-                            border = if (Settings.shared.liquidGlassTheme) glassCardBorder() else null,
+                            border = if (glass) glassCardBorder() else null,
                             elevation = ButtonDefaults.filledTonalButtonElevation(),
                             onClick = {
                                 onSortDirectionChange(
@@ -310,9 +307,9 @@ fun CollectionFilterBar(
                         colors =
                             ButtonDefaults.filledTonalButtonColors(
                                 containerColor =
-                                    if (Settings.shared.liquidGlassTheme && reorderMode) {
+                                    if (glass && reorderMode) {
                                         MaterialTheme.colorScheme.primary.copy(alpha = 0.32f)
-                                    } else if (Settings.shared.liquidGlassTheme) {
+                                    } else if (glass) {
                                         glassCardColor(MaterialTheme.colorScheme.surfaceContainer)
                                     } else if (reorderMode) {
                                         MaterialTheme.colorScheme.secondary
@@ -320,7 +317,7 @@ fun CollectionFilterBar(
                                         MaterialTheme.colorScheme.secondaryContainer
                                     },
                                 contentColor =
-                                    if (Settings.shared.liquidGlassTheme) {
+                                    if (glass) {
                                         MaterialTheme.colorScheme.onSurface
                                     } else if (reorderMode) {
                                         MaterialTheme.colorScheme.onSecondary
@@ -328,7 +325,7 @@ fun CollectionFilterBar(
                                         MaterialTheme.colorScheme.onSecondaryContainer
                                     },
                             ),
-                        border = if (Settings.shared.liquidGlassTheme) glassCardBorder() else null,
+                        border = if (glass) glassCardBorder() else null,
                         shapes = ButtonDefaults.shapes(),
                     ) {
                         Text(if (reorderMode) text.lock else text.reorder, maxLines = 1, softWrap = false)
@@ -336,7 +333,7 @@ fun CollectionFilterBar(
                 }
             }
             if (onClear != null) {
-                TextButton(onClick = onClear, modifier = Modifier.tvFocusHighlight(CircleShape), shapes = ButtonDefaults.shapes()) {
+                LiquidGlassTextButton(onClick = onClear, modifier = Modifier.tvFocusHighlight(CircleShape)) {
                     Text(
                         text = text.clear ?: "",
                         color = MaterialTheme.colorScheme.error,
