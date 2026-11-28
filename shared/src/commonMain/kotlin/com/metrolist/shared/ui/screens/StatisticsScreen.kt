@@ -128,11 +128,17 @@ import com.metrolist.shared.generated.resources.statistics_play_count_duration
 import com.metrolist.shared.generated.resources.statistics_plays
 import com.metrolist.shared.generated.resources.statistics_plays_label
 import com.metrolist.shared.generated.resources.statistics_time
+import com.metrolist.shared.settings.Settings
 import com.metrolist.shared.ui.components.HeaderPlaybackButtons
 import com.metrolist.shared.ui.components.LiquidGlassChip
+import com.metrolist.shared.ui.components.LiquidGlassIconButton
+import com.metrolist.shared.ui.components.LiquidGlassSurface
 import com.metrolist.shared.ui.components.LoadingScreen
 import com.metrolist.shared.ui.components.RefreshIndicator
 import com.metrolist.shared.ui.components.ScrollingFabState
+import com.metrolist.shared.ui.components.appPageBackground
+import com.metrolist.shared.ui.components.glassCardBorder
+import com.metrolist.shared.ui.components.glassCardColor
 import com.metrolist.shared.ui.components.images.AsyncImage
 import com.metrolist.shared.ui.components.rememberScrollingFabState
 import com.metrolist.shared.ui.components.withStaticCorners
@@ -291,7 +297,7 @@ fun StatisticsScreen(
                     artistLookupGeneration = artistLookupGeneration,
                 )
             } else {
-                Surface(Modifier.fillMaxSize()) {
+                Surface(Modifier.fillMaxSize(), color = appPageBackground(MaterialTheme.colorScheme.surface)) {
                     Box(Modifier.fillMaxSize()) {
                         Column(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.statusBars)) {
                             Row(
@@ -361,19 +367,34 @@ fun StatisticsScreen(
                                                 style = MaterialTheme.typography.bodyMedium,
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                             )
-                                            Button(
-                                                onClick = { onPlayAll(true) },
-                                                enabled = !state.isLoading && state.errorMessage == null && state.tracks.isNotEmpty(),
-                                                modifier =
-                                                    Modifier
-                                                        .fillMaxWidth()
-                                                        .height(ButtonDefaults.MediumContainerHeight)
-                                                        .tvFocusHighlight(CircleShape),
-                                                shapes = ButtonDefaults.shapes(),
+                                            LiquidGlassSurface(
+                                                radius = ButtonDefaults.MediumContainerHeight / 2,
+                                                modifier = Modifier.fillMaxWidth(),
                                             ) {
-                                                Icon(MetrolistIcons.Rounded.Shuffle, null)
-                                                Spacer(Modifier.width(8.dp))
-                                                Text(stringResource(Res.string.shuffle), style = MaterialTheme.typography.titleMedium)
+                                                Button(
+                                                    onClick = { onPlayAll(true) },
+                                                    enabled = !state.isLoading && state.errorMessage == null && state.tracks.isNotEmpty(),
+                                                    modifier =
+                                                        Modifier
+                                                            .fillMaxWidth()
+                                                            .height(ButtonDefaults.MediumContainerHeight)
+                                                            .tvFocusHighlight(CircleShape),
+                                                    shapes = ButtonDefaults.shapes(),
+                                                    colors =
+                                                        if (Settings.shared.liquidGlassTheme) {
+                                                            ButtonDefaults.buttonColors(
+                                                                containerColor = glassCardColor(MaterialTheme.colorScheme.surfaceContainer),
+                                                                contentColor = MaterialTheme.colorScheme.onSurface,
+                                                            )
+                                                        } else {
+                                                            ButtonDefaults.buttonColors()
+                                                        },
+                                                    border = if (Settings.shared.liquidGlassTheme) glassCardBorder() else null,
+                                                ) {
+                                                    Icon(MetrolistIcons.Rounded.Shuffle, null)
+                                                    Spacer(Modifier.width(8.dp))
+                                                    Text(stringResource(Res.string.shuffle), style = MaterialTheme.typography.titleMedium)
+                                                }
                                             }
                                             HorizontalDivider(Modifier.padding(top = 8.dp))
                                         }
@@ -475,7 +496,7 @@ fun StatisticsScreen(
 
 @Composable
 private fun BackButton(onBack: () -> Unit) {
-    IconButton(onClick = onBack, modifier = Modifier.tvFocusHighlight(CircleShape), shapes = IconButtonDefaults.shapes()) {
+    LiquidGlassIconButton(onClick = onBack, modifier = Modifier.tvFocusHighlight(CircleShape)) {
         Icon(MetrolistIcons.AutoMirrored.Filled.ArrowBack, stringResource(Res.string.back))
     }
 }
@@ -618,11 +639,15 @@ private fun StatisticsCard(
                         heading()
                     },
         )
-        Card(
-            shape = ComponentShapes.CardShape,
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-        ) {
-            Column(Modifier.padding(16.dp)) { content() }
+        LiquidGlassSurface(radius = 20.dp, modifier = Modifier.fillMaxWidth()) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = ComponentShapes.CardShape,
+                colors = CardDefaults.cardColors(containerColor = glassCardColor(MaterialTheme.colorScheme.surfaceContainer)),
+                border = glassCardBorder(),
+            ) {
+                Column(Modifier.padding(16.dp)) { content() }
+            }
         }
     }
 }
@@ -670,15 +695,18 @@ private fun SummaryCard(
     value: String,
     modifier: Modifier,
 ) {
-    Card(
-        modifier = modifier,
-        shape = MaterialTheme.shapes.extraSmall,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest),
-    ) {
-        Column(Modifier.padding(14.dp)) {
-            Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Spacer(Modifier.height(4.dp))
-            Text(value, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Black)
+    LiquidGlassSurface(radius = 4.dp, modifier = modifier) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.extraSmall,
+            colors = CardDefaults.cardColors(containerColor = glassCardColor(MaterialTheme.colorScheme.surfaceContainerHighest)),
+            border = glassCardBorder(),
+        ) {
+            Column(Modifier.padding(14.dp)) {
+                Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Spacer(Modifier.height(4.dp))
+                Text(value, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Black)
+            }
         }
     }
 }
@@ -702,7 +730,7 @@ fun StatisticsDetailScreen(
 ) {
     val listState = rememberLazyListState()
     val alpha by animateFloatAsState(if (isLoading) 0.7f else 1f, MaterialTheme.motionScheme.defaultEffectsSpec())
-    Surface(modifier.fillMaxSize()) {
+    Surface(modifier.fillMaxSize(), color = appPageBackground(MaterialTheme.colorScheme.surface)) {
         Column(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.statusBars)) {
             Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp)) { BackButton(onNavigateBack) }
             StatisticsRefreshIndicator(isLoading)
@@ -903,8 +931,14 @@ private fun StatisticsCarousel(
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.primary,
             )
-            FilledIconButton(onClick = onOpenDetail, shapes = IconButtonDefaults.shapes()) {
-                Icon(MetrolistIcons.AutoMirrored.Filled.KeyboardArrowRight, stringResource(Res.string.see_all))
+            if (Settings.shared.liquidGlassTheme) {
+                LiquidGlassIconButton(onClick = onOpenDetail) {
+                    Icon(MetrolistIcons.AutoMirrored.Filled.KeyboardArrowRight, stringResource(Res.string.see_all))
+                }
+            } else {
+                FilledIconButton(onClick = onOpenDetail, shapes = IconButtonDefaults.shapes()) {
+                    Icon(MetrolistIcons.AutoMirrored.Filled.KeyboardArrowRight, stringResource(Res.string.see_all))
+                }
             }
         }
         if (items.isEmpty()) {
