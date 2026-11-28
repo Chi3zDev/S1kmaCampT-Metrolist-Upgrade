@@ -53,6 +53,7 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.pullToRefresh
@@ -69,6 +70,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
@@ -135,6 +137,7 @@ import com.metrolist.shared.ui.components.appPageBackground
 import com.metrolist.shared.ui.components.glassCardBorder
 import com.metrolist.shared.ui.components.glassCardColor
 import com.metrolist.shared.ui.components.images.AsyncImage
+import com.metrolist.shared.ui.components.liquidGlassBackdropReady
 import com.metrolist.shared.ui.components.rememberScrollingFabState
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import com.metrolist.shared.ui.menu.artworkMenuActions
@@ -550,36 +553,51 @@ private fun PeriodButtons(
                 )
                 Icon(MetrolistIcons.Outlined.KeyboardArrowDown, null)
             })
-            DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-                StatisticsPeriodMode.entries.forEach { mode ->
-                    DropdownMenuItem(
-                        modifier = Modifier.tvFocusHighlight(RoundedCornerShape(4.dp)),
-                        text = {
-                            Text(
-                                stringResource(
-                                    if (mode ==
-                                        StatisticsPeriodMode.CALENDAR
-                                    ) {
-                                        Res.string.statistics_calendar_mode
-                                    } else {
-                                        Res.string.statistics_continuous_mode
-                                    },
-                                ),
+            val glassMenu = liquidGlassBackdropReady()
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+                shape = RoundedCornerShape(16.dp),
+                containerColor = if (glassMenu) Color.Transparent else MenuDefaults.containerColor,
+                border = if (glassMenu) glassCardBorder() else null,
+            ) {
+                LiquidGlassSurface(radius = 16.dp, enabled = glassMenu) {
+                    Column(
+                        Modifier.background(
+                            if (glassMenu) glassCardColor(MaterialTheme.colorScheme.surfaceContainerHigh) else Color.Transparent,
+                        ),
+                    ) {
+                        StatisticsPeriodMode.entries.forEach { mode ->
+                            DropdownMenuItem(
+                                modifier = Modifier.tvFocusHighlight(RoundedCornerShape(4.dp)),
+                                text = {
+                                    Text(
+                                        stringResource(
+                                            if (mode ==
+                                                StatisticsPeriodMode.CALENDAR
+                                            ) {
+                                                Res.string.statistics_calendar_mode
+                                            } else {
+                                                Res.string.statistics_continuous_mode
+                                            },
+                                        ),
+                                    )
+                                },
+                                onClick = {
+                                    expanded = false
+                                    onModeSelected(mode)
+                                },
                             )
-                        },
-                        onClick = {
+                        }
+                        DropdownMenuItem(modifier = Modifier.tvFocusHighlight(RoundedCornerShape(4.dp)), text = {
+                            Text(stringResource(Res.string.statistics_choose_dates))
+                        }, onClick = {
                             expanded = false
-                            onModeSelected(mode)
-                        },
-                    )
+                            showDates =
+                                true
+                        })
+                    }
                 }
-                DropdownMenuItem(modifier = Modifier.tvFocusHighlight(RoundedCornerShape(4.dp)), text = {
-                    Text(stringResource(Res.string.statistics_choose_dates))
-                }, onClick = {
-                    expanded = false
-                    showDates =
-                        true
-                })
             }
         }
         StatisticsPeriod.entries.forEach { period ->
