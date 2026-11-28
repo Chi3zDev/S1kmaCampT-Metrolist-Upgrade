@@ -45,6 +45,38 @@ fun LiquidGlassButton(
     }
 }
 
+/** Intrinsic-width filled action for toolbars and empty-state retry controls. */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+fun LiquidGlassCompactButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    content: @Composable RowScope.() -> Unit,
+) {
+    val glass = liquidGlassBackdropReady()
+    LiquidGlassSurface(radius = 24.dp, modifier = modifier, enabled = glass) {
+        Button(
+            onClick = onClick,
+            enabled = enabled,
+            shapes = ButtonDefaults.shapes(),
+            colors =
+                if (glass) {
+                    ButtonDefaults.buttonColors(
+                        containerColor = glassCardColor(MaterialTheme.colorScheme.surfaceContainer),
+                        contentColor = MaterialTheme.colorScheme.onSurface,
+                        disabledContainerColor = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.25f),
+                        disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                    )
+                } else {
+                    ButtonDefaults.buttonColors()
+                },
+            border = if (glass) glassCardBorder() else null,
+            content = content,
+        )
+    }
+}
+
 /** Tonal button colors keep text legible while revealing the platform glass behind the action. */
 @Composable
 fun liquidGlassTonalColors(selected: Boolean = false): ButtonColors =
