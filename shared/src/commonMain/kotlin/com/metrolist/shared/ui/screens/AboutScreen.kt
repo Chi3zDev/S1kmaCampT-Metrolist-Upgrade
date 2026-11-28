@@ -109,6 +109,7 @@ import com.metrolist.shared.generated.resources.devtools_enabled
 import com.metrolist.shared.generated.resources.play
 import com.metrolist.shared.generated.resources.stands_with_palestine
 import com.metrolist.shared.settings.Settings
+import com.metrolist.shared.ui.components.GlassScreenFrame
 import com.metrolist.shared.ui.components.LiquidGlassIconButton
 import com.metrolist.shared.ui.components.LiquidGlassSurface
 import com.metrolist.shared.ui.components.LocalThemeGlassBackdrop
@@ -577,48 +578,55 @@ private fun UpgradeNotesScreen(
     upgradeNumber: Int,
     onBack: () -> Unit,
 ) {
-    Column(Modifier.fillMaxSize().statusBarsPadding()) {
-        LiquidGlassSurface(radius = 0.dp, modifier = Modifier.fillMaxWidth()) {
-            Surface(
-                color = glassCardColor(MaterialTheme.colorScheme.surface),
-                border = glassCardBorder(),
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
+    Box(Modifier.fillMaxSize().statusBarsPadding()) {
+        GlassScreenFrame(topInset = 0.dp, barHeight = 64.dp, topBar = {
+            LiquidGlassSurface(radius = 0.dp, modifier = Modifier.fillMaxWidth()) {
+                Surface(
+                    color = glassCardColor(MaterialTheme.colorScheme.surface),
+                    border = glassCardBorder(),
                 ) {
-                    LiquidGlassIconButton(onClick = onBack) {
-                        Icon(MetrolistIcons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(Res.string.back))
+                    Row(
+                        modifier = Modifier.fillMaxWidth().height(64.dp).padding(horizontal = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        LiquidGlassIconButton(onClick = onBack) {
+                            Icon(MetrolistIcons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(Res.string.back))
+                        }
+                        Text(
+                            stringResource(Res.string.about_upgrade_whats_new),
+                            style = MaterialTheme.typography.headlineSmall,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
                     }
-                    Text(stringResource(Res.string.about_upgrade_whats_new), style = MaterialTheme.typography.headlineSmall)
                 }
             }
-        }
-        Column(
-            modifier =
-                Modifier
-                    .weight(1f)
-                    .verticalScrollWithDrag(rememberScrollState())
-                    .padding(horizontal = 16.dp, vertical = 16.dp)
-                    .padding(bottom = bottomInset),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            upgradeNoteVersions(upgradeNumber).forEach { version ->
-                Text(
-                    stringResource(Res.string.about_upgrade_version, version),
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                )
-                val notes = if (version == 2) upgradeTwoNotes else upgradeOneNotes
-                notes.forEach { note ->
-                    LiquidGlassSurface(radius = 16.dp, modifier = Modifier.fillMaxWidth()) {
-                        Surface(
-                            shape = RoundedCornerShape(16.dp),
-                            color = glassCardColor(MaterialTheme.colorScheme.surfaceContainer),
-                            border = glassCardBorder(),
-                            modifier = Modifier.fillMaxWidth(),
-                        ) {
-                            Text(stringResource(note), Modifier.padding(16.dp), style = MaterialTheme.typography.bodyLarge)
+        }) { viewport ->
+            Column(
+                modifier =
+                    viewport
+                        .verticalScrollWithDrag(rememberScrollState())
+                        .padding(horizontal = 16.dp, vertical = 16.dp)
+                        .padding(bottom = bottomInset),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                upgradeNoteVersions(upgradeNumber).forEach { version ->
+                    Text(
+                        stringResource(Res.string.about_upgrade_version, version),
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    val notes = if (version == 2) upgradeTwoNotes else upgradeOneNotes
+                    notes.forEach { note ->
+                        LiquidGlassSurface(radius = 16.dp, modifier = Modifier.fillMaxWidth()) {
+                            Surface(
+                                shape = RoundedCornerShape(16.dp),
+                                color = glassCardColor(MaterialTheme.colorScheme.surfaceContainer),
+                                border = glassCardBorder(),
+                                modifier = Modifier.fillMaxWidth(),
+                            ) {
+                                Text(stringResource(note), Modifier.padding(16.dp), style = MaterialTheme.typography.bodyLarge)
+                            }
                         }
                     }
                 }
