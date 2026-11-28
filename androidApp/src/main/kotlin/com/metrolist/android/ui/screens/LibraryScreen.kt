@@ -39,6 +39,7 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -145,10 +146,14 @@ import com.metrolist.shared.ui.components.AlertDialog
 import com.metrolist.shared.ui.components.ChipShelf
 import com.metrolist.shared.ui.components.FabMenuPopup
 import com.metrolist.shared.ui.components.LibraryItemContainer
+import com.metrolist.shared.ui.components.LiquidGlassSurface
 import com.metrolist.shared.ui.components.PlaylistDeleteConfirmation
 import com.metrolist.shared.ui.components.PopupVisibility
 import com.metrolist.shared.ui.components.RefreshIndicator
 import com.metrolist.shared.ui.components.ScrollingAddButton
+import com.metrolist.shared.ui.components.glassCardBorder
+import com.metrolist.shared.ui.components.glassCardColor
+import com.metrolist.shared.ui.components.liquidGlassBackdropReady
 import com.metrolist.shared.ui.components.rememberScrollingFabState
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import com.metrolist.shared.ui.menu.groupedMenuItemShapes
@@ -807,27 +812,41 @@ fun LibraryScreen(
                 expanded = rootActive && showNewPlaylistMenu,
                 onDismissRequest = { showNewPlaylistMenu = false },
             ) {
-                DropdownMenuGroup(shapes = MenuDefaults.groupShape(0, 1)) {
-                    DropdownMenuItem(
-                        modifier = Modifier.tvFocusHighlight(groupedMenuItemShapes(0, 2).shape).navigationPopupSource(),
-                        text = { Text(stringResource(Res.string.create_playlist)) },
-                        shape = groupedMenuItemShapes(0, 2).shape,
-                        onClick = {
-                            showNewPlaylistMenu = false
-                            remoteCreationAvailable = GlobalYouTubeRepository.instance.canManagePlaylists()
-                            createLocally = !remoteCreationAvailable
-                            showCreateDialog = true
-                        },
-                    )
-                    DropdownMenuItem(
-                        modifier = Modifier.tvFocusHighlight(groupedMenuItemShapes(1, 2).shape),
-                        text = { Text(stringResource(Res.string.import_playlist)) },
-                        shape = groupedMenuItemShapes(1, 2).shape,
-                        onClick = {
-                            showNewPlaylistMenu = false
-                            onNavigateToPlaylistImport()
-                        },
-                    )
+                val glass = liquidGlassBackdropReady()
+                LiquidGlassSurface(radius = 16.dp, enabled = glass) {
+                    DropdownMenuGroup(
+                        shapes = MenuDefaults.groupShape(0, 1),
+                        containerColor =
+                            if (glass) {
+                                glassCardColor(
+                                    MaterialTheme.colorScheme.surfaceContainer,
+                                )
+                            } else {
+                                MenuDefaults.groupStandardContainerColor
+                            },
+                        border = if (glass) glassCardBorder() else null,
+                    ) {
+                        DropdownMenuItem(
+                            modifier = Modifier.tvFocusHighlight(groupedMenuItemShapes(0, 2).shape).navigationPopupSource(),
+                            text = { Text(stringResource(Res.string.create_playlist)) },
+                            shape = groupedMenuItemShapes(0, 2).shape,
+                            onClick = {
+                                showNewPlaylistMenu = false
+                                remoteCreationAvailable = GlobalYouTubeRepository.instance.canManagePlaylists()
+                                createLocally = !remoteCreationAvailable
+                                showCreateDialog = true
+                            },
+                        )
+                        DropdownMenuItem(
+                            modifier = Modifier.tvFocusHighlight(groupedMenuItemShapes(1, 2).shape),
+                            text = { Text(stringResource(Res.string.import_playlist)) },
+                            shape = groupedMenuItemShapes(1, 2).shape,
+                            onClick = {
+                                showNewPlaylistMenu = false
+                                onNavigateToPlaylistImport()
+                            },
+                        )
+                    }
                 }
             }
         }
