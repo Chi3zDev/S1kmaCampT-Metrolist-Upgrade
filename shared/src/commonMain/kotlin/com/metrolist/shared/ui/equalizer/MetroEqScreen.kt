@@ -28,16 +28,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
@@ -45,7 +40,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberSliderState
@@ -150,6 +144,11 @@ import com.metrolist.shared.generated.resources.wizard_no_models
 import com.metrolist.shared.ui.components.AlertDialog
 import com.metrolist.shared.ui.components.ContainedLoadingIndicator
 import com.metrolist.shared.ui.components.ExpressiveSwitch
+import com.metrolist.shared.ui.components.LiquidGlassDropdownMenu
+import com.metrolist.shared.ui.components.LiquidGlassIconButton
+import com.metrolist.shared.ui.components.LiquidGlassSliderContainer
+import com.metrolist.shared.ui.components.LiquidGlassTextButton
+import com.metrolist.shared.ui.components.LiquidGlassTonalButton
 import com.metrolist.shared.ui.components.PopupContent
 import com.metrolist.shared.ui.components.PopupVisibility
 import com.metrolist.shared.ui.icons.MetrolistIcons
@@ -303,7 +302,7 @@ private fun ProfilesPage(
                             style = MaterialTheme.typography.titleMedium,
                         )
                     }
-                    DropdownMenu(expanded = selectingProfile, onDismissRequest = { selectingProfile = false }) {
+                    LiquidGlassDropdownMenu(expanded = selectingProfile, onDismissRequest = { selectingProfile = false }) {
                         Text(
                             stringResource(Res.string.metroeq_presets),
                             modifier = Modifier.padding(start = 16.dp, top = 12.dp, end = 16.dp, bottom = 4.dp),
@@ -341,7 +340,7 @@ private fun ProfilesPage(
                     }
                 }
                 if (savedProfile) {
-                    IconButton(onClick = { confirmingProfileDelete = true }, shapes = IconButtonDefaults.shapes()) {
+                    LiquidGlassIconButton(onClick = { confirmingProfileDelete = true }) {
                         Icon(
                             MetrolistIcons.Outlined.Delete,
                             contentDescription = stringResource(Res.string.delete),
@@ -384,23 +383,21 @@ private fun ProfilesPage(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.weight(1f).padding(end = 8.dp),
                 )
-                TextButton(
+                LiquidGlassTextButton(
                     onClick = { requestSave(false) },
                     enabled = EqualizerProfiles.hasUnsavedChanges,
-                    shapes = ButtonDefaults.shapes(),
                 ) {
                     Text(stringResource(Res.string.save))
                 }
                 Box {
                     var actionsExpanded by remember { mutableStateOf(false) }
-                    IconButton(
+                    LiquidGlassIconButton(
                         modifier = Modifier.navigationPopupSource(),
                         onClick = { actionsExpanded = true },
-                        shapes = IconButtonDefaults.shapes(),
                     ) {
                         Icon(MetrolistIcons.Default.MoreVert, contentDescription = stringResource(Res.string.more_options))
                     }
-                    DropdownMenu(expanded = actionsExpanded, onDismissRequest = { actionsExpanded = false }) {
+                    LiquidGlassDropdownMenu(expanded = actionsExpanded, onDismissRequest = { actionsExpanded = false }) {
                         DropdownMenuItem(
                             text = { Text(stringResource(Res.string.metroeq_save_as)) },
                             onClick = {
@@ -479,19 +476,17 @@ private fun ProfilesPage(
                 )
             },
             confirmButton = {
-                TextButton(
+                LiquidGlassTextButton(
                     enabled = profileName.isNotBlank(),
                     onClick = {
                         EqualizerProfiles.saveCurrent(profileName, saveAs = saveAs)
                         namingProfile = false
                     },
-                    shapes = ButtonDefaults.shapes(),
                 ) { Text(stringResource(Res.string.save)) }
             },
             dismissButton = {
-                TextButton(
+                LiquidGlassTextButton(
                     onClick = { namingProfile = false },
-                    shapes = ButtonDefaults.shapes(),
                 ) { Text(stringResource(Res.string.cancel)) }
             },
         )
@@ -506,16 +501,15 @@ private fun ProfilesPage(
                 Text(stringResource(Res.string.metroeq_delete_profile_confirm, activeProfile.name))
             },
             confirmButton = {
-                TextButton(
+                LiquidGlassTextButton(
                     onClick = {
                         EqualizerProfiles.delete(activeProfile.id)
                         confirmingProfileDelete = false
                     },
-                    shapes = ButtonDefaults.shapes(),
                 ) { Text(stringResource(Res.string.delete)) }
             },
             dismissButton = {
-                TextButton(onClick = { confirmingProfileDelete = false }, shapes = ButtonDefaults.shapes()) {
+                LiquidGlassTextButton(onClick = { confirmingProfileDelete = false }) {
                     Text(stringResource(Res.string.cancel))
                 }
             },
@@ -767,26 +761,23 @@ private fun EqualizerGraph(
             }
             if (profile != null) {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    TextButton(
+                    LiquidGlassTextButton(
                         enabled = profile.bands.size < MAX_EQUALIZER_BANDS,
                         onClick = {
                             EqualizerProfiles.addBand(MIN_EQUALIZER_FREQUENCY, maxFrequency)
                             selectedBand = profile.bands.size
                         },
-                        shapes = ButtonDefaults.shapes(),
                     ) { Text(stringResource(Res.string.add)) }
-                    TextButton(
+                    LiquidGlassTextButton(
                         enabled = selectedBand in profile.bands.indices,
                         onClick = {
                             EqualizerProfiles.removeBand(selectedBand)
                             selectedBand = (selectedBand - 1).coerceAtLeast(0)
                         },
-                        shapes = ButtonDefaults.shapes(),
                     ) { Text(stringResource(Res.string.remove)) }
-                    TextButton(
+                    LiquidGlassTextButton(
                         enabled = EqualizerProfiles.bandHasChanges(selectedBand),
                         onClick = { EqualizerProfiles.resetBand(selectedBand) },
-                        shapes = ButtonDefaults.shapes(),
                     ) { Text(stringResource(Res.string.reset)) }
                 }
                 Row(
@@ -851,26 +842,36 @@ private fun EqualizerGraph(
                                     trackRange = MIN_EQUALIZER_BAND_GAIN_DB.toFloat()..MAX_EQUALIZER_BAND_GAIN_DB.toFloat(),
                                 )
                             gainSliderState.value = band.gain.toFloat()
-                            Slider(
-                                state = gainSliderState,
-                                onValueChange = {
-                                    gainSliderState.value = it
-                                    updateGain(selectedBand, it.toDouble())
-                                },
-                                modifier = Modifier.retainPlaybackKeyFocus().semantics { contentDescription = gainLabel },
-                            )
+                            LiquidGlassSliderContainer(modifier = Modifier.fillMaxWidth()) {
+                                Slider(
+                                    state = gainSliderState,
+                                    onValueChange = {
+                                        gainSliderState.value = it
+                                        updateGain(selectedBand, it.toDouble())
+                                    },
+                                    modifier =
+                                        Modifier.fillMaxWidth().retainPlaybackKeyFocus().semantics {
+                                            contentDescription = gainLabel
+                                        },
+                                )
+                            }
                         }
                         val frequency = (ln(band.frequency / MIN_EQUALIZER_FREQUENCY) / logarithmicSpan).toFloat()
                         val frequencySliderState = rememberSliderState(value = frequency, trackRange = 0f..1f)
                         frequencySliderState.value = frequency
-                        Slider(
-                            state = frequencySliderState,
-                            onValueChange = { fraction ->
-                                frequencySliderState.value = fraction
-                                updateBand(selectedBand, band.gain, MIN_EQUALIZER_FREQUENCY * exp(fraction * logarithmicSpan))
-                            },
-                            modifier = Modifier.retainPlaybackKeyFocus().semantics { contentDescription = frequencyLabel },
-                        )
+                        LiquidGlassSliderContainer(modifier = Modifier.fillMaxWidth()) {
+                            Slider(
+                                state = frequencySliderState,
+                                onValueChange = { fraction ->
+                                    frequencySliderState.value = fraction
+                                    updateBand(selectedBand, band.gain, MIN_EQUALIZER_FREQUENCY * exp(fraction * logarithmicSpan))
+                                },
+                                modifier =
+                                    Modifier.fillMaxWidth().retainPlaybackKeyFocus().semantics {
+                                        contentDescription = frequencyLabel
+                                    },
+                            )
+                        }
                     }
                 }
             }
@@ -887,7 +888,7 @@ private fun EqualizerGraph(
                             style = MaterialTheme.typography.titleSmall,
                         )
                     }
-                    DropdownMenu(expanded = choosingBand, onDismissRequest = { choosingBand = false }) {
+                    LiquidGlassDropdownMenu(expanded = choosingBand, onDismissRequest = { choosingBand = false }) {
                         profile.bandsByFrequency.forEach { (index, item) ->
                             if (editableBand(index)) {
                                 DropdownMenuItem(
@@ -910,7 +911,7 @@ private fun EqualizerGraph(
                     }
                 }
                 if (editableBand(selectedBand)) {
-                    TextButton(onClick = { editingQ = true }, shapes = ButtonDefaults.shapes()) {
+                    LiquidGlassTextButton(onClick = { editingQ = true }) {
                         Text(stringResource(Res.string.metroeq_q_value, (round(band.q * 100) / 100).toString()))
                     }
                     Text(
@@ -932,23 +933,25 @@ private fun EqualizerGraph(
                 onDismissRequest = { editingQ = false },
                 title = { Text(stringResource(Res.string.metroeq_q_value, (round(qValue * 100) / 100).toString())) },
                 text = {
-                    Slider(
-                        state = qSliderState,
-                        onValueChange = { fraction ->
-                            qSliderState.value = fraction
-                            qValue = (0.1f * exp(fraction * ln(20f / 0.1f))).coerceIn(0.1f, 20f)
-                        },
-                        modifier = Modifier.retainPlaybackKeyFocus(),
-                    )
+                    LiquidGlassSliderContainer(modifier = Modifier.fillMaxWidth()) {
+                        Slider(
+                            state = qSliderState,
+                            onValueChange = { fraction ->
+                                qSliderState.value = fraction
+                                qValue = (0.1f * exp(fraction * ln(20f / 0.1f))).coerceIn(0.1f, 20f)
+                            },
+                            modifier = Modifier.fillMaxWidth().retainPlaybackKeyFocus(),
+                        )
+                    }
                 },
                 confirmButton = {
-                    TextButton(onClick = {
+                    LiquidGlassTextButton(onClick = {
                         updateQ(selectedBand, qValue.toDouble())
                         editingQ = false
-                    }, shapes = ButtonDefaults.shapes()) { Text(stringResource(Res.string.save)) }
+                    }) { Text(stringResource(Res.string.save)) }
                 },
                 dismissButton = {
-                    TextButton(onClick = { editingQ = false }, shapes = ButtonDefaults.shapes()) { Text(stringResource(Res.string.cancel)) }
+                    LiquidGlassTextButton(onClick = { editingQ = false }) { Text(stringResource(Res.string.cancel)) }
                 },
             )
         }
@@ -1046,14 +1049,16 @@ private fun PreampControl(reduction: Float) {
                     color = MaterialTheme.colorScheme.primary,
                 )
             }
-            Slider(
-                state = preampSliderState,
-                onValueChange = {
-                    preampSliderState.value = it
-                    EqualizerProfiles.setPreamp(it.toDouble())
-                },
-                modifier = Modifier.retainPlaybackKeyFocus(),
-            )
+            LiquidGlassSliderContainer(modifier = Modifier.fillMaxWidth()) {
+                Slider(
+                    state = preampSliderState,
+                    onValueChange = {
+                        preampSliderState.value = it
+                        EqualizerProfiles.setPreamp(it.toDouble())
+                    },
+                    modifier = Modifier.fillMaxWidth().retainPlaybackKeyFocus(),
+                )
+            }
             Box(Modifier.fillMaxWidth().height(24.dp)) {
                 if (reduction >= 0.5f) {
                     Text(
@@ -1140,7 +1145,7 @@ private fun AutoEqPage(
                         null
                     } else {
                         {
-                            IconButton(onClick = { query = "" }, shapes = IconButtonDefaults.shapes()) {
+                            LiquidGlassIconButton(onClick = { query = "" }) {
                                 Icon(MetrolistIcons.Outlined.Close, contentDescription = stringResource(Res.string.close))
                             }
                         }
@@ -1277,7 +1282,7 @@ private fun AutoEqError(onRetry: () -> Unit) {
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        FilledTonalButton(onClick = onRetry, shapes = ButtonDefaults.shapes()) { Text(stringResource(Res.string.retry)) }
+        LiquidGlassTonalButton(onClick = onRetry) { Text(stringResource(Res.string.retry)) }
     }
 }
 
@@ -1293,7 +1298,7 @@ private fun DialogHeader(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         onBack?.let {
-            IconButton(onClick = it, shapes = IconButtonDefaults.shapes()) {
+            LiquidGlassIconButton(onClick = it) {
                 Icon(MetrolistIcons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(Res.string.back))
             }
         }
@@ -1303,7 +1308,7 @@ private fun DialogHeader(
                 Text(it, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
-        IconButton(onClick = onDismiss, shapes = IconButtonDefaults.shapes()) {
+        LiquidGlassIconButton(onClick = onDismiss) {
             Icon(MetrolistIcons.Outlined.Close, contentDescription = stringResource(Res.string.close))
         }
     }
