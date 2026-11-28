@@ -13,6 +13,13 @@ class GlassThemeTest {
     }
 
     @Test
+    fun toolbarRemainsOpaqueWithoutAWorkingBackdrop() {
+        assertEquals(Color.Blue, topBarBackgroundColor(Color.Blue, imageReady = true, glassReady = false))
+        assertEquals(Color.Blue, topBarBackgroundColor(Color.Blue, imageReady = false, glassReady = true))
+        assertEquals(Color.Blue.copy(alpha = 0.82f), topBarBackgroundColor(Color.Blue, imageReady = true, glassReady = true))
+    }
+
+    @Test
     fun themeAndFloatingCardsAreIndependent() {
         assertTrue(glassListMaterialEnabled(liquidGlassTheme = true, floatingGlass = false, glassCards = false))
         assertTrue(glassListMaterialEnabled(liquidGlassTheme = false, floatingGlass = true, glassCards = true))
