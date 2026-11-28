@@ -28,10 +28,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -749,7 +747,9 @@ private fun StreakLevelGallery(
         title = { Text(stringResource(Res.string.streak_levels_title)) },
         text = {
             FlowRow(
-                modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()),
+                // AlertDialog owns vertical scrolling in both Material and glass modes.
+                // A second scroll here receives an unbounded height and crashes on measure.
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
