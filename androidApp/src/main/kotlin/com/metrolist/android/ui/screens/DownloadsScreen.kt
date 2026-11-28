@@ -16,16 +16,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -69,6 +65,12 @@ import com.metrolist.shared.generated.resources.queued
 import com.metrolist.shared.generated.resources.remove
 import com.metrolist.shared.generated.resources.retry
 import com.metrolist.shared.generated.resources.see_all
+import com.metrolist.shared.ui.components.LiquidGlassIconButton
+import com.metrolist.shared.ui.components.LiquidGlassSurface
+import com.metrolist.shared.ui.components.LiquidGlassTextButton
+import com.metrolist.shared.ui.components.glassCardBorder
+import com.metrolist.shared.ui.components.glassCardColor
+import com.metrolist.shared.ui.components.liquidGlassBackdropReady
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
@@ -85,17 +87,17 @@ fun DownloadsScreen(onNavigateBack: () -> Unit) {
         contentScrollable = false,
         actions = {
             if (visible.any { it.state.isRunnable }) {
-                IconButton(onClick = manager::pauseAll, shapes = IconButtonDefaults.shapes()) {
+                LiquidGlassIconButton(onClick = manager::pauseAll) {
                     Icon(MetrolistIcons.Filled.Pause, stringResource(Res.string.download_pause_all))
                 }
             }
             if (visible.any { it.state == DownloadQueueState.PAUSED }) {
-                IconButton(onClick = manager::resumeAll, shapes = IconButtonDefaults.shapes()) {
+                LiquidGlassIconButton(onClick = manager::resumeAll) {
                     Icon(MetrolistIcons.Filled.PlayArrow, stringResource(Res.string.download_resume_all))
                 }
             }
             if (visible.isNotEmpty()) {
-                IconButton(onClick = manager::cancelAll, shapes = IconButtonDefaults.shapes()) {
+                LiquidGlassIconButton(onClick = manager::cancelAll) {
                     Icon(MetrolistIcons.Default.Close, stringResource(Res.string.download_cancel_all))
                 }
             }
@@ -187,52 +189,60 @@ internal fun DownloadQueuePanel(
     if (pending.isEmpty()) return
     val failedCount = pending.count { it.state == DownloadQueueState.FAILED }
     val waitingCount = pending.size - failedCount
-    Surface(
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-        shape = MaterialTheme.shapes.medium,
-        modifier = modifier.fillMaxWidth(),
-    ) {
-        Column(Modifier.padding(start = 16.dp, top = 12.dp, end = 4.dp, bottom = 4.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Column(Modifier.weight(1f)) {
-                    if (waitingCount > 0) {
-                        Text(
-                            pluralStringResource(Res.plurals.download_queue_pending, waitingCount, waitingCount),
-                            style = MaterialTheme.typography.titleSmall,
-                        )
+    val glass = liquidGlassBackdropReady()
+    LiquidGlassSurface(radius = 16.dp, modifier = modifier.fillMaxWidth(), enabled = glass) {
+        Surface(
+            color =
+                if (glass) {
+                    glassCardColor(
+                        MaterialTheme.colorScheme.surfaceContainerHigh,
+                    )
+                } else {
+                    MaterialTheme.colorScheme.surfaceContainerHigh
+                },
+            border = if (glass) glassCardBorder() else null,
+            shape = MaterialTheme.shapes.medium,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Column(Modifier.padding(start = 16.dp, top = 12.dp, end = 4.dp, bottom = 4.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f)) {
+                        if (waitingCount > 0) {
+                            Text(
+                                pluralStringResource(Res.plurals.download_queue_pending, waitingCount, waitingCount),
+                                style = MaterialTheme.typography.titleSmall,
+                            )
+                        }
+                        if (failedCount > 0) {
+                            Text(
+                                pluralStringResource(Res.plurals.downloads_failed_banner, failedCount, failedCount),
+                                style = if (waitingCount > 0) MaterialTheme.typography.bodySmall else MaterialTheme.typography.titleSmall,
+                                color = MaterialTheme.colorScheme.error,
+                            )
+                        }
                     }
+                    LiquidGlassTextButton(onClick = onSeeAll) { Text(stringResource(Res.string.see_all)) }
+                }
+                pending.take(PANEL_ROWS).forEach { DownloadQueueRow(it, manager) }
+                Row(Modifier.align(Alignment.End)) {
                     if (failedCount > 0) {
-                        Text(
-                            pluralStringResource(Res.plurals.downloads_failed_banner, failedCount, failedCount),
-                            style = if (waitingCount > 0) MaterialTheme.typography.bodySmall else MaterialTheme.typography.titleSmall,
-                            color = MaterialTheme.colorScheme.error,
-                        )
+                        LiquidGlassTextButton(
+                            onClick = manager::dismissFailed,
+                        ) { Text(stringResource(Res.string.dismiss)) }
+                        LiquidGlassTextButton(onClick = manager::retryFailed) { Text(stringResource(Res.string.retry)) }
                     }
-                }
-                TextButton(onClick = onSeeAll, shapes = ButtonDefaults.shapes()) { Text(stringResource(Res.string.see_all)) }
-            }
-            pending.take(PANEL_ROWS).forEach { DownloadQueueRow(it, manager) }
-            Row(Modifier.align(Alignment.End)) {
-                if (failedCount > 0) {
-                    TextButton(
-                        onClick = manager::dismissFailed,
-                        shapes = ButtonDefaults.shapes(),
-                    ) { Text(stringResource(Res.string.dismiss)) }
-                    TextButton(onClick = manager::retryFailed, shapes = ButtonDefaults.shapes()) { Text(stringResource(Res.string.retry)) }
-                }
-                when {
-                    pending.any { it.state.isRunnable } -> {
-                        TextButton(
-                            onClick = manager::pauseAll,
-                            shapes = ButtonDefaults.shapes(),
-                        ) { Text(stringResource(Res.string.download_pause_all)) }
-                    }
+                    when {
+                        pending.any { it.state.isRunnable } -> {
+                            LiquidGlassTextButton(
+                                onClick = manager::pauseAll,
+                            ) { Text(stringResource(Res.string.download_pause_all)) }
+                        }
 
-                    pending.any { it.state == DownloadQueueState.PAUSED } -> {
-                        TextButton(
-                            onClick = manager::resumeAll,
-                            shapes = ButtonDefaults.shapes(),
-                        ) { Text(stringResource(Res.string.download_resume_all)) }
+                        pending.any { it.state == DownloadQueueState.PAUSED } -> {
+                            LiquidGlassTextButton(
+                                onClick = manager::resumeAll,
+                            ) { Text(stringResource(Res.string.download_resume_all)) }
+                        }
                     }
                 }
             }
@@ -299,24 +309,24 @@ private fun DownloadQueueRow(
         }
         when (request.state) {
             DownloadQueueState.RUNNING, DownloadQueueState.QUEUED -> {
-                IconButton(onClick = { manager.pause(songId) }, shapes = IconButtonDefaults.shapes()) {
+                LiquidGlassIconButton(onClick = { manager.pause(songId) }) {
                     Icon(MetrolistIcons.Filled.Pause, stringResource(Res.string.pause))
                 }
             }
 
             DownloadQueueState.PAUSED -> {
-                IconButton(onClick = { manager.resume(songId) }, shapes = IconButtonDefaults.shapes()) {
+                LiquidGlassIconButton(onClick = { manager.resume(songId) }) {
                     Icon(MetrolistIcons.Filled.PlayArrow, stringResource(Res.string.continue_action))
                 }
             }
 
             else -> {
-                IconButton(onClick = { manager.retryFailed(songId) }, shapes = IconButtonDefaults.shapes()) {
+                LiquidGlassIconButton(onClick = { manager.retryFailed(songId) }) {
                     Icon(MetrolistIcons.Filled.Refresh, stringResource(Res.string.retry))
                 }
             }
         }
-        IconButton(onClick = { manager.cancel(request.song) }, shapes = IconButtonDefaults.shapes()) {
+        LiquidGlassIconButton(onClick = { manager.cancel(request.song) }) {
             Icon(MetrolistIcons.Default.Close, stringResource(Res.string.remove))
         }
     }
