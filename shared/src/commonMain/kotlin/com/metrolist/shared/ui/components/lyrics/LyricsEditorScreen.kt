@@ -19,13 +19,12 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -89,7 +88,12 @@ import com.metrolist.shared.repository.LyricsRepository
 import com.metrolist.shared.ui.components.AlertDialog
 import com.metrolist.shared.ui.components.BasicAlertDialog
 import com.metrolist.shared.ui.components.LiquidGlassDropdownMenu
+import com.metrolist.shared.ui.components.LiquidGlassIconButton
+import com.metrolist.shared.ui.components.LiquidGlassSurface
+import com.metrolist.shared.ui.components.LiquidGlassTextButton
 import com.metrolist.shared.ui.components.PopupVisibility
+import com.metrolist.shared.ui.components.glassCardColor
+import com.metrolist.shared.ui.components.liquidGlassBackdropReady
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import com.metrolist.shared.ui.playback.LocalPlaybackController
 import com.metrolist.shared.ui.utils.setText
@@ -225,113 +229,136 @@ fun LyricsEditorScreen(
                     }
                 },
             topBar = {
-                TopAppBar(
-                    title = {
-                        Text(
-                            stringResource(Res.string.lyrics_editor_title, songTitle),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                    },
-                    navigationIcon = {
-                        IconButton(
-                            onClick = ::close,
-                            enabled = !busy,
-                        ) { Icon(MetrolistIcons.AutoMirrored.Filled.ArrowBack, stringResource(Res.string.back)) }
-                    },
-                )
+                val glass = liquidGlassBackdropReady()
+                LiquidGlassSurface(radius = 0.dp, modifier = Modifier.fillMaxWidth(), enabled = glass) {
+                    TopAppBar(
+                        colors =
+                            if (glass) {
+                                TopAppBarDefaults.topAppBarColors(
+                                    containerColor = glassCardColor(MaterialTheme.colorScheme.surface),
+                                    scrolledContainerColor = glassCardColor(MaterialTheme.colorScheme.surfaceContainer),
+                                )
+                            } else {
+                                TopAppBarDefaults.topAppBarColors()
+                            },
+                        title = {
+                            Text(
+                                stringResource(Res.string.lyrics_editor_title, songTitle),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        },
+                        navigationIcon = {
+                            LiquidGlassIconButton(
+                                onClick = ::close,
+                                enabled = !busy,
+                            ) { Icon(MetrolistIcons.AutoMirrored.Filled.ArrowBack, stringResource(Res.string.back)) }
+                        },
+                    )
+                }
             },
             bottomBar = {
-                BottomAppBar {
-                    TextButton(onClick = {
-                        update { editor.shift(-500) }
-                    }, enabled = ready && !busy && current.isValid) { Text(stringResource(Res.string.lyrics_editor_earlier)) }
-                    TextButton(onClick = {
-                        update { editor.shift(500) }
-                    }, enabled = ready && !busy && current.isValid) { Text(stringResource(Res.string.lyrics_editor_later)) }
-                    Spacer(Modifier.weight(1f))
-                    IconButton(onClick = {
-                        update {
-                            editor.deleteLines()
-                        }
-                    }, enabled = ready && !busy) {
-                        Icon(
-                            MetrolistIcons.Outlined.Delete,
-                            stringResource(Res.string.lyrics_editor_delete_line),
-                        )
-                    }
-                    IconButton(onClick = {
-                        update {
-                            editor.undo()
-                        }
-                    }, enabled = ready && !busy && editor.canUndo) {
-                        Icon(
-                            MetrolistIcons.Outlined.Replay,
-                            stringResource(Res.string.lyrics_editor_undo),
-                        )
-                    }
-                    IconButton(onClick = { update { editor.redo() } }, enabled = ready && !busy && editor.canRedo) {
-                        Icon(
-                            MetrolistIcons.Outlined.Replay,
-                            stringResource(Res.string.lyrics_editor_redo),
-                            Modifier.graphicsLayer {
-                                scaleX =
-                                    -1f
+                LiquidGlassSurface(radius = 0.dp, modifier = Modifier.fillMaxWidth(), enabled = liquidGlassBackdropReady()) {
+                    BottomAppBar(
+                        containerColor =
+                            if (liquidGlassBackdropReady()) {
+                                glassCardColor(
+                                    MaterialTheme.colorScheme.surfaceContainer,
+                                )
+                            } else {
+                                androidx.compose.material3.BottomAppBarDefaults.containerColor
                             },
-                        )
-                    }
-                    Box {
-                        IconButton(onClick = {
-                            more = true
+                    ) {
+                        LiquidGlassTextButton(onClick = {
+                            update { editor.shift(-500) }
+                        }, enabled = ready && !busy && current.isValid) { Text(stringResource(Res.string.lyrics_editor_earlier)) }
+                        LiquidGlassTextButton(onClick = {
+                            update { editor.shift(500) }
+                        }, enabled = ready && !busy && current.isValid) { Text(stringResource(Res.string.lyrics_editor_later)) }
+                        Spacer(Modifier.weight(1f))
+                        LiquidGlassIconButton(onClick = {
+                            update {
+                                editor.deleteLines()
+                            }
                         }, enabled = ready && !busy) {
                             Icon(
-                                MetrolistIcons.Outlined.MoreVert,
-                                stringResource(Res.string.lyrics_editor_more),
+                                MetrolistIcons.Outlined.Delete,
+                                stringResource(Res.string.lyrics_editor_delete_line),
                             )
                         }
-                        LiquidGlassDropdownMenu(expanded = more, onDismissRequest = { more = false }) {
-                            DropdownMenuItem(text = {
-                                Text(
-                                    stringResource(Res.string.lyrics_editor_shift_all_earlier),
+                        LiquidGlassIconButton(onClick = {
+                            update {
+                                editor.undo()
+                            }
+                        }, enabled = ready && !busy && editor.canUndo) {
+                            Icon(
+                                MetrolistIcons.Outlined.Replay,
+                                stringResource(Res.string.lyrics_editor_undo),
+                            )
+                        }
+                        LiquidGlassIconButton(onClick = { update { editor.redo() } }, enabled = ready && !busy && editor.canRedo) {
+                            Icon(
+                                MetrolistIcons.Outlined.Replay,
+                                stringResource(Res.string.lyrics_editor_redo),
+                                Modifier.graphicsLayer {
+                                    scaleX =
+                                        -1f
+                                },
+                            )
+                        }
+                        Box {
+                            LiquidGlassIconButton(onClick = {
+                                more = true
+                            }, enabled = ready && !busy) {
+                                Icon(
+                                    MetrolistIcons.Outlined.MoreVert,
+                                    stringResource(Res.string.lyrics_editor_more),
                                 )
-                            }, enabled = current.isValid, onClick = {
-                                more =
-                                    false
-                                ; update { editor.shift(-500, all = true) }
-                            })
-                            DropdownMenuItem(text = {
-                                Text(
-                                    stringResource(Res.string.lyrics_editor_shift_all_later),
-                                )
-                            }, enabled = current.isValid, onClick = {
-                                more =
-                                    false
-                                ; update { editor.shift(500, all = true) }
-                            })
-                            DropdownMenuItem(text = { Text(stringResource(Res.string.lyrics_editor_sync)) }, onClick = {
-                                more = false
-                                update { editor.timestamp(playback.currentPositionMs()) }
-                            })
-                            DropdownMenuItem(text = { Text(stringResource(Res.string.lyrics_editor_revert)) }, onClick = {
-                                more = false
-                                reverting =
-                                    true
-                            })
-                            DropdownMenuItem(text = {
-                                Text(
-                                    stringResource(Res.string.lyrics_editor_export),
-                                )
-                            }, enabled = current.isValid, onClick = {
-                                more =
-                                    false
-                                ; syncInput()
-                                exporting = true
-                            })
-                            DropdownMenuItem(text = { Text(stringResource(Res.string.lyrics_editor_import)) }, onClick = {
-                                more = false
-                                importing =
-                                    true
-                            })
+                            }
+                            LiquidGlassDropdownMenu(expanded = more, onDismissRequest = { more = false }) {
+                                DropdownMenuItem(text = {
+                                    Text(
+                                        stringResource(Res.string.lyrics_editor_shift_all_earlier),
+                                    )
+                                }, enabled = current.isValid, onClick = {
+                                    more =
+                                        false
+                                    ; update { editor.shift(-500, all = true) }
+                                })
+                                DropdownMenuItem(text = {
+                                    Text(
+                                        stringResource(Res.string.lyrics_editor_shift_all_later),
+                                    )
+                                }, enabled = current.isValid, onClick = {
+                                    more =
+                                        false
+                                    ; update { editor.shift(500, all = true) }
+                                })
+                                DropdownMenuItem(text = { Text(stringResource(Res.string.lyrics_editor_sync)) }, onClick = {
+                                    more = false
+                                    update { editor.timestamp(playback.currentPositionMs()) }
+                                })
+                                DropdownMenuItem(text = { Text(stringResource(Res.string.lyrics_editor_revert)) }, onClick = {
+                                    more = false
+                                    reverting =
+                                        true
+                                })
+                                DropdownMenuItem(text = {
+                                    Text(
+                                        stringResource(Res.string.lyrics_editor_export),
+                                    )
+                                }, enabled = current.isValid, onClick = {
+                                    more =
+                                        false
+                                    ; syncInput()
+                                    exporting = true
+                                })
+                                DropdownMenuItem(text = { Text(stringResource(Res.string.lyrics_editor_import)) }, onClick = {
+                                    more = false
+                                    importing =
+                                        true
+                                })
+                            }
                         }
                     }
                 }
@@ -347,7 +374,7 @@ fun LyricsEditorScreen(
                             color = errorColor,
                             modifier = Modifier.padding(horizontal = 16.dp),
                         )
-                        TextButton(onClick = {
+                        LiquidGlassTextButton(onClick = {
                             syncInput()
                             scope.launch { autosave.flush() }
                         }) { Text(stringResource(Res.string.retry)) }
@@ -390,7 +417,7 @@ fun LyricsEditorScreen(
                 }
             },
             confirmButton = {
-                TextButton(enabled = importText.isNotBlank(), onClick = {
+                LiquidGlassTextButton(enabled = importText.isNotBlank(), onClick = {
                     syncInput()
                     val before = editor.current
                     if (editor.import(importText)) {
@@ -407,7 +434,7 @@ fun LyricsEditorScreen(
                     }
                 }) { Text(stringResource(Res.string.lyrics_editor_import)) }
             },
-            dismissButton = { TextButton(onClick = { importing = false }) { Text(stringResource(Res.string.cancel)) } },
+            dismissButton = { LiquidGlassTextButton(onClick = { importing = false }) { Text(stringResource(Res.string.cancel)) } },
         )
     }
     PopupVisibility(visible = exporting) {
@@ -416,14 +443,14 @@ fun LyricsEditorScreen(
             title = { Text(stringResource(Res.string.lyrics_editor_export)) },
             text = { OutlinedTextField(value = current.json, onValueChange = {}, readOnly = true, modifier = Modifier.fillMaxWidth()) },
             confirmButton = {
-                TextButton(onClick = {
+                LiquidGlassTextButton(onClick = {
                     scope.launch {
                         clipboard.setText(current.json)
                         exporting = false
                     }
                 }) { Text(stringResource(Res.string.copy)) }
             },
-            dismissButton = { TextButton(onClick = { exporting = false }) { Text(stringResource(Res.string.cancel)) } },
+            dismissButton = { LiquidGlassTextButton(onClick = { exporting = false }) { Text(stringResource(Res.string.cancel)) } },
         )
     }
     PopupVisibility(visible = reverting) {
@@ -432,7 +459,7 @@ fun LyricsEditorScreen(
             title = { Text(stringResource(Res.string.lyrics_editor_revert)) },
             text = { Text(stringResource(Res.string.lyrics_editor_revert_message)) },
             confirmButton = {
-                TextButton(onClick = {
+                LiquidGlassTextButton(onClick = {
                     scope.launch {
                         if (autosave.revert()) {
                             reverting = false
@@ -441,7 +468,7 @@ fun LyricsEditorScreen(
                     }
                 }) { Text(stringResource(Res.string.delete)) }
             },
-            dismissButton = { TextButton(onClick = { reverting = false }) { Text(stringResource(Res.string.cancel)) } },
+            dismissButton = { LiquidGlassTextButton(onClick = { reverting = false }) { Text(stringResource(Res.string.cancel)) } },
         )
     }
 }
