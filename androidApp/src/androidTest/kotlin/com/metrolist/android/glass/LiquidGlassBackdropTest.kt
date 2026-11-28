@@ -171,6 +171,49 @@ class LiquidGlassBackdropTest {
         }
     }
 
+    /** Experimental only: ancestor capture is not enabled for production glass views. */
+    @Test
+    fun upstreamAncestorProbeUpdatesWithoutReenteringCompose() {
+        assumeTrue("Glass bridge requires Android 12", Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        val activityManager = instrumentation.targetContext.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        assumeTrue("Glass bridge skips low-RAM devices", !activityManager.isLowRamDevice)
+        assumeTrue("QWEA0 native library is unavailable", runCatching { System.loadLibrary("nativegauss") }.isSuccess)
+        val intent =
+            Intent(instrumentation.targetContext, LiquidGlassAncestorProbeActivity::class.java)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        val activity = instrumentation.startActivitySync(intent) as LiquidGlassAncestorProbeActivity
+        try {
+            instrumentation.waitForIdleSync()
+            Thread.sleep(1000)
+            lateinit var glass: View
+            instrumentation.runOnMainSync {
+                val view = checkNotNull(activity.glass) { "Ancestor probe did not create glass" }
+                assertTrue("probe should use the page ancestor", view.backdropSource === activity.pageSource)
+                assertTrue("probe should update dynamically", view.enableDynamicBackground)
+                glass = view
+            }
+            val green = captureWindowGlassCenter(activity.window, glass)
+            instrumentation.runOnMainSync { activity.sceneColor = Color.Blue }
+            instrumentation.waitForIdleSync()
+            Thread.sleep(1000)
+            val blue = captureWindowGlassCenter(activity.window, glass)
+            assertTrue("ancestor scene should begin green: $green", AndroidColor.green(green) > AndroidColor.blue(green) + 20)
+            assertTrue("ancestor scene should update to blue: $blue", AndroidColor.blue(blue) > AndroidColor.green(blue) + 20)
+            instrumentation.runOnMainSync { activity.stripedScene = true }
+            instrumentation.waitForIdleSync()
+            Thread.sleep(1000)
+            val stripes = captureWindowGlassRow(activity.window, glass, 32)
+            val red = stripes.map(AndroidColor::red)
+            val stripeBlue = stripes.map(AndroidColor::blue)
+            assertTrue("capture must contain both stripe colors", red.average() > 25 && stripeBlue.average() > 25)
+            assertTrue("red stripes must be blurred: $red", red.max() - red.min() < 130)
+            assertTrue("blue stripes must be blurred: $stripeBlue", stripeBlue.max() - stripeBlue.min() < 130)
+        } finally {
+            instrumentation.runOnMainSync { activity.finish() }
+        }
+    }
+
     /** The page can contain its own glass while a separate chrome layer samples the page. */
     @Test
     fun separatePageSourceUpdatesChromeWithoutSelfCapture() {
@@ -263,7 +306,14 @@ class LiquidGlassBackdropTest {
     private fun captureWindowGlassCenter(
         window: Window,
         glass: View,
-    ): Int {
+    ): Int = captureWindowGlassRow(window, glass, 1).single()
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun captureWindowGlassRow(
+        window: Window,
+        glass: View,
+        count: Int,
+    ): List<Int> {
         val bitmap = Bitmap.createBitmap(window.decorView.width, window.decorView.height, Bitmap.Config.ARGB_8888)
         val latch = CountDownLatch(1)
         var result = -1
@@ -274,10 +324,16 @@ class LiquidGlassBackdropTest {
         assertTrue("PixelCopy timed out", latch.await(5, TimeUnit.SECONDS))
         assertEquals(PixelCopy.SUCCESS, result)
         val position = IntArray(2)
-        InstrumentationRegistry.getInstrumentation().runOnMainSync { glass.getLocationInWindow(position) }
-        val pixel = bitmap.getPixel(position[0] + glass.width / 2, position[1] + glass.height / 2)
+        var centerX = 0
+        var centerY = 0
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            glass.getLocationInWindow(position)
+            centerX = position[0] + glass.width / 2
+            centerY = position[1] + glass.height / 2
+        }
+        val pixels = List(count) { index -> bitmap.getPixel(centerX - count / 2 + index, centerY) }
         bitmap.recycle()
-        return pixel
+        return pixels
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
