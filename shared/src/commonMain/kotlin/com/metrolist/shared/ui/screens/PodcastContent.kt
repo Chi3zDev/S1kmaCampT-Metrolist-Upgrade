@@ -28,8 +28,6 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenuGroup
@@ -38,18 +36,14 @@ import androidx.compose.material3.DropdownMenuPopup
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledIconButton
-import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -108,11 +102,19 @@ import com.metrolist.shared.ui.components.ContainedLoadingIndicator
 import com.metrolist.shared.ui.components.EpisodePlayedIndicator
 import com.metrolist.shared.ui.components.ExpandableSearchBar
 import com.metrolist.shared.ui.components.ExpandableText
+import com.metrolist.shared.ui.components.LiquidGlassCompactButton
+import com.metrolist.shared.ui.components.LiquidGlassIconButton
+import com.metrolist.shared.ui.components.LiquidGlassSurface
+import com.metrolist.shared.ui.components.LiquidGlassTextButton
+import com.metrolist.shared.ui.components.LiquidGlassTonalButton
+import com.metrolist.shared.ui.components.LiquidGlassTonalIconButton
 import com.metrolist.shared.ui.components.ModalBottomSheet
 import com.metrolist.shared.ui.components.SongThumbnailPlayingIndicator
 import com.metrolist.shared.ui.components.appPageBackground
 import com.metrolist.shared.ui.components.episodeProgressFraction
+import com.metrolist.shared.ui.components.glassCardColor
 import com.metrolist.shared.ui.components.images.AsyncImage
+import com.metrolist.shared.ui.components.liquidGlassBackdropReady
 import com.metrolist.shared.ui.components.loadingShimmer
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import com.metrolist.shared.ui.menu.CursorDropdownMenu
@@ -206,27 +208,44 @@ fun PodcastContent(
         modifier = modifier,
         containerColor = appPageBackground(MaterialTheme.colorScheme.surface),
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        page?.podcast?.title ?: stringResource(Res.string.podcast),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                },
-                navigationIcon = {
-                    if (onBackClick != null) {
-                        IconButton(onClick = onBackClick, shapes = IconButtonDefaults.shapes()) {
-                            Icon(MetrolistIcons.AutoMirrored.Filled.ArrowBack, stringResource(Res.string.back))
+            val glass = liquidGlassBackdropReady()
+            LiquidGlassSurface(radius = 0.dp, modifier = Modifier.fillMaxWidth(), enabled = glass) {
+                TopAppBar(
+                    title = {
+                        Text(
+                            page?.podcast?.title ?: stringResource(Res.string.podcast),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    },
+                    navigationIcon = {
+                        if (onBackClick != null) {
+                            LiquidGlassIconButton(onClick = onBackClick) {
+                                Icon(MetrolistIcons.AutoMirrored.Filled.ArrowBack, stringResource(Res.string.back))
+                            }
                         }
-                    }
-                },
-                colors =
-                    TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.surface,
-                        scrolledContainerColor = MaterialTheme.colorScheme.surface,
-                    ),
-            )
+                    },
+                    colors =
+                        TopAppBarDefaults.topAppBarColors(
+                            containerColor =
+                                if (glass) {
+                                    glassCardColor(
+                                        MaterialTheme.colorScheme.surface,
+                                    )
+                                } else {
+                                    MaterialTheme.colorScheme.surface
+                                },
+                            scrolledContainerColor =
+                                if (glass) {
+                                    glassCardColor(
+                                        MaterialTheme.colorScheme.surface,
+                                    )
+                                } else {
+                                    MaterialTheme.colorScheme.surface
+                                },
+                        ),
+                )
+            }
         },
     ) { scaffoldPadding ->
         when {
@@ -242,7 +261,7 @@ fun PodcastContent(
                 ) {
                     Text(stringResource(Res.string.unable_to_load_podcast), color = MaterialTheme.colorScheme.error)
                     Spacer(Modifier.height(12.dp))
-                    Button(onClick = onRetry, shapes = ButtonDefaults.shapes()) { Text(stringResource(Res.string.retry)) }
+                    LiquidGlassCompactButton(onClick = onRetry) { Text(stringResource(Res.string.retry)) }
                 }
             }
 
@@ -311,7 +330,7 @@ fun PodcastContent(
                         item(key = "podcast_load_error") {
                             Column(Modifier.padding(16.dp)) {
                                 Text(error, color = MaterialTheme.colorScheme.error)
-                                Button(onClick = onRetry, enabled = !isLoading, shapes = ButtonDefaults.shapes()) {
+                                LiquidGlassCompactButton(onClick = onRetry, enabled = !isLoading) {
                                     Text(stringResource(Res.string.retry))
                                 }
                             }
@@ -414,15 +433,16 @@ private fun PodcastHeader(
             verticalArrangement = Arrangement.spacedBy(8.dp),
             itemVerticalAlignment = Alignment.CenterVertically,
         ) {
-            Button(onClick = onPlay, enabled = page.episodes.any { !it.isUnavailable }, shapes = ButtonDefaults.shapes()) {
+            LiquidGlassCompactButton(onClick = onPlay, enabled = page.episodes.any { !it.isUnavailable }) {
                 Icon(MetrolistIcons.Rounded.PlayArrow, null, Modifier.size(18.dp))
                 Spacer(Modifier.width(6.dp))
                 Text(stringResource(Res.string.play_latest))
             }
             val saveLabel = stringResource(if (page.saved) Res.string.saved else Res.string.save)
             val loadingLabel = stringResource(Res.string.loading)
-            FilledTonalButton(
+            LiquidGlassTonalButton(
                 onClick = onToggleSaved,
+                fillWidth = true,
                 enabled = !isSaving,
                 modifier =
                     Modifier.weight(1f).semantics {
@@ -431,7 +451,6 @@ private fun PodcastHeader(
                             stateDescription = loadingLabel
                         }
                     },
-                shapes = ButtonDefaults.shapes(),
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Text(saveLabel, modifier = Modifier.alpha(if (isSaving) 0f else 1f))
@@ -442,17 +461,15 @@ private fun PodcastHeader(
                     }
                 }
             }
-            FilledTonalIconButton(
+            LiquidGlassTonalIconButton(
                 onClick = onSearchClick,
                 modifier = Modifier.size(36.dp),
-                shapes = IconButtonDefaults.shapes(),
             ) {
                 Icon(MetrolistIcons.Default.Search, stringResource(Res.string.search_episodes))
             }
-            FilledTonalIconButton(
+            LiquidGlassTonalIconButton(
                 onClick = onMenuClick,
                 modifier = Modifier.size(36.dp).navigationPopupSource(),
-                shapes = IconButtonDefaults.shapes(),
             ) {
                 Icon(MetrolistIcons.Default.MoreVert, stringResource(Res.string.podcast_actions))
             }
@@ -576,10 +593,9 @@ private fun EpisodeRow(
                     overflow = TextOverflow.Ellipsis,
                 )
                 Box {
-                    IconButton(
+                    LiquidGlassIconButton(
                         onClick = { showMenu = true },
                         modifier = Modifier.size(36.dp).navigationPopupSource(),
-                        shapes = IconButtonDefaults.shapes(),
                     ) {
                         Icon(MetrolistIcons.Default.MoreVert, stringResource(Res.string.episode_actions), Modifier.size(20.dp))
                     }
@@ -740,9 +756,8 @@ private fun EpisodeDetails(
             onDismissRequest = onDismiss,
             text = { EpisodeDetailsBody(episode, onPlay, channelId, onChannelClick, Modifier.width(420.dp)) },
             confirmButton = {
-                TextButton(
+                LiquidGlassTextButton(
                     onClick = onDismiss,
-                    shapes = ButtonDefaults.shapes(),
                 ) { Text(stringResource(Res.string.close)) }
             },
         )
