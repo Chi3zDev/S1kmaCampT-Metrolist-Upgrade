@@ -8,6 +8,14 @@ import kotlin.test.assertTrue
 
 class PlayerArtworkTransitionSettingTest {
     @Test
+    fun lyricsSlideIsBoundedAndHandlesSmallLayouts() {
+        assertEquals(0, lyricsTransitionOffset(-1))
+        assertEquals(0, lyricsTransitionOffset(0))
+        assertEquals(10, lyricsTransitionOffset(320))
+        assertEquals(32, lyricsTransitionOffset(4000))
+    }
+
+    @Test
     fun glassPlayerMaterialHasDistinctBoundedStyles() {
         val clear = playerGlassOpacity("CLEAR", 100f)
         val regular = playerGlassOpacity("BLUR", 100f)

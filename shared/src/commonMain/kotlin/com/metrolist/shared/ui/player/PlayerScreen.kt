@@ -1576,9 +1576,11 @@ fun PlayerScreen(
                                 AnimatedContent(
                                     targetState = uiState.isLyricsVisible,
                                     transitionSpec = {
-                                        val duration = if (lyricsMotion) PolishMotion.durationMillis else 0
-                                        fadeIn(animationSpec = tween(duration))
-                                            .togetherWith(fadeOut(animationSpec = tween(duration)))
+                                        playerLyricsTransition(
+                                            opening = targetState,
+                                            motionAllowed = lyricsMotion,
+                                            glassCard = playerType == PlayerType.GLASS_CARD,
+                                        )
                                     },
                                     label = "lyricsToggle",
                                     modifier = Modifier.weight(1f),

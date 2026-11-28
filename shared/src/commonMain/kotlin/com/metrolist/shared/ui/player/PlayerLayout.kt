@@ -1287,8 +1287,11 @@ internal fun LandscapePlayerContent(
                         AnimatedContent(
                             targetState = uiState.isLyricsVisible,
                             transitionSpec = {
-                                val duration = if (lyricsMotion) PolishMotion.durationMillis else 0
-                                fadeIn(tween(duration)) togetherWith fadeOut(tween(duration))
+                                playerLyricsTransition(
+                                    opening = targetState,
+                                    motionAllowed = lyricsMotion,
+                                    glassCard = playerType == PlayerType.GLASS_CARD,
+                                )
                             },
                             label = "landscapeLyricsToggle",
                             modifier = Modifier.fillMaxSize(),
