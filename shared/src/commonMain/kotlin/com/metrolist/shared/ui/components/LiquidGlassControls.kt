@@ -57,6 +57,7 @@ fun LiquidGlassCompactButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    destructive: Boolean = false,
     content: @Composable RowScope.() -> Unit,
 ) {
     val glass = liquidGlassBackdropReady()
@@ -68,11 +69,18 @@ fun LiquidGlassCompactButton(
             colors =
                 if (glass) {
                     ButtonDefaults.buttonColors(
-                        containerColor = glassCardColor(MaterialTheme.colorScheme.surfaceContainer),
+                        containerColor =
+                            if (destructive) {
+                                MaterialTheme.colorScheme.error.copy(alpha = 0.32f)
+                            } else {
+                                glassCardColor(MaterialTheme.colorScheme.surfaceContainer)
+                            },
                         contentColor = MaterialTheme.colorScheme.onSurface,
                         disabledContainerColor = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.25f),
                         disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
                     )
+                } else if (destructive) {
+                    ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
                 } else {
                     ButtonDefaults.buttonColors()
                 },
