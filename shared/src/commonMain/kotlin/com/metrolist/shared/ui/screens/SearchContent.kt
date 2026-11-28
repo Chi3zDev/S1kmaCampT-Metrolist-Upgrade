@@ -1333,8 +1333,21 @@ private fun TopResultCard(
                                                 .weight(1f)
                                                 .height(48.dp),
                                         shape = CircleShape,
-                                        color = MaterialTheme.colorScheme.primary,
-                                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                                        color =
+                                            if (Settings.shared.liquidGlassTheme) {
+                                                MaterialTheme.colorScheme.primary.copy(
+                                                    alpha = 0.32f,
+                                                )
+                                            } else {
+                                                MaterialTheme.colorScheme.primary
+                                            },
+                                        contentColor =
+                                            if (Settings.shared.liquidGlassTheme) {
+                                                MaterialTheme.colorScheme.onSurface
+                                            } else {
+                                                MaterialTheme.colorScheme.onPrimary
+                                            },
+                                        border = if (Settings.shared.liquidGlassTheme) glassCardBorder() else null,
                                     ) {
                                         Row(
                                             modifier = Modifier.fillMaxSize(),
@@ -1361,13 +1374,24 @@ private fun TopResultCard(
                                                 .weight(1f)
                                                 .height(48.dp),
                                         shape = CircleShape,
-                                        color = MaterialTheme.colorScheme.surfaceVariant,
+                                        color =
+                                            if (Settings.shared.liquidGlassTheme) {
+                                                glassCardColor(
+                                                    MaterialTheme.colorScheme.surfaceVariant,
+                                                )
+                                            } else {
+                                                MaterialTheme.colorScheme.surfaceVariant
+                                            },
                                         contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
                                         border =
-                                            androidx.compose.foundation.BorderStroke(
-                                                1.dp,
-                                                MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-                                            ),
+                                            if (Settings.shared.liquidGlassTheme) {
+                                                glassCardBorder()
+                                            } else {
+                                                androidx.compose.foundation.BorderStroke(
+                                                    1.dp,
+                                                    MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+                                                )
+                                            },
                                     ) {
                                         Row(
                                             modifier = Modifier.fillMaxSize(),
@@ -1632,8 +1656,21 @@ private fun TopResultCard(
                                                 enabled = podcastActions?.isLoading != true,
                                                 modifier = Modifier.height(40.dp),
                                                 shape = RoundedCornerShape(100.dp),
-                                                color = MaterialTheme.colorScheme.primary,
-                                                contentColor = MaterialTheme.colorScheme.onPrimary,
+                                                color =
+                                                    if (Settings.shared.liquidGlassTheme) {
+                                                        MaterialTheme.colorScheme.primary.copy(
+                                                            alpha = 0.32f,
+                                                        )
+                                                    } else {
+                                                        MaterialTheme.colorScheme.primary
+                                                    },
+                                                contentColor =
+                                                    if (Settings.shared.liquidGlassTheme) {
+                                                        MaterialTheme.colorScheme.onSurface
+                                                    } else {
+                                                        MaterialTheme.colorScheme.onPrimary
+                                                    },
+                                                border = if (Settings.shared.liquidGlassTheme) glassCardBorder() else null,
                                             ) {
                                                 Row(
                                                     modifier = Modifier.padding(horizontal = 20.dp),
@@ -1655,13 +1692,24 @@ private fun TopResultCard(
                                                 enabled = canSave,
                                                 modifier = Modifier.height(40.dp),
                                                 shape = RoundedCornerShape(100.dp),
-                                                color = MaterialTheme.colorScheme.surfaceVariant,
+                                                color =
+                                                    if (Settings.shared.liquidGlassTheme) {
+                                                        glassCardColor(
+                                                            MaterialTheme.colorScheme.surfaceVariant,
+                                                        )
+                                                    } else {
+                                                        MaterialTheme.colorScheme.surfaceVariant
+                                                    },
                                                 contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
                                                 border =
-                                                    androidx.compose.foundation.BorderStroke(
-                                                        1.dp,
-                                                        MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-                                                    ),
+                                                    if (Settings.shared.liquidGlassTheme) {
+                                                        glassCardBorder()
+                                                    } else {
+                                                        androidx.compose.foundation.BorderStroke(
+                                                            1.dp,
+                                                            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+                                                        )
+                                                    },
                                             ) {
                                                 Row(
                                                     modifier = Modifier.padding(horizontal = 20.dp),
@@ -1705,8 +1753,21 @@ private fun TopResultCard(
                                         enabled = podcastActions?.isLoading != true,
                                         modifier = Modifier.height(36.dp).weight(1f),
                                         shape = RoundedCornerShape(100.dp),
-                                        color = MaterialTheme.colorScheme.primary,
-                                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                                        color =
+                                            if (Settings.shared.liquidGlassTheme) {
+                                                MaterialTheme.colorScheme.primary.copy(
+                                                    alpha = 0.32f,
+                                                )
+                                            } else {
+                                                MaterialTheme.colorScheme.primary
+                                            },
+                                        contentColor =
+                                            if (Settings.shared.liquidGlassTheme) {
+                                                MaterialTheme.colorScheme.onSurface
+                                            } else {
+                                                MaterialTheme.colorScheme.onPrimary
+                                            },
+                                        border = if (Settings.shared.liquidGlassTheme) glassCardBorder() else null,
                                     ) {
                                         Row(
                                             modifier = Modifier.fillMaxSize(),
@@ -1723,13 +1784,24 @@ private fun TopResultCard(
                                         enabled = canSave,
                                         modifier = Modifier.height(36.dp).weight(1f),
                                         shape = RoundedCornerShape(100.dp),
-                                        color = MaterialTheme.colorScheme.surfaceVariant,
+                                        color =
+                                            if (Settings.shared.liquidGlassTheme) {
+                                                glassCardColor(
+                                                    MaterialTheme.colorScheme.surfaceVariant,
+                                                )
+                                            } else {
+                                                MaterialTheme.colorScheme.surfaceVariant
+                                            },
                                         contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
                                         border =
-                                            androidx.compose.foundation.BorderStroke(
-                                                1.dp,
-                                                MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-                                            ),
+                                            if (Settings.shared.liquidGlassTheme) {
+                                                glassCardBorder()
+                                            } else {
+                                                androidx.compose.foundation.BorderStroke(
+                                                    1.dp,
+                                                    MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+                                                )
+                                            },
                                     ) {
                                         Row(
                                             modifier = Modifier.fillMaxSize(),
