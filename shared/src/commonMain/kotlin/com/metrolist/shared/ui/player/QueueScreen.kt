@@ -51,7 +51,6 @@ import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FilledTonalIconToggleButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -158,6 +157,8 @@ import com.metrolist.shared.settings.Settings
 import com.metrolist.shared.ui.LocalIsTv
 import com.metrolist.shared.ui.components.ChipShelf
 import com.metrolist.shared.ui.components.ContainedLoadingIndicator
+import com.metrolist.shared.ui.components.LiquidGlassIconButton
+import com.metrolist.shared.ui.components.LiquidGlassIconToggleButton
 import com.metrolist.shared.ui.components.LiquidGlassSurface
 import com.metrolist.shared.ui.components.LocalThemeGlassBackdrop
 import com.metrolist.shared.ui.components.PlayerMenuAction
@@ -565,13 +566,12 @@ fun QueueScreen(
                     actions = {
                         headerActions()
                         if (isTv) {
-                            IconButton(
+                            LiquidGlassIconButton(
                                 onClick = {
                                     tvMenuEntryKey = null
                                     tvMenuOpen = true
                                 },
                                 modifier = Modifier.tvFocusHighlight(CircleShape).navigationPopupSource(),
-                                shapes = IconButtonDefaults.shapes(),
                             ) {
                                 Icon(MetrolistIcons.Rounded.MoreVert, stringResource(Res.string.more_options))
                             }
@@ -1199,7 +1199,15 @@ private fun PlaylistHeader(
                     if (selectedCount > 0) {
                         Surface(
                             shape = RoundedCornerShape(100.dp),
-                            color = MaterialTheme.colorScheme.secondaryContainer,
+                            color =
+                                if (glass) {
+                                    glassCardColor(
+                                        MaterialTheme.colorScheme.secondaryContainer,
+                                    )
+                                } else {
+                                    MaterialTheme.colorScheme.secondaryContainer
+                                },
+                            border = if (glass) glassCardBorder() else null,
                         ) {
                             IconButton(
                                 onClick = onClearSelection,
@@ -1209,7 +1217,12 @@ private fun PlaylistHeader(
                                 Icon(
                                     imageVector = MetrolistIcons.Filled.Close,
                                     contentDescription = stringResource(Res.string.clear_selection),
-                                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                                    tint =
+                                        if (glass) {
+                                            MaterialTheme.colorScheme.onSurface
+                                        } else {
+                                            MaterialTheme.colorScheme.onSecondaryContainer
+                                        },
                                     modifier = Modifier.size(24.dp),
                                 )
                             }
@@ -1218,11 +1231,10 @@ private fun PlaylistHeader(
                         actions()
                     }
                     if (selectedCount == 0 && !LocalIsTv.current) {
-                        FilledTonalIconToggleButton(
+                        LiquidGlassIconToggleButton(
                             checked = isUnlocked,
                             onCheckedChange = onUnlockedChange,
                             modifier = Modifier.size(48.dp),
-                            shapes = IconButtonDefaults.toggleableShapes(),
                         ) {
                             Icon(
                                 imageVector = if (isUnlocked) MetrolistIcons.Rounded.LockOpen else MetrolistIcons.Rounded.Lock,
@@ -1588,14 +1600,13 @@ private fun TrackItem(
                         Checkbox(checked = isSelected, onCheckedChange = null)
                     }
                 } else {
-                    IconButton(
+                    LiquidGlassIconButton(
                         onClick = {
                             Logger.d("Haptics", "Trigger QueueScreen track menu click index=$trackIndex")
                             hapticManager.perform(HapticEvent.PRESS)
                             onEvent(QueueEvent.OpenTrackMenu(track.entryKey, contextMenu.offset))
                         },
                         modifier = Modifier.size(40.dp).navigationPopupSource(),
-                        shapes = IconButtonDefaults.shapes(),
                     ) {
                         Icon(
                             imageVector = MetrolistIcons.Rounded.MoreVert,
