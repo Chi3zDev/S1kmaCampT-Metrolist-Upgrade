@@ -74,6 +74,7 @@ import com.metrolist.shared.ui.components.appPageBackground
 import com.metrolist.shared.ui.components.glassCardBorder
 import com.metrolist.shared.ui.components.glassCardColor
 import com.metrolist.shared.ui.components.glassEdgeBrush
+import com.metrolist.shared.ui.components.liquidGlassBackdropReady
 import com.metrolist.shared.ui.haptics.HapticEvent
 import com.metrolist.shared.ui.haptics.rememberMetrolistHaptics
 import com.metrolist.shared.ui.navigation.LocalContentObscured
@@ -323,7 +324,7 @@ fun StreakScreen(onBack: () -> Unit) {
                 )
             }
             item {
-                if (Settings.shared.liquidGlassTheme) {
+                if (liquidGlassBackdropReady()) {
                     LiquidGlassButton(onClick = { showShare = true }) { Text(stringResource(Res.string.streak_share)) }
                 } else {
                     OutlinedButton(onClick = { showShare = true }) { Text(stringResource(Res.string.streak_share)) }
@@ -520,7 +521,7 @@ fun StreakScreen(onBack: () -> Unit) {
                         if (plan?.canRecover ==
                             true
                         ) {
-                            if (Settings.shared.liquidGlassTheme) {
+                            if (liquidGlassBackdropReady()) {
                                 LiquidGlassButton(onClick = { confirmation = true }, enabled = !simulated) {
                                     Text(stringResource(Res.string.streak_restore))
                                 }
@@ -801,7 +802,7 @@ internal fun DayDot(
     restored: Set<LocalDate>,
 ) {
     val c = MaterialTheme.colorScheme
-    val glass = Settings.shared.liquidGlassTheme
+    val glass = liquidGlassBackdropReady()
     val background =
         when {
             day in listened -> c.primary
