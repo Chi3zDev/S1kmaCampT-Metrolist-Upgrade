@@ -49,7 +49,6 @@ import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialShapes
@@ -782,7 +781,7 @@ fun StatisticsDetailScreen(
                             )
                         }
                         onItemMenu?.let { menu ->
-                            IconButton(onClick = { menu(item) }, enabled = !isLoading, shapes = IconButtonDefaults.shapes()) {
+                            LiquidGlassIconButton(onClick = { menu(item) }, enabled = !isLoading) {
                                 Icon(MetrolistIcons.Default.MoreVert, stringResource(Res.string.more_options_for, item.title))
                             }
                         }
