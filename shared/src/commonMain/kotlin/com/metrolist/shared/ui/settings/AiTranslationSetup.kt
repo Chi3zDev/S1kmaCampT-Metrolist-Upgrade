@@ -14,13 +14,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -45,6 +42,8 @@ import com.metrolist.shared.api.lyrics.lyricsTranslationFailure
 import com.metrolist.shared.generated.resources.*
 import com.metrolist.shared.settings.Settings
 import com.metrolist.shared.settings.canonicalAppLanguageTag
+import com.metrolist.shared.ui.components.LiquidGlassCompactButton
+import com.metrolist.shared.ui.components.LiquidGlassTextButton
 import com.metrolist.shared.ui.components.lyrics.messageResource
 import com.metrolist.shared.ui.menu.ExpressiveSelectionMenu
 import com.metrolist.shared.ui.menu.trackPressPosition
@@ -139,13 +138,11 @@ internal fun AiTranslationSetup(
                     0 -> {
                         Text(stringResource(Res.string.ai_setup_account_description))
                         Text(stringResource(Res.string.ai_setup_limits, 20, 50, 10, 1000))
-                        Button(
+                        LiquidGlassCompactButton(
                             onClick = { tryOpenUrl("https://openrouter.ai/sign-up") { browserFailed = !it } },
-                            shapes = ButtonDefaults.shapes(),
                         ) { Text(stringResource(Res.string.ai_setup_create_account)) }
-                        TextButton(
+                        LiquidGlassTextButton(
                             onClick = { tryOpenUrl("https://openrouter.ai/docs/api_reference/limits") { browserFailed = !it } },
-                            shapes = ButtonDefaults.shapes(),
                         ) { Text(stringResource(Res.string.ai_setup_view_limits)) }
                         if (browserFailed) Text(stringResource(Res.string.ai_setup_browser_failed), color = MaterialTheme.colorScheme.error)
                     }
@@ -185,26 +182,23 @@ internal fun AiTranslationSetup(
                             Text(stringResource(reason.setupHintResource()))
                             when (reason) {
                                 LyricsTranslationFailure.DATA_POLICY -> {
-                                    TextButton(
+                                    LiquidGlassTextButton(
                                         onClick = { tryOpenUrl("https://openrouter.ai/settings/privacy") { browserFailed = !it } },
-                                        shapes = ButtonDefaults.shapes(),
                                     ) { Text(stringResource(Res.string.ai_setup_privacy_settings)) }
                                 }
 
                                 LyricsTranslationFailure.AUTHENTICATION -> {
-                                    TextButton(
+                                    LiquidGlassTextButton(
                                         onClick = {
                                             settings.lyricsOpenRouterOAuthKey = ""
                                             step = 1
                                         },
-                                        shapes = ButtonDefaults.shapes(),
                                     ) { Text(stringResource(Res.string.ai_setup_sign_in_again)) }
                                 }
 
                                 LyricsTranslationFailure.CREDIT_LIMIT -> {
-                                    TextButton(
+                                    LiquidGlassTextButton(
                                         onClick = { tryOpenUrl("https://openrouter.ai/settings/keys") { browserFailed = !it } },
-                                        shapes = ButtonDefaults.shapes(),
                                     ) { Text(stringResource(Res.string.ai_setup_key_limits)) }
                                 }
 
@@ -219,10 +213,10 @@ internal fun AiTranslationSetup(
         }
         if (step != 0 && browserFailed) Text(stringResource(Res.string.ai_setup_browser_failed), color = MaterialTheme.colorScheme.error)
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            TextButton(onClick = { if (step > 0) step-- else onDone() }, enabled = !verifying, shapes = ButtonDefaults.shapes()) {
+            LiquidGlassTextButton(onClick = { if (step > 0) step-- else onDone() }, enabled = !verifying) {
                 Text(stringResource(if (step > 0) Res.string.back else Res.string.cancel))
             }
-            Button(
+            LiquidGlassCompactButton(
                 onClick = {
                     if (step < 2) {
                         step++
@@ -257,7 +251,6 @@ internal fun AiTranslationSetup(
                                 true
                             }
                         },
-                shapes = ButtonDefaults.shapes(),
             ) {
                 Text(
                     stringResource(
