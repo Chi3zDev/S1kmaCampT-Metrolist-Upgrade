@@ -33,7 +33,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
@@ -110,6 +109,8 @@ import com.metrolist.shared.generated.resources.devtools_enabled
 import com.metrolist.shared.generated.resources.play
 import com.metrolist.shared.generated.resources.stands_with_palestine
 import com.metrolist.shared.settings.Settings
+import com.metrolist.shared.ui.components.LiquidGlassIconButton
+import com.metrolist.shared.ui.components.LiquidGlassSurface
 import com.metrolist.shared.ui.components.LocalThemeGlassBackdrop
 import com.metrolist.shared.ui.components.appPageBackground
 import com.metrolist.shared.ui.components.glassCardBorder
@@ -201,23 +202,39 @@ fun AboutScreen(
         contentWindowInsets = WindowInsets(0),
         topBar = {
             if (onNavigateBack != null) {
-                LargeFlexibleTopAppBar(
-                    title = { Text(text.title) },
-                    navigationIcon = {
-                        IconButton(onClick = onNavigateBack, shapes = IconButtonDefaults.shapes()) {
-                            Icon(
-                                MetrolistIcons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = stringResource(Res.string.back),
-                            )
-                        }
-                    },
-                    colors =
-                        TopAppBarDefaults.topAppBarColors(
-                            containerColor = colorScheme.surface,
-                            scrolledContainerColor = colorScheme.surfaceContainerHigh,
-                        ),
-                    scrollBehavior = scrollBehavior,
-                )
+                LiquidGlassSurface(radius = 0.dp, modifier = Modifier.fillMaxWidth()) {
+                    LargeFlexibleTopAppBar(
+                        title = { Text(text.title) },
+                        navigationIcon = {
+                            LiquidGlassIconButton(onClick = onNavigateBack) {
+                                Icon(
+                                    MetrolistIcons.AutoMirrored.Filled.ArrowBack,
+                                    contentDescription = stringResource(Res.string.back),
+                                )
+                            }
+                        },
+                        colors =
+                            TopAppBarDefaults.topAppBarColors(
+                                containerColor =
+                                    if (Settings.shared.liquidGlassTheme) {
+                                        glassCardColor(
+                                            colorScheme.surface,
+                                        )
+                                    } else {
+                                        colorScheme.surface
+                                    },
+                                scrolledContainerColor =
+                                    if (Settings.shared.liquidGlassTheme) {
+                                        glassCardColor(
+                                            colorScheme.surfaceContainerHigh,
+                                        )
+                                    } else {
+                                        colorScheme.surfaceContainerHigh
+                                    },
+                            ),
+                        scrollBehavior = scrollBehavior,
+                    )
+                }
             }
         },
         snackbarHost = {
