@@ -33,19 +33,15 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -77,6 +73,7 @@ import com.metrolist.shared.settings.Settings
 import com.metrolist.shared.settings.SliderStyle
 import com.metrolist.shared.settings.ThemeMode
 import com.metrolist.shared.ui.components.ExpressiveSwitch
+import com.metrolist.shared.ui.components.LiquidGlassIconButton
 import com.metrolist.shared.ui.components.LiquidGlassSurface
 import com.metrolist.shared.ui.components.ReorderMenu
 import com.metrolist.shared.ui.components.focusOutline
@@ -147,21 +144,19 @@ internal fun CanvasContentOrderSetting(
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = if (sourceEnabled) 1f else 0.38f),
                     )
                 }
-                IconButton(
+                LiquidGlassIconButton(
                     onClick = {
                         move(source, availableSources[index - 1])
                     },
                     enabled = sourceEnabled && index > 0,
-                    shapes = IconButtonDefaults.shapes(),
                 ) {
                     Icon(MetrolistIcons.Outlined.KeyboardArrowUp, stringResource(Res.string.move_up))
                 }
-                IconButton(
+                LiquidGlassIconButton(
                     onClick = {
                         move(source, availableSources[index + 1])
                     },
                     enabled = sourceEnabled && index < availableSources.lastIndex,
-                    shapes = IconButtonDefaults.shapes(),
                 ) {
                     Icon(MetrolistIcons.Outlined.KeyboardArrowDown, stringResource(Res.string.move_down))
                 }
@@ -517,7 +512,7 @@ internal fun ThemeSeedColorSetting(
             prefix = { Text("#") },
             trailingIcon = {
                 if (isFullValidHex) {
-                    IconButton(
+                    LiquidGlassIconButton(
                         onClick = {
                             hex.toLongOrNull(16)?.let { rgb ->
                                 val color = Color(color = 0xFF000000L or rgb)
@@ -526,7 +521,6 @@ internal fun ThemeSeedColorSetting(
                             focusManager.clearFocus()
                             keyboardController?.hide()
                         },
-                        shapes = IconButtonDefaults.shapes(),
                     ) {
                         Icon(
                             imageVector = MetrolistIcons.Filled.Check,
