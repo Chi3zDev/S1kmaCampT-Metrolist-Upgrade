@@ -52,19 +52,14 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.systemGestureExclusion
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
@@ -335,6 +330,9 @@ import com.metrolist.shared.ui.components.AlertDialog
 import com.metrolist.shared.ui.components.BottomSheet
 import com.metrolist.shared.ui.components.DISMISSED_ANCHOR
 import com.metrolist.shared.ui.components.EXPANDED_ANCHOR
+import com.metrolist.shared.ui.components.LiquidGlassCompactButton
+import com.metrolist.shared.ui.components.LiquidGlassIconButton
+import com.metrolist.shared.ui.components.LiquidGlassTextButton
 import com.metrolist.shared.ui.components.LocalAppBackgroundVisible
 import com.metrolist.shared.ui.components.LocalDownloadedSongIds
 import com.metrolist.shared.ui.components.LocalThemeGlassBackdrop
@@ -571,18 +569,17 @@ fun MetrolistApp(
                 title = { Text(stringResource(Res.string.youtube_session_expired_title)) },
                 text = { Text(stringResource(Res.string.youtube_session_expired_message)) },
                 confirmButton = {
-                    TextButton(
+                    LiquidGlassTextButton(
                         onClick = {
                             YouTubeSessionState.dismissExpiredSessionNotice()
                             navigator.navigate(Screen.Login)
                         },
-                        shapes = ButtonDefaults.shapes(),
                     ) {
                         Text(stringResource(Res.string.action_login))
                     }
                 },
                 dismissButton = {
-                    TextButton(onClick = YouTubeSessionState::dismissExpiredSessionNotice, shapes = ButtonDefaults.shapes()) {
+                    LiquidGlassTextButton(onClick = YouTubeSessionState::dismissExpiredSessionNotice) {
                         Text(stringResource(Res.string.action_not_now))
                     }
                 },
@@ -594,18 +591,17 @@ fun MetrolistApp(
                 title = { Text(stringResource(Res.string.lastfm_session_expired_title)) },
                 text = { Text(stringResource(Res.string.lastfm_session_expired_description)) },
                 confirmButton = {
-                    TextButton(
+                    LiquidGlassTextButton(
                         onClick = {
                             ScrobbleSessions.dismissLastFmExpiredNotice()
                             navigator.navigate(Screen.LastFm)
                         },
-                        shapes = ButtonDefaults.shapes(),
                     ) {
                         Text(stringResource(Res.string.action_login))
                     }
                 },
                 dismissButton = {
-                    TextButton(onClick = ScrobbleSessions::dismissLastFmExpiredNotice, shapes = ButtonDefaults.shapes()) {
+                    LiquidGlassTextButton(onClick = ScrobbleSessions::dismissLastFmExpiredNotice) {
                         Text(stringResource(Res.string.action_not_now))
                     }
                 },
@@ -699,19 +695,18 @@ fun MetrolistApp(
                     }
                 },
                 confirmButton = {
-                    TextButton(
+                    LiquidGlassTextButton(
                         onClick = {
                             updatePrompt = null
                             navigator.navigate(Screen.UpdateDetails)
                             updateScope.launch { AppUpdateManager.download(context, release) }
                         },
-                        shapes = ButtonDefaults.shapes(),
                     ) {
                         Text(stringResource(Res.string.updates_action))
                     }
                 },
                 dismissButton = {
-                    TextButton(onClick = { updatePrompt = null }, shapes = ButtonDefaults.shapes()) {
+                    LiquidGlassTextButton(onClick = { updatePrompt = null }) {
                         Text(stringResource(Res.string.action_not_now))
                     }
                 },
@@ -1159,7 +1154,7 @@ fun MetrolistApp(
                 val accountThumbnail = authManager.accountThumbnail
                 val updatePending = stringResource(Res.string.update_pending)
                 Box {
-                    IconButton(
+                    LiquidGlassIconButton(
                         onClick = { showAccountMenu = true },
                         modifier =
                             (
@@ -1173,7 +1168,6 @@ fun MetrolistApp(
                                 scale = 1.08f,
                                 bringIntoView = false,
                             ).navigationPopupSource(),
-                        shapes = IconButtonDefaults.shapes(),
                     ) {
                         TopBarProfileAvatar(
                             accountName = accountName,
@@ -1208,10 +1202,9 @@ fun MetrolistApp(
                     BoxWithConstraints(Modifier.weight(1f), contentAlignment = Alignment.Center) {
                         if (currentRoute != Screen.Search) {
                             if (maxWidth < 240.dp) {
-                                IconButton(
+                                LiquidGlassIconButton(
                                     onClick = { navigator.navigateToRoot(Screen.Search) },
                                     modifier = Modifier.size(captionSize).systemGestureExclusion(),
-                                    shapes = IconButtonDefaults.shapes(),
                                 ) {
                                     Icon(MetrolistIcons.Outlined.Search, contentDescription = stringResource(Res.string.search))
                                 }
@@ -2276,7 +2269,7 @@ fun MetrolistApp(
                                 )
                             },
                             confirmButton = {
-                                TextButton(
+                                LiquidGlassTextButton(
                                     onClick = {
                                         Settings.shared.pendingContinuePlayback = false
                                         showContinuePlaybackPrompt = false
@@ -2284,18 +2277,16 @@ fun MetrolistApp(
                                             playerConnection.togglePlayPause()
                                         }
                                     },
-                                    shapes = ButtonDefaults.shapes(),
                                 ) {
                                     Text(stringResource(Res.string.play))
                                 }
                             },
                             dismissButton = {
-                                TextButton(
+                                LiquidGlassTextButton(
                                     onClick = {
                                         Settings.shared.pendingContinuePlayback = false
                                         showContinuePlaybackPrompt = false
                                     },
-                                    shapes = ButtonDefaults.shapes(),
                                 ) {
                                     Text(stringResource(Res.string.action_not_now))
                                 }
@@ -2364,22 +2355,21 @@ private fun ListenTogetherPlaybackRequestHandler(playerConnection: PlayerConnect
             title = { Text(stringResource(Res.string.listen_together_guest_choice_title)) },
             text = { Text(stringResource(Res.string.listen_together_guest_choice_message)) },
             confirmButton = {
-                Button(
+                LiquidGlassCompactButton(
                     onClick = {
                         AndroidListenTogetherManager.suggestTrack(pending.song)
                         request = null
                     },
-                    shapes = ButtonDefaults.shapes(),
                 ) {
                     Text(stringResource(Res.string.listen_together_guest_queue))
                 }
             },
             dismissButton = {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    TextButton(onClick = { request = null }, shapes = ButtonDefaults.shapes()) {
+                    LiquidGlassTextButton(onClick = { request = null }) {
                         Text(stringResource(Res.string.cancel))
                     }
-                    TextButton(
+                    LiquidGlassTextButton(
                         onClick = {
                             request = null
                             scope.launch {
@@ -2397,7 +2387,6 @@ private fun ListenTogetherPlaybackRequestHandler(playerConnection: PlayerConnect
                                 }
                             }
                         },
-                        shapes = ButtonDefaults.shapes(),
                     ) {
                         Text(stringResource(Res.string.listen_together_guest_solo))
                     }
