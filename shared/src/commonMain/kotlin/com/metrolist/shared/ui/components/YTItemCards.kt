@@ -277,152 +277,154 @@ fun SongListItem(
     val rowGlass = Settings.shared.liquidGlassTheme && !isCurrent
     val rowBackground = if (rowGlass) glassCardColor(colors.container) else colors.container
     val rowBorder = if (rowGlass) glassCardBorder() else null
-    Row(
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .heightIn(min = 56.dp)
-                .alpha(if (enabled) 1f else 0.38f)
-                .clip(rowShape)
-                .background(rowBackground)
-                .then(if (rowBorder != null) Modifier.border(rowBorder, rowShape) else Modifier)
-                .focusOutline(rowShape)
-                .currentSongSemantics(isCurrent, isPlaying)
-                .combinedClickable(
-                    onClick = {
-                        if (enabled) {
-                            onClick()
-                        } else if (song.isUnavailable) {
-                            UnavailableSongTaps.tapped()
-                        }
-                    },
-                    onLongClick = if (longClickEnabled) onLongClick ?: onShowMenu else null,
-                ).onSecondaryClick(onShowMenu)
-                .padding(horizontal = 8.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        leadingContent?.let {
-            Box(
-                modifier = Modifier.width(36.dp),
-                contentAlignment = Alignment.Center,
-            ) {
-                it()
-            }
-            Spacer(Modifier.width(8.dp))
-        }
-
-        if (leadingContent == null && (index != null || isCurrent) && !(isCurrent && hasArtwork)) {
-            Box(
-                modifier = Modifier.width(36.dp),
-                contentAlignment = Alignment.Center,
-            ) {
-                if (isCurrent && !hasArtwork) {
-                    Icon(
-                        imageVector = if (isPlaying) MetrolistIcons.Rounded.PlayArrow else MetrolistIcons.Default.Pause,
-                        contentDescription = null,
-                        tint = contentColor,
-                        modifier = Modifier.size(20.dp),
-                    )
-                } else {
-                    Text(
-                        text = "${index!! + 1}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
+    LiquidGlassSurface(radius = 8.dp, modifier = modifier, enabled = rowGlass) {
+        Row(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 56.dp)
+                    .alpha(if (enabled) 1f else 0.38f)
+                    .clip(rowShape)
+                    .background(rowBackground)
+                    .then(if (rowBorder != null) Modifier.border(rowBorder, rowShape) else Modifier)
+                    .focusOutline(rowShape)
+                    .currentSongSemantics(isCurrent, isPlaying)
+                    .combinedClickable(
+                        onClick = {
+                            if (enabled) {
+                                onClick()
+                            } else if (song.isUnavailable) {
+                                UnavailableSongTaps.tapped()
+                            }
+                        },
+                        onLongClick = if (longClickEnabled) onLongClick ?: onShowMenu else null,
+                    ).onSecondaryClick(onShowMenu)
+                    .padding(horizontal = 8.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            leadingContent?.let {
+                Box(
+                    modifier = Modifier.width(36.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    it()
                 }
+                Spacer(Modifier.width(8.dp))
             }
-            Spacer(Modifier.width(8.dp))
-        }
 
-        if (hasArtwork) {
-            Box(
-                modifier =
-                    Modifier
-                        .squareArtworkSlot(if (numberedArtwork) 36.dp else 48.dp, if (isCurrent) 1f else song.previewAspectRatio)
-                        .graphicsLayer { rotationZ = artworkRotation }
-                        .clip(artworkShape)
-                        .background(MaterialTheme.colorScheme.secondaryContainer),
-                contentAlignment = Alignment.Center,
-            ) {
+            if (leadingContent == null && (index != null || isCurrent) && !(isCurrent && hasArtwork)) {
+                Box(
+                    modifier = Modifier.width(36.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    if (isCurrent && !hasArtwork) {
+                        Icon(
+                            imageVector = if (isPlaying) MetrolistIcons.Rounded.PlayArrow else MetrolistIcons.Default.Pause,
+                            contentDescription = null,
+                            tint = contentColor,
+                            modifier = Modifier.size(20.dp),
+                        )
+                    } else {
+                        Text(
+                            text = "${index!! + 1}",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+                Spacer(Modifier.width(8.dp))
+            }
+
+            if (hasArtwork) {
                 Box(
                     modifier =
                         Modifier
-                            .fillMaxSize()
-                            .graphicsLayer { rotationZ = -artworkRotation },
+                            .squareArtworkSlot(if (numberedArtwork) 36.dp else 48.dp, if (isCurrent) 1f else song.previewAspectRatio)
+                            .graphicsLayer { rotationZ = artworkRotation }
+                            .clip(artworkShape)
+                            .background(MaterialTheme.colorScheme.secondaryContainer),
                     contentAlignment = Alignment.Center,
                 ) {
-                    AsyncImage(
-                        url = song.previewThumbnailUrl,
-                        contentDescription = null,
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop,
-                    )
+                    Box(
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .graphicsLayer { rotationZ = -artworkRotation },
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        AsyncImage(
+                            url = song.previewThumbnailUrl,
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop,
+                        )
+                    }
                 }
+                Spacer(Modifier.width(if (numberedArtwork) 8.dp else 12.dp))
             }
-            Spacer(Modifier.width(if (numberedArtwork) 8.dp else 12.dp))
-        }
 
-        Column(modifier = Modifier.weight(1f)) {
-            ListItemTitle(
-                text = effectiveSong.title,
-                isExplicit = isDesktop && effectiveSong.isExplicit,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = if (isCurrent) FontWeight.Bold else FontWeight.Medium,
-                color = contentColor,
-            )
-
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                ItemStatusBadges(effectiveSong, isDownloaded, showExplicit = !isDesktop)
-
-                ArtistSubtitle(
-                    artists = effectiveSong.artists,
-                    onArtistClick = onArtistClick,
-                    style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.weight(1f, fill = false),
-                    clickable = clickableMetadata,
-                    color = subtitleColor,
-                    linkColor = linkColor,
+            Column(modifier = Modifier.weight(1f)) {
+                ListItemTitle(
+                    text = effectiveSong.title,
+                    isExplicit = isDesktop && effectiveSong.isExplicit,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = if (isCurrent) FontWeight.Bold else FontWeight.Medium,
+                    color = contentColor,
                 )
 
-                if (showAlbum && effectiveSong.album != null) {
-                    Text(text = " • ", style = MaterialTheme.typography.bodySmall, color = subtitleColor)
-                    MetadataLink(
-                        text = effectiveSong.album.name,
-                        id = effectiveSong.album.id,
-                        onClick = onAlbumClick,
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    ItemStatusBadges(effectiveSong, isDownloaded, showExplicit = !isDesktop)
+
+                    ArtistSubtitle(
+                        artists = effectiveSong.artists,
+                        onArtistClick = onArtistClick,
                         style = MaterialTheme.typography.bodySmall,
                         modifier = Modifier.weight(1f, fill = false),
-                        enabled = clickableMetadata,
+                        clickable = clickableMetadata,
                         color = subtitleColor,
                         linkColor = linkColor,
                     )
-                }
 
-                effectiveSong.duration?.let {
-                    val mins = it / 60
-                    val secs = it % 60
-                    Text(
-                        text = " • $mins:${secs.toString().padStart(2, '0')}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = subtitleColor,
-                        maxLines = 1,
-                        softWrap = false,
-                        overflow = TextOverflow.Ellipsis,
+                    if (showAlbum && effectiveSong.album != null) {
+                        Text(text = " • ", style = MaterialTheme.typography.bodySmall, color = subtitleColor)
+                        MetadataLink(
+                            text = effectiveSong.album.name,
+                            id = effectiveSong.album.id,
+                            onClick = onAlbumClick,
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.weight(1f, fill = false),
+                            enabled = clickableMetadata,
+                            color = subtitleColor,
+                            linkColor = linkColor,
+                        )
+                    }
+
+                    effectiveSong.duration?.let {
+                        val mins = it / 60
+                        val secs = it % 60
+                        Text(
+                            text = " • $mins:${secs.toString().padStart(2, '0')}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = subtitleColor,
+                            maxLines = 1,
+                            softWrap = false,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
+                }
+                if (song.isPodcast) EpisodePlayedIndicator(song.id, song.duration)
+            }
+
+            if (trailingContent != null) {
+                trailingContent()
+            } else {
+                IconButton(modifier = Modifier.navigationPopupSource(), onClick = onShowMenu, shapes = IconButtonDefaults.shapes()) {
+                    Icon(
+                        MetrolistIcons.Default.MoreVert,
+                        contentDescription = stringResource(Res.string.more_options),
+                        tint = if (isCurrent) contentColor else LocalContentColor.current,
                     )
                 }
-            }
-            if (song.isPodcast) EpisodePlayedIndicator(song.id, song.duration)
-        }
-
-        if (trailingContent != null) {
-            trailingContent()
-        } else {
-            IconButton(modifier = Modifier.navigationPopupSource(), onClick = onShowMenu, shapes = IconButtonDefaults.shapes()) {
-                Icon(
-                    MetrolistIcons.Default.MoreVert,
-                    contentDescription = stringResource(Res.string.more_options),
-                    tint = if (isCurrent) contentColor else LocalContentColor.current,
-                )
             }
         }
     }
@@ -792,191 +794,202 @@ fun YTListItem(
     val contentColor = colors.content
     val subtitleColor = colors.subtitle
     val linkColor = colors.link
-    Row(
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .heightIn(min = 48.dp)
-                .alpha(if (itemEnabled) 1f else 0.38f)
-                .clip(rowShape)
-                .background(rowBackground)
-                .then(if (rowBorder != null) Modifier.border(rowBorder, rowShape) else Modifier)
-                .focusOutline(rowShape)
-                .currentSongSemantics(currentSong, isPlaying)
-                .then(if (pageArtwork != null) Modifier.navigationPageSource(pageArtwork.token) else Modifier)
-                .combinedClickable(
-                    enabled = itemEnabled || onLongClick != null || onShowMenu != null || item.isUnavailable,
-                    onClick = {
-                        if (itemEnabled) {
-                            CollectionPreviews.record(item)
-                            onClick()
-                        } else if (item.isUnavailable) {
-                            UnavailableSongTaps.tapped()
-                        }
-                    },
-                    onLongClick = onLongClick ?: onShowMenu,
-                ).onSecondaryClick(onLongClick ?: onShowMenu)
-                .padding(contentPadding),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        val shape =
-            animatedCurrentSongArtworkShape(
-                currentSong,
-                if (item is ArtistItem) artistArtworkShape(item.id) else RoundedCornerShape(4.dp),
-            )
-        val artworkRotation by rememberCurrentSongArtworkRotation(currentSong, isPlaying)
-
-        Box(
+    LiquidGlassSurface(radius = 4.dp, modifier = modifier, enabled = rowGlass) {
+        Row(
             modifier =
                 Modifier
-                    .then(pageArtwork?.modifier(4.dp) ?: Modifier)
-                    .squareArtworkSlot(48.dp, if (currentSong) 1f else item.thumbnailAspectRatio)
-                    .graphicsLayer { rotationZ = artworkRotation }
-                    .clip(shape)
-                    .background(MaterialTheme.colorScheme.secondaryContainer),
-            contentAlignment = Alignment.Center,
+                    .fillMaxWidth()
+                    .heightIn(min = 48.dp)
+                    .alpha(if (itemEnabled) 1f else 0.38f)
+                    .clip(rowShape)
+                    .background(rowBackground)
+                    .then(if (rowBorder != null) Modifier.border(rowBorder, rowShape) else Modifier)
+                    .focusOutline(rowShape)
+                    .currentSongSemantics(currentSong, isPlaying)
+                    .then(if (pageArtwork != null) Modifier.navigationPageSource(pageArtwork.token) else Modifier)
+                    .combinedClickable(
+                        enabled = itemEnabled || onLongClick != null || onShowMenu != null || item.isUnavailable,
+                        onClick = {
+                            if (itemEnabled) {
+                                CollectionPreviews.record(item)
+                                onClick()
+                            } else if (item.isUnavailable) {
+                                UnavailableSongTaps.tapped()
+                            }
+                        },
+                        onLongClick = onLongClick ?: onShowMenu,
+                    ).onSecondaryClick(onLongClick ?: onShowMenu)
+                    .padding(contentPadding),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
+            val shape =
+                animatedCurrentSongArtworkShape(
+                    currentSong,
+                    if (item is ArtistItem) artistArtworkShape(item.id) else RoundedCornerShape(4.dp),
+                )
+            val artworkRotation by rememberCurrentSongArtworkRotation(currentSong, isPlaying)
+
             Box(
                 modifier =
                     Modifier
-                        .fillMaxSize()
-                        .graphicsLayer { rotationZ = -artworkRotation },
+                        .then(pageArtwork?.modifier(4.dp) ?: Modifier)
+                        .squareArtworkSlot(48.dp, if (currentSong) 1f else item.thumbnailAspectRatio)
+                        .graphicsLayer { rotationZ = artworkRotation }
+                        .clip(shape)
+                        .background(MaterialTheme.colorScheme.secondaryContainer),
                 contentAlignment = Alignment.Center,
             ) {
-                if (item is PlaylistItem) {
-                    PlaylistCoverImage(item, Modifier.fillMaxSize())
-                } else if (item.thumbnail != null) {
-                    AsyncImage(
-                        url = item.displayThumbnailUrl,
-                        contentDescription = null,
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop,
-                    )
-                }
-                if (item is AlbumItem && onAlbumPlay != null) {
-                    AlbumPlayButton(
-                        visible = !isCurrent,
-                        onClick = onAlbumPlay,
-                    )
+                Box(
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .graphicsLayer { rotationZ = -artworkRotation },
+                    contentAlignment = Alignment.Center,
+                ) {
+                    if (item is PlaylistItem) {
+                        PlaylistCoverImage(item, Modifier.fillMaxSize())
+                    } else if (item.thumbnail != null) {
+                        AsyncImage(
+                            url = item.displayThumbnailUrl,
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop,
+                        )
+                    }
+                    if (item is AlbumItem && onAlbumPlay != null) {
+                        AlbumPlayButton(
+                            visible = !isCurrent,
+                            onClick = onAlbumPlay,
+                        )
+                    }
                 }
             }
-        }
 
-        Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(12.dp))
 
-        Column(modifier = Modifier.weight(1f)) {
-            ListItemTitle(
-                text = (item as? SongItem)?.let(SongMetadataState::apply)?.title ?: item.displayTitle,
-                isExplicit = isDesktop && (item as? SongItem)?.isExplicit == true,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Medium,
-                color = contentColor,
-            )
+            Column(modifier = Modifier.weight(1f)) {
+                ListItemTitle(
+                    text = (item as? SongItem)?.let(SongMetadataState::apply)?.title ?: item.displayTitle,
+                    isExplicit = isDesktop && (item as? SongItem)?.isExplicit == true,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Medium,
+                    color = contentColor,
+                )
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                ItemStatusBadges((item as? SongItem)?.let(SongMetadataState::apply) ?: item, showExplicit = !isDesktop)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    ItemStatusBadges((item as? SongItem)?.let(SongMetadataState::apply) ?: item, showExplicit = !isDesktop)
 
-                if (item is SongItem || item is AlbumItem) {
-                    val subtitleStyle = MaterialTheme.typography.labelSmall
-                    if (item is SongItem) {
-                        SongSubtitle(
-                            SongMetadataState.apply(item),
-                            onArtistClick,
-                            clickableMetadata,
-                            subtitleStyle,
-                            Modifier.weight(1f),
-                            !compactSongSubtitle,
-                            color = subtitleColor,
-                            linkColor = linkColor,
-                        )
-                    } else if (item is AlbumItem) {
-                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
-                            val type = item.type ?: stringResource(Res.string.album_type)
-                            Text(
-                                text = "$type • ",
-                                style = subtitleStyle,
+                    if (item is SongItem || item is AlbumItem) {
+                        val subtitleStyle = MaterialTheme.typography.labelSmall
+                        if (item is SongItem) {
+                            SongSubtitle(
+                                SongMetadataState.apply(item),
+                                onArtistClick,
+                                clickableMetadata,
+                                subtitleStyle,
+                                Modifier.weight(1f),
+                                !compactSongSubtitle,
                                 color = subtitleColor,
-                                maxLines = 1,
-                                softWrap = false,
+                                linkColor = linkColor,
                             )
-                            ArtistSubtitle(
-                                artists = item.artists,
-                                onArtistClick = onArtistClick,
-                                style = subtitleStyle,
-                                color = subtitleColor,
-                                modifier = Modifier.weight(1f, fill = false),
-                                clickable = clickableMetadata,
-                            )
-                            val count = item.songCount?.let { pluralStringResource(Res.plurals.n_track, it, it) }
-                            val detail = count ?: item.year
-                            if (detail != null) {
+                        } else if (item is AlbumItem) {
+                            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
+                                val type = item.type ?: stringResource(Res.string.album_type)
                                 Text(
-                                    text = " • $detail",
+                                    text = "$type • ",
                                     style = subtitleStyle,
                                     color = subtitleColor,
                                     maxLines = 1,
                                     softWrap = false,
                                 )
+                                ArtistSubtitle(
+                                    artists = item.artists,
+                                    onArtistClick = onArtistClick,
+                                    style = subtitleStyle,
+                                    color = subtitleColor,
+                                    modifier = Modifier.weight(1f, fill = false),
+                                    clickable = clickableMetadata,
+                                )
+                                val count = item.songCount?.let { pluralStringResource(Res.plurals.n_track, it, it) }
+                                val detail = count ?: item.year
+                                if (detail != null) {
+                                    Text(
+                                        text = " • $detail",
+                                        style = subtitleStyle,
+                                        color = subtitleColor,
+                                        maxLines = 1,
+                                        softWrap = false,
+                                    )
+                                }
                             }
                         }
-                    }
-                } else {
-                    val subtitle =
-                        when (item) {
-                            is ArtistItem -> {
-                                monthlyAudienceText(item.monthlyListeners, stringResource(Res.string.monthly_audience_short))
-                                    ?: item.subscribers
-                                    ?: stringResource(Res.string.artist_type)
-                            }
+                    } else {
+                        val subtitle =
+                            when (item) {
+                                is ArtistItem -> {
+                                    monthlyAudienceText(item.monthlyListeners, stringResource(Res.string.monthly_audience_short))
+                                        ?: item.subscribers
+                                        ?: stringResource(Res.string.artist_type)
+                                }
 
-                            is PlaylistItem -> {
-                                listOfNotNull(item.author?.let { ArtistNameAliases.resolve(null, it) }, item.songCount).joinToString(" • ")
-                            }
+                                is PlaylistItem -> {
+                                    listOfNotNull(
+                                        item.author?.let { ArtistNameAliases.resolve(null, it) },
+                                        item.songCount,
+                                    ).joinToString(" • ")
+                                }
 
-                            is PodcastItem -> {
-                                listOfNotNull(
-                                    item.author?.let { ArtistNameAliases.resolve(null, it) },
-                                    item.episodeCount,
-                                ).joinToString(" • ")
-                            }
+                                is PodcastItem -> {
+                                    listOfNotNull(
+                                        item.author?.let { ArtistNameAliases.resolve(null, it) },
+                                        item.episodeCount,
+                                    ).joinToString(" • ")
+                                }
 
-                            is EpisodeItem -> {
-                                listOfNotNull(
-                                    item.author?.displayName,
-                                    item.publishDateText,
-                                    item.duration?.let { formatDuration(it * 1000) },
-                                ).joinToString(" • ")
-                            }
+                                is EpisodeItem -> {
+                                    listOfNotNull(
+                                        item.author?.displayName,
+                                        item.publishDateText,
+                                        item.duration?.let { formatDuration(it * 1000) },
+                                    ).joinToString(" • ")
+                                }
 
-                            is BrowseItem -> {
-                                item.subtitle ?: ""
+                                is BrowseItem -> {
+                                    item.subtitle ?: ""
+                                }
                             }
+                        if (subtitle.isNotEmpty()) {
+                            Text(
+                                text = subtitle,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = subtitleColor,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
                         }
-                    if (subtitle.isNotEmpty()) {
-                        Text(
-                            text = subtitle,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = subtitleColor,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
                     }
                 }
+                if (item is EpisodeItem) {
+                    EpisodePlayedIndicator(
+                        item.id,
+                        item.duration,
+                        serverProgressPercent = item.playbackProgressPercent,
+                    )
+                }
             }
-            if (item is EpisodeItem) EpisodePlayedIndicator(item.id, item.duration, serverProgressPercent = item.playbackProgressPercent)
-        }
 
-        if (trailingContent != null) {
-            trailingContent()
-        } else if (onShowMenu != null) {
-            IconButton(modifier = Modifier.navigationPopupSource(), onClick = onShowMenu, shapes = IconButtonDefaults.shapes()) {
-                Icon(
-                    MetrolistIcons.Default.MoreVert,
-                    contentDescription = stringResource(Res.string.more_options),
-                    tint = if (currentSong) contentColor else LocalContentColor.current,
-                )
+            if (trailingContent != null) {
+                trailingContent()
+            } else if (onShowMenu != null) {
+                IconButton(modifier = Modifier.navigationPopupSource(), onClick = onShowMenu, shapes = IconButtonDefaults.shapes()) {
+                    Icon(
+                        MetrolistIcons.Default.MoreVert,
+                        contentDescription = stringResource(Res.string.more_options),
+                        tint = if (currentSong) contentColor else LocalContentColor.current,
+                    )
+                }
             }
         }
     }
