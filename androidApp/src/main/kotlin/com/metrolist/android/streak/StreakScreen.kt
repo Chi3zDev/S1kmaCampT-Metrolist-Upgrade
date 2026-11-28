@@ -746,36 +746,55 @@ private fun StreakLevelGallery(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(Res.string.streak_levels_title)) },
         text = {
-            FlowRow(
-                // AlertDialog owns vertical scrolling in both Material and glass modes.
-                // A second scroll here receives an unbounded height and crashes on measure.
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                streakLevels.forEach { level ->
-                    val unlocked = longest >= level.minimumDays
-                    Surface(
-                        onClick = { onSelect(level) },
-                        modifier = Modifier.width(120.dp),
-                        shape = RoundedCornerShape(16.dp),
-                        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                    ) {
-                        Column(Modifier.padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                            Flame(
-                                color = if (unlocked) level.color else MaterialTheme.colorScheme.outline,
-                                animate = false,
-                                extinguished = !unlocked,
-                                modifier = Modifier.size(54.dp),
-                                variant = level.flameVariant,
-                            )
-                            Text(stringResource(level.title), style = MaterialTheme.typography.labelMedium, textAlign = TextAlign.Center)
-                            Text(
-                                stringResource(Res.string.streak_level_requirement, level.minimumDays),
-                                style = MaterialTheme.typography.labelSmall,
-                            )
-                            if (!unlocked) Text(stringResource(Res.string.streak_level_locked), style = MaterialTheme.typography.labelSmall)
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                // Two equally sized cells keep the seven levels compact, including the final row.
+                streakLevels.chunked(2).forEach { rowLevels ->
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        rowLevels.forEach { level ->
+                            val unlocked = longest >= level.minimumDays
+                            val glass = liquidGlassBackdropReady()
+                            LiquidGlassSurface(radius = 16.dp, modifier = Modifier.weight(1f), enabled = glass) {
+                                Surface(
+                                    onClick = { onSelect(level) },
+                                    modifier = Modifier.fillMaxWidth().heightIn(min = 132.dp),
+                                    shape = RoundedCornerShape(16.dp),
+                                    color = glassCardColor(MaterialTheme.colorScheme.surfaceContainerHigh),
+                                    border = if (glass) glassCardBorder() else null,
+                                ) {
+                                    Column(
+                                        modifier = Modifier.padding(8.dp),
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.Center,
+                                    ) {
+                                        Flame(
+                                            // Locked levels are labelled, but keep their actual preview colors.
+                                            color = level.color,
+                                            animate = false,
+                                            extinguished = false,
+                                            modifier = Modifier.size(54.dp),
+                                            variant = level.flameVariant,
+                                        )
+                                        Text(
+                                            stringResource(level.title),
+                                            style = MaterialTheme.typography.labelMedium,
+                                            textAlign = TextAlign.Center,
+                                        )
+                                        Text(
+                                            stringResource(Res.string.streak_level_requirement, level.minimumDays),
+                                            style = MaterialTheme.typography.labelSmall,
+                                            textAlign = TextAlign.Center,
+                                        )
+                                        if (!unlocked) {
+                                            Text(
+                                                stringResource(Res.string.streak_level_locked),
+                                                style = MaterialTheme.typography.labelSmall,
+                                            )
+                                        }
+                                    }
+                                }
+                            }
                         }
+                        if (rowLevels.size == 1) Spacer(Modifier.weight(1f))
                     }
                 }
             }
