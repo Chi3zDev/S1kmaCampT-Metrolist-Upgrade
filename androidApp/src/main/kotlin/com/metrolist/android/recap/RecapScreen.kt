@@ -41,6 +41,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -72,6 +73,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -170,19 +172,31 @@ fun RecapScreen(onBack: () -> Unit) {
                             showPeriods = false
                         }) { Text(stringResource(label)) }
                     }
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        LiquidGlassTextButton(onClick = {
+                    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                        IconButton(onClick = {
                             month = month.minusMonths(1)
                             period = RecapPeriod.MONTH
                         }) {
-                            Text(stringResource(Res.string.story_previous_month))
+                            Icon(
+                                imageVector = MetrolistIcons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = stringResource(Res.string.story_previous_month),
+                            )
                         }
-                        Text(month.format(DateTimeFormatter.ofPattern("MMM yyyy")))
-                        LiquidGlassTextButton(onClick = {
+                        Text(
+                            text = month.format(DateTimeFormatter.ofPattern("MMM yyyy")),
+                            modifier = Modifier.weight(1f),
+                            textAlign = TextAlign.Center,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                        IconButton(onClick = {
                             month = month.plusMonths(1)
                             period = RecapPeriod.MONTH
                         }, enabled = month < YearMonth.now()) {
-                            Text(stringResource(Res.string.story_next_month))
+                            Icon(
+                                imageVector = MetrolistIcons.AutoMirrored.Filled.ArrowForward,
+                                contentDescription = stringResource(Res.string.story_next_month),
+                            )
                         }
                     }
                 }
