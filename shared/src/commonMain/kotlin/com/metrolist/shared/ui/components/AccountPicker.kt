@@ -53,65 +53,85 @@ private fun AccountPickerItem(
     isSelected: Boolean,
     onClick: () -> Unit,
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        colors =
-            CardDefaults.cardColors(
-                containerColor =
-                    if (isSelected) {
-                        MaterialTheme.colorScheme.primaryContainer
-                    } else {
-                        MaterialTheme.colorScheme.surfaceContainerHigh
-                    },
-            ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-    ) {
-        Row(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .clickable(onClick = onClick)
-                    .padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically,
+    val glass = liquidGlassBackdropReady()
+    LiquidGlassSurface(radius = 12.dp, modifier = Modifier.fillMaxWidth(), enabled = glass) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp),
+            border = if (glass) glassCardBorder() else null,
+            colors =
+                CardDefaults.cardColors(
+                    containerColor =
+                        if (glass && isSelected) {
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.32f)
+                        } else if (glass) {
+                            glassCardColor(MaterialTheme.colorScheme.surfaceContainerHigh)
+                        } else if (isSelected) {
+                            MaterialTheme.colorScheme.primaryContainer
+                        } else {
+                            MaterialTheme.colorScheme.surfaceContainerHigh
+                        },
+                    contentColor =
+                        if (glass) {
+                            MaterialTheme.colorScheme.onSurface
+                        } else {
+                            androidx.compose.material3.contentColorFor(
+                                if (isSelected) {
+                                    MaterialTheme.colorScheme.primaryContainer
+                                } else {
+                                    MaterialTheme.colorScheme.surfaceContainerHigh
+                                },
+                            )
+                        },
+                ),
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         ) {
-            if (account.thumbnailUrl != null) {
-                AsyncImage(
-                    url = account.thumbnailUrl,
-                    modifier = Modifier.size(40.dp).clip(CircleShape),
-                    shape = CircleShape,
-                )
-            } else {
-                Spacer(Modifier.size(40.dp))
-            }
-            Spacer(Modifier.width(12.dp))
-            Column(Modifier.weight(1f)) {
-                Text(
-                    text = account.displayName,
-                    style = MaterialTheme.typography.bodyLarge,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-                account.channelHandle?.let { handle ->
+            Row(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .clickable(onClick = onClick)
+                        .padding(12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                if (account.thumbnailUrl != null) {
+                    AsyncImage(
+                        url = account.thumbnailUrl,
+                        modifier = Modifier.size(40.dp).clip(CircleShape),
+                        shape = CircleShape,
+                    )
+                } else {
+                    Spacer(Modifier.size(40.dp))
+                }
+                Spacer(Modifier.width(12.dp))
+                Column(Modifier.weight(1f)) {
                     Text(
-                        text = handle,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        text = account.displayName,
+                        style = MaterialTheme.typography.bodyLarge,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
+                    account.channelHandle?.let { handle ->
+                        Text(
+                            text = handle,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
+                    account.byline?.let { byline ->
+                        Text(
+                            text = byline,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
                 }
-                account.byline?.let { byline ->
-                    Text(
-                        text = byline,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                }
+                RadioButton(selected = isSelected, onClick = null)
             }
-            RadioButton(selected = isSelected, onClick = null)
         }
     }
 }
