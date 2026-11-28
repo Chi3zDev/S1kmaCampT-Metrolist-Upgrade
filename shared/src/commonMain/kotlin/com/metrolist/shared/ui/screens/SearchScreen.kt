@@ -35,9 +35,8 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.SearchBarValue
@@ -82,9 +81,12 @@ import com.metrolist.shared.model.SongItem
 import com.metrolist.shared.model.YTItem
 import com.metrolist.shared.settings.Settings
 import com.metrolist.shared.ui.LocalIsTv
+import com.metrolist.shared.ui.components.LiquidGlassIconButton
+import com.metrolist.shared.ui.components.LiquidGlassSurface
 import com.metrolist.shared.ui.components.LocalThemeGlassBackdrop
 import com.metrolist.shared.ui.components.glassCardBorder
 import com.metrolist.shared.ui.components.glassCardColor
+import com.metrolist.shared.ui.components.liquidGlassBackdropReady
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import com.metrolist.shared.ui.tv.tvFocusHighlight
 import com.metrolist.shared.viewmodels.SearchViewModel
@@ -304,7 +306,7 @@ fun SearchBar(
                         placeholder = { Text(text = placeholder, maxLines = 1, overflow = TextOverflow.Clip) },
                         leadingIcon = {
                             if (isQuerySubmitted) {
-                                IconButton(onClick = onBack, modifier = Modifier.size(48.dp), shapes = IconButtonDefaults.shapes()) {
+                                LiquidGlassIconButton(onClick = onBack, modifier = Modifier.size(48.dp)) {
                                     Icon(
                                         imageVector = MetrolistIcons.AutoMirrored.Filled.ArrowBack,
                                         contentDescription = backLabel,
@@ -321,14 +323,13 @@ fun SearchBar(
                         },
                         trailingIcon = {
                             if (query.isNotEmpty()) {
-                                IconButton(onClick = onClear, modifier = Modifier.size(48.dp), shapes = IconButtonDefaults.shapes()) {
+                                LiquidGlassIconButton(onClick = onClear, modifier = Modifier.size(48.dp)) {
                                     Icon(imageVector = MetrolistIcons.Default.Clear, contentDescription = clearLabel)
                                 }
                             } else if (onMicrophoneClick != null) {
-                                IconButton(
+                                LiquidGlassIconButton(
                                     onClick = onMicrophoneClick,
                                     modifier = Modifier.size(48.dp),
-                                    shapes = IconButtonDefaults.shapes(),
                                 ) {
                                     Icon(
                                         imageVector = MetrolistIcons.Rounded.Mic,
@@ -367,10 +368,9 @@ fun SearchBar(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     if (isQuerySubmitted) {
-                        IconButton(
+                        LiquidGlassIconButton(
                             onClick = onBack,
                             modifier = Modifier.size(barHeight).tvFocusHighlight(CircleShape, scale = 1f),
-                            shapes = IconButtonDefaults.shapes(),
                         ) {
                             Icon(
                                 imageVector = MetrolistIcons.AutoMirrored.Filled.ArrowBack,
@@ -462,10 +462,9 @@ fun SearchBar(
                     )
 
                     if (query.isNotEmpty()) {
-                        IconButton(
+                        LiquidGlassIconButton(
                             onClick = onClear,
                             modifier = Modifier.size(barHeight).tvFocusHighlight(CircleShape, scale = 1f),
-                            shapes = IconButtonDefaults.shapes(),
                         ) {
                             Icon(
                                 imageVector = MetrolistIcons.Default.Clear,
@@ -475,10 +474,9 @@ fun SearchBar(
                             )
                         }
                     } else if (onMicrophoneClick != null) {
-                        IconButton(
+                        LiquidGlassIconButton(
                             onClick = onMicrophoneClick,
                             modifier = Modifier.size(barHeight).tvFocusHighlight(CircleShape, scale = 1f),
-                            shapes = IconButtonDefaults.shapes(),
                         ) {
                             Icon(
                                 imageVector = MetrolistIcons.Rounded.Mic,
@@ -492,54 +490,69 @@ fun SearchBar(
             }
         }
 
+        val menuGlass = liquidGlassBackdropReady()
         DropdownMenu(
             expanded = !isTv && isFocused && history.isNotEmpty() && query.isEmpty(),
             onDismissRequest = { isFocused = false },
             offset = DpOffset(0.dp, 4.dp),
             modifier =
-                Modifier
-                    .width(maxWidth)
-                    .background(MaterialTheme.colorScheme.surfaceContainerHigh, RoundedCornerShape(16.dp))
-                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f), RoundedCornerShape(16.dp)),
+                if (menuGlass) {
+                    Modifier.width(maxWidth)
+                } else {
+                    Modifier
+                        .width(maxWidth)
+                        .background(MaterialTheme.colorScheme.surfaceContainerHigh, RoundedCornerShape(16.dp))
+                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f), RoundedCornerShape(16.dp))
+                },
+            shape = RoundedCornerShape(16.dp),
+            containerColor = if (menuGlass) Color.Transparent else MenuDefaults.containerColor,
+            border = if (menuGlass) glassCardBorder() else null,
         ) {
-            Column(modifier = Modifier.padding(vertical = 4.dp)) {
-                history.forEach { historyItem ->
-                    Row(
-                        modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    onHistoryItemClick(historyItem)
-                                    isFocused = false
-                                }.padding(horizontal = 16.dp, vertical = 10.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    ) {
-                        Icon(
-                            MetrolistIcons.Outlined.History,
-                            contentDescription = null,
-                            modifier = Modifier.size(20.dp),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                        Text(
-                            text = historyItem,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier.weight(1f),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                        IconButton(
-                            onClick = { onRemoveHistoryItem(historyItem) },
-                            modifier = Modifier.size(48.dp),
-                            shapes = IconButtonDefaults.shapes(),
+            LiquidGlassSurface(radius = 16.dp, modifier = Modifier.fillMaxWidth(), enabled = menuGlass) {
+                Column(
+                    modifier =
+                        Modifier
+                            .background(
+                                if (menuGlass) glassCardColor(MaterialTheme.colorScheme.surfaceContainerHigh) else Color.Transparent,
+                            ).padding(vertical = 4.dp),
+                ) {
+                    history.forEach { historyItem ->
+                        Row(
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        onHistoryItemClick(historyItem)
+                                        isFocused = false
+                                    }.padding(horizontal = 16.dp, vertical = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
                         ) {
                             Icon(
-                                MetrolistIcons.Default.Close,
-                                contentDescription = stringResource(Res.string.remove_recent_search_action),
-                                modifier = Modifier.size(16.dp),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                                MetrolistIcons.Outlined.History,
+                                contentDescription = null,
+                                modifier = Modifier.size(20.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
+                            Text(
+                                text = historyItem,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.weight(1f),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                            LiquidGlassIconButton(
+                                onClick = { onRemoveHistoryItem(historyItem) },
+                                modifier = Modifier.size(48.dp),
+                            ) {
+                                Icon(
+                                    MetrolistIcons.Default.Close,
+                                    contentDescription = stringResource(Res.string.remove_recent_search_action),
+                                    modifier = Modifier.size(16.dp),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                                )
+                            }
                         }
                     }
                 }
