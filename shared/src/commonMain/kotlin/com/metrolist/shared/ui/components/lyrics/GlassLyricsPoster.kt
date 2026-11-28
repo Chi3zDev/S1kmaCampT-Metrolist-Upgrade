@@ -220,7 +220,9 @@ internal fun renderGlassLyricsPoster(
                 Unit
             }
         }
-        drawRect(Color(0xFF180C08).copy(alpha = 0.52f))
+        if (style.background != LyricsImageBackground.SOLID) {
+            drawRect(Color.Black.copy(alpha = 0.30f))
+        }
         val cardPath =
             Path().apply {
                 addRoundRect(

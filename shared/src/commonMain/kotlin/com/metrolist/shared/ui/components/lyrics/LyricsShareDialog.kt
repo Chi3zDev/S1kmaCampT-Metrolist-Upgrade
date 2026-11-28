@@ -46,6 +46,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.luminance
@@ -371,7 +372,6 @@ fun LyricsShareDialog(
                         stringResource(if (useStoryLayout) Res.string.lyrics_share_story_style else Res.string.customize_colors),
                         style = MaterialTheme.typography.headlineSmall,
                     )
-                    Text(stringResource(Res.string.lyrics_share_scroll_options), style = MaterialTheme.typography.bodySmall)
                     Box(Modifier.weight(1f)) {
                         DragScrollableColumn(
                             state = scrollState,
@@ -381,7 +381,11 @@ fun LyricsShareDialog(
                             item {
                                 Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                                     Box(
-                                        Modifier.widthIn(max = 420.dp).fillMaxWidth().aspectRatio(if (useStoryLayout) 9f / 16f else 1f),
+                                        Modifier
+                                            .widthIn(max = if (useStoryLayout) 144.dp else 220.dp)
+                                            .fillMaxWidth()
+                                            .aspectRatio(if (useStoryLayout) 9f / 16f else 1f)
+                                            .clip(RoundedCornerShape(12.dp)),
                                         contentAlignment = Alignment.Center,
                                     ) {
                                         bitmap?.let { Image(it, stringResource(Res.string.preview), Modifier.fillMaxWidth()) }
@@ -436,6 +440,9 @@ fun LyricsShareDialog(
                                             style =
                                                 style.copy(
                                                     posterStyle = LyricsPosterStyle.GLASS_CARD,
+                                                    alignment = TextAlign.Start,
+                                                    textScale = 1f,
+                                                    contentScale = 1f,
                                                     background =
                                                         if (artwork !=
                                                             null
