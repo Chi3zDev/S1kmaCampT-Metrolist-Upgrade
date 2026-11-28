@@ -40,7 +40,6 @@ import androidx.compose.material3.SplitButtonDefaults
 import androidx.compose.material3.SplitButtonLayout
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.ToggleButton
 import androidx.compose.material3.ToggleButtonDefaults
 import androidx.compose.runtime.Composable
@@ -122,6 +121,7 @@ import com.metrolist.shared.ui.components.ContainedLoadingIndicator
 import com.metrolist.shared.ui.components.ExpandableSearchBar
 import com.metrolist.shared.ui.components.GridCard
 import com.metrolist.shared.ui.components.LiquidGlassSurface
+import com.metrolist.shared.ui.components.LiquidGlassTextButton
 import com.metrolist.shared.ui.components.ListCard
 import com.metrolist.shared.ui.components.LocalThemeGlassBackdrop
 import com.metrolist.shared.ui.components.ReorderMenu
@@ -498,7 +498,7 @@ fun LibraryContent(
                             Column(Modifier.fillMaxWidth().padding(24.dp)) {
                                 Text(stringResource(Res.string.library_load_failed), color = MaterialTheme.colorScheme.error)
                                 onRetry?.let { retry ->
-                                    TextButton(onClick = retry, shapes = ButtonDefaults.shapes()) {
+                                    LiquidGlassTextButton(onClick = retry) {
                                         Text(stringResource(Res.string.try_again))
                                     }
                                 }
