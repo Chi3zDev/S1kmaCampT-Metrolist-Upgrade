@@ -201,9 +201,14 @@ fun CollectionFilterBar(
                     .then(if (canReorder) Modifier.weight(1f) else Modifier)
                     .trackPressPosition { sortMenuOffset = it.round() },
             ) {
+                if (Settings.shared.liquidGlassTheme) {
+                    LocalThemeGlassBackdrop.current?.Background(radius = 24.dp, modifier = Modifier.matchParentSize())
+                }
                 SplitButtonLayout(
                     leadingButton = {
                         SplitButtonDefaults.TonalLeadingButton(
+                            colors = liquidGlassTonalColors(),
+                            border = if (Settings.shared.liquidGlassTheme) glassCardBorder() else null,
                             onClick = { sortExpanded = true },
                             enabled = !reorderMode,
                             modifier =
@@ -228,7 +233,8 @@ fun CollectionFilterBar(
                     },
                     trailingButton = {
                         SplitButtonDefaults.TrailingButton(
-                            colors = ButtonDefaults.filledTonalButtonColors(),
+                            colors = liquidGlassTonalColors(),
+                            border = if (Settings.shared.liquidGlassTheme) glassCardBorder() else null,
                             elevation = ButtonDefaults.filledTonalButtonElevation(),
                             onClick = {
                                 onSortDirectionChange(
@@ -296,28 +302,37 @@ fun CollectionFilterBar(
                 )
             }
             if (canReorder) {
-                FilledTonalButton(
-                    onClick = { onReorderModeChange(!reorderMode) },
-                    enabled = reorderMode || effectiveSort?.allowsReordering() == true,
-                    modifier = Modifier.tvFocusHighlight(CircleShape).semantics { selected = reorderMode },
-                    colors =
-                        ButtonDefaults.filledTonalButtonColors(
-                            containerColor =
-                                if (reorderMode) {
-                                    MaterialTheme.colorScheme.secondary
-                                } else {
-                                    MaterialTheme.colorScheme.secondaryContainer
-                                },
-                            contentColor =
-                                if (reorderMode) {
-                                    MaterialTheme.colorScheme.onSecondary
-                                } else {
-                                    MaterialTheme.colorScheme.onSecondaryContainer
-                                },
-                        ),
-                    shapes = ButtonDefaults.shapes(),
-                ) {
-                    Text(if (reorderMode) text.lock else text.reorder, maxLines = 1, softWrap = false)
+                LiquidGlassSurface(radius = 24.dp) {
+                    FilledTonalButton(
+                        onClick = { onReorderModeChange(!reorderMode) },
+                        enabled = reorderMode || effectiveSort?.allowsReordering() == true,
+                        modifier = Modifier.tvFocusHighlight(CircleShape).semantics { selected = reorderMode },
+                        colors =
+                            ButtonDefaults.filledTonalButtonColors(
+                                containerColor =
+                                    if (Settings.shared.liquidGlassTheme && reorderMode) {
+                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.32f)
+                                    } else if (Settings.shared.liquidGlassTheme) {
+                                        glassCardColor(MaterialTheme.colorScheme.surfaceContainer)
+                                    } else if (reorderMode) {
+                                        MaterialTheme.colorScheme.secondary
+                                    } else {
+                                        MaterialTheme.colorScheme.secondaryContainer
+                                    },
+                                contentColor =
+                                    if (Settings.shared.liquidGlassTheme) {
+                                        MaterialTheme.colorScheme.onSurface
+                                    } else if (reorderMode) {
+                                        MaterialTheme.colorScheme.onSecondary
+                                    } else {
+                                        MaterialTheme.colorScheme.onSecondaryContainer
+                                    },
+                            ),
+                        border = if (Settings.shared.liquidGlassTheme) glassCardBorder() else null,
+                        shapes = ButtonDefaults.shapes(),
+                    ) {
+                        Text(if (reorderMode) text.lock else text.reorder, maxLines = 1, softWrap = false)
+                    }
                 }
             }
             if (onClear != null) {

@@ -3,6 +3,7 @@ package com.metrolist.shared.ui.components
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -38,3 +39,22 @@ fun LiquidGlassButton(
         )
     }
 }
+
+/** Tonal button colors keep text legible while revealing the platform glass behind the action. */
+@Composable
+fun liquidGlassTonalColors(selected: Boolean = false): ButtonColors =
+    if (Settings.shared.liquidGlassTheme) {
+        ButtonDefaults.filledTonalButtonColors(
+            containerColor =
+                if (selected) {
+                    MaterialTheme.colorScheme.primary.copy(alpha = 0.32f)
+                } else {
+                    glassCardColor(MaterialTheme.colorScheme.surfaceContainer)
+                },
+            contentColor = MaterialTheme.colorScheme.onSurface,
+            disabledContainerColor = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.25f),
+            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+        )
+    } else {
+        ButtonDefaults.filledTonalButtonColors()
+    }
