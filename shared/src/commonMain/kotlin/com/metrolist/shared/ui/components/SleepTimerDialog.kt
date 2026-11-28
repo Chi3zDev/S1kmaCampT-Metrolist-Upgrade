@@ -46,16 +46,10 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialogDefaults
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
@@ -155,199 +149,214 @@ fun SleepTimerDialog(
     val durationMs = sleepTimerDurationMs(hours, minutes)
 
     SleepTimerDialogWindow(onDismiss) {
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = AlertDialogDefaults.shape,
-            color = AlertDialogDefaults.containerColor,
-            tonalElevation = AlertDialogDefaults.TonalElevation,
-        ) {
-            Column(
-                modifier = Modifier.padding(24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(20.dp),
+        val glass = liquidGlassBackdropReady()
+        LiquidGlassSurface(radius = 28.dp, modifier = Modifier.fillMaxWidth(), enabled = glass) {
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = AlertDialogDefaults.shape,
+                color = if (glass) glassCardColor(AlertDialogDefaults.containerColor) else AlertDialogDefaults.containerColor,
+                border = if (glass) glassCardBorder() else null,
+                tonalElevation = if (glass) 0.dp else AlertDialogDefaults.TonalElevation,
             ) {
-                Icon(MetrolistIcons.Outlined.Bedtime, contentDescription = null, tint = AlertDialogDefaults.iconContentColor)
-                Text(stringResource(Res.string.sleep_timer), style = MaterialTheme.typography.headlineSmall)
                 Column(
-                    modifier = Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState()),
+                    modifier = Modifier.padding(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(20.dp),
                 ) {
-                    if (state.isActive) {
-                        Text(
-                            if (state.stopAfterCurrentSong) {
-                                stringResource(Res.string.sleep_timer_end_current_song)
-                            } else {
-                                stringResource(Res.string.sleep_timer_remaining, formatSleepTimerRemaining(state.remainingMs))
-                            },
-                            style = MaterialTheme.typography.bodyLarge,
-                        )
-                        if (state.finishCurrentSong) Text(stringResource(Res.string.sleep_timer_finish_current_song))
-                        if (state.fadeOut) Text(stringResource(Res.string.sleep_timer_fade_out_enabled))
-                    } else {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalAlignment = Alignment.Top,
-                        ) {
-                            DurationField(
-                                hours,
-                                { hours = it },
-                                stringResource(Res.string.sleep_timer_hour),
-                                23,
-                                Modifier.weight(1f),
-                                resetSignal = { resetSignal },
-                            )
+                    Icon(MetrolistIcons.Outlined.Bedtime, contentDescription = null, tint = AlertDialogDefaults.iconContentColor)
+                    Text(stringResource(Res.string.sleep_timer), style = MaterialTheme.typography.headlineSmall)
+                    Column(
+                        modifier = Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState()),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                    ) {
+                        if (state.isActive) {
                             Text(
-                                stringResource(Res.string.sleep_timer_separator),
-                                modifier = Modifier.padding(top = 20.dp),
-                                style = MaterialTheme.typography.displayMedium,
-                            )
-                            DurationField(
-                                minutes,
-                                { minutes = it },
-                                stringResource(Res.string.sleep_timer_minute),
-                                59,
-                                Modifier.weight(1f),
-                                last = true,
-                                resetSignal = { resetSignal },
-                            )
-                        }
-                        if (allowEndOfSong) {
-                            FilledTonalButton(
-                                onClick = {
-                                    onStopAfterCurrentSong(fadeOut)
-                                    onDismiss()
+                                if (state.stopAfterCurrentSong) {
+                                    stringResource(Res.string.sleep_timer_end_current_song)
+                                } else {
+                                    stringResource(Res.string.sleep_timer_remaining, formatSleepTimerRemaining(state.remainingMs))
                                 },
-                                modifier = Modifier.tvFocusHighlight(CircleShape),
-                                shapes = ButtonDefaults.shapes(),
-                            ) { Text(stringResource(Res.string.sleep_timer_end_of_song)) }
-                        }
-                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                            Surface(
-                                shape = segmentedGroupShape(true, !expanded, false),
-                                color = MaterialTheme.colorScheme.surfaceContainerLowest,
+                                style = MaterialTheme.typography.bodyLarge,
+                            )
+                            if (state.finishCurrentSong) Text(stringResource(Res.string.sleep_timer_finish_current_song))
+                            if (state.fadeOut) Text(stringResource(Res.string.sleep_timer_fade_out_enabled))
+                        } else {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.Top,
                             ) {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
+                                DurationField(
+                                    hours,
+                                    { hours = it },
+                                    stringResource(Res.string.sleep_timer_hour),
+                                    23,
+                                    Modifier.weight(1f),
+                                    resetSignal = { resetSignal },
+                                )
+                                Text(
+                                    stringResource(Res.string.sleep_timer_separator),
+                                    modifier = Modifier.padding(top = 20.dp),
+                                    style = MaterialTheme.typography.displayMedium,
+                                )
+                                DurationField(
+                                    minutes,
+                                    { minutes = it },
+                                    stringResource(Res.string.sleep_timer_minute),
+                                    59,
+                                    Modifier.weight(1f),
+                                    last = true,
+                                    resetSignal = { resetSignal },
+                                )
+                            }
+                            if (allowEndOfSong) {
+                                LiquidGlassTonalButton(
+                                    onClick = {
+                                        onStopAfterCurrentSong(fadeOut)
+                                        onDismiss()
+                                    },
+                                    modifier = Modifier.tvFocusHighlight(CircleShape),
+                                ) { Text(stringResource(Res.string.sleep_timer_end_of_song)) }
+                            }
+                            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                Surface(
+                                    shape = segmentedGroupShape(true, !expanded, false),
+                                    color =
+                                        if (liquidGlassBackdropReady()) {
+                                            glassCardColor(
+                                                MaterialTheme.colorScheme.surfaceContainerLowest,
+                                            )
+                                        } else {
+                                            MaterialTheme.colorScheme.surfaceContainerLowest
+                                        },
+                                    border = if (liquidGlassBackdropReady()) glassCardBorder() else null,
                                 ) {
-                                    Text(
-                                        stringResource(Res.string.sleep_timer_advanced_options),
-                                        Modifier.weight(1f),
-                                        style = MaterialTheme.typography.titleMedium,
-                                    )
-                                    val rotation by animateFloatAsState(
-                                        if (expanded) 180f else 0f,
-                                        MaterialTheme.motionScheme.fastSpatialSpec(),
-                                    )
-                                    FilledTonalIconButton(
-                                        onClick = { expanded = !expanded },
-                                        modifier = Modifier.tvFocusHighlight(CircleShape),
-                                        shapes = IconButtonDefaults.shapes(),
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
                                     ) {
-                                        Icon(
-                                            MetrolistIcons.Outlined.KeyboardArrowDown,
-                                            stringResource(if (expanded) Res.string.collapse else Res.string.expand),
-                                            Modifier.rotate(rotation),
+                                        Text(
+                                            stringResource(Res.string.sleep_timer_advanced_options),
+                                            Modifier.weight(1f),
+                                            style = MaterialTheme.typography.titleMedium,
+                                        )
+                                        val rotation by animateFloatAsState(
+                                            if (expanded) 180f else 0f,
+                                            MaterialTheme.motionScheme.fastSpatialSpec(),
+                                        )
+                                        LiquidGlassTonalIconButton(
+                                            onClick = { expanded = !expanded },
+                                            modifier = Modifier.tvFocusHighlight(CircleShape),
+                                        ) {
+                                            Icon(
+                                                MetrolistIcons.Outlined.KeyboardArrowDown,
+                                                stringResource(if (expanded) Res.string.collapse else Res.string.expand),
+                                                Modifier.rotate(rotation),
+                                            )
+                                        }
+                                    }
+                                }
+                                AnimatedVisibility(
+                                    visible = expanded,
+                                    enter =
+                                        expandVertically(MaterialTheme.motionScheme.defaultSpatialSpec()) +
+                                            fadeIn(MaterialTheme.motionScheme.fastEffectsSpec()),
+                                    exit =
+                                        shrinkVertically(MaterialTheme.motionScheme.defaultSpatialSpec()) +
+                                            fadeOut(MaterialTheme.motionScheme.fastEffectsSpec()),
+                                ) {
+                                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                        TimerCheckboxRow(
+                                            text = stringResource(Res.string.sleep_timer_finish_current_song),
+                                            checked = finishCurrentSong,
+                                            enabled = allowEndOfSong,
+                                            last = false,
+                                            onCheckedChange = { finishCurrentSong = it },
+                                        )
+                                        TimerCheckboxRow(
+                                            text = stringResource(Res.string.sleep_timer_fade_out),
+                                            checked = fadeOut,
+                                            last = true,
+                                            onCheckedChange = { fadeOut = it },
                                         )
                                     }
                                 }
                             }
-                            AnimatedVisibility(
-                                visible = expanded,
-                                enter =
-                                    expandVertically(MaterialTheme.motionScheme.defaultSpatialSpec()) +
-                                        fadeIn(MaterialTheme.motionScheme.fastEffectsSpec()),
-                                exit =
-                                    shrinkVertically(MaterialTheme.motionScheme.defaultSpatialSpec()) +
-                                        fadeOut(MaterialTheme.motionScheme.fastEffectsSpec()),
+                            Surface(
+                                onClick = {
+                                    resetSignal++
+                                    durationMs?.let {
+                                        Settings.shared.sleepTimerDefaults =
+                                            SleepTimerDefaults((it / 60_000L).toInt(), finishCurrentSong, fadeOut)
+                                    }
+                                },
+                                enabled = durationMs != null,
+                                modifier = Modifier.fillMaxWidth().tvFocusHighlight(MaterialTheme.shapes.extraLarge),
+                                shape = MaterialTheme.shapes.extraLarge,
+                                color =
+                                    if (liquidGlassBackdropReady()) {
+                                        glassCardColor(
+                                            MaterialTheme.colorScheme.surfaceContainerLowest,
+                                        )
+                                    } else {
+                                        MaterialTheme.colorScheme.surfaceContainerLowest
+                                    },
+                                border = if (liquidGlassBackdropReady()) glassCardBorder() else null,
+                                contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
                             ) {
-                                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                                    TimerCheckboxRow(
-                                        text = stringResource(Res.string.sleep_timer_finish_current_song),
-                                        checked = finishCurrentSong,
-                                        enabled = allowEndOfSong,
-                                        last = false,
-                                        onCheckedChange = { finishCurrentSong = it },
-                                    )
-                                    TimerCheckboxRow(
-                                        text = stringResource(Res.string.sleep_timer_fade_out),
-                                        checked = fadeOut,
-                                        last = true,
-                                        onCheckedChange = { fadeOut = it },
-                                    )
-                                }
+                                Text(
+                                    stringResource(Res.string.sleep_timer_set_default),
+                                    Modifier.padding(16.dp),
+                                    style = MaterialTheme.typography.labelLarge,
+                                )
                             }
                         }
-                        Surface(
-                            onClick = {
-                                resetSignal++
-                                durationMs?.let {
-                                    Settings.shared.sleepTimerDefaults =
-                                        SleepTimerDefaults((it / 60_000L).toInt(), finishCurrentSong, fadeOut)
-                                }
-                            },
-                            enabled = durationMs != null,
-                            modifier = Modifier.fillMaxWidth().tvFocusHighlight(MaterialTheme.shapes.extraLarge),
-                            shape = MaterialTheme.shapes.extraLarge,
-                            color = MaterialTheme.colorScheme.surfaceContainerLowest,
-                            contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        ) {
-                            Text(
-                                stringResource(Res.string.sleep_timer_set_default),
-                                Modifier.padding(16.dp),
-                                style = MaterialTheme.typography.labelLarge,
-                            )
-                        }
                     }
-                }
-                FlowRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    if (!state.isActive) {
-                        OutlinedButton(
-                            onClick = {
-                                resetSignal++
-                                val saved = Settings.shared.sleepTimerDefaults
-                                hours = (saved.durationMinutes / 60).toString().padStart(2, '0')
-                                minutes = (saved.durationMinutes % 60).toString().padStart(2, '0')
-                                finishCurrentSong = saved.finishCurrentSong
-                                fadeOut = saved.fadeOut
-                            },
-                            modifier = Modifier.tvFocusHighlight(CircleShape),
-                            shapes = ButtonDefaults.shapes(),
-                        ) { Text(stringResource(Res.string.reset)) }
-                    }
-                    Spacer(Modifier.weight(1f))
-                    OutlinedButton(
-                        onClick = onDismiss,
-                        modifier = Modifier.tvFocusHighlight(CircleShape),
-                        shapes = ButtonDefaults.shapes(),
+                    FlowRow(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        Text(stringResource(if (state.isActive) Res.string.close else Res.string.cancel))
-                    }
-                    Button(
-                        onClick = {
-                            if (state.isActive) {
-                                onCancelTimer()
-                            } else {
-                                durationMs?.let {
-                                    onStart(
-                                        it,
-                                        fadeOut,
-                                        finishCurrentSong && allowEndOfSong,
-                                    )
+                        if (!state.isActive) {
+                            LiquidGlassOutlinedButton(
+                                onClick = {
+                                    resetSignal++
+                                    val saved = Settings.shared.sleepTimerDefaults
+                                    hours = (saved.durationMinutes / 60).toString().padStart(2, '0')
+                                    minutes = (saved.durationMinutes % 60).toString().padStart(2, '0')
+                                    finishCurrentSong = saved.finishCurrentSong
+                                    fadeOut = saved.fadeOut
+                                },
+                                modifier = Modifier.tvFocusHighlight(CircleShape),
+                            ) { Text(stringResource(Res.string.reset)) }
+                        }
+                        Spacer(Modifier.weight(1f))
+                        LiquidGlassOutlinedButton(
+                            onClick = onDismiss,
+                            modifier = Modifier.tvFocusHighlight(CircleShape),
+                        ) {
+                            Text(stringResource(if (state.isActive) Res.string.close else Res.string.cancel))
+                        }
+                        LiquidGlassCompactButton(
+                            onClick = {
+                                if (state.isActive) {
+                                    onCancelTimer()
+                                } else {
+                                    durationMs?.let {
+                                        onStart(
+                                            it,
+                                            fadeOut,
+                                            finishCurrentSong && allowEndOfSong,
+                                        )
+                                    }
                                 }
-                            }
-                            onDismiss()
-                        },
-                        enabled = state.isActive || durationMs != null,
-                        modifier = Modifier.tvFocusHighlight(CircleShape),
-                        shapes = ButtonDefaults.shapes(),
-                    ) { Text(stringResource(if (state.isActive) Res.string.sleep_timer_cancel else Res.string.ok)) }
+                                onDismiss()
+                            },
+                            enabled = state.isActive || durationMs != null,
+                            modifier = Modifier.tvFocusHighlight(CircleShape),
+                        ) { Text(stringResource(if (state.isActive) Res.string.sleep_timer_cancel else Res.string.ok)) }
+                    }
                 }
             }
         }
@@ -616,7 +625,15 @@ private fun TimerCheckboxRow(
     val pressed by interactionSource.collectIsPressedAsState()
     Surface(
         shape = segmentedGroupShape(false, last, pressed),
-        color = MaterialTheme.colorScheme.surfaceContainerLowest,
+        color =
+            if (liquidGlassBackdropReady()) {
+                glassCardColor(
+                    MaterialTheme.colorScheme.surfaceContainerLowest,
+                )
+            } else {
+                MaterialTheme.colorScheme.surfaceContainerLowest
+            },
+        border = if (liquidGlassBackdropReady()) glassCardBorder() else null,
     ) {
         Row(
             modifier =
