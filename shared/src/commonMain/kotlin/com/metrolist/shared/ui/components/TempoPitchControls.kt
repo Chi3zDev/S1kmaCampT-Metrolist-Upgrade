@@ -14,17 +14,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberSliderState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -117,17 +112,16 @@ fun TempoPitchControls(
                 )
             },
             confirmButton = {
-                TextButton(
+                LiquidGlassTextButton(
                     enabled = presetName.isNotBlank(),
                     onClick = {
                         Settings.shared.saveTempoPitchPreset(presetName, speed, pitch)
                         savingPreset = false
                     },
-                    shapes = ButtonDefaults.shapes(),
                 ) { Text(stringResource(Res.string.save)) }
             },
             dismissButton = {
-                TextButton(onClick = { savingPreset = false }, shapes = ButtonDefaults.shapes()) { Text(stringResource(Res.string.cancel)) }
+                LiquidGlassTextButton(onClick = { savingPreset = false }) { Text(stringResource(Res.string.cancel)) }
             },
         )
     }
@@ -136,15 +130,14 @@ fun TempoPitchControls(
             onDismissRequest = { deletingPresetId = null },
             text = { Text(stringResource(Res.string.tempo_pitch_delete_preset, preset.name)) },
             confirmButton = {
-                TextButton(onClick = {
+                LiquidGlassTextButton(onClick = {
                     Settings.shared.deleteTempoPitchPreset(preset.id)
                     deletingPresetId = null
-                }, shapes = ButtonDefaults.shapes()) { Text(stringResource(Res.string.delete)) }
+                }) { Text(stringResource(Res.string.delete)) }
             },
             dismissButton = {
-                TextButton(
+                LiquidGlassTextButton(
                     onClick = { deletingPresetId = null },
-                    shapes = ButtonDefaults.shapes(),
                 ) { Text(stringResource(Res.string.cancel)) }
             },
         )
@@ -173,23 +166,21 @@ fun TempoPitchControls(
                 onValueChange = { onPitchChange(semitonesToPlaybackPitch(it)) },
             )
         }
-        TextButton(modifier = Modifier.navigationPopupSource(), onClick = {
+        LiquidGlassTextButton(modifier = Modifier.navigationPopupSource(), onClick = {
             presetName = ""
             savingPreset = true
-        }, shapes = ButtonDefaults.shapes()) { Text(stringResource(Res.string.tempo_pitch_save_preset)) }
+        }) { Text(stringResource(Res.string.tempo_pitch_save_preset)) }
         if (presets.isNotEmpty()) {
             Text(stringResource(Res.string.tempo_pitch_presets))
             presets.forEach { preset ->
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                    TextButton(
+                    LiquidGlassTextButton(
                         onClick = { preset.apply(speedEnabled, varispeed, onSpeedChange, onPitchChange) },
                         enabled = preset.canApply(speedEnabled, varispeed, onPitchChange != null),
                         modifier = Modifier.weight(1f),
-                        shapes = ButtonDefaults.shapes(),
                     ) { Text(preset.name) }
-                    TextButton(
+                    LiquidGlassTextButton(
                         onClick = { deletingPresetId = preset.id },
-                        shapes = ButtonDefaults.shapes(),
                     ) { Text(stringResource(Res.string.delete)) }
                 }
             }
@@ -199,15 +190,14 @@ fun TempoPitchControls(
             horizontalArrangement = Arrangement.End,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            TextButton(
+            LiquidGlassTextButton(
                 onClick = {
                     if (speedEnabled) applySpeed(1f)
                     if (!varispeed) onPitchChange?.invoke(1f)
                 },
-                shapes = ButtonDefaults.shapes(),
             ) { Text(stringResource(Res.string.reset)) }
             Spacer(Modifier.width(8.dp))
-            Button(onClick = onDone, shapes = ButtonDefaults.shapes()) { Text(stringResource(Res.string.done)) }
+            LiquidGlassCompactButton(onClick = onDone) { Text(stringResource(Res.string.done)) }
         }
     }
 }
@@ -230,47 +220,46 @@ private fun TempoPitchSlider(
     var editing by rememberSaveable { mutableStateOf(false) }
     Text(label)
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        TextButton(onClick = { editing = true }, enabled = enabled, shapes = ButtonDefaults.shapes()) { Text(valueText) }
+        LiquidGlassTextButton(onClick = { editing = true }, enabled = enabled) { Text(valueText) }
         Spacer(Modifier.weight(1f))
-        TextButton(
+        LiquidGlassTextButton(
             onClick = { onValueChange(defaultValue) },
             enabled = enabled && value != defaultValue,
-            shapes = ButtonDefaults.shapes(),
         ) {
             Text(stringResource(Res.string.reset))
         }
     }
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        IconButton(
+        LiquidGlassIconButton(
             onClick = { onValueChange(stepTempoPitchValue(value, -0.05f, range)) },
             enabled = enabled && value > range.start,
-            shapes = IconButtonDefaults.shapes(),
         ) {
             Icon(MetrolistIcons.Filled.Remove, stringResource(Res.string.tempo_pitch_decrease, label))
         }
         val sliderState = rememberSliderState(value = value.coerceIn(range), trackRange = range, steps = steps)
         sliderState.shouldAutoSnap = false
         sliderState.value = value.coerceIn(range)
-        Slider(
-            state = sliderState,
-            onValueChange = {
-                val snapped = (it * 20).roundToInt() / 20f
-                if (detents.moved(snapped)) haptics.perform(HapticEvent.SEGMENT_TICK)
-                onValueChange(snapped)
-            },
-            enabled = enabled,
-            modifier = Modifier.retainPlaybackKeyFocus().weight(1f).semantics { contentDescription = label },
-            colors =
-                if (showTicks) {
-                    SliderDefaults.colors()
-                } else {
-                    SliderDefaults.colors(activeTickColor = Color.Transparent, inactiveTickColor = Color.Transparent)
+        LiquidGlassSliderContainer(modifier = Modifier.weight(1f)) {
+            Slider(
+                state = sliderState,
+                onValueChange = {
+                    val snapped = (it * 20).roundToInt() / 20f
+                    if (detents.moved(snapped)) haptics.perform(HapticEvent.SEGMENT_TICK)
+                    onValueChange(snapped)
                 },
-        )
-        IconButton(
+                enabled = enabled,
+                modifier = Modifier.retainPlaybackKeyFocus().fillMaxWidth().semantics { contentDescription = label },
+                colors =
+                    if (showTicks) {
+                        SliderDefaults.colors()
+                    } else {
+                        SliderDefaults.colors(activeTickColor = Color.Transparent, inactiveTickColor = Color.Transparent)
+                    },
+            )
+        }
+        LiquidGlassIconButton(
             onClick = { onValueChange(stepTempoPitchValue(value, 0.05f, range)) },
             enabled = enabled && value < range.endInclusive,
-            shapes = IconButtonDefaults.shapes(),
         ) {
             Icon(MetrolistIcons.Filled.Add, stringResource(Res.string.tempo_pitch_increase, label))
         }
@@ -321,14 +310,13 @@ private fun TempoPitchSlider(
                 LaunchedEffect(Unit) { focusRequester.requestFocus() }
             },
             confirmButton = {
-                TextButton(
+                LiquidGlassTextButton(
                     onClick = confirm,
                     enabled = parsed != null,
-                    shapes = ButtonDefaults.shapes(),
                 ) { Text(stringResource(Res.string.done)) }
             },
             dismissButton = {
-                TextButton(onClick = { editing = false }, shapes = ButtonDefaults.shapes()) { Text(stringResource(Res.string.cancel)) }
+                LiquidGlassTextButton(onClick = { editing = false }) { Text(stringResource(Res.string.cancel)) }
             },
         )
     }
