@@ -40,7 +40,6 @@ import androidx.compose.ui.unit.round
 import com.metrolist.shared.model.PlaylistSongSort
 import com.metrolist.shared.model.SortDirection
 import com.metrolist.shared.model.allowsReordering
-import com.metrolist.shared.settings.Settings
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import com.metrolist.shared.ui.menu.ExpressiveSelectionMenu
 import com.metrolist.shared.ui.menu.trackPressPosition
@@ -72,6 +71,7 @@ fun PlaylistOrderControls(
     val leadingFocusRequester = remember { FocusRequester() }
     val trailingFocusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
+    val glass = liquidGlassBackdropReady()
     Row(
         modifier =
             modifier
@@ -81,14 +81,14 @@ fun PlaylistOrderControls(
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Box(Modifier.weight(1f).trackPressPosition { sortMenuOffset = it.round() }) {
-            if (Settings.shared.liquidGlassTheme) {
+            if (glass) {
                 LocalThemeGlassBackdrop.current?.Background(radius = 24.dp, modifier = Modifier.matchParentSize())
             }
             SplitButtonLayout(
                 leadingButton = {
                     SplitButtonDefaults.TonalLeadingButton(
                         colors = liquidGlassTonalColors(),
-                        border = if (Settings.shared.liquidGlassTheme) glassCardBorder() else null,
+                        border = if (glass) glassCardBorder() else null,
                         onClick = {
                             // Touch-mode buttons reject focus; release the search field in that case.
                             if (!leadingFocusRequester.requestFocus()) focusManager.clearFocus()
@@ -109,7 +109,7 @@ fun PlaylistOrderControls(
                 trailingButton = {
                     SplitButtonDefaults.TrailingButton(
                         colors = liquidGlassTonalColors(),
-                        border = if (Settings.shared.liquidGlassTheme) glassCardBorder() else null,
+                        border = if (glass) glassCardBorder() else null,
                         elevation = ButtonDefaults.filledTonalButtonElevation(),
                         onClick = {
                             if (!trailingFocusRequester.requestFocus()) focusManager.clearFocus()
@@ -173,9 +173,9 @@ fun PlaylistOrderControls(
                     colors =
                         ButtonDefaults.filledTonalButtonColors(
                             containerColor =
-                                if (Settings.shared.liquidGlassTheme && reorderMode) {
+                                if (glass && reorderMode) {
                                     MaterialTheme.colorScheme.primary.copy(alpha = 0.32f)
-                                } else if (Settings.shared.liquidGlassTheme) {
+                                } else if (glass) {
                                     glassCardColor(MaterialTheme.colorScheme.surfaceContainer)
                                 } else if (reorderMode) {
                                     MaterialTheme.colorScheme.secondary
@@ -183,7 +183,7 @@ fun PlaylistOrderControls(
                                     MaterialTheme.colorScheme.secondaryContainer
                                 },
                             contentColor =
-                                if (Settings.shared.liquidGlassTheme) {
+                                if (glass) {
                                     MaterialTheme.colorScheme.onSurface
                                 } else if (reorderMode) {
                                     MaterialTheme.colorScheme.onSecondary
@@ -191,7 +191,7 @@ fun PlaylistOrderControls(
                                     MaterialTheme.colorScheme.onSecondaryContainer
                                 },
                         ),
-                    border = if (Settings.shared.liquidGlassTheme) glassCardBorder() else null,
+                    border = if (glass) glassCardBorder() else null,
                     shapes = ButtonDefaults.shapes(),
                 ) {
                     Text(if (reorderMode) text.lock else text.reorder, maxLines = 1, softWrap = false)
