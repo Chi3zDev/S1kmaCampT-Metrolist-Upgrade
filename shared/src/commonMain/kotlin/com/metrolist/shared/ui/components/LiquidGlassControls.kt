@@ -10,6 +10,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.FilledTonalIconToggleButton
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -138,6 +140,61 @@ fun liquidGlassTonalColors(selected: Boolean = false): ButtonColors =
     } else {
         ButtonDefaults.filledTonalButtonColors()
     }
+
+/** Tonal action preserving the Material fallback while using a real backdrop in glass mode. */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+fun LiquidGlassTonalButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    content: @Composable RowScope.() -> Unit,
+) {
+    val glass = liquidGlassBackdropReady()
+    LiquidGlassSurface(radius = 24.dp, modifier = modifier, enabled = glass) {
+        FilledTonalButton(
+            onClick = onClick,
+            enabled = enabled,
+            shapes = ButtonDefaults.shapes(),
+            colors = liquidGlassTonalColors(),
+            border = if (glass) glassCardBorder() else null,
+            content = content,
+        )
+    }
+}
+
+/** Tonal icon action with the same fallback as Material's filled tonal icon button. */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+fun LiquidGlassTonalIconButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    content: @Composable () -> Unit,
+) {
+    val glass = liquidGlassBackdropReady()
+    val border = if (glass) glassCardBorder() else null
+    LiquidGlassSurface(radius = 24.dp, modifier = modifier, enabled = glass) {
+        FilledTonalIconButton(
+            onClick = onClick,
+            enabled = enabled,
+            modifier = if (border != null) Modifier.border(border, CircleShape) else Modifier,
+            shapes = IconButtonDefaults.shapes(),
+            colors =
+                if (glass) {
+                    IconButtonDefaults.filledTonalIconButtonColors(
+                        containerColor = glassCardColor(MaterialTheme.colorScheme.surfaceContainer),
+                        contentColor = MaterialTheme.colorScheme.onSurface,
+                        disabledContainerColor = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.25f),
+                        disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                    )
+                } else {
+                    IconButtonDefaults.filledTonalIconButtonColors()
+                },
+            content = content,
+        )
+    }
+}
 
 /** Circular action with a QWE backdrop, retaining ordinary IconButton behavior outside the theme. */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
