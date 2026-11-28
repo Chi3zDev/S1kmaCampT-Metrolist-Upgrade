@@ -12,6 +12,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -29,12 +30,9 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenuGroup
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.DropdownMenuPopup
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Text
@@ -47,6 +45,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -92,8 +91,14 @@ import com.metrolist.shared.settings.displayName
 import com.metrolist.shared.ui.components.ChipShelf
 import com.metrolist.shared.ui.components.CollectionPreviews
 import com.metrolist.shared.ui.components.EpisodePlayedIndicator
+import com.metrolist.shared.ui.components.LiquidGlassDropdownMenu
+import com.metrolist.shared.ui.components.LiquidGlassIconButton
+import com.metrolist.shared.ui.components.LiquidGlassSurface
 import com.metrolist.shared.ui.components.SongThumbnailPlayingIndicator
+import com.metrolist.shared.ui.components.glassCardBorder
+import com.metrolist.shared.ui.components.glassCardColor
 import com.metrolist.shared.ui.components.libraryCover
+import com.metrolist.shared.ui.components.liquidGlassBackdropReady
 import com.metrolist.shared.ui.components.menuAnchorSemantics
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import com.metrolist.shared.ui.menu.BuiltinPlaylistMenuButton
@@ -305,18 +310,38 @@ fun PodcastLibraryScreen(
         }
 
         if (selectedTab == PodcastLibraryTab.DOWNLOADED && sortedDownloaded.isNotEmpty()) {
-            ExtendedFloatingActionButton(
-                onClick = {
-                    playerConnection?.shuffleQueue(
-                        sortedDownloaded.map { it.toSongItem() },
-                        podcastQueueTitle,
-                        finite = true,
-                    )
-                },
-                icon = { Icon(MetrolistIcons.Rounded.Shuffle, contentDescription = null) },
-                text = { Text(stringResource(Res.string.shuffle)) },
+            val glass = liquidGlassBackdropReady()
+            LiquidGlassSurface(
+                radius = 28.dp,
                 modifier = Modifier.align(Alignment.BottomEnd).padding(end = 16.dp, bottom = bottomInset + 16.dp),
-            )
+                enabled = glass,
+            ) {
+                ExtendedFloatingActionButton(
+                    onClick = {
+                        playerConnection?.shuffleQueue(
+                            sortedDownloaded.map { it.toSongItem() },
+                            podcastQueueTitle,
+                            finite = true,
+                        )
+                    },
+                    icon = { Icon(MetrolistIcons.Rounded.Shuffle, contentDescription = null) },
+                    text = { Text(stringResource(Res.string.shuffle)) },
+                    containerColor =
+                        if (glass) {
+                            glassCardColor(MaterialTheme.colorScheme.primaryContainer)
+                        } else {
+                            androidx.compose.material3.FloatingActionButtonDefaults.containerColor
+                        },
+                    contentColor =
+                        if (glass) {
+                            MaterialTheme.colorScheme.onSurface
+                        } else {
+                            androidx.compose.material3.contentColorFor(
+                                androidx.compose.material3.FloatingActionButtonDefaults.containerColor,
+                            )
+                        },
+                )
+            }
         }
     }
 }
@@ -344,6 +369,32 @@ private fun PodcastFilterChips(
 }
 
 @Composable
+private fun PodcastGlassCard(
+    modifier: Modifier = Modifier,
+    shape: Shape = CardDefaults.shape,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    val glass = liquidGlassBackdropReady()
+    LiquidGlassSurface(radius = 18.dp, modifier = modifier, enabled = glass) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = shape,
+            colors =
+                CardDefaults.cardColors(
+                    containerColor =
+                        if (glass) {
+                            glassCardColor(MaterialTheme.colorScheme.surfaceContainer)
+                        } else {
+                            MaterialTheme.colorScheme.surfaceContainer
+                        },
+                ),
+            border = if (glass) glassCardBorder() else null,
+            content = content,
+        )
+    }
+}
+
+@Composable
 private fun AutoPlaylistCard(
     type: String,
     title: String,
@@ -351,14 +402,13 @@ private fun AutoPlaylistCard(
     icon: ImageVector,
     onClick: () -> Unit,
 ) {
-    Card(
+    PodcastGlassCard(
         modifier =
             Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 12.dp)
                 .clip(RoundedCornerShape(18.dp))
                 .clickable(onClick = onClick),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
         shape = RoundedCornerShape(18.dp),
     ) {
         Row(
@@ -417,14 +467,13 @@ private fun PodcastShowRow(
     podcast: PodcastEntity,
     onClick: () -> Unit,
 ) {
-    Card(
+    PodcastGlassCard(
         modifier =
             Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 12.dp)
                 .clip(RoundedCornerShape(18.dp))
                 .clickable(onClick = onClick),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
     ) {
         Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             AsyncImage(
@@ -459,14 +508,13 @@ private fun PodcastLibraryChannelRow(
     channel: ArtistItem,
     onClick: () -> Unit,
 ) {
-    Card(
+    PodcastGlassCard(
         modifier =
             Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 12.dp)
                 .clip(RoundedCornerShape(18.dp))
                 .clickable(onClick = onClick),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
     ) {
         Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             AsyncImage(
@@ -511,7 +559,7 @@ private fun DownloadSortHeader(
                 style = MaterialTheme.typography.titleSmall,
                 modifier = Modifier.menuAnchorSemantics(expanded).clickable { expanded = true }.padding(8.dp),
             )
-            DropdownMenuPopup(expanded = expanded, onDismissRequest = { expanded = false }) {
+            LiquidGlassDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                 DropdownMenuGroup(shapes = MenuDefaults.groupShape(0, 1)) {
                     DownloadSort.entries.forEachIndexed { index, candidate ->
                         DropdownMenuItem(
@@ -534,7 +582,7 @@ private fun DownloadSortHeader(
                 }
             }
         }
-        IconButton(onClick = onToggleDirection, shapes = IconButtonDefaults.shapes()) {
+        LiquidGlassIconButton(onClick = onToggleDirection) {
             Icon(
                 if (descending) MetrolistIcons.Outlined.KeyboardArrowDown else MetrolistIcons.Outlined.KeyboardArrowUp,
                 contentDescription =
@@ -556,14 +604,13 @@ private fun PodcastLibraryEpisodeRow(
     onDownload: (() -> Unit)?,
 ) {
     var expanded by remember { mutableStateOf(false) }
-    Card(
+    PodcastGlassCard(
         modifier =
             Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 12.dp)
                 .clip(RoundedCornerShape(18.dp))
                 .clickable(onClick = onClick),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
         shape = RoundedCornerShape(18.dp),
     ) {
         Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -604,14 +651,13 @@ private fun PodcastLibraryEpisodeRow(
                 EpisodePlayedIndicator(song.id, song.song.duration.toLong())
             }
             Box {
-                IconButton(
+                LiquidGlassIconButton(
                     modifier = Modifier.navigationPopupSource(),
                     onClick = { expanded = true },
-                    shapes = IconButtonDefaults.shapes(),
                 ) {
                     Icon(MetrolistIcons.Default.MoreVert, contentDescription = stringResource(Res.string.more_options))
                 }
-                DropdownMenuPopup(expanded = expanded, onDismissRequest = { expanded = false }) {
+                LiquidGlassDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                     DropdownMenuGroup(shapes = MenuDefaults.groupShape(0, 1)) {
                         DropdownMenuItem(
                             text = { Text(stringResource(Res.string.play_next)) },
