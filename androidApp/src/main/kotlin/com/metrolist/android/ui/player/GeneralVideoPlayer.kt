@@ -1,6 +1,6 @@
 package com.metrolist.android.ui.player
 
-import android.content.pm.ActivityInfo
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.DropdownMenu
@@ -27,7 +28,6 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -40,18 +40,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import androidx.media3.common.Player
 import coil3.compose.AsyncImage
-import com.metrolist.android.extensions.findActivity
 import com.metrolist.android.playback.PlayerConnection
 import com.metrolist.shared.generated.resources.Res
 import com.metrolist.shared.generated.resources.back
 import com.metrolist.shared.generated.resources.enter_fullscreen
+import com.metrolist.shared.generated.resources.enter_pip
+import com.metrolist.shared.generated.resources.exit_fullscreen
 import com.metrolist.shared.generated.resources.experimental_video_live
 import com.metrolist.shared.generated.resources.music_video_quality
 import com.metrolist.shared.generated.resources.music_video_quality_auto
@@ -64,7 +62,12 @@ import com.metrolist.shared.model.SongItem
 import com.metrolist.shared.model.isLive
 import com.metrolist.shared.settings.MusicVideoQuality
 import com.metrolist.shared.settings.Settings
+import com.metrolist.shared.ui.LocalIsInPipMode
+import com.metrolist.shared.ui.LocalIsTv
+import com.metrolist.shared.ui.components.PlayerPrimaryControls
+import com.metrolist.shared.ui.components.sliders.PlaybackProgressSlider
 import com.metrolist.shared.ui.icons.MetrolistIcons
+import com.metrolist.shared.ui.player.LocalPlayerPlatform
 import com.metrolist.shared.utils.formatDuration
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
@@ -76,26 +79,32 @@ fun GeneralVideoPlayer(
     connection: PlayerConnection,
     player: Player?,
     hasVideo: Boolean,
+    isExpanded: Boolean,
     onClose: () -> Unit,
 ) {
     var fullscreen by rememberSaveable(song.id) { mutableStateOf(false) }
     var showControls by remember(song.id) { mutableStateOf(true) }
     var qualityMenu by remember { mutableStateOf(false) }
     var interactionCount by remember { mutableStateOf(0) }
-    val activity = LocalContext.current.findActivity()
+    val platform = LocalPlayerPlatform.current
+    val isTv = LocalIsTv.current
+    val isInPipMode = LocalIsInPipMode.current
+    val loading by connection.isPlaybackLoading.collectAsState()
     val playing by connection.isPlaying.collectAsState()
     val position by connection.currentPosition.collectAsState()
     val duration by connection.duration.collectAsState()
     var dragPosition by remember(song.id) { mutableFloatStateOf(-1f) }
     val progress = if (duration > 0) (position.toFloat() / duration).coerceIn(0f, 1f) else 0f
 
-    DisposableEffect(activity, fullscreen) {
-        val previousOrientation = activity?.requestedOrientation
-        if (fullscreen) activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-        onDispose {
-            if (fullscreen && previousOrientation != null) activity?.requestedOrientation = previousOrientation
-        }
+    LaunchedEffect(isExpanded, isInPipMode) {
+        if (!isExpanded || isInPipMode) fullscreen = false
     }
+    BackHandler(enabled = fullscreen) { fullscreen = false }
+    platform.PlayerWindowEffects(
+        hideSystemBars = fullscreen && isExpanded && !isInPipMode,
+        lockLandscape = !isTv && fullscreen && isExpanded && !isInPipMode,
+        lightStatusBars = null,
+    )
     LaunchedEffect(fullscreen, showControls, playing, interactionCount, qualityMenu) {
         if (fullscreen && showControls && playing && !qualityMenu) {
             delay(4000)
@@ -219,64 +228,127 @@ fun GeneralVideoPlayer(
         }
     }
     if (fullscreen) {
-        Dialog(onDismissRequest = { fullscreen = false }, properties = DialogProperties(usePlatformDefaultWidth = false)) {
-            CompositionLocalProvider(LocalContentColor provides Color.White) {
-                Box(Modifier.fillMaxSize().background(Color.Black), contentAlignment = Alignment.Center) {
-                    videoSurface(Modifier.fillMaxSize())
-                    if (showControls) {
-                        Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.38f)))
-                        Row(Modifier.align(Alignment.TopStart).statusBarsPadding(), verticalAlignment = Alignment.CenterVertically) {
-                            IconButton(onClick = { fullscreen = false }) {
-                                Icon(MetrolistIcons.Rounded.KeyboardArrowDown, stringResource(Res.string.back))
-                            }
-                            Column(Modifier.weight(1f)) {
-                                Text(
-                                    song.title,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-                                    style = MaterialTheme.typography.titleMedium,
-                                )
-                                song.artists
-                                    .firstOrNull()
-                                    ?.name
-                                    ?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
-                            }
-                            qualityButton()
+        CompositionLocalProvider(LocalContentColor provides Color.White) {
+            Box(Modifier.fillMaxSize().background(Color.Black), contentAlignment = Alignment.Center) {
+                videoSurface(Modifier.fillMaxSize())
+                if (showControls) {
+                    Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.5f)))
+                    Row(
+                        modifier = Modifier.align(Alignment.TopStart).statusBarsPadding().padding(start = 24.dp, end = 24.dp, top = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        IconButton(onClick = { fullscreen = false }) {
+                            Icon(MetrolistIcons.Rounded.KeyboardArrowDown, stringResource(Res.string.back), modifier = Modifier.size(32.dp))
                         }
-                        Box(Modifier.align(Alignment.Center)) { playControls() }
-                        Column(Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(horizontal = 20.dp)) {
-                            seekBar()
+                        Column(Modifier.weight(1f).padding(start = 16.dp)) {
+                            Text(song.title, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.titleLarge)
+                            song.artists.firstOrNull()?.name?.let {
+                                Text(it, style = MaterialTheme.typography.titleMedium, color = Color.White.copy(alpha = 0.7f))
+                            }
+                        }
+                        qualityButton()
+                    }
+                    Box(Modifier.align(Alignment.Center).widthIn(max = 300.dp).fillMaxWidth()) {
+                        PlayerPrimaryControls(
+                            isPlaying = playing,
+                            isLoading = loading,
+                            playText = stringResource(Res.string.play),
+                            pauseText = stringResource(Res.string.pause),
+                            onSkipPrevious = {
+                                connection.skipToPrevious()
+                                interactionCount++
+                            },
+                            onTogglePlay = {
+                                connection.togglePlayPause()
+                                interactionCount++
+                            },
+                            onSkipNext = {
+                                connection.skipToNext()
+                                interactionCount++
+                            },
+                            buttonHeight = 56.dp,
+                            showLabels = true,
+                            useRoundedRect = Settings.shared.useRoundedRectPlayButton,
+                        )
+                    }
+                    Column(
+                        Modifier
+                            .align(Alignment.BottomCenter)
+                            .navigationBarsPadding()
+                            .padding(start = 24.dp, end = 24.dp, bottom = 16.dp),
+                    ) {
+                        Row(
+                            Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                if (song.isLive) {
+                                    stringResource(Res.string.experimental_video_live)
+                                } else {
+                                    "${formatDuration(
+                                        if (dragPosition >= 0f) (duration * dragPosition).toLong() else position,
+                                    )} / ${formatDuration(duration)}"
+                                },
+                                color = Color.White.copy(alpha = 0.8f),
+                                style = MaterialTheme.typography.labelLarge,
+                                modifier = Modifier.weight(1f),
+                            )
+                            if (platform.supportsPictureInPicture) {
+                                IconButton(onClick = { platform.enterPictureInPicture(isPlaying = playing, hasVideo = hasVideo) }) {
+                                    Icon(MetrolistIcons.Filled.PictureInPicture, stringResource(Res.string.enter_pip), tint = Color.White)
+                                }
+                            }
+                            IconButton(onClick = { fullscreen = false }) {
+                                Icon(MetrolistIcons.Default.FullscreenExit, stringResource(Res.string.exit_fullscreen), tint = Color.White)
+                            }
+                        }
+                        if (!song.isLive) {
+                            PlaybackProgressSlider(
+                                value = if (dragPosition >= 0f) dragPosition else progress,
+                                onValueChange = {
+                                    dragPosition = it
+                                    interactionCount++
+                                },
+                                onValueChangeFinished = {
+                                    if (duration > 0 && dragPosition >= 0f) connection.seekTo((duration * dragPosition).toLong())
+                                    dragPosition = -1f
+                                },
+                                isPlaying = playing,
+                                enabled = duration > 0,
+                            )
                         }
                     }
                 }
             }
         }
-    }
-    CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurface) {
-        Column(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.surface)
-                    .statusBarsPadding()
-                    .navigationBarsPadding()
-                    .verticalScroll(rememberScrollState()),
-        ) {
-            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = onClose) { Icon(MetrolistIcons.Rounded.KeyboardArrowDown, stringResource(Res.string.back)) }
-                Box(Modifier.weight(1f))
-                qualityButton()
-            }
-            // Keep only one attached surface while fullscreen is visible.
-            if (!fullscreen) videoSurface(Modifier.fillMaxWidth().aspectRatio(16f / 9f))
-            Column(Modifier.fillMaxWidth().padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text(song.title, style = MaterialTheme.typography.headlineSmall, maxLines = 3, overflow = TextOverflow.Ellipsis)
-                song.artists
-                    .firstOrNull()
-                    ?.name
-                    ?.let { Text(it, style = MaterialTheme.typography.bodyLarge) }
-                seekBar()
-                Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) { playControls() }
+    } else {
+        CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurface) {
+            Column(
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.surface)
+                        .statusBarsPadding()
+                        .navigationBarsPadding()
+                        .verticalScroll(rememberScrollState()),
+            ) {
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    IconButton(onClick = onClose) { Icon(MetrolistIcons.Rounded.KeyboardArrowDown, stringResource(Res.string.back)) }
+                    Box(Modifier.weight(1f))
+                    qualityButton()
+                }
+                // Keep only one attached surface while fullscreen is visible.
+                if (!fullscreen) videoSurface(Modifier.fillMaxWidth().aspectRatio(16f / 9f))
+                Column(Modifier.fillMaxWidth().padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Text(song.title, style = MaterialTheme.typography.headlineSmall, maxLines = 3, overflow = TextOverflow.Ellipsis)
+                    song.artists
+                        .firstOrNull()
+                        ?.name
+                        ?.let { Text(it, style = MaterialTheme.typography.bodyLarge) }
+                    seekBar()
+                    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) { playControls() }
+                }
             }
         }
     }

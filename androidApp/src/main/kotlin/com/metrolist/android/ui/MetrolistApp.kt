@@ -2277,6 +2277,7 @@ fun MetrolistApp(
                                         connection = playerConnection,
                                         player = videoPlayer,
                                         hasVideo = hasVideo,
+                                        isExpanded = !playerBottomSheetState.isCollapsed && !playerBottomSheetState.isDismissed,
                                         onClose = { playerBottomSheetState.collapseSoft() },
                                     )
                                 } else {
