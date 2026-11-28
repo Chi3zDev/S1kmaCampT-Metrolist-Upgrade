@@ -52,8 +52,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -252,7 +250,7 @@ internal fun SharedSettingsRegistryScreen(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         if (canNavigateBackFromSettings(pageStack, expanded = true)) {
-                            IconButton(onClick = ::closePage, shapes = IconButtonDefaults.shapes()) {
+                            LiquidGlassIconButton(onClick = ::closePage) {
                                 Icon(MetrolistIcons.AutoMirrored.Filled.ArrowBack, stringResource(Res.string.back))
                             }
                         }
@@ -270,7 +268,7 @@ internal fun SharedSettingsRegistryScreen(
                                 modifier = Modifier.singleLineMarquee(),
                             )
                         }
-                        IconButton(onClick = host.onClose, shapes = IconButtonDefaults.shapes()) {
+                        LiquidGlassIconButton(onClick = host.onClose) {
                             Icon(MetrolistIcons.Default.Close, stringResource(Res.string.close))
                         }
                     }
