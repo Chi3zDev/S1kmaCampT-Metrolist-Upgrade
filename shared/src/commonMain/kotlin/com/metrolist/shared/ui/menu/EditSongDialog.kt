@@ -5,12 +5,10 @@ package com.metrolist.shared.ui.menu
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -27,6 +25,7 @@ import com.metrolist.shared.generated.resources.reset
 import com.metrolist.shared.generated.resources.save
 import com.metrolist.shared.generated.resources.title
 import com.metrolist.shared.ui.components.AlertDialog
+import com.metrolist.shared.ui.components.LiquidGlassTextButton
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -80,21 +79,20 @@ fun EditSongDialog(
                     Text(stringResource(Res.string.error_unknown), color = MaterialTheme.colorScheme.error)
                 }
                 if (onReset != null) {
-                    TextButton(enabled = !editor.busy, onClick = editor::reset, shapes = ButtonDefaults.shapes()) {
+                    LiquidGlassTextButton(enabled = !editor.busy, onClick = editor::reset) {
                         Text(stringResource(Res.string.reset))
                     }
                 }
             }
         },
         confirmButton = {
-            TextButton(
+            LiquidGlassTextButton(
                 enabled = !editor.busy && editor.title.isNotBlank() && editor.artist.isNotBlank(),
                 onClick = editor::confirm,
-                shapes = ButtonDefaults.shapes(),
             ) { Text(stringResource(Res.string.save)) }
         },
         dismissButton = {
-            TextButton(enabled = !editor.busy, onClick = editor::dismiss, shapes = ButtonDefaults.shapes()) {
+            LiquidGlassTextButton(enabled = !editor.busy, onClick = editor::dismiss) {
                 Text(stringResource(Res.string.cancel))
             }
         },
