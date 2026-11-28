@@ -8,16 +8,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -67,6 +62,9 @@ import com.metrolist.shared.state.moveLikedSong
 import com.metrolist.shared.ui.components.AlertDialog
 import com.metrolist.shared.ui.components.CollectionFilterBar
 import com.metrolist.shared.ui.components.DownloadPlaylistFilterBar
+import com.metrolist.shared.ui.components.LiquidGlassCompactButton
+import com.metrolist.shared.ui.components.LiquidGlassIconButton
+import com.metrolist.shared.ui.components.LiquidGlassTextButton
 import com.metrolist.shared.ui.components.PlaylistOrderControls
 import com.metrolist.shared.ui.components.PopupContent
 import com.metrolist.shared.ui.components.PopupVisibility
@@ -522,15 +520,14 @@ fun StoredPlaylistContent(
                                 onCheckedChange = { selection.toggle(song.id) },
                             )
                         } else {
-                            IconButton(
+                            LiquidGlassIconButton(
                                 modifier = Modifier.navigationPopupSource(),
                                 onClick = { onTrackMenu(song) },
-                                shapes = IconButtonDefaults.shapes(),
                             ) {
                                 Icon(MetrolistIcons.Default.MoreVert, stringResource(Res.string.menu))
                             }
                             if (selectionEnabled) {
-                                IconButton(onClick = { onRemoveSongs(setOf(song.id)) }, shapes = IconButtonDefaults.shapes()) {
+                                LiquidGlassIconButton(onClick = { onRemoveSongs(setOf(song.id)) }) {
                                     Icon(
                                         MetrolistIcons.Outlined.Delete,
                                         contentDescription = stringResource(Res.string.remove_from_device_desc),
@@ -555,20 +552,18 @@ fun StoredPlaylistContent(
             },
             text = { Text(stringResource(Res.string.confirm_delete_stored_audio)) },
             confirmButton = {
-                Button(
+                LiquidGlassCompactButton(
                     onClick = {
                         onRemoveSongs?.invoke(removalIds)
                         selection.exit()
                         pendingRemoval = null
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
-                    shapes = ButtonDefaults.shapes(),
+                    destructive = true,
                 ) { Text(stringResource(Res.string.remove)) }
             },
             dismissButton = {
-                TextButton(
+                LiquidGlassTextButton(
                     onClick = { pendingRemoval = null },
-                    shapes = ButtonDefaults.shapes(),
                 ) { Text(stringResource(Res.string.cancel)) }
             },
         )
@@ -579,18 +574,17 @@ fun StoredPlaylistContent(
             title = { Text(stringResource(Res.string.clear_collection_confirm, title)) },
             text = { Text(stringResource(Res.string.confirm_clear_collection)) },
             confirmButton = {
-                Button(
+                LiquidGlassCompactButton(
                     onClick = {
                         onClearCollection?.invoke()
                         selection.exit()
                         confirmClear = false
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
-                    shapes = ButtonDefaults.shapes(),
+                    destructive = true,
                 ) { Text(stringResource(Res.string.clear)) }
             },
             dismissButton = {
-                TextButton(onClick = { confirmClear = false }, shapes = ButtonDefaults.shapes()) { Text(stringResource(Res.string.cancel)) }
+                LiquidGlassTextButton(onClick = { confirmClear = false }) { Text(stringResource(Res.string.cancel)) }
             },
         )
     }
