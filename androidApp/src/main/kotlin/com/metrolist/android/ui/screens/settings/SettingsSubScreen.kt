@@ -72,6 +72,7 @@ import com.metrolist.shared.ui.components.LocalThemeGlassBackdrop
 import com.metrolist.shared.ui.components.appPageBackground
 import com.metrolist.shared.ui.components.glassCardBorder
 import com.metrolist.shared.ui.components.glassCardColor
+import com.metrolist.shared.ui.components.glassScaffoldViewport
 import com.metrolist.shared.ui.components.liquidGlassBackdropReady
 import com.metrolist.shared.ui.components.singleLineMarquee
 import com.metrolist.shared.ui.icons.MetrolistIcons
@@ -173,7 +174,9 @@ fun SettingsSubScreen(
             }
         },
     ) { paddingValues ->
-        Column(Modifier.fillMaxSize().padding(paddingValues)) {
+        val viewport =
+            if (glass) Modifier.glassScaffoldViewport(paddingValues) else Modifier.fillMaxSize().padding(paddingValues)
+        Column(viewport) {
             persistentHeader()
             Column(
                 modifier =
