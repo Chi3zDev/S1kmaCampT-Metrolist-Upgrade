@@ -34,7 +34,6 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberSliderState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -48,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import com.metrolist.shared.generated.resources.*
 import com.metrolist.shared.ui.components.BasicAlertDialog
 import com.metrolist.shared.ui.components.LiquidGlassSurface
+import com.metrolist.shared.ui.components.LiquidGlassTextButton
 import com.metrolist.shared.ui.components.glassCardBorder
 import com.metrolist.shared.ui.components.glassCardColor
 import com.metrolist.shared.ui.icons.MetrolistIcons
@@ -110,14 +110,13 @@ internal fun SettingsSliderDialog(
                 },
             )
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                TextButton(onClick = onDismiss, shapes = ButtonDefaults.shapes()) { Text(stringResource(Res.string.cancel)) }
-                TextButton(
+                LiquidGlassTextButton(onClick = onDismiss) { Text(stringResource(Res.string.cancel)) }
+                LiquidGlassTextButton(
                     onClick = {
                         item.onSliderChanged?.invoke(value)
                         onSettingValueChanged()
                         onDismiss()
                     },
-                    shapes = ButtonDefaults.shapes(),
                 ) { Text(stringResource(Res.string.done)) }
             }
         }
@@ -173,14 +172,13 @@ internal fun SettingsTextDialog(
                 )
             }
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                TextButton(onClick = onDismiss, shapes = ButtonDefaults.shapes()) { Text(stringResource(Res.string.cancel)) }
-                TextButton(
+                LiquidGlassTextButton(onClick = onDismiss) { Text(stringResource(Res.string.cancel)) }
+                LiquidGlassTextButton(
                     onClick = {
                         item.onTextChanged?.invoke(textFieldState.text.toString())
                         onSettingValueChanged()
                         onDismiss()
                     },
-                    shapes = ButtonDefaults.shapes(),
                 ) { Text(stringResource(Res.string.done)) }
             }
         }
@@ -227,7 +225,7 @@ internal fun SettingsConfirmDialog(
                 horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                TextButton(onClick = onDismiss, shapes = ButtonDefaults.shapes()) {
+                LiquidGlassTextButton(onClick = onDismiss) {
                     Text(stringResource(Res.string.cancel))
                 }
                 Button(
