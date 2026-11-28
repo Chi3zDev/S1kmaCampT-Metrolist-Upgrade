@@ -57,6 +57,7 @@ import com.metrolist.shared.generated.resources.Res
 import com.metrolist.shared.generated.resources.bottom_sheet_pane_title
 import com.metrolist.shared.generated.resources.dismiss
 import com.metrolist.shared.generated.resources.expand
+import com.metrolist.shared.settings.Settings
 import com.metrolist.shared.ui.navigation.LocalNavigationContainerState
 import com.metrolist.shared.ui.navigation.blockInput
 import com.metrolist.shared.ui.theme.ComponentShapes
@@ -147,6 +148,8 @@ fun ModalBottomSheet(
     val expandLabel = stringResource(Res.string.expand)
     val visible = requestedVisible && sheetState.anchorsState.targetValue != SheetValue.Hidden
     val scrimAlpha by animateFloatAsState(if (visible) 1f else 0f, MaterialTheme.motionScheme.fastEffectsSpec())
+    val sheetBackdrop = LocalThemeGlassBackdrop.current.takeIf { Settings.shared.liquidGlassTheme }
+    val sheetTint = if (sheetBackdrop != null) glassCardColor(containerColor) else containerColor
     val containers = LocalNavigationContainerState.current
     remember { containers?.takePopupSource() }
     ModalSheetDialog(onDismissRequest = dismissSheet, properties = properties, contentColor = contentColor) { backProgress ->
@@ -218,33 +221,37 @@ fun ModalBottomSheet(
                                         }
                                     },
                             shape = shape,
-                            color = containerColor,
+                            color = if (sheetBackdrop != null) Color.Transparent else containerColor,
                             contentColor = contentColor,
                             tonalElevation = tonalElevation,
                         ) {
-                            Column(
-                                Modifier
-                                    .windowInsetsPadding(contentWindowInsets().only(WindowInsetsSides.Bottom))
-                                    .graphicsLayer {
-                                        applySheetBackContentTransform(backProgress)
-                                    },
-                            ) {
-                                if (dragHandle != null) {
-                                    val expanded = sheetState.anchorsState.settledValue == SheetValue.Expanded
-                                    Box(
-                                        Modifier.fillMaxWidth().clickable(
-                                            interactionSource = remember { MutableInteractionSource() },
-                                            indication = null,
-                                            onClickLabel = if (expanded) dismissLabel else expandLabel,
-                                        ) {
-                                            if (expanded) dismiss() else scope.launch { sheetState.expand() }
+                            Box {
+                                sheetBackdrop?.Background(radius = 28.dp, modifier = Modifier.matchParentSize())
+                                if (sheetBackdrop != null) Box(Modifier.matchParentSize().background(sheetTint))
+                                Column(
+                                    Modifier
+                                        .windowInsetsPadding(contentWindowInsets().only(WindowInsetsSides.Bottom))
+                                        .graphicsLayer {
+                                            applySheetBackContentTransform(backProgress)
                                         },
-                                        contentAlignment = Alignment.Center,
-                                    ) {
-                                        dragHandle()
+                                ) {
+                                    if (dragHandle != null) {
+                                        val expanded = sheetState.anchorsState.settledValue == SheetValue.Expanded
+                                        Box(
+                                            Modifier.fillMaxWidth().clickable(
+                                                interactionSource = remember { MutableInteractionSource() },
+                                                indication = null,
+                                                onClickLabel = if (expanded) dismissLabel else expandLabel,
+                                            ) {
+                                                if (expanded) dismiss() else scope.launch { sheetState.expand() }
+                                            },
+                                            contentAlignment = Alignment.Center,
+                                        ) {
+                                            dragHandle()
+                                        }
                                     }
+                                    content()
                                 }
-                                content()
                             }
                         }
                     },
