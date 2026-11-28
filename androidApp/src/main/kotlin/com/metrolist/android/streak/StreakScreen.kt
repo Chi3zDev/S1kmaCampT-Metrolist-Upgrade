@@ -66,6 +66,7 @@ import com.metrolist.shared.settings.Settings
 import com.metrolist.shared.ui.LocalPlayerEffectsAllowed
 import com.metrolist.shared.ui.PolishMotion
 import com.metrolist.shared.ui.components.AlertDialog
+import com.metrolist.shared.ui.components.ExpressiveSwitch
 import com.metrolist.shared.ui.components.LiquidGlassSurface
 import com.metrolist.shared.ui.components.appPageBackground
 import com.metrolist.shared.ui.components.glassCardBorder
@@ -317,7 +318,7 @@ fun StreakScreen(onBack: () -> Unit) {
                 val label = stringResource(Res.string.streak_level_background)
                 Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
                     Text(label, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
-                    Switch(
+                    ExpressiveSwitch(
                         checked = backgroundEnabled,
                         onCheckedChange = { Settings.shared.streakLevelBackgroundEnabled = it },
                         modifier = Modifier.semantics { contentDescription = label },
@@ -331,7 +332,7 @@ fun StreakScreen(onBack: () -> Unit) {
                 StreakPanel {
                     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                         Text(reminderLabel, modifier = Modifier.weight(1f), style = MaterialTheme.typography.titleMedium)
-                        Switch(
+                        ExpressiveSwitch(
                             checked = enabled,
                             onCheckedChange = { checked ->
                                 if (checked && Build.VERSION.SDK_INT >= 33) {
