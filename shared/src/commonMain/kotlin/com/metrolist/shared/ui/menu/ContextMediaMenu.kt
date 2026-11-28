@@ -93,9 +93,13 @@ import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
 import com.metrolist.shared.generated.resources.Res
 import com.metrolist.shared.generated.resources.more_options
+import com.metrolist.shared.settings.Settings
 import com.metrolist.shared.ui.components.AutoPlaylistThumbnail
+import com.metrolist.shared.ui.components.LiquidGlassSurface
 import com.metrolist.shared.ui.components.PlayerMenuAction
 import com.metrolist.shared.ui.components.PlayerMenuActionIcon
+import com.metrolist.shared.ui.components.glassCardBorder
+import com.metrolist.shared.ui.components.glassCardColor
 import com.metrolist.shared.ui.components.images.AsyncImage
 import com.metrolist.shared.ui.components.isAutoPlaylistIcon
 import com.metrolist.shared.ui.components.playbackMarquee
@@ -614,40 +618,51 @@ fun ExpressiveMenuActionGroup(
     groupIndex: Int,
     groupCount: Int,
 ) {
-    DropdownMenuGroup(
-        shapes = MenuDefaults.groupShape(if (isDesktop) 0 else groupIndex, if (isDesktop) 1 else groupCount),
-        modifier = Modifier.fillMaxWidth(),
-        tonalElevation = 0.dp,
-        shadowElevation = 0.dp,
-    ) {
-        actions.forEachIndexed { index, action ->
-            DropdownMenuItem(
-                onClick = action.onClick,
-                modifier = Modifier.fillMaxWidth().navigationPopupSource(),
-                text = {
-                    Text(action.title, maxLines = 1, overflow = TextOverflow.Ellipsis)
+    LiquidGlassSurface(radius = 20.dp, modifier = Modifier.fillMaxWidth()) {
+        DropdownMenuGroup(
+            shapes = MenuDefaults.groupShape(if (isDesktop) 0 else groupIndex, if (isDesktop) 1 else groupCount),
+            modifier = Modifier.fillMaxWidth(),
+            containerColor =
+                if (Settings.shared.liquidGlassTheme) {
+                    glassCardColor(
+                        MaterialTheme.colorScheme.surfaceContainer,
+                    )
+                } else {
+                    MenuDefaults.groupStandardContainerColor
                 },
-                supportingText =
-                    action.description?.let { description ->
-                        {
-                            Text(
-                                description,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
+            border = if (Settings.shared.liquidGlassTheme) glassCardBorder() else null,
+            tonalElevation = 0.dp,
+            shadowElevation = 0.dp,
+        ) {
+            actions.forEachIndexed { index, action ->
+                DropdownMenuItem(
+                    onClick = action.onClick,
+                    modifier = Modifier.fillMaxWidth().navigationPopupSource(),
+                    text = {
+                        Text(action.title, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     },
-                shape =
-                    groupedMenuItemShapes(
-                        index,
-                        actions.size,
-                        if (isDesktop) 0 else groupIndex,
-                        if (isDesktop) 1 else groupCount,
-                    ).shape,
-                leadingIcon = {
-                    PlayerMenuActionIcon(action, Modifier.size(22.dp))
-                },
-                enabled = action.enabled,
-            )
+                    supportingText =
+                        action.description?.let { description ->
+                            {
+                                Text(
+                                    description,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                        },
+                    shape =
+                        groupedMenuItemShapes(
+                            index,
+                            actions.size,
+                            if (isDesktop) 0 else groupIndex,
+                            if (isDesktop) 1 else groupCount,
+                        ).shape,
+                    leadingIcon = {
+                        PlayerMenuActionIcon(action, Modifier.size(22.dp))
+                    },
+                    enabled = action.enabled,
+                )
+            }
         }
     }
 }
