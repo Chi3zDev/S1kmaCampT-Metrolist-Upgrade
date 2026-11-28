@@ -86,10 +86,13 @@ import com.metrolist.shared.ui.components.CollectionLoadingPlaceholder
 import com.metrolist.shared.ui.components.CollectionPreviews
 import com.metrolist.shared.ui.components.CollectionSongsLoadingPlaceholder
 import com.metrolist.shared.ui.components.ContainedLoadingIndicator
+import com.metrolist.shared.ui.components.LiquidGlassIconButton
+import com.metrolist.shared.ui.components.LiquidGlassSurface
 import com.metrolist.shared.ui.components.PopupContent
 import com.metrolist.shared.ui.components.PopupVisibility
 import com.metrolist.shared.ui.components.SongSelectionControls
 import com.metrolist.shared.ui.components.appTopBarBackground
+import com.metrolist.shared.ui.components.glassCardColor
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import com.metrolist.shared.ui.navigation.navigationPopupSource
 import com.metrolist.shared.ui.screens.AlbumContent
@@ -257,49 +260,58 @@ fun AlbumScreen(
             if (selection.active) {
                 selectionBar()
             } else {
-                TopAppBar(
-                    title = {
-                        Text(
-                            text = albumInfo?.title ?: "",
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                    },
-                    navigationIcon = {
-                        IconButton(
-                            onClick = onBackClick,
-                            modifier = Modifier.tvFocusHighlight(CircleShape),
-                            shapes = IconButtonDefaults.shapes(),
-                        ) {
-                            Icon(
-                                MetrolistIcons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = stringResource(Res.string.back),
+                LiquidGlassSurface(radius = 0.dp, modifier = Modifier.fillMaxWidth()) {
+                    TopAppBar(
+                        title = {
+                            Text(
+                                text = albumInfo?.title ?: "",
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
                             )
-                        }
-                    },
-                    actions = {
-                        IconButton(
-                            modifier = Modifier.tvFocusHighlight(CircleShape).navigationPopupSource(),
-                            onClick = { showMenu = true },
-                            shapes = IconButtonDefaults.shapes(),
-                        ) {
-                            Icon(MetrolistIcons.Default.MoreVert, contentDescription = stringResource(Res.string.more_actions))
-                        }
-                    },
-                    colors =
-                        TopAppBarDefaults.topAppBarColors(
-                            containerColor =
-                                if (isTopBarCollapsed) {
-                                    appTopBarBackground(
-                                        MaterialTheme.colorScheme.surface,
-                                    )
-                                } else {
-                                    Color.Transparent
-                                },
-                            scrolledContainerColor = if (isTopBarCollapsed) MaterialTheme.colorScheme.surface else Color.Transparent,
-                        ),
-                    scrollBehavior = scrollBehavior,
-                )
+                        },
+                        navigationIcon = {
+                            LiquidGlassIconButton(
+                                onClick = onBackClick,
+                                modifier = Modifier.tvFocusHighlight(CircleShape),
+                            ) {
+                                Icon(
+                                    MetrolistIcons.AutoMirrored.Filled.ArrowBack,
+                                    contentDescription = stringResource(Res.string.back),
+                                )
+                            }
+                        },
+                        actions = {
+                            LiquidGlassIconButton(
+                                modifier = Modifier.tvFocusHighlight(CircleShape).navigationPopupSource(),
+                                onClick = { showMenu = true },
+                            ) {
+                                Icon(MetrolistIcons.Default.MoreVert, contentDescription = stringResource(Res.string.more_actions))
+                            }
+                        },
+                        colors =
+                            TopAppBarDefaults.topAppBarColors(
+                                containerColor =
+                                    if (Settings.shared.liquidGlassTheme) {
+                                        glassCardColor(MaterialTheme.colorScheme.surface)
+                                    } else if (isTopBarCollapsed) {
+                                        appTopBarBackground(
+                                            MaterialTheme.colorScheme.surface,
+                                        )
+                                    } else {
+                                        Color.Transparent
+                                    },
+                                scrolledContainerColor =
+                                    if (Settings.shared.liquidGlassTheme) {
+                                        glassCardColor(MaterialTheme.colorScheme.surface)
+                                    } else if (isTopBarCollapsed) {
+                                        MaterialTheme.colorScheme.surface
+                                    } else {
+                                        Color.Transparent
+                                    },
+                            ),
+                        scrollBehavior = scrollBehavior,
+                    )
+                }
             }
         },
     ) { paddingValues ->
