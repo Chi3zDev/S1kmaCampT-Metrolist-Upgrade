@@ -46,17 +46,13 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -131,6 +127,8 @@ import com.metrolist.shared.ui.components.ChipShelf
 import com.metrolist.shared.ui.components.CollectionPreviews
 import com.metrolist.shared.ui.components.ContainedLoadingIndicator
 import com.metrolist.shared.ui.components.FittingText
+import com.metrolist.shared.ui.components.LiquidGlassIconButton
+import com.metrolist.shared.ui.components.LiquidGlassTextButton
 import com.metrolist.shared.ui.components.LocalThemeGlassBackdrop
 import com.metrolist.shared.ui.components.PlaylistCoverImage
 import com.metrolist.shared.ui.components.PopupContent
@@ -524,9 +522,8 @@ private fun SearchEmptyState(
                                         modifier = Modifier.weight(1f),
                                         color = MaterialTheme.colorScheme.onSurface,
                                     )
-                                    IconButton(
+                                    LiquidGlassIconButton(
                                         onClick = { onHistoryItemInsert(historyItem) },
-                                        shapes = IconButtonDefaults.shapes(),
                                     ) {
                                         Icon(
                                             imageVector = MetrolistIcons.AutoMirrored.Filled.ArrowBack,
@@ -582,7 +579,7 @@ private fun RecentSectionTitle(
                 label = stringResource(Res.string.clearing_search_history),
             )
         } else {
-            IconButton(onClick = onClearClick, shapes = IconButtonDefaults.shapes()) {
+            LiquidGlassIconButton(onClick = onClearClick) {
                 Icon(
                     imageVector = MetrolistIcons.Default.Close,
                     contentDescription = text.clearSection(title),
@@ -606,12 +603,12 @@ private fun ConfirmDeleteDialog(
         title = { Text(title) },
         text = { Text(text) },
         confirmButton = {
-            TextButton(onClick = onConfirm, modifier = Modifier.tvFocusHighlight(CircleShape), shapes = ButtonDefaults.shapes()) {
+            LiquidGlassTextButton(onClick = onConfirm, modifier = Modifier.tvFocusHighlight(CircleShape)) {
                 Text(textData.delete)
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss, modifier = Modifier.tvFocusHighlight(CircleShape), shapes = ButtonDefaults.shapes()) {
+            LiquidGlassTextButton(onClick = onDismiss, modifier = Modifier.tvFocusHighlight(CircleShape)) {
                 Text(textData.cancel)
             }
         },
@@ -838,9 +835,8 @@ private fun SearchSuggestionRow(
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f),
             )
-            IconButton(
+            LiquidGlassIconButton(
                 onClick = onInsertClick,
-                shapes = IconButtonDefaults.shapes(),
             ) {
                 Icon(
                     imageVector = MetrolistIcons.AutoMirrored.Filled.ArrowBack,
@@ -1076,7 +1072,7 @@ private fun SearchResultsList(
             item(key = "search_failed") {
                 Column(Modifier.fillMaxWidth().padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(stringResource(Res.string.search_online_failed))
-                    TextButton(onClick = { onFilterSelected(selectedFilter) }, shapes = ButtonDefaults.shapes()) {
+                    LiquidGlassTextButton(onClick = { onFilterSelected(selectedFilter) }) {
                         Text(stringResource(Res.string.retry))
                     }
                 }
@@ -1132,7 +1128,7 @@ private fun SearchResultsList(
                 item(key = "filtered_results_retry") {
                     Column(Modifier.fillMaxWidth().padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(stringResource(Res.string.search_load_more_failed))
-                        TextButton(onClick = onRetryLoadMore, shapes = ButtonDefaults.shapes()) {
+                        LiquidGlassTextButton(onClick = onRetryLoadMore) {
                             Text(stringResource(Res.string.retry))
                         }
                     }
@@ -1500,10 +1496,9 @@ private fun TopResultCard(
                                     )
                                 }
                                 Spacer(Modifier.weight(1f))
-                                IconButton(
+                                LiquidGlassIconButton(
                                     modifier = Modifier.navigationPopupSource(),
                                     onClick = { onItemLongClick(mainItem) },
-                                    shapes = IconButtonDefaults.shapes(),
                                 ) {
                                     Icon(MetrolistIcons.Default.MoreVert, contentDescription = stringResource(Res.string.more_options))
                                 }
@@ -1732,10 +1727,9 @@ private fun TopResultCard(
                                         }
                                     }
 
-                                    IconButton(
+                                    LiquidGlassIconButton(
                                         modifier = Modifier.navigationPopupSource(),
                                         onClick = { onItemLongClick(mainItem) },
-                                        shapes = IconButtonDefaults.shapes(),
                                     ) {
                                         Icon(MetrolistIcons.Default.MoreVert, contentDescription = stringResource(Res.string.more_options))
                                     }
@@ -1942,7 +1936,7 @@ private fun TopResultItem(
             }
         }
 
-        IconButton(modifier = Modifier.navigationPopupSource(), onClick = onMenuClick, shapes = IconButtonDefaults.shapes()) {
+        LiquidGlassIconButton(modifier = Modifier.navigationPopupSource(), onClick = onMenuClick) {
             Icon(
                 imageVector = MetrolistIcons.Default.MoreVert,
                 contentDescription = stringResource(Res.string.more_options),
