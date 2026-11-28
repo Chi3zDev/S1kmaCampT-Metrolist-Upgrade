@@ -24,8 +24,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
@@ -33,6 +31,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -82,6 +81,13 @@ import com.metrolist.shared.settings.Settings
 import com.metrolist.shared.state.GlobalInnerTube
 import com.metrolist.shared.state.SongLikeState
 import com.metrolist.shared.ui.components.ExpressiveSwitch
+import com.metrolist.shared.ui.components.LiquidGlassIconButton
+import com.metrolist.shared.ui.components.LiquidGlassSurface
+import com.metrolist.shared.ui.components.appPageBackground
+import com.metrolist.shared.ui.components.glassCardBorder
+import com.metrolist.shared.ui.components.glassCardColor
+import com.metrolist.shared.ui.components.glassScaffoldViewport
+import com.metrolist.shared.ui.components.liquidGlassBackdropReady
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import com.metrolist.shared.ui.tv.RequestTvFocus
 import com.metrolist.shared.ui.tv.tvFocusHighlight
@@ -399,20 +405,36 @@ fun TokenLoginScreen(
     BlockScreenshots()
     RequestTvFocus(showTokenFocus)
 
+    val glass = liquidGlassBackdropReady()
     Scaffold(
         modifier = Modifier.imePadding(),
+        containerColor = appPageBackground(MaterialTheme.colorScheme.background),
         topBar = {
-            LargeTopAppBar(
-                title = { Text(stringResource(Res.string.token_login_title)) },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack, enabled = !isSaving, shapes = IconButtonDefaults.shapes()) {
-                        Icon(MetrolistIcons.AutoMirrored.Filled.ArrowBack, stringResource(Res.string.back))
-                    }
-                },
-            )
+            LiquidGlassSurface(radius = 0.dp, modifier = Modifier.fillMaxWidth(), enabled = glass) {
+                LargeTopAppBar(
+                    title = { Text(stringResource(Res.string.token_login_title)) },
+                    navigationIcon = {
+                        LiquidGlassIconButton(onClick = onNavigateBack, enabled = !isSaving) {
+                            Icon(MetrolistIcons.AutoMirrored.Filled.ArrowBack, stringResource(Res.string.back))
+                        }
+                    },
+                    colors =
+                        TopAppBarDefaults.topAppBarColors(
+                            containerColor =
+                                if (glass) {
+                                    glassCardColor(
+                                        MaterialTheme.colorScheme.surface,
+                                    )
+                                } else {
+                                    MaterialTheme.colorScheme.surface
+                                },
+                        ),
+                )
+            }
         },
     ) { padding ->
-        Box(Modifier.fillMaxSize().padding(padding).consumeWindowInsets(padding), contentAlignment = Alignment.TopCenter) {
+        val viewport = if (glass) Modifier.glassScaffoldViewport(padding) else Modifier.fillMaxSize().padding(padding)
+        Box(viewport.consumeWindowInsets(padding), contentAlignment = Alignment.TopCenter) {
             Column(
                 Modifier
                     .widthIn(max = 600.dp)
@@ -472,122 +494,165 @@ fun TokenLoginScreen(
                             bottomStart = if (showToken) 4.dp else 24.dp,
                             bottomEnd = if (showToken) 4.dp else 24.dp,
                         )
-                    Surface(shape = switchShape, color = MaterialTheme.colorScheme.surfaceContainer) {
-                        Row(
-                            modifier =
-                                Modifier
-                                    .fillMaxWidth()
-                                    .focusRequester(showTokenFocus)
-                                    .tvFocusHighlight(shape = switchShape)
-                                    .toggleable(
-                                        value = showToken,
-                                        role = Role.Switch,
-                                        onValueChange = {
-                                            focusManager.clearFocus()
-                                            showToken = it
-                                            showTokenFocus.requestFocus()
-                                        },
-                                    ).padding(horizontal = 16.dp, vertical = 12.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    LiquidGlassSurface(radius = 24.dp, modifier = Modifier.fillMaxWidth(), enabled = glass) {
+                        Surface(
+                            shape = switchShape,
+                            color =
+                                if (glass) {
+                                    glassCardColor(
+                                        MaterialTheme.colorScheme.surfaceContainer,
+                                    )
+                                } else {
+                                    MaterialTheme.colorScheme.surfaceContainer
+                                },
+                            border = if (glass) glassCardBorder() else null,
                         ) {
-                            Text(
-                                stringResource(Res.string.token_login_show_token),
-                                style = MaterialTheme.typography.titleMedium,
-                                modifier = Modifier.weight(1f),
-                            )
-                            ExpressiveSwitch(checked = showToken, onCheckedChange = null)
+                            Row(
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .focusRequester(showTokenFocus)
+                                        .tvFocusHighlight(shape = switchShape)
+                                        .toggleable(
+                                            value = showToken,
+                                            role = Role.Switch,
+                                            onValueChange = {
+                                                focusManager.clearFocus()
+                                                showToken = it
+                                                showTokenFocus.requestFocus()
+                                            },
+                                        ).padding(horizontal = 16.dp, vertical = 12.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                            ) {
+                                Text(
+                                    stringResource(Res.string.token_login_show_token),
+                                    style = MaterialTheme.typography.titleMedium,
+                                    modifier = Modifier.weight(1f),
+                                )
+                                ExpressiveSwitch(checked = showToken, onCheckedChange = null)
+                            }
                         }
                     }
                     if (showToken) {
-                        Surface(shape = RoundedCornerShape(4.dp), color = MaterialTheme.colorScheme.surfaceContainer) {
-                            Column(Modifier.fillMaxWidth().padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                TokenLoginTextField(
-                                    value = tokenText,
-                                    onValueChange = {
-                                        tokenText = it
-                                        result = null
-                                        resultIsError = false
+                        LiquidGlassSurface(radius = 4.dp, modifier = Modifier.fillMaxWidth(), enabled = glass) {
+                            Surface(
+                                shape = RoundedCornerShape(4.dp),
+                                color =
+                                    if (glass) {
+                                        glassCardColor(
+                                            MaterialTheme.colorScheme.surfaceContainer,
+                                        )
+                                    } else {
+                                        MaterialTheme.colorScheme.surfaceContainer
                                     },
-                                    enabled = !isSaving,
-                                    isError = resultIsError,
-                                )
-                                result?.let {
-                                    Text(
-                                        it,
-                                        color = if (resultIsError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
-                                        style = MaterialTheme.typography.bodySmall,
-                                        modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+                                border = if (glass) glassCardBorder() else null,
+                            ) {
+                                Column(Modifier.fillMaxWidth().padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    TokenLoginTextField(
+                                        value = tokenText,
+                                        onValueChange = {
+                                            tokenText = it
+                                            result = null
+                                            resultIsError = false
+                                        },
+                                        enabled = !isSaving,
+                                        isError = resultIsError,
                                     )
+                                    result?.let {
+                                        Text(
+                                            it,
+                                            color =
+                                                if (resultIsError) {
+                                                    MaterialTheme.colorScheme.error
+                                                } else {
+                                                    MaterialTheme.colorScheme.primary
+                                                },
+                                            style = MaterialTheme.typography.bodySmall,
+                                            modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+                                        )
+                                    }
                                 }
                             }
                         }
-                        Button(
-                            onClick = {
-                                focusManager.clearFocus()
-                                val parsed = parseToken(tokenText)
-                                if (!hasAuthCookie(parsed.cookie)) {
-                                    resultIsError = true
-                                    result = invalidToken
-                                } else {
-                                    val credentials =
-                                        parsed.resolveCredentials(
-                                            existingCookie = saved.cookie,
-                                            existingVisitorData = saved.visitorData,
-                                            existingDataSyncId = saved.dataSyncId,
-                                            existingAuthUser = saved.authUser,
-                                            existingAccountInfo = saved.accountInfo,
-                                        )
-                                    isSaving = true
-                                    result = null
-                                    resultIsError = false
-                                    scope.launch {
-                                        try {
-                                            val validated =
-                                                withTimeoutOrNull(10_000L) {
-                                                    authManager.validateAndSaveCredentials(
-                                                        cookie = credentials.cookie,
-                                                        visitorData = credentials.visitorData,
-                                                        dataSyncId = credentials.dataSyncId,
-                                                        authUser = credentials.authUser,
-                                                    )
-                                                } == true
-                                            if (validated) {
-                                                saved = authManager.tokenLoginCredentials()
-                                                tokenText = saved.toTokenText()
-                                                onCredentialsSaved(saved)
+                        LiquidGlassSurface(radius = 24.dp, modifier = Modifier.fillMaxWidth(), enabled = glass) {
+                            Button(
+                                onClick = {
+                                    focusManager.clearFocus()
+                                    val parsed = parseToken(tokenText)
+                                    if (!hasAuthCookie(parsed.cookie)) {
+                                        resultIsError = true
+                                        result = invalidToken
+                                    } else {
+                                        val credentials =
+                                            parsed.resolveCredentials(
+                                                existingCookie = saved.cookie,
+                                                existingVisitorData = saved.visitorData,
+                                                existingDataSyncId = saved.dataSyncId,
+                                                existingAuthUser = saved.authUser,
+                                                existingAccountInfo = saved.accountInfo,
+                                            )
+                                        isSaving = true
+                                        result = null
+                                        resultIsError = false
+                                        scope.launch {
+                                            try {
+                                                val validated =
+                                                    withTimeoutOrNull(10_000L) {
+                                                        authManager.validateAndSaveCredentials(
+                                                            cookie = credentials.cookie,
+                                                            visitorData = credentials.visitorData,
+                                                            dataSyncId = credentials.dataSyncId,
+                                                            authUser = credentials.authUser,
+                                                        )
+                                                    } == true
+                                                if (validated) {
+                                                    saved = authManager.tokenLoginCredentials()
+                                                    tokenText = saved.toTokenText()
+                                                    onCredentialsSaved(saved)
+                                                }
+                                                resultIsError = !validated
+                                                result = if (validated) savedMessage else failedMessage
+                                            } catch (cancelled: CancellationException) {
+                                                throw cancelled
+                                            } catch (_: Exception) {
+                                                resultIsError = true
+                                                result = failedMessage
+                                            } finally {
+                                                isSaving = false
                                             }
-                                            resultIsError = !validated
-                                            result = if (validated) savedMessage else failedMessage
-                                        } catch (cancelled: CancellationException) {
-                                            throw cancelled
-                                        } catch (_: Exception) {
-                                            resultIsError = true
-                                            result = failedMessage
-                                        } finally {
-                                            isSaving = false
                                         }
                                     }
-                                }
-                            },
-                            enabled = !isSaving,
-                            modifier = Modifier.fillMaxWidth().heightIn(min = 60.dp).tvFocusHighlight(),
-                            shapes =
-                                ButtonDefaults.shapes(
-                                    shape = RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp, bottomStart = 24.dp, bottomEnd = 24.dp),
-                                ),
-                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
-                        ) {
-                            Row(
-                                Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                                verticalAlignment = Alignment.CenterVertically,
+                                },
+                                enabled = !isSaving,
+                                modifier = Modifier.fillMaxWidth().heightIn(min = 60.dp).tvFocusHighlight(),
+                                colors =
+                                    if (glass) {
+                                        ButtonDefaults.buttonColors(
+                                            containerColor = glassCardColor(MaterialTheme.colorScheme.surfaceContainer),
+                                            contentColor = MaterialTheme.colorScheme.onSurface,
+                                        )
+                                    } else {
+                                        ButtonDefaults.buttonColors()
+                                    },
+                                border = if (glass) glassCardBorder() else null,
+                                shapes =
+                                    ButtonDefaults.shapes(
+                                        shape = RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp, bottomStart = 24.dp, bottomEnd = 24.dp),
+                                    ),
+                                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
                             ) {
-                                if (isSaving) LoadingIndicator(Modifier.size(24.dp))
-                                Text(
-                                    stringResource(if (isSaving) Res.string.token_login_saving else Res.string.save_changes),
-                                    style = MaterialTheme.typography.titleMedium,
-                                )
+                                Row(
+                                    Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    if (isSaving) LoadingIndicator(Modifier.size(24.dp))
+                                    Text(
+                                        stringResource(if (isSaving) Res.string.token_login_saving else Res.string.save_changes),
+                                        style = MaterialTheme.typography.titleMedium,
+                                    )
+                                }
                             }
                         }
                     }
