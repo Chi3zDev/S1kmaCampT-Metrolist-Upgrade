@@ -1852,14 +1852,8 @@ fun MetrolistApp(
                                                 }
                                             }
                                         },
-                                        modifier =
-                                            if (useQweThemeGlass) {
-                                                Modifier
-                                            } else {
-                                                Modifier
-                                                    .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection)
-                                                    .nestedScroll(glassScrollConnection)
-                                            },
+                                        // The page's nested-scroll connections live inside its stable ComposeView.
+                                        modifier = Modifier,
                                     ) { scaffoldPadding ->
                                         Box(
                                             Modifier
@@ -2098,20 +2092,18 @@ fun MetrolistApp(
                                                     }
                                                 }
                                             }
-                                            if (useQweThemeGlass) {
-                                                QweBackdropSource(
-                                                    onViewChanged = { qwePageSource = it },
-                                                    modifier = Modifier.fillMaxSize(),
-                                                    contentModifier =
-                                                        Modifier
-                                                            .fillMaxSize()
-                                                            .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection)
-                                                            .nestedScroll(glassScrollConnection),
-                                                    content = pageContent,
-                                                )
-                                            } else {
-                                                pageContent()
-                                            }
+                                            // Keep navigation's composition alive when glass is toggled. Swapping
+                                            // between a ComposeView and direct content disposes the route tree.
+                                            QweBackdropSource(
+                                                onViewChanged = { qwePageSource = it },
+                                                modifier = Modifier.fillMaxSize(),
+                                                contentModifier =
+                                                    Modifier
+                                                        .fillMaxSize()
+                                                        .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection)
+                                                        .nestedScroll(glassScrollConnection),
+                                                content = pageContent,
+                                            )
 
                                             installedReleaseNotes?.let { release ->
                                                 ReleaseNotesSheet(
