@@ -1371,6 +1371,7 @@ private fun TrackItem(
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     val isHovered by interactionSource.collectIsHoveredAsState()
+    val glass = Settings.shared.liquidGlassTheme && LocalThemeGlassBackdrop.current != null
     val highlightProgress =
         animateFloatAsState(
             targetValue = if (isActive) 1f else 0f,
@@ -1378,19 +1379,23 @@ private fun TrackItem(
             label = "queueCurrentShape",
         ).value.coerceIn(0f, 1f)
     val shape =
-        RoundedCornerShape(
-            object : CornerSize {
-                override fun toPx(
-                    shapeSize: Size,
-                    density: Density,
-                ): Float =
-                    lerp(
-                        queueItemShape.topStart.toPx(shapeSize, density),
-                        CircleShape.topStart.toPx(shapeSize, density),
-                        highlightProgress,
-                    )
-            },
-        )
+        if (glass) {
+            RoundedCornerShape(12.dp)
+        } else {
+            RoundedCornerShape(
+                object : CornerSize {
+                    override fun toPx(
+                        shapeSize: Size,
+                        density: Density,
+                    ): Float =
+                        lerp(
+                            queueItemShape.topStart.toPx(shapeSize, density),
+                            CircleShape.topStart.toPx(shapeSize, density),
+                            highlightProgress,
+                        )
+                },
+            )
+        }
     val artworkShape = animatedCurrentSongArtworkShape(isActive, RoundedCornerShape(6.dp))
     val motionScale = rememberCoroutineScope().coroutineContext[MotionDurationScale]?.scaleFactor ?: 1f
     val motionEnabled = isActive && motionScale > 0f && !rememberReducedMotion()
@@ -1414,12 +1419,11 @@ private fun TrackItem(
             track.title,
             track.artist,
         )
-    val glass = Settings.shared.liquidGlassTheme && LocalThemeGlassBackdrop.current != null && !isActive
     val colors =
         animateCurrentSongColors(
-            isCurrent = isActive,
+            isCurrent = isActive && !glass,
             container =
-                if (glass && (isSelected || isMoving)) {
+                if (glass && (isActive || isSelected || isMoving)) {
                     MaterialTheme.colorScheme.primary.copy(alpha = 0.32f)
                 } else if (glass) {
                     glassCardColor(MaterialTheme.colorScheme.surfaceContainer)
