@@ -871,7 +871,7 @@ fun MetrolistApp(
         val shouldShowTopBar =
             navigationState.topLevelRoute in topLevelScreens && currentRoute in topLevelScreens
 
-        val useGlassTopBar = useGlass && Settings.shared.glassTopBar && !hasDesktopCaption
+        val useGlassTopBar = useGlass && (Settings.shared.liquidGlassTheme || Settings.shared.glassTopBar) && !hasDesktopCaption
         val useFloatingTopBar = (Settings.shared.floatingTopBar || useGlassTopBar) && !hasDesktopCaption
         // Resolve status-bar clearance before Scaffold consumes insets for the content subtree.
         val screenTopInset = WindowInsets.safeDrawing.asPaddingValues().calculateTopPadding()

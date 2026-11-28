@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.captionBar
 import androidx.compose.foundation.layout.exclude
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -43,6 +44,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.unit.dp
 import com.metrolist.shared.settings.Settings
+import com.metrolist.shared.ui.components.LiquidGlassIconButton
+import com.metrolist.shared.ui.components.LiquidGlassSurface
+import com.metrolist.shared.ui.components.LocalThemeGlassBackdrop
 import com.metrolist.shared.ui.components.glassEdgeBrush
 import com.metrolist.shared.ui.navigation.LocalGlassNavigationState
 import dev.chrisbanes.haze.HazeInput
@@ -116,6 +120,10 @@ fun TopBarIconButton(
     glasmioBackdrop: LayerBackdrop? = null,
     content: @Composable () -> Unit,
 ) {
+    if (floating && Settings.shared.liquidGlassTheme && LocalThemeGlassBackdrop.current != null) {
+        LiquidGlassIconButton(onClick = onClick, modifier = modifier, content = content)
+        return
+    }
     val backdrop = LocalGlassNavigationState.current
     val radius =
         (
@@ -257,7 +265,20 @@ fun FloatingTopAppBar(
                 }
             }
         }
-        if (glass && glasmioBackdrop != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        if (Settings.shared.liquidGlassTheme && LocalThemeGlassBackdrop.current != null) {
+            LiquidGlassSurface(
+                radius = FloatingBarElementSize / 2,
+                modifier = Modifier.weight(1f).height(FloatingBarElementSize),
+            ) {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    shape = CircleShape,
+                    color = tint,
+                    border = border,
+                    contentColor = MaterialTheme.colorScheme.onSurface,
+                ) { titleContent() }
+            }
+        } else if (glass && glasmioBackdrop != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             val scheme = MaterialTheme.colorScheme
             val typography = MaterialTheme.typography
             val material =
