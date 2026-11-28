@@ -200,6 +200,8 @@ import com.metrolist.android.ui.components.shouldUseDesktopCaption
 import com.metrolist.android.ui.components.shouldUseDesktopMiniPlayer
 import com.metrolist.android.ui.glass.QweBackdropSource
 import com.metrolist.android.ui.glass.QweThemeGlassBackdrop
+import com.metrolist.android.ui.glass.cacheSheetContentOffscreen
+import com.metrolist.android.ui.glass.hideBackdropHost
 import com.metrolist.android.ui.glass.rememberQweGlassAvailable
 import com.metrolist.android.ui.player.AndroidPlayerPlatform
 import com.metrolist.android.ui.player.MusicVideoSurface
@@ -1312,6 +1314,9 @@ fun MetrolistApp(
                     val contentObscured by remember(playerBottomSheetState) {
                         derivedStateOf { playerBackgroundOpaque && playerBottomSheetState.isSettledExpanded }
                     }
+                    // A live glass surface samples this page as the player moves away. Keep its
+                    // render node populated instead of revealing an empty/black capture for a frame.
+                    val hasLiveGlassSource = useQweThemeGlass || glasmioBackdrop != null || glassBackdrop != null
                     val libraryNeeded =
                         currentRoute == Screen.Library || (currentRoute is Screen.Playlist && isHistoryPlaylistId(currentRoute.id))
                     val libraryActive = libraryNeeded && !contentObscured && !isInPipMode
@@ -1642,13 +1647,19 @@ fun MetrolistApp(
                                         .graphicsLayer {
                                             // Cache the static content as a texture during sheet motion to avoid redrawing it each frame.
                                             compositingStrategy =
-                                                if (playerBottomSheetState.progress > 0f && !playerBottomSheetState.isSettledExpanded) {
+                                                if (
+                                                    cacheSheetContentOffscreen(
+                                                        playerBottomSheetState.progress,
+                                                        playerBottomSheetState.isSettledExpanded,
+                                                        hasLiveGlassSource,
+                                                    )
+                                                ) {
                                                     CompositingStrategy.Offscreen
                                                 } else {
                                                     CompositingStrategy.Auto
                                                 }
                                             alpha =
-                                                if (isInPipMode || contentObscured) {
+                                                if (hideBackdropHost(isInPipMode, contentObscured, hasLiveGlassSource)) {
                                                     0f
                                                 } else {
                                                     1f
@@ -1860,7 +1871,7 @@ fun MetrolistApp(
                                                 .fillMaxSize()
                                                 .then(if (glassBackdrop != null) Modifier.hazeSource(glassBackdrop) else Modifier)
                                                 .then(
-                                                    if (glasmioBackdrop != null && !isPlayerExpandedOrExpanding) {
+                                                    if (glasmioBackdrop != null) {
                                                         Modifier.layerBackdrop(glasmioBackdrop)
                                                     } else {
                                                         Modifier
