@@ -148,6 +148,7 @@ fun LiquidGlassTonalButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    fillWidth: Boolean = false,
     content: @Composable RowScope.() -> Unit,
 ) {
     val glass = liquidGlassBackdropReady()
@@ -155,6 +156,7 @@ fun LiquidGlassTonalButton(
         FilledTonalButton(
             onClick = onClick,
             enabled = enabled,
+            modifier = if (fillWidth) Modifier.fillMaxWidth() else Modifier,
             shapes = ButtonDefaults.shapes(),
             colors = liquidGlassTonalColors(),
             border = if (glass) glassCardBorder() else null,
