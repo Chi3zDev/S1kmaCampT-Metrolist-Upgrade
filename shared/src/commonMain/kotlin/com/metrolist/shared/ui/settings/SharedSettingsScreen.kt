@@ -106,11 +106,13 @@ import com.metrolist.shared.generated.resources.*
 import com.metrolist.shared.settings.Settings
 import com.metrolist.shared.ui.LocalIsTv
 import com.metrolist.shared.ui.components.ExpressiveSwitch
-import com.metrolist.shared.ui.components.LocalAppBackgroundVisible
+import com.metrolist.shared.ui.components.LiquidGlassIconButton
+import com.metrolist.shared.ui.components.LiquidGlassSurface
 import com.metrolist.shared.ui.components.LocalThemeGlassBackdrop
 import com.metrolist.shared.ui.components.SwipeBackLayout
 import com.metrolist.shared.ui.components.appPageBackground
 import com.metrolist.shared.ui.components.focusOutline
+import com.metrolist.shared.ui.components.glassCardBorder
 import com.metrolist.shared.ui.components.glassCardColor
 import com.metrolist.shared.ui.components.singleLineMarquee
 import com.metrolist.shared.ui.equalizer.MetroEqScreen
@@ -372,61 +374,66 @@ private fun CompactSettingsHome(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         containerColor = appPageBackground(MaterialTheme.colorScheme.surface),
         topBar = {
-            LargeFlexibleTopAppBar(
-                title = {
-                    when {
-                        host.title != null -> {
-                            Text(host.title, fontWeight = MaterialTheme.typography.titleLargeEmphasized.fontWeight)
-                        }
+            LiquidGlassSurface(radius = 0.dp, modifier = Modifier.fillMaxWidth()) {
+                LargeFlexibleTopAppBar(
+                    title = {
+                        when {
+                            host.title != null -> {
+                                Text(host.title, fontWeight = MaterialTheme.typography.titleLargeEmphasized.fontWeight)
+                            }
 
-                        host.platform != SettingsPlatform.DESKTOP -> {
-                            Text(
-                                stringResource(Res.string.settings),
-                                fontWeight = MaterialTheme.typography.titleLargeEmphasized.fontWeight,
-                            )
-                        }
+                            host.platform != SettingsPlatform.DESKTOP -> {
+                                Text(
+                                    stringResource(Res.string.settings),
+                                    fontWeight = MaterialTheme.typography.titleLargeEmphasized.fontWeight,
+                                )
+                            }
 
-                        else -> {}
-                    }
-                },
-                navigationIcon = {
-                    if (host.platform != SettingsPlatform.DESKTOP) {
-                        IconButton(
-                            onClick = host.onClose,
-                            modifier =
-                                Modifier.focusProperties {
-                                    if (isTv) down = contentFocusRequester
+                            else -> {}
+                        }
+                    },
+                    navigationIcon = {
+                        if (host.platform != SettingsPlatform.DESKTOP) {
+                            LiquidGlassIconButton(
+                                onClick = host.onClose,
+                                modifier =
+                                    Modifier.focusProperties {
+                                        if (isTv) down = contentFocusRequester
+                                    },
+                            ) {
+                                Icon(MetrolistIcons.AutoMirrored.Filled.ArrowBack, stringResource(Res.string.back))
+                            }
+                        }
+                    },
+                    actions = {
+                        if (host.platform == SettingsPlatform.DESKTOP) {
+                            LiquidGlassIconButton(onClick = host.onClose) {
+                                Icon(MetrolistIcons.Default.Close, stringResource(Res.string.close))
+                            }
+                        }
+                    },
+                    colors =
+                        TopAppBarDefaults.topAppBarColors(
+                            containerColor =
+                                if (Settings.shared.liquidGlassTheme) {
+                                    glassCardColor(
+                                        MaterialTheme.colorScheme.surface,
+                                    )
+                                } else {
+                                    MaterialTheme.colorScheme.surface
                                 },
-                            shapes = IconButtonDefaults.shapes(),
-                        ) {
-                            Icon(MetrolistIcons.AutoMirrored.Filled.ArrowBack, stringResource(Res.string.back))
-                        }
-                    }
-                },
-                actions = {
-                    if (host.platform == SettingsPlatform.DESKTOP) {
-                        IconButton(onClick = host.onClose, shapes = IconButtonDefaults.shapes()) {
-                            Icon(MetrolistIcons.Default.Close, stringResource(Res.string.close))
-                        }
-                    }
-                },
-                colors =
-                    TopAppBarDefaults.topAppBarColors(
-                        containerColor =
-                            if (Settings.shared.liquidGlassTheme) {
-                                appPageBackground(MaterialTheme.colorScheme.surface)
-                            } else {
-                                MaterialTheme.colorScheme.surface
-                            },
-                        scrolledContainerColor =
-                            if (Settings.shared.liquidGlassTheme && LocalAppBackgroundVisible.current) {
-                                MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.82f)
-                            } else {
-                                MaterialTheme.colorScheme.surfaceContainer
-                            },
-                    ),
-                scrollBehavior = scrollBehavior,
-            )
+                            scrolledContainerColor =
+                                if (Settings.shared.liquidGlassTheme) {
+                                    glassCardColor(
+                                        MaterialTheme.colorScheme.surfaceContainer,
+                                    )
+                                } else {
+                                    MaterialTheme.colorScheme.surfaceContainer
+                                },
+                        ),
+                    scrollBehavior = scrollBehavior,
+                )
+            }
         },
     ) { padding ->
         Box(if (isTv) Modifier.focusRequester(contentFocusRequester).focusGroup() else Modifier) {
@@ -483,37 +490,42 @@ private fun CompactSettingsDetail(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         containerColor = appPageBackground(MaterialTheme.colorScheme.surface),
         topBar = {
-            LargeFlexibleTopAppBar(
-                title = { Text(page.title, fontWeight = MaterialTheme.typography.titleLargeEmphasized.fontWeight) },
-                navigationIcon = {
-                    IconButton(
-                        onClick = onBack,
-                        modifier =
-                            Modifier.focusProperties {
-                                if (isTv) down = contentFocusRequester
-                            },
-                        shapes = IconButtonDefaults.shapes(),
-                    ) {
-                        Icon(MetrolistIcons.AutoMirrored.Filled.ArrowBack, stringResource(Res.string.back))
-                    }
-                },
-                colors =
-                    TopAppBarDefaults.topAppBarColors(
-                        containerColor =
-                            if (Settings.shared.liquidGlassTheme) {
-                                appPageBackground(MaterialTheme.colorScheme.surface)
-                            } else {
-                                MaterialTheme.colorScheme.surface
-                            },
-                        scrolledContainerColor =
-                            if (Settings.shared.liquidGlassTheme && LocalAppBackgroundVisible.current) {
-                                MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.82f)
-                            } else {
-                                MaterialTheme.colorScheme.surfaceContainer
-                            },
-                    ),
-                scrollBehavior = scrollBehavior,
-            )
+            LiquidGlassSurface(radius = 0.dp, modifier = Modifier.fillMaxWidth()) {
+                LargeFlexibleTopAppBar(
+                    title = { Text(page.title, fontWeight = MaterialTheme.typography.titleLargeEmphasized.fontWeight) },
+                    navigationIcon = {
+                        LiquidGlassIconButton(
+                            onClick = onBack,
+                            modifier =
+                                Modifier.focusProperties {
+                                    if (isTv) down = contentFocusRequester
+                                },
+                        ) {
+                            Icon(MetrolistIcons.AutoMirrored.Filled.ArrowBack, stringResource(Res.string.back))
+                        }
+                    },
+                    colors =
+                        TopAppBarDefaults.topAppBarColors(
+                            containerColor =
+                                if (Settings.shared.liquidGlassTheme) {
+                                    glassCardColor(
+                                        MaterialTheme.colorScheme.surface,
+                                    )
+                                } else {
+                                    MaterialTheme.colorScheme.surface
+                                },
+                            scrolledContainerColor =
+                                if (Settings.shared.liquidGlassTheme) {
+                                    glassCardColor(
+                                        MaterialTheme.colorScheme.surfaceContainer,
+                                    )
+                                } else {
+                                    MaterialTheme.colorScheme.surfaceContainer
+                                },
+                        ),
+                    scrollBehavior = scrollBehavior,
+                )
+            }
         },
     ) { padding ->
         Box(if (isTv) Modifier.focusRequester(contentFocusRequester).focusGroup() else Modifier) {
@@ -1117,13 +1129,16 @@ private fun SettingsItemRow(
         return
     }
     if (item.control == SettingsControl.CUSTOM) {
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = connectedShape(first, last, outer = 20.dp, inner = 5.dp),
-            color = MaterialTheme.colorScheme.settingsRowContainerColor(),
-        ) {
-            Box(Modifier.alpha(if (item.enabled) 1f else 0.38f)) {
-                item.customContent?.invoke(onSettingValueChanged)
+        LiquidGlassSurface(radius = 20.dp, modifier = Modifier.fillMaxWidth()) {
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = connectedShape(first, last, outer = 20.dp, inner = 5.dp),
+                color = glassCardColor(MaterialTheme.colorScheme.settingsRowContainerColor()),
+                border = glassCardBorder(),
+            ) {
+                Box(Modifier.alpha(if (item.enabled) 1f else 0.38f)) {
+                    item.customContent?.invoke(onSettingValueChanged)
+                }
             }
         }
         return
