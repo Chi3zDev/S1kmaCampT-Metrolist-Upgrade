@@ -13,15 +13,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.toggleable
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -66,6 +63,9 @@ import com.metrolist.shared.generated.resources.restore_confirm_title
 import com.metrolist.shared.generated.resources.restore_failed
 import com.metrolist.shared.settings.Settings
 import com.metrolist.shared.ui.components.AlertDialog
+import com.metrolist.shared.ui.components.LiquidGlassButton
+import com.metrolist.shared.ui.components.LiquidGlassCompactButton
+import com.metrolist.shared.ui.components.LiquidGlassTextButton
 import com.metrolist.shared.ui.components.PopupVisibility
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
@@ -157,11 +157,10 @@ fun BackupRestorePage(
                 }
             }
         }
-        Button(
+        LiquidGlassButton(
             onClick = { showBackupWarning = true },
             modifier = Modifier.fillMaxWidth(),
             enabled = status != BackupRestoreStatus.BUSY,
-            shapes = ButtonDefaults.shapes(),
         ) {
             Text(stringResource(Res.string.create_backup))
         }
@@ -207,22 +206,20 @@ fun BackupRestorePage(
                 style = MaterialTheme.typography.bodyMedium,
             )
         }
-        Button(
+        LiquidGlassButton(
             onClick = { showRestoreWarning = true },
             modifier = Modifier.fillMaxWidth(),
             enabled = status != BackupRestoreStatus.BUSY,
-            shapes = ButtonDefaults.shapes(),
         ) {
             Text(stringResource(Res.string.restore_backup))
         }
         onImportForeign?.let { importForeign ->
             Text(stringResource(Res.string.foreign_import_desc), style = MaterialTheme.typography.bodyMedium)
             foreignImportStatus?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
-            Button(
+            LiquidGlassButton(
                 onClick = importForeign,
                 modifier = Modifier.fillMaxWidth(),
                 enabled = status != BackupRestoreStatus.BUSY,
-                shapes = ButtonDefaults.shapes(),
             ) {
                 Text(stringResource(Res.string.foreign_import_title))
             }
@@ -235,16 +232,15 @@ fun BackupRestorePage(
             title = { Text(stringResource(Res.string.restore_confirm_title)) },
             text = { Text(stringResource(Res.string.restore_confirm_message)) },
             confirmButton = {
-                TextButton(
+                LiquidGlassTextButton(
                     onClick = {
                         showRestoreWarning = false
                         onImport()
                     },
-                    shapes = ButtonDefaults.shapes(),
                 ) { Text(stringResource(Res.string.restore_backup)) }
             },
             dismissButton = {
-                TextButton(onClick = { showRestoreWarning = false }, shapes = ButtonDefaults.shapes()) {
+                LiquidGlassTextButton(onClick = { showRestoreWarning = false }) {
                     Text(stringResource(Res.string.cancel))
                 }
             },
@@ -262,13 +258,12 @@ fun BackupRestorePage(
                 )
             },
             confirmButton = {
-                Button(
+                LiquidGlassCompactButton(
                     enabled = warningSeconds == 0,
                     onClick = {
                         showBackupWarning = false
                         onExport()
                     },
-                    shapes = ButtonDefaults.shapes(),
                 ) {
                     Text(
                         if (warningSeconds == 0) {
@@ -280,7 +275,7 @@ fun BackupRestorePage(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showBackupWarning = false }, shapes = ButtonDefaults.shapes()) {
+                LiquidGlassTextButton(onClick = { showBackupWarning = false }) {
                     Text(stringResource(Res.string.cancel))
                 }
             },
