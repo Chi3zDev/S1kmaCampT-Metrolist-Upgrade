@@ -12,7 +12,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.Window
 import androidx.annotation.RequiresApi
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.test.platform.app.InstrumentationRegistry
 import com.metrolist.android.ui.glass.QweGlassStyle
 import com.metrolist.android.ui.glass.QweGlassView
@@ -27,6 +29,28 @@ import java.util.concurrent.TimeUnit
 import android.graphics.Color as AndroidColor
 
 class LiquidGlassBackdropTest {
+    @Test
+    fun separatePagePreservesDensityUpdatesAndScrollCallbacks() {
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        val intent =
+            Intent(instrumentation.targetContext, LiquidGlassPageInteractionTestActivity::class.java)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        val activity = instrumentation.startActivitySync(intent) as LiquidGlassPageInteractionTestActivity
+        try {
+            instrumentation.waitForIdleSync()
+            assertEquals(2f, activity.observedDensity, 0.001f)
+            instrumentation.runOnMainSync { activity.requestedDensity = 3f }
+            instrumentation.waitForIdleSync()
+            assertEquals("density changes must reach the page", 3f, activity.observedDensity, 0.001f)
+            instrumentation.runOnMainSync {
+                activity.dispatcher.dispatchPostScroll(Offset(0f, -24f), Offset.Zero, NestedScrollSource.UserInput)
+            }
+            assertEquals("scroll must reach the page navigation connection", -24f, activity.observedScroll, 0.001f)
+        } finally {
+            instrumentation.runOnMainSync { activity.finish() }
+        }
+    }
+
     /** Demonstrates that a moving Compose sibling is actually sampled; it does not certify visual quality. */
     @Test
     fun dynamicGlassUpdatesWhenSeparateComposeBackdropChanges() {
