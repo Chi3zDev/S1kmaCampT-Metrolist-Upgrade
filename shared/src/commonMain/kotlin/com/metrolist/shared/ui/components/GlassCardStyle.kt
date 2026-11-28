@@ -61,6 +61,7 @@ internal fun glassListMaterialEnabled(
 @Composable
 fun glassCardColor(fallback: Color): Color {
     val settings = Settings.shared
+    if (settings.liquidGlassTheme && !liquidGlassBackdropReady()) return fallback
     if (!glassListMaterialEnabled(settings.liquidGlassTheme, settings.glassNavigation, settings.glassCards)) return fallback
     val multiplier =
         when (settings.glassStyle) {
@@ -74,6 +75,7 @@ fun glassCardColor(fallback: Color): Color {
 @Composable
 fun glassCardBorder(): BorderStroke? {
     val settings = Settings.shared
+    if (settings.liquidGlassTheme && !liquidGlassBackdropReady()) return null
     if (!glassListMaterialEnabled(settings.liquidGlassTheme, settings.glassNavigation, settings.glassCards)) return null
     return BorderStroke(1.dp, glassEdgeBrush(settings.glassStyle == "CLEAR"))
 }

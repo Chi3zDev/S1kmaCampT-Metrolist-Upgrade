@@ -15,7 +15,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.metrolist.shared.settings.Settings
 
 /** Filled action with a real platform backdrop when the Liquid Glass theme is enabled. */
 @Composable
@@ -25,7 +24,7 @@ fun LiquidGlassButton(
     enabled: Boolean = true,
     content: @Composable RowScope.() -> Unit,
 ) {
-    val glass = Settings.shared.liquidGlassTheme
+    val glass = liquidGlassBackdropReady()
     LiquidGlassSurface(radius = 32.dp, modifier = modifier) {
         Button(
             onClick = onClick,
@@ -49,7 +48,7 @@ fun LiquidGlassButton(
 /** Tonal button colors keep text legible while revealing the platform glass behind the action. */
 @Composable
 fun liquidGlassTonalColors(selected: Boolean = false): ButtonColors =
-    if (Settings.shared.liquidGlassTheme) {
+    if (liquidGlassBackdropReady()) {
         ButtonDefaults.filledTonalButtonColors(
             containerColor =
                 if (selected) {
@@ -74,7 +73,7 @@ fun LiquidGlassIconButton(
     enabled: Boolean = true,
     content: @Composable () -> Unit,
 ) {
-    val glass = Settings.shared.liquidGlassTheme
+    val glass = liquidGlassBackdropReady()
     val border = if (glass) glassCardBorder() else null
     LiquidGlassSurface(radius = 24.dp, modifier = modifier) {
         IconButton(
@@ -105,7 +104,7 @@ fun LiquidGlassTextButton(
     enabled: Boolean = true,
     content: @Composable RowScope.() -> Unit,
 ) {
-    val glass = Settings.shared.liquidGlassTheme && LocalThemeGlassBackdrop.current != null
+    val glass = liquidGlassBackdropReady()
     LiquidGlassSurface(radius = 24.dp, modifier = modifier, enabled = glass) {
         TextButton(
             onClick = onClick,

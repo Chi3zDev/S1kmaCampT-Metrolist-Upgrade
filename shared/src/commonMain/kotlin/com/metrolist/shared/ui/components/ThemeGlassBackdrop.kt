@@ -19,6 +19,15 @@ interface ThemeGlassBackdrop {
 
 val LocalThemeGlassBackdrop = staticCompositionLocalOf<ThemeGlassBackdrop?> { null }
 
+internal fun glassBackdropReady(
+    themeEnabled: Boolean,
+    backdropPresent: Boolean,
+): Boolean = themeEnabled && backdropPresent
+
+/** A requested theme is not proof that the platform renderer was successfully initialized. */
+@Composable
+fun liquidGlassBackdropReady(): Boolean = glassBackdropReady(Settings.shared.liquidGlassTheme, LocalThemeGlassBackdrop.current != null)
+
 /** A bounded visual backdrop behind interactive Compose content; the platform can safely opt out. */
 @Composable
 fun LiquidGlassSurface(

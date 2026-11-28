@@ -21,6 +21,14 @@ class GlassThemeTest {
     }
 
     @Test
+    fun backdropMustExistBeforeUsingTransparentGlass() {
+        assertTrue(glassBackdropReady(themeEnabled = true, backdropPresent = true))
+        assertTrue(!glassBackdropReady(themeEnabled = true, backdropPresent = false))
+        assertTrue(!glassBackdropReady(themeEnabled = false, backdropPresent = true))
+        assertTrue(!glassBackdropReady(themeEnabled = false, backdropPresent = false))
+    }
+
+    @Test
     fun lightThemeUsesWhiteHighlightNotDarkInk() {
         val (highlight, edge) = glassEdgeColors(Color.White, Color.Black, Color.DarkGray, clear = true)
         assertEquals(Color.White.copy(alpha = 0.72f), highlight)

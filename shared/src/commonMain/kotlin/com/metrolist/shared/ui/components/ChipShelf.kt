@@ -156,8 +156,8 @@ fun LiquidGlassChip(
     enabled: Boolean = true,
 ) {
     val glassBorder = glassCardBorder()
-    val themeGlass = Settings.shared.liquidGlassTheme
     val backdrop = LocalThemeGlassBackdrop.current
+    val themeGlass = glassBackdropReady(Settings.shared.liquidGlassTheme, backdrop != null)
     var visible by remember { mutableStateOf(false) }
     Box(
         Modifier.onGloballyPositioned { coordinates ->
