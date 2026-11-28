@@ -47,6 +47,9 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.unit.dp
 import com.metrolist.shared.generated.resources.*
 import com.metrolist.shared.ui.components.BasicAlertDialog
+import com.metrolist.shared.ui.components.LiquidGlassSurface
+import com.metrolist.shared.ui.components.glassCardBorder
+import com.metrolist.shared.ui.components.glassCardColor
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import com.metrolist.shared.ui.playback.retainPlaybackKeyFocus
 import kotlinx.coroutines.cancel
@@ -59,12 +62,14 @@ private fun SettingsDialogSurface(
     content: @Composable () -> Unit,
 ) {
     BasicAlertDialog(onDismissRequest = onDismiss) {
-        Surface(
-            modifier = Modifier.widthIn(min = 280.dp, max = 560.dp),
-            shape = MaterialTheme.shapes.extraLarge,
-            color = MaterialTheme.colorScheme.surfaceContainerHigh,
-        ) {
-            content()
+        LiquidGlassSurface(radius = 28.dp, modifier = Modifier.widthIn(min = 280.dp, max = 560.dp)) {
+            Surface(
+                shape = MaterialTheme.shapes.extraLarge,
+                color = glassCardColor(MaterialTheme.colorScheme.surfaceContainerHigh),
+                border = glassCardBorder(),
+            ) {
+                content()
+            }
         }
     }
 }
