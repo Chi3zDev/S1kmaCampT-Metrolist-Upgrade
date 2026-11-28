@@ -9,8 +9,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.rememberScrollState
@@ -160,14 +162,22 @@ fun LiquidGlassChip(
     val themeGlass = glassBackdropReady(Settings.shared.liquidGlassTheme, backdrop != null)
     var visible by remember { mutableStateOf(false) }
     Box(
-        Modifier.onGloballyPositioned { coordinates ->
-            val bounds = coordinates.boundsInWindow()
-            visible = bounds.width > 0f && bounds.height > 0f
-        },
+        Modifier
+            .onGloballyPositioned { coordinates ->
+                val bounds = coordinates.boundsInWindow()
+                visible = bounds.width > 0f && bounds.height > 0f
+            },
     ) {
         // Shelf chips may be eagerly composed; avoid renderers for clipped, off-screen chips.
         if (themeGlass && visible) {
-            backdrop?.Background(radius = ButtonDefaults.ExtraSmallContainerHeight / 2, modifier = Modifier.matchParentSize())
+            backdrop?.Background(
+                radius = ButtonDefaults.ExtraSmallContainerHeight / 2,
+                modifier =
+                    Modifier
+                        .matchParentSize()
+                        .wrapContentHeight(Alignment.CenterVertically)
+                        .height(ButtonDefaults.ExtraSmallContainerHeight),
+            )
         }
         ToggleButton(
             checked = selected,

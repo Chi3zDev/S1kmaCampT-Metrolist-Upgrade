@@ -26,6 +26,8 @@ internal class QweGlassView(
         enableChromaticAberration = false
         enableChromaticDispersion = false
         enableSensorHighlight = false
+        // Compose already supplies a thin edge; avoid an overly bright second QWE rim.
+        edgeHighlightOpacity = 35f
         enableAdaptiveTint = false
     }
 
