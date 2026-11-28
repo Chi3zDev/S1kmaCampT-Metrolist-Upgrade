@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -21,7 +20,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -64,6 +62,7 @@ import com.metrolist.shared.generated.resources.disable
 import com.metrolist.shared.generated.resources.settings_crash_reports_summary
 import com.metrolist.shared.settings.Settings
 import com.metrolist.shared.ui.components.AlertDialog
+import com.metrolist.shared.ui.components.LiquidGlassTextButton
 import com.metrolist.shared.ui.components.PopupVisibility
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import com.metrolist.shared.ui.settings.CapabilityStatusKey
@@ -124,11 +123,10 @@ fun DevtoolsSettingsScreen(
         title = stringResource(Res.string.devtools_title),
         onNavigateBack = onNavigateBack,
     ) {
-        TextButton(
+        LiquidGlassTextButton(
             onClick = {
                 crashContext.startActivity(CrashHandler.logsIntent(crashContext))
             },
-            shapes = ButtonDefaults.shapes(),
         ) {
             Text(stringResource(Res.string.crash_logs))
         }
@@ -170,19 +168,17 @@ fun DevtoolsSettingsScreen(
                 title = { Text(stringResource(Res.string.devtools_disable_title)) },
                 text = { Text(stringResource(Res.string.devtools_disable_message)) },
                 confirmButton = {
-                    TextButton(
+                    LiquidGlassTextButton(
                         onClick = {
                             showDisableConfirmation = false
                             Settings.shared.setDevtoolsEnabled(false)
                             onNavigateBack()
                         },
-                        shapes = ButtonDefaults.shapes(),
                     ) { Text(stringResource(Res.string.disable)) }
                 },
                 dismissButton = {
-                    TextButton(
+                    LiquidGlassTextButton(
                         onClick = { showDisableConfirmation = false },
-                        shapes = ButtonDefaults.shapes(),
                     ) { Text(stringResource(Res.string.cancel)) }
                 },
             )
