@@ -61,14 +61,11 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.SearchBarValue
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.ToggleButton
 import androidx.compose.material3.ToggleButtonColors
 import androidx.compose.material3.ToggleButtonDefaults
@@ -182,7 +179,9 @@ import com.metrolist.shared.state.SongLikeState
 import com.metrolist.shared.ui.LocalIsTv
 import com.metrolist.shared.ui.components.AlertDialog
 import com.metrolist.shared.ui.components.HistoryEntryGroupPosition
+import com.metrolist.shared.ui.components.LiquidGlassIconButton
 import com.metrolist.shared.ui.components.LiquidGlassSurface
+import com.metrolist.shared.ui.components.LiquidGlassTextButton
 import com.metrolist.shared.ui.components.glassCardBorder
 import com.metrolist.shared.ui.components.glassCardColor
 import com.metrolist.shared.ui.components.liquidGlassBackdropReady
@@ -284,7 +283,7 @@ fun RecognitionScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showPermissionDialog = false }, shapes = ButtonDefaults.shapes()) {
+                LiquidGlassTextButton(onClick = { showPermissionDialog = false }) {
                     Text(stringResource(Res.string.cancel))
                 }
             },
@@ -315,7 +314,7 @@ fun RecognitionScreen(
         title = stringResource(Res.string.recognition),
         onNavigateBack = onNavigateBack,
         actions = {
-            IconButton(onClick = onNavigateToHistory, shapes = IconButtonDefaults.shapes()) {
+            LiquidGlassIconButton(onClick = onNavigateToHistory) {
                 Icon(
                     imageVector = MetrolistIcons.Outlined.History,
                     contentDescription = stringResource(Res.string.recognition_history),
@@ -514,7 +513,7 @@ fun RecognitionHistoryContent(
                     },
                     trailingIcon = {
                         if (query.isNotEmpty()) {
-                            IconButton(onClick = { onQueryChange("") }, shapes = IconButtonDefaults.shapes()) {
+                            LiquidGlassIconButton(onClick = { onQueryChange("") }) {
                                 Icon(
                                     imageVector = MetrolistIcons.Default.Clear,
                                     contentDescription = stringResource(Res.string.clear_search),
@@ -642,7 +641,7 @@ private fun RecognitionHistoryRow(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            IconButton(onClick = onDelete, shapes = IconButtonDefaults.shapes()) {
+            LiquidGlassIconButton(onClick = onDelete) {
                 Icon(
                     imageVector = MetrolistIcons.Outlined.Delete,
                     contentDescription = stringResource(Res.string.delete),
