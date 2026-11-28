@@ -78,9 +78,14 @@ fun PlaylistPickerOrderControls(modifier: Modifier = Modifier) {
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Box(Modifier.trackPressPosition { menuOffset = it.round() }) {
+            if (Settings.shared.liquidGlassTheme) {
+                LocalThemeGlassBackdrop.current?.Background(radius = 24.dp, modifier = Modifier.matchParentSize())
+            }
             SplitButtonLayout(
                 leadingButton = {
                     SplitButtonDefaults.TonalLeadingButton(
+                        colors = liquidGlassTonalColors(),
+                        border = if (Settings.shared.liquidGlassTheme) glassCardBorder() else null,
                         onClick = {
                             if (!leadingFocusRequester.requestFocus()) focusManager.clearFocus()
                             menuExpanded = true
@@ -102,7 +107,8 @@ fun PlaylistPickerOrderControls(modifier: Modifier = Modifier) {
                 trailingButton = {
                     SplitButtonDefaults.TrailingButton(
                         enabled = sort != PlaylistPickerSort.LIBRARY && sort != PlaylistPickerSort.MANUAL,
-                        colors = ButtonDefaults.filledTonalButtonColors(),
+                        colors = liquidGlassTonalColors(),
+                        border = if (Settings.shared.liquidGlassTheme) glassCardBorder() else null,
                         elevation = ButtonDefaults.filledTonalButtonElevation(),
                         onClick = {
                             if (!trailingFocusRequester.requestFocus()) focusManager.clearFocus()

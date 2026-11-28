@@ -167,9 +167,14 @@ fun HistoryFilterBar(
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 Box(Modifier.trackPressPosition { sortMenuOffset = it.round() }) {
+                    if (Settings.shared.liquidGlassTheme) {
+                        LocalThemeGlassBackdrop.current?.Background(radius = 24.dp, modifier = Modifier.matchParentSize())
+                    }
                     SplitButtonLayout(
                         leadingButton = {
                             SplitButtonDefaults.TonalLeadingButton(
+                                colors = liquidGlassTonalColors(),
+                                border = if (Settings.shared.liquidGlassTheme) glassCardBorder() else null,
                                 onClick = { sortExpanded = true },
                                 modifier =
                                     Modifier
@@ -192,7 +197,8 @@ fun HistoryFilterBar(
                         },
                         trailingButton = {
                             SplitButtonDefaults.TrailingButton(
-                                colors = ButtonDefaults.filledTonalButtonColors(),
+                                colors = liquidGlassTonalColors(),
+                                border = if (Settings.shared.liquidGlassTheme) glassCardBorder() else null,
                                 elevation = ButtonDefaults.filledTonalButtonElevation(),
                                 onClick = {
                                     onSortDirectionChange(

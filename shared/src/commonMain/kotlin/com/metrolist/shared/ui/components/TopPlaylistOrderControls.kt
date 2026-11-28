@@ -44,6 +44,7 @@ import com.metrolist.shared.generated.resources.top_period_past_week
 import com.metrolist.shared.generated.resources.top_period_past_year
 import com.metrolist.shared.model.SortDirection
 import com.metrolist.shared.model.TopPlaylistPeriod
+import com.metrolist.shared.settings.Settings
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import com.metrolist.shared.ui.menu.ExpressiveSelectionMenu
 import com.metrolist.shared.ui.menu.trackPressPosition
@@ -93,9 +94,14 @@ fun TopPlaylistOrderControls(
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Box(Modifier.trackPressPosition { menuOffset = it.round() }) {
+            if (Settings.shared.liquidGlassTheme) {
+                LocalThemeGlassBackdrop.current?.Background(radius = 24.dp, modifier = Modifier.matchParentSize())
+            }
             SplitButtonLayout(
                 leadingButton = {
                     SplitButtonDefaults.TonalLeadingButton(
+                        colors = liquidGlassTonalColors(),
+                        border = if (Settings.shared.liquidGlassTheme) glassCardBorder() else null,
                         onClick = {
                             if (!leadingFocusRequester.requestFocus()) focusManager.clearFocus()
                             menuExpanded = true
@@ -113,7 +119,8 @@ fun TopPlaylistOrderControls(
                 },
                 trailingButton = {
                     SplitButtonDefaults.TrailingButton(
-                        colors = ButtonDefaults.filledTonalButtonColors(),
+                        colors = liquidGlassTonalColors(),
+                        border = if (Settings.shared.liquidGlassTheme) glassCardBorder() else null,
                         elevation = ButtonDefaults.filledTonalButtonElevation(),
                         onClick = {
                             if (!trailingFocusRequester.requestFocus()) focusManager.clearFocus()
