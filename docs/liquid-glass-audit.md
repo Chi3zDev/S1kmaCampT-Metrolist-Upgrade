@@ -4,7 +4,8 @@ This is a work-in-progress checklist, not a visual approval or a claim of comple
 
 ## Renderer and sources
 
-- [ ] **Main-window surfaces:** `QweThemeGlassBackdrop` still uses `QweBackdropSource` containing the wallpaper only. Scrolling page content is not yet captured behind same-window controls. Do not substitute a tint for this requirement.
+- [ ] **Main-window surfaces:** app chrome and the player now request a separate live page source, with a debug probe for a page containing its own glass. Page-local controls still use the wallpaper source to avoid self-capture. The live-source integration and probe have not been built or run; same-window page controls still need a safe moving-content solution. Do not substitute a tint for this requirement.
+- [ ] Validate the separate page ComposeView with navigation/shared transitions, keyboard and focus, scroll, accessibility, lifecycle/recomposition, AndroidView rendering and performance before relying on it.
 - [ ] **Separate-window dialogs/popups:** activity-root sampling and dynamic updates have been implemented; compile and run `LiquidGlassBackdropTest.dialogGlassSamplesAndUpdatesActivityForeground` on a supported ARM device. Check nested glass, secure windows, disposal, performance, and scrolling.
 - [ ] Verify CPU fallback, Android 12/13+, unsupported ABIs, low-RAM/light mode and renderer failure. Ensure opaque, readable fallbacks, no self-capture, and no input interception.
 
