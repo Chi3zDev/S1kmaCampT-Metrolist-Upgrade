@@ -92,6 +92,8 @@ import com.metrolist.shared.ui.components.PopupVisibility
 import com.metrolist.shared.ui.components.SongSelectionControls
 import com.metrolist.shared.ui.components.appTopBarBackground
 import com.metrolist.shared.ui.components.glassCardColor
+import com.metrolist.shared.ui.components.glassScreenViewport
+import com.metrolist.shared.ui.components.liquidGlassBackdropReady
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import com.metrolist.shared.ui.navigation.navigationPopupSource
 import com.metrolist.shared.ui.screens.AlbumContent
@@ -228,6 +230,7 @@ fun AlbumScreen(
         }
     }
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    val glass = liquidGlassBackdropReady()
 
     val miniPlayerInset = LocalMiniPlayerBottomInset.current
     val selectionBar: @Composable () -> Unit = {
@@ -290,7 +293,7 @@ fun AlbumScreen(
                         colors =
                             TopAppBarDefaults.topAppBarColors(
                                 containerColor =
-                                    if (Settings.shared.liquidGlassTheme) {
+                                    if (glass) {
                                         glassCardColor(MaterialTheme.colorScheme.surface)
                                     } else if (isTopBarCollapsed) {
                                         appTopBarBackground(
@@ -300,7 +303,7 @@ fun AlbumScreen(
                                         Color.Transparent
                                     },
                                 scrolledContainerColor =
-                                    if (Settings.shared.liquidGlassTheme) {
+                                    if (glass) {
                                         glassCardColor(MaterialTheme.colorScheme.surface)
                                     } else if (isTopBarCollapsed) {
                                         MaterialTheme.colorScheme.surface
@@ -314,11 +317,14 @@ fun AlbumScreen(
             }
         },
     ) { paddingValues ->
-        Box(modifier = Modifier.fillMaxSize().padding(bottom = paddingValues.calculateBottomPadding())) {
+        val contentTopPadding = if (glass) 0.dp else paddingValues.calculateTopPadding()
+        val contentViewport =
+            if (glass) Modifier.glassScreenViewport(paddingValues.calculateTopPadding()) else Modifier.fillMaxSize()
+        Box(modifier = contentViewport.padding(bottom = paddingValues.calculateBottomPadding())) {
             when {
                 isLoading && albumInfo == null && preview == null -> {
                     CollectionLoadingPlaceholder(
-                        modifier = Modifier.padding(top = paddingValues.calculateTopPadding()),
+                        modifier = Modifier.padding(top = contentTopPadding),
                     )
                 }
 
@@ -423,7 +429,7 @@ fun AlbumScreen(
                             onAlbumArtworkClick = onAlbumArtworkClick,
                             contentPadding =
                                 PaddingValues(
-                                    top = paddingValues.calculateTopPadding() + 16.dp,
+                                    top = contentTopPadding + 16.dp,
                                     bottom = miniPlayerInset,
                                 ),
                             trackContainer = { song, content ->
@@ -444,7 +450,7 @@ fun AlbumScreen(
                     modifier =
                         Modifier
                             .align(Alignment.TopCenter)
-                            .padding(top = paddingValues.calculateTopPadding()),
+                            .padding(top = contentTopPadding),
                 ) {
                     ContainedLoadingIndicator()
                 }
