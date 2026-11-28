@@ -22,13 +22,9 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -71,6 +67,8 @@ import com.metrolist.shared.model.homeSectionLayout
 import com.metrolist.shared.model.toSongItem
 import com.metrolist.shared.ui.components.ContainedLoadingIndicator
 import com.metrolist.shared.ui.components.GenreCard
+import com.metrolist.shared.ui.components.LiquidGlassCompactButton
+import com.metrolist.shared.ui.components.LiquidGlassIconButton
 import com.metrolist.shared.ui.components.LocalThemeGlassBackdrop
 import com.metrolist.shared.ui.components.SectionTitle
 import com.metrolist.shared.ui.components.YTGridItem
@@ -147,7 +145,7 @@ fun BrowseContent(
                 },
                 navigationIcon = {
                     if (onBackClick != null) {
-                        IconButton(onClick = onBackClick, shapes = IconButtonDefaults.shapes()) {
+                        LiquidGlassIconButton(onClick = onBackClick) {
                             Icon(MetrolistIcons.AutoMirrored.Filled.ArrowBack, stringResource(Res.string.back))
                         }
                     }
@@ -171,7 +169,7 @@ fun BrowseContent(
                     verticalArrangement = Arrangement.Center,
                 ) {
                     Text(error, color = MaterialTheme.colorScheme.error)
-                    Button(onClick = onRetry, shapes = ButtonDefaults.shapes()) { Text(stringResource(Res.string.retry)) }
+                    LiquidGlassCompactButton(onClick = onRetry) { Text(stringResource(Res.string.retry)) }
                 }
             }
 
@@ -423,7 +421,7 @@ fun BrowseContent(
                             item(key = "browse_error", span = { GridItemSpan(maxLineSpan) }) {
                                 Column(Modifier.fillMaxWidth().padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                                     Text(error, color = MaterialTheme.colorScheme.error)
-                                    Button(onClick = onRetry, shapes = ButtonDefaults.shapes()) { Text(stringResource(Res.string.retry)) }
+                                    LiquidGlassCompactButton(onClick = onRetry) { Text(stringResource(Res.string.retry)) }
                                 }
                             }
                         }
@@ -451,7 +449,7 @@ private fun LoadMore(
     Box(Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
         when {
             isLoadingMore -> ContainedLoadingIndicator()
-            error != null -> Button(onClick = onRetry, shapes = ButtonDefaults.shapes()) { Text(stringResource(Res.string.retry)) }
+            error != null -> LiquidGlassCompactButton(onClick = onRetry) { Text(stringResource(Res.string.retry)) }
         }
     }
 }
