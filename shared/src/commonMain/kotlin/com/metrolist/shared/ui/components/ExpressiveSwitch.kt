@@ -13,7 +13,6 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.metrolist.shared.settings.Settings
 import com.metrolist.shared.ui.haptics.HapticEvent
 import com.metrolist.shared.ui.haptics.rememberMetrolistHaptics
 import com.metrolist.shared.ui.icons.MetrolistIcons
@@ -26,7 +25,7 @@ fun ExpressiveSwitch(
     enabled: Boolean = true,
 ) {
     val haptics = rememberMetrolistHaptics()
-    val glass = Settings.shared.liquidGlassTheme
+    val glass = liquidGlassBackdropReady()
     val c = MaterialTheme.colorScheme
     LiquidGlassSurface(radius = 16.dp, modifier = modifier) {
         Switch(

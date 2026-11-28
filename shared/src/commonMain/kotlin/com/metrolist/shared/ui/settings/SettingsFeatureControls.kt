@@ -82,6 +82,7 @@ import com.metrolist.shared.ui.components.ReorderMenu
 import com.metrolist.shared.ui.components.focusOutline
 import com.metrolist.shared.ui.components.glassCardBorder
 import com.metrolist.shared.ui.components.glassCardColor
+import com.metrolist.shared.ui.components.liquidGlassBackdropReady
 import com.metrolist.shared.ui.components.singleLineMarquee
 import com.metrolist.shared.ui.components.sliders.PlaybackProgressSlider
 import com.metrolist.shared.ui.haptics.HapticEvent
@@ -578,7 +579,7 @@ fun SettingsMainSwitch(
                 .toDp()
         }
     val height = if (density.fontScale > 1f) (labelHeight + 32.dp).coerceAtLeast(64.dp) else 64.dp
-    val glass = Settings.shared.liquidGlassTheme
+    val glass = liquidGlassBackdropReady()
     val border = if (glass) glassCardBorder() else null
     LiquidGlassSurface(radius = height / 2, modifier = modifier.fillMaxWidth()) {
         Row(

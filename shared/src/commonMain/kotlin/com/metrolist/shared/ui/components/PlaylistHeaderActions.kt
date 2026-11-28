@@ -35,7 +35,6 @@ import androidx.compose.ui.unit.dp
 import com.metrolist.shared.generated.resources.Res
 import com.metrolist.shared.generated.resources.add_to_favorites
 import com.metrolist.shared.generated.resources.remove_from_favorites
-import com.metrolist.shared.settings.Settings
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import com.metrolist.shared.ui.tv.tvFocusHighlight
 import org.jetbrains.compose.resources.stringResource
@@ -51,6 +50,7 @@ fun PlaylistHeaderActions(
     onFavorite: (() -> Unit)?,
     buttonHeight: Dp,
 ) {
+    val glass = liquidGlassBackdropReady()
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -70,7 +70,7 @@ fun PlaylistHeaderActions(
                     shapes = ToggleButtonDefaults.shapesFor(buttonHeight).withStaticCorners(),
                     contentPadding = PaddingValues(0.dp),
                     colors =
-                        if (Settings.shared.liquidGlassTheme) {
+                        if (glass) {
                             ToggleButtonDefaults.colors(
                                 containerColor = glassCardColor(MaterialTheme.colorScheme.surfaceContainer),
                                 contentColor = MaterialTheme.colorScheme.onSurface,
@@ -80,7 +80,7 @@ fun PlaylistHeaderActions(
                         } else {
                             ToggleButtonDefaults.colors()
                         },
-                    border = if (Settings.shared.liquidGlassTheme) glassCardBorder() else null,
+                    border = if (glass) glassCardBorder() else null,
                 ) {
                     Icon(
                         if (isFavorite) MetrolistIcons.Filled.Favorite else MetrolistIcons.Default.FavoriteBorder,
@@ -105,6 +105,7 @@ internal fun HeaderPlaybackButtons(
     tonalShuffle: Boolean = false,
     enabled: Boolean = true,
 ) {
+    val glass = liquidGlassBackdropReady()
     val labels = if (playFirst) listOf(playLabel, shuffleLabel) else listOf(shuffleLabel, playLabel)
     val icons =
         if (playFirst) {
@@ -155,7 +156,7 @@ internal fun HeaderPlaybackButtons(
                                 shapes = buttonShapes,
                                 contentPadding = PaddingValues(horizontal = 12.dp),
                                 colors = liquidGlassTonalColors(),
-                                border = if (Settings.shared.liquidGlassTheme) glassCardBorder() else null,
+                                border = if (glass) glassCardBorder() else null,
                                 content = content,
                             )
                         } else {
@@ -166,8 +167,8 @@ internal fun HeaderPlaybackButtons(
                                 modifier = buttonModifier,
                                 shapes = buttonShapes,
                                 contentPadding = PaddingValues(horizontal = 12.dp),
-                                colors = if (Settings.shared.liquidGlassTheme) liquidGlassTonalColors() else ButtonDefaults.buttonColors(),
-                                border = if (Settings.shared.liquidGlassTheme) glassCardBorder() else null,
+                                colors = if (glass) liquidGlassTonalColors() else ButtonDefaults.buttonColors(),
+                                border = if (glass) glassCardBorder() else null,
                                 content = content,
                             )
                         }

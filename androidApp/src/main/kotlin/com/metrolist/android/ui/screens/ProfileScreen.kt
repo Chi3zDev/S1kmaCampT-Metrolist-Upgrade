@@ -53,6 +53,7 @@ import com.metrolist.shared.ui.components.LiquidGlassButton
 import com.metrolist.shared.ui.components.LiquidGlassSurface
 import com.metrolist.shared.ui.components.glassEdgeBrush
 import com.metrolist.shared.ui.components.images.AsyncImage
+import com.metrolist.shared.ui.components.liquidGlassBackdropReady
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import org.jetbrains.compose.resources.stringResource
 
@@ -69,7 +70,12 @@ fun ProfileScreen(
     onIntegrations: () -> Unit,
     onSettings: () -> Unit,
 ) {
-    val glass = Settings.shared.liquidGlassTheme || (Settings.shared.glassNavigation && Settings.shared.glassProfile)
+    val glass =
+        if (Settings.shared.liquidGlassTheme) {
+            liquidGlassBackdropReady()
+        } else {
+            Settings.shared.glassNavigation && Settings.shared.glassProfile
+        }
     val surface = MaterialTheme.colorScheme.surfaceContainerHigh
     val tintMultiplier =
         when (Settings.shared.glassStyle) {
