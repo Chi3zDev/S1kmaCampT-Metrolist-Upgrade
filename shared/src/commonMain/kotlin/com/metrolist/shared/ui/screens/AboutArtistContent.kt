@@ -35,17 +35,13 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.carousel.CarouselDefaults
@@ -112,8 +108,14 @@ import com.metrolist.shared.generated.resources.subscribers
 import com.metrolist.shared.generated.resources.total_views
 import com.metrolist.shared.model.ArtistItem
 import com.metrolist.shared.ui.components.ExpandableText
+import com.metrolist.shared.ui.components.LiquidGlassIconButton
+import com.metrolist.shared.ui.components.LiquidGlassSurface
+import com.metrolist.shared.ui.components.LiquidGlassTextButton
 import com.metrolist.shared.ui.components.appPageBackground
+import com.metrolist.shared.ui.components.glassCardBorder
+import com.metrolist.shared.ui.components.glassCardColor
 import com.metrolist.shared.ui.components.images.AsyncImage
+import com.metrolist.shared.ui.components.liquidGlassBackdropReady
 import com.metrolist.shared.ui.components.loadingShimmer
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import com.metrolist.shared.ui.utils.carouselScroll
@@ -136,6 +138,7 @@ fun AboutArtistContent(
     bottomContentPadding: Dp = 0.dp,
     onBackClick: () -> Unit,
 ) {
+    val glass = liquidGlassBackdropReady()
     val availablePhotos =
         remember(artistName, info?.thumbnail, uiState.lastFmData?.photos) {
             artistGalleryPhotos(artistName, info?.thumbnail, uiState.lastFmData?.photos.orEmpty())
@@ -460,9 +463,9 @@ fun AboutArtistContent(
                             showMoreText = stringResource(Res.string.show_more),
                             showLessText = stringResource(Res.string.show_less),
                         )
-                        TextButton(onClick = {
+                        LiquidGlassTextButton(onClick = {
                             openLastFm(artistName)
-                        }, shapes = ButtonDefaults.shapes()) { Text(stringResource(Res.string.artist_lastfm_read_more)) }
+                        }) { Text(stringResource(Res.string.artist_lastfm_read_more)) }
                     }
                 }
             }
@@ -489,7 +492,7 @@ fun AboutArtistContent(
                         )
                         Spacer(Modifier.height(12.dp))
                         data.similarArtists.forEach { name ->
-                            TextButton(onClick = { openLastFm(name) }, shapes = ButtonDefaults.shapes()) { Text(name) }
+                            LiquidGlassTextButton(onClick = { openLastFm(name) }) { Text(name) }
                         }
                     }
                 }
@@ -522,15 +525,27 @@ fun AboutArtistContent(
             Scaffold(
                 containerColor = appPageBackground(MaterialTheme.colorScheme.background),
                 topBar = {
-                    TopAppBar(
-                        title = { Text(artistName, maxLines = 1, overflow = TextOverflow.Ellipsis) },
-                        navigationIcon = {
-                            IconButton(onClick = onBackClick, shapes = IconButtonDefaults.shapes()) {
-                                Icon(MetrolistIcons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(Res.string.back))
-                            }
-                        },
-                        colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface),
-                    )
+                    LiquidGlassSurface(radius = 0.dp, modifier = Modifier.fillMaxWidth(), enabled = glass) {
+                        TopAppBar(
+                            title = { Text(artistName, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                            navigationIcon = {
+                                LiquidGlassIconButton(onClick = onBackClick) {
+                                    Icon(MetrolistIcons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(Res.string.back))
+                                }
+                            },
+                            colors =
+                                TopAppBarDefaults.topAppBarColors(
+                                    containerColor =
+                                        if (glass) {
+                                            glassCardColor(
+                                                MaterialTheme.colorScheme.surface,
+                                            )
+                                        } else {
+                                            MaterialTheme.colorScheme.surface
+                                        },
+                                ),
+                        )
+                    }
                 },
             ) { padding ->
                 BoxWithConstraints(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.TopCenter) {
@@ -629,33 +644,36 @@ private fun LastfmHintCard(
 ) {
     val uriHandler = LocalUriHandler.current
     val lastfmUrl = LastFM.artistPageUrl(artistName)
+    val glass = liquidGlassBackdropReady()
 
-    Surface(
-        shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant,
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-            )
-            Spacer(Modifier.height(8.dp))
-            Text(
-                text = bodyText,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            TextButton(
-                onClick = {
-                    runCatching { uriHandler.openUri(lastfmUrl) }
-                        .onFailure { Logger.w(TAG, "unable to open Last.fm profile", it) }
-                },
-                modifier = Modifier.align(Alignment.End),
-                shapes = ButtonDefaults.shapes(),
-            ) {
-                Text(stringResource(Res.string.lastfm_link_text))
+    LiquidGlassSurface(radius = 16.dp, modifier = Modifier.fillMaxWidth(), enabled = glass) {
+        Surface(
+            shape = RoundedCornerShape(16.dp),
+            color = if (glass) glassCardColor(MaterialTheme.colorScheme.surfaceVariant) else MaterialTheme.colorScheme.surfaceVariant,
+            border = if (glass) glassCardBorder() else null,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                )
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    text = bodyText,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                LiquidGlassTextButton(
+                    onClick = {
+                        runCatching { uriHandler.openUri(lastfmUrl) }
+                            .onFailure { Logger.w(TAG, "unable to open Last.fm profile", it) }
+                    },
+                    modifier = Modifier.align(Alignment.End),
+                ) {
+                    Text(stringResource(Res.string.lastfm_link_text))
+                }
             }
         }
     }
