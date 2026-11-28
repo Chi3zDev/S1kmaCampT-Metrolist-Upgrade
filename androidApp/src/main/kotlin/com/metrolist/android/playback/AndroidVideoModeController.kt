@@ -205,7 +205,7 @@ internal class AndroidVideoModeController(
         startVideo: Boolean,
     ) {
         // General video should not leave the music player stuck in video mode for the next selection.
-        if (player.currentSong.value?.isGeneralVideo == true && !song.isGeneralVideo && !startVideo) {
+        if (shouldResetVideoAfterGeneralVideo(player.currentSong.value?.isGeneralVideo == true, song.isGeneralVideo, startVideo)) {
             clearVideoMode(resetViewerPreference = true)
         }
         if (startVideo) selectVideoForQueue(song)
@@ -708,3 +708,9 @@ internal fun originalAudioForVideo(
     currentVideoId: String?,
     originalAudio: SongItem?,
 ): SongItem? = originalAudio?.takeIf { videoId == currentVideoId }
+
+internal fun shouldResetVideoAfterGeneralVideo(
+    wasGeneralVideo: Boolean,
+    nextGeneralVideo: Boolean,
+    startVideo: Boolean,
+): Boolean = wasGeneralVideo && !nextGeneralVideo && !startVideo
