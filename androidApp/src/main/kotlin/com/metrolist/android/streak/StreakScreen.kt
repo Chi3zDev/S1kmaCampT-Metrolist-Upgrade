@@ -727,7 +727,11 @@ private fun StreakTopBar(onBack: () -> Unit) {
                 modifier = Modifier.fillMaxWidth().height(56.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                LiquidGlassTextButton(onClick = onBack) { Text("‹  " + stringResource(Res.string.back)) }
+                // The parent is already glass; another glass button creates overlapping rims.
+                TextButton(
+                    onClick = onBack,
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
+                ) { Text("‹  " + stringResource(Res.string.back)) }
                 Text(stringResource(Res.string.streak_page_title), style = MaterialTheme.typography.titleMedium)
             }
         }

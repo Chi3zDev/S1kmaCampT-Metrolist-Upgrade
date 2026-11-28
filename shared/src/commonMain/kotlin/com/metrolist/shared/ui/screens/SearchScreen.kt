@@ -35,6 +35,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Scaffold
@@ -306,7 +307,7 @@ fun SearchBar(
                         placeholder = { Text(text = placeholder, maxLines = 1, overflow = TextOverflow.Clip) },
                         leadingIcon = {
                             if (isQuerySubmitted) {
-                                LiquidGlassIconButton(onClick = onBack, modifier = Modifier.size(48.dp)) {
+                                IconButton(onClick = onBack, modifier = Modifier.size(48.dp)) {
                                     Icon(
                                         imageVector = MetrolistIcons.AutoMirrored.Filled.ArrowBack,
                                         contentDescription = backLabel,
@@ -323,11 +324,11 @@ fun SearchBar(
                         },
                         trailingIcon = {
                             if (query.isNotEmpty()) {
-                                LiquidGlassIconButton(onClick = onClear, modifier = Modifier.size(48.dp)) {
+                                IconButton(onClick = onClear, modifier = Modifier.size(48.dp)) {
                                     Icon(imageVector = MetrolistIcons.Default.Clear, contentDescription = clearLabel)
                                 }
                             } else if (onMicrophoneClick != null) {
-                                LiquidGlassIconButton(
+                                IconButton(
                                     onClick = onMicrophoneClick,
                                     modifier = Modifier.size(48.dp),
                                 ) {
@@ -368,7 +369,7 @@ fun SearchBar(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     if (isQuerySubmitted) {
-                        LiquidGlassIconButton(
+                        IconButton(
                             onClick = onBack,
                             modifier = Modifier.size(barHeight).tvFocusHighlight(CircleShape, scale = 1f),
                         ) {
@@ -462,7 +463,7 @@ fun SearchBar(
                     )
 
                     if (query.isNotEmpty()) {
-                        LiquidGlassIconButton(
+                        IconButton(
                             onClick = onClear,
                             modifier = Modifier.size(barHeight).tvFocusHighlight(CircleShape, scale = 1f),
                         ) {
@@ -474,7 +475,7 @@ fun SearchBar(
                             )
                         }
                     } else if (onMicrophoneClick != null) {
-                        LiquidGlassIconButton(
+                        IconButton(
                             onClick = onMicrophoneClick,
                             modifier = Modifier.size(barHeight).tvFocusHighlight(CircleShape, scale = 1f),
                         ) {
