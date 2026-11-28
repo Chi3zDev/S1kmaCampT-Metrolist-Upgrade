@@ -12,17 +12,13 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,6 +29,9 @@ import com.metrolist.shared.generated.resources.close
 import com.metrolist.shared.generated.resources.import_action_start
 import com.metrolist.shared.generated.resources.menu_paste
 import com.metrolist.shared.generated.resources.or
+import com.metrolist.shared.ui.components.LiquidGlassButton
+import com.metrolist.shared.ui.components.LiquidGlassTextButton
+import com.metrolist.shared.ui.components.LiquidGlassTonalButton
 import com.metrolist.shared.ui.components.ModalBottomSheet
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
@@ -75,20 +74,19 @@ internal fun ProviderChoiceDialog(
                     style = MaterialTheme.typography.headlineSmall,
                     modifier = Modifier.weight(1f),
                 )
-                TextButton(onClick = onDismiss, shapes = ButtonDefaults.shapes()) { Text(stringResource(Res.string.close)) }
+                LiquidGlassTextButton(onClick = onDismiss) { Text(stringResource(Res.string.close)) }
             }
             Text(
                 text = stringResource(descriptionRes),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            Button(
+            LiquidGlassButton(
                 onClick = {
                     onDismiss()
                     onConnect()
                 },
                 modifier = Modifier.fillMaxWidth(),
-                shapes = ButtonDefaults.shapes(),
             ) {
                 Text(stringResource(accountActionRes))
             }
@@ -111,7 +109,7 @@ internal fun ProviderChoiceDialog(
                 label = { Text(stringResource(linkPromptRes)) },
                 placeholder = { Text(stringResource(linkHintRes)) },
                 trailingIcon = {
-                    TextButton(
+                    LiquidGlassTextButton(
                         onClick = {
                             val text =
                                 clipboard
@@ -121,7 +119,6 @@ internal fun ProviderChoiceDialog(
                                     ?.toString()
                             if (!text.isNullOrBlank()) onInputChange(text)
                         },
-                        shapes = ButtonDefaults.shapes(),
                     ) {
                         Text(stringResource(Res.string.menu_paste))
                     }
@@ -130,7 +127,8 @@ internal fun ProviderChoiceDialog(
                 shape = MaterialTheme.shapes.large,
                 modifier = Modifier.fillMaxWidth(),
             )
-            FilledTonalButton(
+            LiquidGlassTonalButton(
+                fillWidth = true,
                 enabled = input.isNotBlank(),
                 onClick = {
                     val link = input
@@ -138,7 +136,6 @@ internal fun ProviderChoiceDialog(
                     onImportLink(link)
                 },
                 modifier = Modifier.fillMaxWidth(),
-                shapes = ButtonDefaults.shapes(),
             ) {
                 Text(stringResource(Res.string.import_action_start))
             }
