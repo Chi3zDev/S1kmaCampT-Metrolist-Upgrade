@@ -42,6 +42,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.contentColorFor
 import androidx.compose.material3.rememberSliderState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -60,6 +61,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.input.pointer.pointerInput
@@ -147,10 +149,14 @@ import com.metrolist.shared.ui.components.ExpressiveSwitch
 import com.metrolist.shared.ui.components.LiquidGlassDropdownMenu
 import com.metrolist.shared.ui.components.LiquidGlassIconButton
 import com.metrolist.shared.ui.components.LiquidGlassSliderContainer
+import com.metrolist.shared.ui.components.LiquidGlassSurface
 import com.metrolist.shared.ui.components.LiquidGlassTextButton
 import com.metrolist.shared.ui.components.LiquidGlassTonalButton
 import com.metrolist.shared.ui.components.PopupContent
 import com.metrolist.shared.ui.components.PopupVisibility
+import com.metrolist.shared.ui.components.glassCardBorder
+import com.metrolist.shared.ui.components.glassCardColor
+import com.metrolist.shared.ui.components.liquidGlassBackdropReady
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import com.metrolist.shared.ui.menu.ExpressiveSelectionMenu
 import com.metrolist.shared.ui.menu.trackPressPosition
@@ -282,7 +288,7 @@ private fun ProfilesPage(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        Surface(
+        MetroEqGlassSurface(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
             shape = RoundedCornerShape(20.dp),
             color = MaterialTheme.colorScheme.surfaceContainer,
@@ -368,7 +374,7 @@ private fun ProfilesPage(
         }
         EqualizerGraph(activeProfile, meter.sampleRate, meter.levels)
         PreampControl(meter.gainReductionDb)
-        Surface(
+        MetroEqGlassSurface(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
             shape = RoundedCornerShape(20.dp),
             color = MaterialTheme.colorScheme.surfaceContainer,
@@ -687,7 +693,7 @@ private fun EqualizerGraph(
                 }
         }
 
-    Surface(
+    MetroEqGlassSurface(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
         shape = RoundedCornerShape(20.dp),
         color = backgroundColor,
@@ -698,7 +704,7 @@ private fun EqualizerGraph(
                     .fillMaxWidth()
                     .height(224.dp)
                     .clip(MaterialTheme.shapes.large)
-                    .background(backgroundColor)
+                    .background(if (liquidGlassBackdropReady()) glassCardColor(backgroundColor) else backgroundColor)
                     .semantics { contentDescription = graphDescription }
                     .then(gestures),
             ) {
@@ -1031,7 +1037,7 @@ private fun PreampControl(reduction: Float) {
     val preampSteps = ((MAX_AUDIO_BOOST_DB - MIN_AUDIO_PREAMP_DB) * 2).toInt() - 1
     val preampSliderState = rememberSliderState(value = preamp, trackRange = preampRange, steps = preampSteps)
     preampSliderState.value = preamp
-    Surface(
+    MetroEqGlassSurface(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
         shape = RoundedCornerShape(20.dp),
         color = MaterialTheme.colorScheme.surfaceContainer,
@@ -1311,5 +1317,25 @@ private fun DialogHeader(
         LiquidGlassIconButton(onClick = onDismiss) {
             Icon(MetrolistIcons.Outlined.Close, contentDescription = stringResource(Res.string.close))
         }
+    }
+}
+
+@Composable
+private fun MetroEqGlassSurface(
+    modifier: Modifier,
+    shape: Shape,
+    color: Color,
+    content: @Composable () -> Unit,
+) {
+    val glass = liquidGlassBackdropReady()
+    LiquidGlassSurface(radius = 20.dp, modifier = modifier.clip(shape), enabled = glass) {
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = shape,
+            color = if (glass) glassCardColor(color) else color,
+            contentColor = if (glass) MaterialTheme.colorScheme.onSurface else contentColorFor(color),
+            border = if (glass) glassCardBorder() else null,
+            content = content,
+        )
     }
 }
