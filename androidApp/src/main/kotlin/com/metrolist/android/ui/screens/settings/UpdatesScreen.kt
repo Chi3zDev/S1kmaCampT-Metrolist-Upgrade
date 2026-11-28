@@ -15,6 +15,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,8 +28,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -50,6 +49,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
@@ -131,7 +131,13 @@ import com.metrolist.shared.generated.resources.updates_size
 import com.metrolist.shared.generated.resources.updates_status_current
 import com.metrolist.shared.generated.resources.updates_title
 import com.metrolist.shared.generated.resources.updates_version
+import com.metrolist.shared.ui.components.LiquidGlassIconButton
+import com.metrolist.shared.ui.components.LiquidGlassSurface
 import com.metrolist.shared.ui.components.RefreshIndicator
+import com.metrolist.shared.ui.components.appPageBackground
+import com.metrolist.shared.ui.components.glassCardBorder
+import com.metrolist.shared.ui.components.glassCardColor
+import com.metrolist.shared.ui.components.liquidGlassBackdropReady
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import com.metrolist.shared.ui.settings.LocalSettingsPageHasTopBar
 import com.metrolist.shared.ui.settings.settingsPageSubtitle
@@ -496,68 +502,81 @@ fun UpdateDetailsScreen(
             }
         }
     val miniPlayerInset = LocalMiniPlayerBottomInset.current
+    val glass = liquidGlassBackdropReady()
 
     Scaffold(
+        containerColor = if (glass) appPageBackground(MaterialTheme.colorScheme.surface) else MaterialTheme.colorScheme.surface,
         contentWindowInsets = WindowInsets(0),
         topBar = {
             if (!LocalSettingsPageHasTopBar.current) {
-                TopAppBar(
-                    title = {},
-                    navigationIcon = {
-                        IconButton(onClick = onNavigateBack, shapes = IconButtonDefaults.shapes()) {
-                            Icon(
-                                MetrolistIcons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = stringResource(if (crashRecovery) Res.string.crash_back else Res.string.back),
-                            )
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface),
-                )
+                LiquidGlassSurface(radius = 0.dp, modifier = Modifier.fillMaxWidth(), enabled = glass) {
+                    TopAppBar(
+                        title = {},
+                        navigationIcon = {
+                            LiquidGlassIconButton(onClick = onNavigateBack) {
+                                Icon(
+                                    MetrolistIcons.AutoMirrored.Filled.ArrowBack,
+                                    contentDescription = stringResource(if (crashRecovery) Res.string.crash_back else Res.string.back),
+                                )
+                            }
+                        },
+                        colors =
+                            TopAppBarDefaults.topAppBarColors(
+                                containerColor =
+                                    if (glass) {
+                                        glassCardColor(
+                                            MaterialTheme.colorScheme.surface,
+                                        )
+                                    } else {
+                                        MaterialTheme.colorScheme.surface
+                                    },
+                            ),
+                    )
+                }
             }
         },
         bottomBar = {
             val buttonModifier =
                 Modifier
                     .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.surface)
+                    .background(if (glass) Color.Transparent else MaterialTheme.colorScheme.surface)
                     .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 16.dp + miniPlayerInset)
                     .heightIn(min = 56.dp)
             when {
                 current is AppUpdateState.Downloading -> {
-                    OutlinedButton(
+                    UpdatesGlassAction(
+                        outlined = true,
                         onClick = AppUpdateManager::cancelDownload,
                         modifier = buttonModifier,
-                        shapes = ButtonDefaults.shapes(),
                     ) {
                         Text(stringResource(if (crashRecovery) Res.string.crash_cancel else Res.string.cancel))
                     }
                 }
 
                 current is AppUpdateState.Downloaded -> {
-                    Button(
+                    UpdatesGlassAction(
                         enabled = !current.installing,
                         onClick = { install(current) },
                         modifier = buttonModifier,
-                        shapes = ButtonDefaults.shapes(),
                     ) {
                         Text(stringResource(if (crashRecovery) Res.string.crash_updates_install else Res.string.updates_install))
                     }
                 }
 
                 current is AppUpdateState.Available -> {
-                    Button(
+                    UpdatesGlassAction(
                         onClick = { scope.launch { AppUpdateManager.download(context, current.release, crashRecovery) } },
                         modifier = buttonModifier,
-                        shapes = ButtonDefaults.shapes(),
                     ) {
                         Text(stringResource(if (crashRecovery) Res.string.crash_action_download else Res.string.action_download))
                     }
                 }
 
                 current is AppUpdateState.Error -> {
-                    Column(Modifier.background(MaterialTheme.colorScheme.surface)) {
+                    Column(Modifier.background(if (glass) Color.Transparent else MaterialTheme.colorScheme.surface)) {
                         if (release != null && current.failure == UpdateFailure.DIGEST) {
-                            OutlinedButton(
+                            UpdatesGlassAction(
+                                outlined = true,
                                 onClick = {
                                     scope.launch {
                                         AppUpdateManager.download(
@@ -573,7 +592,6 @@ fun UpdateDetailsScreen(
                                         .fillMaxWidth()
                                         .padding(start = 16.dp, end = 16.dp, top = 12.dp)
                                         .heightIn(min = 56.dp),
-                                shapes = ButtonDefaults.shapes(),
                             ) {
                                 Text(
                                     stringResource(
@@ -582,7 +600,7 @@ fun UpdateDetailsScreen(
                                 )
                             }
                         }
-                        Button(
+                        UpdatesGlassAction(
                             onClick = {
                                 scope.launch {
                                     if (release == null || current.failure != UpdateFailure.DOWNLOAD) {
@@ -593,7 +611,6 @@ fun UpdateDetailsScreen(
                                 }
                             },
                             modifier = buttonModifier,
-                            shapes = ButtonDefaults.shapes(),
                         ) {
                             Text(stringResource(if (crashRecovery) Res.string.crash_updates_retry else Res.string.updates_retry))
                         }
@@ -601,11 +618,10 @@ fun UpdateDetailsScreen(
                 }
 
                 else -> {
-                    Button(
+                    UpdatesGlassAction(
                         enabled = current !is AppUpdateState.Checking,
                         onClick = { scope.launch { AppUpdateManager.check(context, crashRecovery = crashRecovery) } },
                         modifier = buttonModifier,
-                        shapes = ButtonDefaults.shapes(),
                     ) {
                         Text(stringResource(if (crashRecovery) Res.string.crash_updates_check else Res.string.updates_check))
                     }
@@ -724,3 +740,53 @@ private fun appNotificationSettingsIntent(context: Context): Intent =
     } else {
         Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, "package:${context.packageName}".toUri())
     }
+
+@Composable
+private fun UpdatesGlassAction(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    outlined: Boolean = false,
+    content: @Composable RowScope.() -> Unit,
+) {
+    val glass = liquidGlassBackdropReady()
+    LiquidGlassSurface(radius = 28.dp, modifier = modifier, enabled = glass) {
+        if (outlined) {
+            OutlinedButton(
+                onClick = onClick,
+                enabled = enabled,
+                modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
+                shapes = ButtonDefaults.shapes(),
+                colors =
+                    if (glass) {
+                        ButtonDefaults.outlinedButtonColors(
+                            containerColor = glassCardColor(MaterialTheme.colorScheme.surfaceContainer),
+                            contentColor = MaterialTheme.colorScheme.onSurface,
+                        )
+                    } else {
+                        ButtonDefaults.outlinedButtonColors()
+                    },
+                border = if (glass) glassCardBorder() else ButtonDefaults.outlinedButtonBorder(enabled),
+                content = content,
+            )
+        } else {
+            Button(
+                onClick = onClick,
+                enabled = enabled,
+                modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
+                shapes = ButtonDefaults.shapes(),
+                colors =
+                    if (glass) {
+                        ButtonDefaults.buttonColors(
+                            containerColor = glassCardColor(MaterialTheme.colorScheme.surfaceContainer),
+                            contentColor = MaterialTheme.colorScheme.onSurface,
+                        )
+                    } else {
+                        ButtonDefaults.buttonColors()
+                    },
+                border = if (glass) glassCardBorder() else null,
+                content = content,
+            )
+        }
+    }
+}
