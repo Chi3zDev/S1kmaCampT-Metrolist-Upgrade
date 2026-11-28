@@ -46,6 +46,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.unit.dp
 import com.metrolist.shared.generated.resources.*
 import com.metrolist.shared.ui.components.BasicAlertDialog
+import com.metrolist.shared.ui.components.LiquidGlassSliderContainer
 import com.metrolist.shared.ui.components.LiquidGlassSurface
 import com.metrolist.shared.ui.components.LiquidGlassTextButton
 import com.metrolist.shared.ui.components.glassCardBorder
@@ -97,18 +98,20 @@ internal fun SettingsSliderDialog(
             val sliderState = rememberSliderState(value = value, steps = item.sliderSteps, trackRange = range)
             sliderState.value = value
             item.sliderPreview?.invoke(value)
-            Slider(
-                state = sliderState,
-                onValueChange = { value = it },
-                modifier = Modifier.retainPlaybackKeyFocus().fillMaxWidth(),
-                track = { state ->
-                    SliderDefaults.Track(
-                        sliderState = state,
-                        drawTick = { _, _ -> },
-                        drawStopIndicator = null,
-                    )
-                },
-            )
+            LiquidGlassSliderContainer {
+                Slider(
+                    state = sliderState,
+                    onValueChange = { value = it },
+                    modifier = Modifier.retainPlaybackKeyFocus().fillMaxWidth(),
+                    track = { state ->
+                        SliderDefaults.Track(
+                            sliderState = state,
+                            drawTick = { _, _ -> },
+                            drawStopIndicator = null,
+                        )
+                    },
+                )
+            }
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                 LiquidGlassTextButton(onClick = onDismiss) { Text(stringResource(Res.string.cancel)) }
                 LiquidGlassTextButton(

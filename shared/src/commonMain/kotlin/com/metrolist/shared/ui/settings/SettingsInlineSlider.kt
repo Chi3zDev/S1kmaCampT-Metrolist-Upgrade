@@ -17,8 +17,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
@@ -34,6 +32,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.metrolist.shared.generated.resources.Res
 import com.metrolist.shared.generated.resources.settings_reset_to_default
+import com.metrolist.shared.ui.components.LiquidGlassIconButton
+import com.metrolist.shared.ui.components.LiquidGlassSliderContainer
 import com.metrolist.shared.ui.haptics.HapticEvent
 import com.metrolist.shared.ui.haptics.SliderDetents
 import com.metrolist.shared.ui.haptics.rememberMetrolistHaptics
@@ -78,28 +78,30 @@ internal fun SettingsGroupRegistryBuilder.inlineSlider(
             detents.reset(value)
             val sliderState = remember(range, steps) { SliderState(value = value, trackRange = range, steps = steps) }
             sliderState.value = value
-            Slider(
-                state = sliderState,
-                onValueChange = {
-                    if (detents.moved(it)) haptics.perform(HapticEvent.SEGMENT_TICK)
-                    onValueChange(it)
-                    onSettingValueChanged()
-                },
-                enabled = enabled,
-                // Dense steps draw a row of touching dots; keep the snapping but hide the ticks.
-                colors =
-                    if (steps > MAX_VISIBLE_SLIDER_TICKS) {
-                        SliderDefaults.colors(activeTickColor = Color.Transparent, inactiveTickColor = Color.Transparent)
-                    } else {
-                        SliderDefaults.colors()
+            LiquidGlassSliderContainer {
+                Slider(
+                    state = sliderState,
+                    onValueChange = {
+                        if (detents.moved(it)) haptics.perform(HapticEvent.SEGMENT_TICK)
+                        onValueChange(it)
+                        onSettingValueChanged()
                     },
-                modifier =
-                    Modifier
-                        .retainPlaybackKeyFocus()
-                        .fillMaxWidth()
-                        .padding(end = 8.dp)
-                        .semantics { contentDescription = title },
-            )
+                    enabled = enabled,
+                    // Dense steps draw a row of touching dots; keep the snapping but hide the ticks.
+                    colors =
+                        if (steps > MAX_VISIBLE_SLIDER_TICKS) {
+                            SliderDefaults.colors(activeTickColor = Color.Transparent, inactiveTickColor = Color.Transparent)
+                        } else {
+                            SliderDefaults.colors()
+                        },
+                    modifier =
+                        Modifier
+                            .retainPlaybackKeyFocus()
+                            .fillMaxWidth()
+                            .padding(end = 8.dp)
+                            .semantics { contentDescription = title },
+                )
+            }
         }
     }
 }
@@ -109,7 +111,7 @@ internal fun SettingsResetButton(
     enabled: Boolean,
     onClick: () -> Unit,
 ) {
-    IconButton(onClick = onClick, enabled = enabled, shapes = IconButtonDefaults.shapes()) {
+    LiquidGlassIconButton(onClick = onClick, enabled = enabled) {
         Icon(MetrolistIcons.Outlined.Replay, contentDescription = stringResource(Res.string.settings_reset_to_default))
     }
 }

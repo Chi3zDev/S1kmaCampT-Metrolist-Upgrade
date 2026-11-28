@@ -58,6 +58,7 @@ import com.metrolist.shared.generated.resources.size_used
 import com.metrolist.shared.generated.resources.storage_in_total
 import com.metrolist.shared.storage.storageUsageFraction
 import com.metrolist.shared.ui.components.AlertDialog
+import com.metrolist.shared.ui.components.LiquidGlassSliderContainer
 import com.metrolist.shared.ui.haptics.rememberMetrolistHaptics
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import com.metrolist.shared.ui.playback.retainPlaybackKeyFocus
@@ -290,13 +291,15 @@ fun StorageSliderRow(
                 var draft by remember { mutableStateOf(value) }
                 val sliderState = remember(steps) { SliderState(value = draft, trackRange = 0f..steps.toFloat(), steps = steps - 1) }
                 sliderState.value = draft
-                Slider(
-                    state = sliderState,
-                    onValueChange = { draft = it },
-                    onValueChangeFinished = { onValueChangeFinished(draft) },
-                    enabled = enabled,
-                    modifier = Modifier.retainPlaybackKeyFocus().fillMaxWidth().semantics { contentDescription = title },
-                )
+                LiquidGlassSliderContainer {
+                    Slider(
+                        state = sliderState,
+                        onValueChange = { draft = it },
+                        onValueChangeFinished = { onValueChangeFinished(draft) },
+                        enabled = enabled,
+                        modifier = Modifier.retainPlaybackKeyFocus().fillMaxWidth().semantics { contentDescription = title },
+                    )
+                }
             }
         }
     }
