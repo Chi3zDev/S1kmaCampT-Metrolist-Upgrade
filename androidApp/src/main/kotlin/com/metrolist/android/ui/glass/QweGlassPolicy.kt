@@ -8,6 +8,13 @@ internal fun shouldAttemptQweGlass(
     hasSource: Boolean,
 ): Boolean = sdkInt >= 31 && !lowRam && !lightMode && hasSource
 
+/** Only another attached window may sample the activity tree without capturing itself. */
+internal fun canCaptureActivityWindow(
+    hostAttached: Boolean,
+    sourceAttached: Boolean,
+    sameRoot: Boolean,
+): Boolean = hostAttached && sourceAttached && !sameRoot
+
 internal fun qweGlassStyle(style: String): QweGlassStyle =
     when (style) {
         "CLEAR" -> QweGlassStyle.CLEAR

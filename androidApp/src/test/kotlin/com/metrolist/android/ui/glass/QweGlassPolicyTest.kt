@@ -7,6 +7,14 @@ import org.junit.Test
 
 class QweGlassPolicyTest {
     @Test
+    fun activityCaptureRequiresAnAttachedSeparateWindow() {
+        assertTrue(canCaptureActivityWindow(hostAttached = true, sourceAttached = true, sameRoot = false))
+        assertFalse(canCaptureActivityWindow(hostAttached = false, sourceAttached = true, sameRoot = false))
+        assertFalse(canCaptureActivityWindow(hostAttached = true, sourceAttached = false, sameRoot = false))
+        assertFalse(canCaptureActivityWindow(hostAttached = true, sourceAttached = true, sameRoot = true))
+    }
+
+    @Test
     fun mapsGlassStylesWithRegularFallback() {
         assertEquals(QweGlassStyle.CLEAR, qweGlassStyle("CLEAR"))
         assertEquals(QweGlassStyle.FROSTED, qweGlassStyle("FROSTED"))
