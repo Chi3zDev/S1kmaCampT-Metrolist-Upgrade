@@ -1368,8 +1368,8 @@ fun BackupRestoreScreen(onNavigateBack: () -> Unit) {
             confirmButton = {
                 LiquidGlassTextButton(
                     onClick = {
-                        val dest = pendingDuplicateDestination ?: return@TextButton
-                        val data = pendingImportData ?: return@TextButton
+                        val dest = pendingDuplicateDestination ?: return@LiquidGlassTextButton
+                        val data = pendingImportData ?: return@LiquidGlassTextButton
                         duplicateWarning = null
                         pendingDuplicateDestination = null
                         startUnifiedImport(data, dest, ignoreDuplicate = true)

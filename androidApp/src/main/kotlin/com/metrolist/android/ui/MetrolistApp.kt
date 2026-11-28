@@ -2093,25 +2093,25 @@ fun MetrolistApp(
                                                         }
                                                     }
                                                 }
-                                                if (useQweThemeGlass) {
-                                                    QweBackdropSource(
-                                                        onViewChanged = { qwePageSource = it },
-                                                        modifier = Modifier.fillMaxSize(),
-                                                        content = pageContent,
-                                                    )
-                                                } else {
-                                                    pageContent()
-                                                }
+                                            }
+                                            if (useQweThemeGlass) {
+                                                QweBackdropSource(
+                                                    onViewChanged = { qwePageSource = it },
+                                                    modifier = Modifier.fillMaxSize(),
+                                                    content = pageContent,
+                                                )
+                                            } else {
+                                                pageContent()
+                                            }
 
-                                                installedReleaseNotes?.let { release ->
-                                                    ReleaseNotesSheet(
-                                                        release = release,
-                                                        onDismiss = {
-                                                            installedReleaseNotes = null
-                                                            AppUpdateManager.clearPendingRelease()
-                                                        },
-                                                    )
-                                                }
+                                            installedReleaseNotes?.let { release ->
+                                                ReleaseNotesSheet(
+                                                    release = release,
+                                                    onDismiss = {
+                                                        installedReleaseNotes = null
+                                                        AppUpdateManager.clearPendingRelease()
+                                                    },
+                                                )
                                             }
                                         }
                                     }
