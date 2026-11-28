@@ -57,6 +57,7 @@ import androidx.lifecycle.compose.currentStateAsState
 import com.metrolist.android.BuildConfig
 import com.metrolist.android.LocalMiniPlayerBottomInset
 import com.metrolist.android.playback.LocalPlayerConnection
+import com.metrolist.android.ui.component.glassScreenViewport
 import com.metrolist.android.ui.component.tabContentTopPadding
 import com.metrolist.android.utils.shareImage
 import com.metrolist.shared.db.MusicDatabase
@@ -268,244 +269,263 @@ fun StreakScreen(onBack: () -> Unit) {
 
     val backgroundEnabled = Settings.shared.streakLevelBackgroundEnabled
     val pageSurface = appPageBackground(MaterialTheme.colorScheme.surface)
-    LazyColumn(
-        modifier =
-            Modifier.fillMaxSize().background(
-                if (backgroundEnabled) {
-                    Brush.verticalGradient(listOf(flameColor.copy(alpha = 0.15f), pageSurface, pageSurface))
-                } else {
-                    Brush.verticalGradient(listOf(pageSurface, pageSurface))
-                },
-            ),
-        contentPadding =
-            PaddingValues(
-                start = 16.dp,
-                end = 16.dp,
-                top = tabContentTopPadding(),
-                bottom =
-                    LocalMiniPlayerBottomInset.current + 32.dp,
-            ),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        item { TextButton(onClick = onBack) { Text("‹  " + stringResource(Res.string.back)) } }
-        item {
-            Text(
-                stringResource(Res.string.streak_page_title),
-                style = MaterialTheme.typography.headlineMedium,
-                modifier =
-                    if (BuildConfig.DEBUG) {
-                        Modifier.clickable {
-                            debugTaps++
-                            if (debugTaps >= 7) {
-                                showDebug = !showDebug
-                                if (!showDebug) debugDays = 0
-                                debugTaps = 0
-                            }
-                        }
+    Box(Modifier.fillMaxSize()) {
+        LazyColumn(
+            modifier =
+                Modifier.glassScreenViewport(tabContentTopPadding() + 64.dp).background(
+                    if (backgroundEnabled) {
+                        Brush.verticalGradient(listOf(flameColor.copy(alpha = 0.15f), pageSurface, pageSurface))
                     } else {
-                        Modifier
+                        Brush.verticalGradient(listOf(pageSurface, pageSurface))
                     },
-            )
-        }
-        item {
-            OutlinedButton(onClick = { showShare = true }) { Text(stringResource(Res.string.streak_share)) }
-        }
-        item {
-            val label = stringResource(Res.string.streak_level_background)
-            Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text(label, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
-                Switch(
-                    checked = backgroundEnabled,
-                    onCheckedChange = { Settings.shared.streakLevelBackgroundEnabled = it },
-                    modifier = Modifier.semantics { contentDescription = label },
+                ),
+            contentPadding =
+                PaddingValues(
+                    start = 16.dp,
+                    end = 16.dp,
+                    top = 12.dp,
+                    bottom =
+                        LocalMiniPlayerBottomInset.current + 32.dp,
+                ),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            item {
+                Text(
+                    stringResource(Res.string.streak_page_title),
+                    style = MaterialTheme.typography.headlineMedium,
+                    modifier =
+                        if (BuildConfig.DEBUG) {
+                            Modifier.clickable {
+                                debugTaps++
+                                if (debugTaps >= 7) {
+                                    showDebug = !showDebug
+                                    if (!showDebug) debugDays = 0
+                                    debugTaps = 0
+                                }
+                            }
+                        } else {
+                            Modifier
+                        },
                 )
             }
-        }
-        item {
-            val reminderLabel = stringResource(Res.string.streak_reminder_title)
-            val enabled = Settings.shared.streakReminderEnabled
-            val minuteOfDay = Settings.shared.streakReminderMinuteOfDay.coerceIn(0, 1439)
-            StreakPanel {
-                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                    Text(reminderLabel, modifier = Modifier.weight(1f), style = MaterialTheme.typography.titleMedium)
+            item {
+                OutlinedButton(onClick = { showShare = true }) { Text(stringResource(Res.string.streak_share)) }
+            }
+            item {
+                val label = stringResource(Res.string.streak_level_background)
+                Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Text(label, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
                     Switch(
-                        checked = enabled,
-                        onCheckedChange = { checked ->
-                            if (checked && Build.VERSION.SDK_INT >= 33) {
-                                reminderPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
-                            } else {
-                                Settings.shared.streakReminderEnabled = checked
-                                StreakReminderWorker.schedule(context, checked, minuteOfDay)
-                            }
-                        },
-                        modifier = Modifier.semantics { contentDescription = reminderLabel },
+                        checked = backgroundEnabled,
+                        onCheckedChange = { Settings.shared.streakLevelBackgroundEnabled = it },
+                        modifier = Modifier.semantics { contentDescription = label },
                     )
                 }
-                Text(stringResource(Res.string.streak_reminder_timing), style = MaterialTheme.typography.bodySmall)
-                TextButton(onClick = {
-                    TimePickerDialog(context, { _, hour, minute ->
-                        val value = hour * 60 + minute
-                        Settings.shared.streakReminderMinuteOfDay = value
-                        if (Settings.shared.streakReminderEnabled) StreakReminderWorker.schedule(context, true, value)
-                    }, minuteOfDay / 60, minuteOfDay % 60, true).show()
-                }) {
-                    Text(String.format(locale, "%02d:%02d", minuteOfDay / 60, minuteOfDay % 60))
+            }
+            item {
+                val reminderLabel = stringResource(Res.string.streak_reminder_title)
+                val enabled = Settings.shared.streakReminderEnabled
+                val minuteOfDay = Settings.shared.streakReminderMinuteOfDay.coerceIn(0, 1439)
+                StreakPanel {
+                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                        Text(reminderLabel, modifier = Modifier.weight(1f), style = MaterialTheme.typography.titleMedium)
+                        Switch(
+                            checked = enabled,
+                            onCheckedChange = { checked ->
+                                if (checked && Build.VERSION.SDK_INT >= 33) {
+                                    reminderPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                } else {
+                                    Settings.shared.streakReminderEnabled = checked
+                                    StreakReminderWorker.schedule(context, checked, minuteOfDay)
+                                }
+                            },
+                            modifier = Modifier.semantics { contentDescription = reminderLabel },
+                        )
+                    }
+                    Text(stringResource(Res.string.streak_reminder_timing), style = MaterialTheme.typography.bodySmall)
+                    TextButton(onClick = {
+                        TimePickerDialog(context, { _, hour, minute ->
+                            val value = hour * 60 + minute
+                            Settings.shared.streakReminderMinuteOfDay = value
+                            if (Settings.shared.streakReminderEnabled) StreakReminderWorker.schedule(context, true, value)
+                        }, minuteOfDay / 60, minuteOfDay % 60, true).show()
+                    }) {
+                        Text(String.format(locale, "%02d:%02d", minuteOfDay / 60, minuteOfDay % 60))
+                    }
                 }
             }
-        }
-        if (BuildConfig.DEBUG && showDebug) {
+            if (BuildConfig.DEBUG && showDebug) {
+                item {
+                    StreakPanel {
+                        Text(stringResource(Res.string.streak_debug_title), style = MaterialTheme.typography.titleMedium)
+                        Text(stringResource(Res.string.streak_debug_date, today.toString(), debugDays))
+                        Text(stringResource(Res.string.streak_debug_read_only), style = MaterialTheme.typography.bodySmall)
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            TextButton(onClick = { debugDays = (debugDays - 1).coerceAtLeast(-366) }) { Text("−1") }
+                            TextButton(onClick = { debugDays = 0 }) { Text(stringResource(Res.string.streak_debug_reset)) }
+                            TextButton(onClick = { debugDays = (debugDays + 1).coerceAtMost(366) }) { Text("+1") }
+                        }
+                    }
+                }
+            }
             item {
                 StreakPanel {
-                    Text(stringResource(Res.string.streak_debug_title), style = MaterialTheme.typography.titleMedium)
-                    Text(stringResource(Res.string.streak_debug_date, today.toString(), debugDays))
-                    Text(stringResource(Res.string.streak_debug_read_only), style = MaterialTheme.typography.bodySmall)
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        TextButton(onClick = { debugDays = (debugDays - 1).coerceAtLeast(-366) }) { Text("−1") }
-                        TextButton(onClick = { debugDays = 0 }) { Text(stringResource(Res.string.streak_debug_reset)) }
-                        TextButton(onClick = { debugDays = (debugDays + 1).coerceAtMost(366) }) { Text("+1") }
-                    }
-                }
-            }
-        }
-        item {
-            StreakPanel {
-                Column(
-                    Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    val motionEnabled = screenActive && streakMotionEnabled()
-                    val minimumMs = (Settings.shared.historyDuration * 1000f).toLong().coerceAtLeast(30_000L)
-                    val todayProgress = streakTodayProgress(streak.todayCounted, liveListeningMs.takeUnless { simulated }, minimumMs)
-                    val ringProgress by animateFloatAsState(
-                        todayProgress,
-                        animationSpec = tween(if (motionEnabled) PolishMotion.durationMillis else 0),
-                        label = "streakTodayProgress",
-                    )
-                    InteractiveStreakFlame(
-                        color = flameColor,
-                        variant = shownLevel.flameVariant,
-                        extinguished = extinguished,
-                        animate = motionEnabled,
-                        progress = ringProgress,
-                        counted = streak.todayCounted,
-                    )
-                    StreakTodayBadge(streak.todayCounted, flameColor, motionEnabled)
-                    StreakCount(streak.current, screenActive && streakMotionEnabled(), MaterialTheme.typography.displayMedium)
-                    TextButton(onClick = { showLevels = true }) {
-                        Text(stringResource(shownLevel.title), color = flameColor, style = MaterialTheme.typography.titleLarge)
-                    }
-                    Text(
-                        stringResource(
-                            when {
-                                extinguished -> Res.string.streak_extinguished
-                                streak.todayCounted -> Res.string.streak_active
-                                else -> Res.string.streak_waiting
-                            },
-                        ),
-                        textAlign = TextAlign.Center,
-                    )
-                    if (extinguished) Text(stringResource(Res.string.streak_previous, previousLength))
-                    streakRemainingMinutes(streak, effectiveNow, zone)?.let { remaining ->
+                    Column(
+                        Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        val motionEnabled = screenActive && streakMotionEnabled()
+                        val minimumMs = (Settings.shared.historyDuration * 1000f).toLong().coerceAtLeast(30_000L)
+                        val todayProgress = streakTodayProgress(streak.todayCounted, liveListeningMs.takeUnless { simulated }, minimumMs)
+                        val ringProgress by animateFloatAsState(
+                            todayProgress,
+                            animationSpec = tween(if (motionEnabled) PolishMotion.durationMillis else 0),
+                            label = "streakTodayProgress",
+                        )
+                        InteractiveStreakFlame(
+                            color = flameColor,
+                            variant = shownLevel.flameVariant,
+                            extinguished = extinguished,
+                            animate = motionEnabled,
+                            progress = ringProgress,
+                            counted = streak.todayCounted,
+                        )
+                        StreakTodayBadge(streak.todayCounted, flameColor, motionEnabled)
+                        StreakCount(streak.current, screenActive && streakMotionEnabled(), MaterialTheme.typography.displayMedium)
+                        TextButton(onClick = { showLevels = true }) {
+                            Text(stringResource(shownLevel.title), color = flameColor, style = MaterialTheme.typography.titleLarge)
+                        }
                         Text(
-                            stringResource(Res.string.streak_expires_in, remaining / 60, remaining % 60),
-                            style = MaterialTheme.typography.labelMedium,
+                            stringResource(
+                                when {
+                                    extinguished -> Res.string.streak_extinguished
+                                    streak.todayCounted -> Res.string.streak_active
+                                    else -> Res.string.streak_waiting
+                                },
+                            ),
                             textAlign = TextAlign.Center,
                         )
-                    }
-                    LinearProgressIndicator(progress = { progress }, modifier = Modifier.fillMaxWidth(), color = flameColor)
-                    if (next !=
-                        null
-                    ) {
-                        Text(
-                            stringResource(Res.string.streak_next, stringResource(next.title)),
-                            style = MaterialTheme.typography.labelMedium,
-                        )
-                    }
-                }
-            }
-        }
-        item {
-            StreakPanel {
-                Text(stringResource(Res.string.streak_week), style = MaterialTheme.typography.titleMedium)
-                Text(stringResource(Res.string.streak_calendar_legend), style = MaterialTheme.typography.bodySmall)
-                Spacer(Modifier.height(12.dp))
-                val start = today.minusDays((today.dayOfWeek.value - 1).toLong())
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    repeat(7) { offset ->
-                        val day = start.plusDays(offset.toLong())
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        if (extinguished) Text(stringResource(Res.string.streak_previous, previousLength))
+                        streakRemainingMinutes(streak, effectiveNow, zone)?.let { remaining ->
                             Text(
-                                day.dayOfWeek.getDisplayName(TextStyle.NARROW_STANDALONE, locale),
-                                style = MaterialTheme.typography.labelSmall,
+                                stringResource(Res.string.streak_expires_in, remaining / 60, remaining % 60),
+                                style = MaterialTheme.typography.labelMedium,
+                                textAlign = TextAlign.Center,
                             )
-                            StaggeredDayDot(day, today, listened, restored, offset, screenActive && streakMotionEnabled())
+                        }
+                        LinearProgressIndicator(progress = { progress }, modifier = Modifier.fillMaxWidth(), color = flameColor)
+                        if (next !=
+                            null
+                        ) {
+                            Text(
+                                stringResource(Res.string.streak_next, stringResource(next.title)),
+                                style = MaterialTheme.typography.labelMedium,
+                            )
                         }
                     }
                 }
             }
-        }
-        item {
-            StreakPanel {
-                val month = YearMonth.from(today)
-                Text(stringResource(Res.string.streak_calendar), style = MaterialTheme.typography.titleMedium)
-                Text(
-                    "${month.month.getDisplayName(TextStyle.FULL, locale)} ${month.year}",
-                    style = MaterialTheme.typography.bodyMedium,
-                )
-                Spacer(Modifier.height(8.dp))
-                val blanks = month.atDay(1).dayOfWeek.value - 1
-                val rows = (blanks + month.lengthOfMonth() + 6) / 7
-                repeat(rows) { row ->
+            item {
+                StreakPanel {
+                    Text(stringResource(Res.string.streak_week), style = MaterialTheme.typography.titleMedium)
+                    Text(stringResource(Res.string.streak_calendar_legend), style = MaterialTheme.typography.bodySmall)
+                    Spacer(Modifier.height(12.dp))
+                    val start = today.minusDays((today.dayOfWeek.value - 1).toLong())
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        repeat(7) { col ->
-                            val day = row * 7 + col - blanks + 1
-                            if (day in 1..month.lengthOfMonth()) {
-                                DayDot(month.atDay(day), today, listened, restored)
-                            } else {
-                                Spacer(Modifier.size(36.dp))
+                        repeat(7) { offset ->
+                            val day = start.plusDays(offset.toLong())
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(
+                                    day.dayOfWeek.getDisplayName(TextStyle.NARROW_STANDALONE, locale),
+                                    style = MaterialTheme.typography.labelSmall,
+                                )
+                                StaggeredDayDot(day, today, listened, restored, offset, screenActive && streakMotionEnabled())
                             }
                         }
                     }
                 }
             }
+            item {
+                StreakPanel {
+                    val month = YearMonth.from(today)
+                    Text(stringResource(Res.string.streak_calendar), style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        "${month.month.getDisplayName(TextStyle.FULL, locale)} ${month.year}",
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    val blanks = month.atDay(1).dayOfWeek.value - 1
+                    val rows = (blanks + month.lengthOfMonth() + 6) / 7
+                    repeat(rows) { row ->
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                            repeat(7) { col ->
+                                val day = row * 7 + col - blanks + 1
+                                if (day in 1..month.lengthOfMonth()) {
+                                    DayDot(month.atDay(day), today, listened, restored)
+                                } else {
+                                    Spacer(Modifier.size(36.dp))
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            item {
+                StreakPanel {
+                    Text(stringResource(Res.string.streak_longest, streak.longest))
+                    Text(stringResource(Res.string.streak_total_days, listened.size))
+                    if (restoreFailed) Text(stringResource(Res.string.streak_restore_failed), color = MaterialTheme.colorScheme.error)
+                    if (ledger == null) {
+                        Text(stringResource(Res.string.streak_restore_corrupt), color = MaterialTheme.colorScheme.error)
+                    } else {
+                        val remaining = ledger.remaining(today)
+                        Text(stringResource(Res.string.streak_recovery_remaining, remaining, MONTHLY_STREAK_RECOVERIES))
+                        Text(
+                            "●".repeat(remaining) + "○".repeat(MONTHLY_STREAK_RECOVERIES - remaining),
+                            color = flameColor,
+                            modifier = Modifier.clearAndSetSemantics { },
+                        )
+                        val nextReset = YearMonth.from(today).plusMonths(1).atDay(1)
+                        Text(
+                            stringResource(
+                                Res.string.streak_recovery_reset,
+                                nextReset.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(locale)),
+                            ),
+                            style = MaterialTheme.typography.labelMedium,
+                        )
+                        when (plan?.failure) {
+                            StreakRecoveryFailure.GAP_TOO_LARGE -> Text(stringResource(Res.string.streak_restore_too_long))
+                            StreakRecoveryFailure.INSUFFICIENT_QUOTA -> Text(stringResource(Res.string.streak_restore_no_quota))
+                            else -> Unit
+                        }
+                        if (plan?.canRecover ==
+                            true
+                        ) {
+                            Button(
+                                onClick = { confirmation = true },
+                                enabled = !simulated,
+                            ) { Text(stringResource(Res.string.streak_restore)) }
+                        }
+                    }
+                }
+            }
         }
-        item {
-            StreakPanel {
-                Text(stringResource(Res.string.streak_longest, streak.longest))
-                Text(stringResource(Res.string.streak_total_days, listened.size))
-                if (restoreFailed) Text(stringResource(Res.string.streak_restore_failed), color = MaterialTheme.colorScheme.error)
-                if (ledger == null) {
-                    Text(stringResource(Res.string.streak_restore_corrupt), color = MaterialTheme.colorScheme.error)
-                } else {
-                    val remaining = ledger.remaining(today)
-                    Text(stringResource(Res.string.streak_recovery_remaining, remaining, MONTHLY_STREAK_RECOVERIES))
-                    Text(
-                        "●".repeat(remaining) + "○".repeat(MONTHLY_STREAK_RECOVERIES - remaining),
-                        color = flameColor,
-                        modifier = Modifier.clearAndSetSemantics { },
-                    )
-                    val nextReset = YearMonth.from(today).plusMonths(1).atDay(1)
-                    Text(
-                        stringResource(
-                            Res.string.streak_recovery_reset,
-                            nextReset.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(locale)),
-                        ),
-                        style = MaterialTheme.typography.labelMedium,
-                    )
-                    when (plan?.failure) {
-                        StreakRecoveryFailure.GAP_TOO_LARGE -> Text(stringResource(Res.string.streak_restore_too_long))
-                        StreakRecoveryFailure.INSUFFICIENT_QUOTA -> Text(stringResource(Res.string.streak_restore_no_quota))
-                        else -> Unit
-                    }
-                    if (plan?.canRecover ==
-                        true
-                    ) {
-                        Button(
-                            onClick = { confirmation = true },
-                            enabled = !simulated,
-                        ) { Text(stringResource(Res.string.streak_restore)) }
-                    }
+        LiquidGlassSurface(
+            radius = 24.dp,
+            modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = tabContentTopPadding()),
+        ) {
+            Surface(
+                shape = RoundedCornerShape(24.dp),
+                color = glassCardColor(MaterialTheme.colorScheme.surfaceContainerHigh),
+                border = glassCardBorder(),
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().height(56.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    TextButton(onClick = onBack) { Text("‹  " + stringResource(Res.string.back)) }
+                    Text(stringResource(Res.string.streak_page_title), style = MaterialTheme.typography.titleMedium)
                 }
             }
         }
