@@ -142,6 +142,7 @@ import com.metrolist.shared.ui.components.CollectionLoadingPlaceholder
 import com.metrolist.shared.ui.components.CollectionPreviews
 import com.metrolist.shared.ui.components.CollectionSongsLoadingPlaceholder
 import com.metrolist.shared.ui.components.ContainedLoadingIndicator
+import com.metrolist.shared.ui.components.LiquidGlassSurface
 import com.metrolist.shared.ui.components.PlaylistCoverImage
 import com.metrolist.shared.ui.components.PlaylistOrderControls
 import com.metrolist.shared.ui.components.PopupContent
@@ -149,6 +150,7 @@ import com.metrolist.shared.ui.components.PopupVisibility
 import com.metrolist.shared.ui.components.SongSelectionControls
 import com.metrolist.shared.ui.components.appPageBackground
 import com.metrolist.shared.ui.components.appTopBarBackground
+import com.metrolist.shared.ui.components.glassCardColor
 import com.metrolist.shared.ui.components.images.AsyncImage
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import com.metrolist.shared.ui.navigation.navigationPopupSource
@@ -588,51 +590,62 @@ fun PlaylistScreen(
             if (selection.active) {
                 selectionBar()
             } else {
-                TopAppBar(
-                    title = {
-                        if (isTopBarCollapsed) {
-                            Text(
-                                text = playlistInfo?.title ?: "",
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                            )
-                        }
-                    },
-                    navigationIcon = {
-                        IconButton(
-                            onClick = onBackClick,
-                            modifier = Modifier.tvFocusHighlight(CircleShape),
-                            shapes = IconButtonDefaults.shapes(),
-                        ) {
-                            Icon(
-                                MetrolistIcons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = stringResource(Res.string.back),
-                            )
-                        }
-                    },
-                    actions = {
-                        IconButton(
-                            modifier = Modifier.tvFocusHighlight(CircleShape).navigationPopupSource(),
-                            onClick = { showMenu = true },
-                            shapes = IconButtonDefaults.shapes(),
-                        ) {
-                            Icon(MetrolistIcons.Default.MoreVert, contentDescription = stringResource(Res.string.more))
-                        }
-                    },
-                    colors =
-                        TopAppBarDefaults.topAppBarColors(
-                            containerColor =
-                                if (isTopBarCollapsed) {
-                                    appTopBarBackground(
-                                        MaterialTheme.colorScheme.surface,
-                                    )
-                                } else {
-                                    Color.Transparent
-                                },
-                            scrolledContainerColor = if (isTopBarCollapsed) MaterialTheme.colorScheme.surface else Color.Transparent,
-                        ),
-                    scrollBehavior = scrollBehavior,
-                )
+                LiquidGlassSurface(radius = 0.dp, modifier = Modifier.fillMaxWidth()) {
+                    TopAppBar(
+                        title = {
+                            if (isTopBarCollapsed) {
+                                Text(
+                                    text = playlistInfo?.title ?: "",
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                            }
+                        },
+                        navigationIcon = {
+                            IconButton(
+                                onClick = onBackClick,
+                                modifier = Modifier.tvFocusHighlight(CircleShape),
+                                shapes = IconButtonDefaults.shapes(),
+                            ) {
+                                Icon(
+                                    MetrolistIcons.AutoMirrored.Filled.ArrowBack,
+                                    contentDescription = stringResource(Res.string.back),
+                                )
+                            }
+                        },
+                        actions = {
+                            IconButton(
+                                modifier = Modifier.tvFocusHighlight(CircleShape).navigationPopupSource(),
+                                onClick = { showMenu = true },
+                                shapes = IconButtonDefaults.shapes(),
+                            ) {
+                                Icon(MetrolistIcons.Default.MoreVert, contentDescription = stringResource(Res.string.more))
+                            }
+                        },
+                        colors =
+                            TopAppBarDefaults.topAppBarColors(
+                                containerColor =
+                                    if (Settings.shared.liquidGlassTheme) {
+                                        glassCardColor(MaterialTheme.colorScheme.surface)
+                                    } else if (isTopBarCollapsed) {
+                                        appTopBarBackground(
+                                            MaterialTheme.colorScheme.surface,
+                                        )
+                                    } else {
+                                        Color.Transparent
+                                    },
+                                scrolledContainerColor =
+                                    if (Settings.shared.liquidGlassTheme) {
+                                        glassCardColor(MaterialTheme.colorScheme.surface)
+                                    } else if (isTopBarCollapsed) {
+                                        MaterialTheme.colorScheme.surface
+                                    } else {
+                                        Color.Transparent
+                                    },
+                            ),
+                        scrollBehavior = scrollBehavior,
+                    )
+                }
             }
         },
     ) { paddingValues ->
