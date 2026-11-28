@@ -171,6 +171,43 @@ class LiquidGlassBackdropTest {
         }
     }
 
+    /** The page can contain its own glass while a separate chrome layer samples the page. */
+    @Test
+    fun separatePageSourceUpdatesChromeWithoutSelfCapture() {
+        assumeTrue("Glass bridge requires Android 12", Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        val activityManager = instrumentation.targetContext.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        assumeTrue("Glass bridge skips low-RAM devices", !activityManager.isLowRamDevice)
+        assumeTrue("QWEA0 native library is unavailable", runCatching { System.loadLibrary("nativegauss") }.isSuccess)
+        val intent =
+            Intent(instrumentation.targetContext, LiquidGlassPageSourceTestActivity::class.java)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        val activity = instrumentation.startActivitySync(intent) as LiquidGlassPageSourceTestActivity
+        try {
+            instrumentation.waitForIdleSync()
+            Thread.sleep(1000)
+            lateinit var glass: QweGlassView
+            instrumentation.runOnMainSync {
+                glass = checkNotNull(activity.outerGlass) as QweGlassView
+                assertTrue("chrome must capture the separate page", glass.backdropSource === activity.page)
+                assertTrue("page chrome capture must update", glass.enableDynamicBackground)
+                assertTrue("page must contain its independent glass", activity.innerGlass is QweGlassView)
+            }
+            val green = captureWindowGlassCenter(activity.window, glass)
+            instrumentation.runOnMainSync { activity.pageColor = Color.Blue }
+            instrumentation.waitForIdleSync()
+            Thread.sleep(1000)
+            val blue = captureWindowGlassCenter(activity.window, glass)
+            assertTrue(
+                "chrome must show the foreground page, not red wallpaper: $green",
+                AndroidColor.green(green) > AndroidColor.red(green) + 20,
+            )
+            assertTrue("chrome must update as the page changes: $blue", AndroidColor.blue(blue) > AndroidColor.red(blue) + 20)
+        } finally {
+            instrumentation.runOnMainSync { activity.finish() }
+        }
+    }
+
     /** A dialog must sample the real activity content, not just the wallpaper source. */
     @Test
     fun dialogGlassSamplesAndUpdatesActivityForeground() {

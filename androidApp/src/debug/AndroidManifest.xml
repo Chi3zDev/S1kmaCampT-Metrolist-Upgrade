@@ -3,5 +3,8 @@
         <activity
             android:name="com.metrolist.android.glass.LiquidGlassBackdropTestActivity"
             android:exported="false" />
+        <activity
+            android:name="com.metrolist.android.glass.LiquidGlassPageSourceTestActivity"
+            android:exported="false" />
     </application>
 </manifest>
