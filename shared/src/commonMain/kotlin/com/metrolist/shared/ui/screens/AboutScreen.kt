@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -32,7 +33,6 @@ import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
@@ -577,36 +577,50 @@ private fun UpgradeNotesScreen(
     upgradeNumber: Int,
     onBack: () -> Unit,
 ) {
-    Column(
-        modifier =
-            Modifier
-                .fillMaxSize()
-                .verticalScrollWithDrag(rememberScrollState())
-                .padding(horizontal = 16.dp, vertical = 16.dp)
-                .padding(bottom = bottomInset),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = onBack) {
-                Icon(MetrolistIcons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(Res.string.back))
-            }
-            Text(stringResource(Res.string.about_upgrade_whats_new), style = MaterialTheme.typography.headlineSmall)
-        }
-        upgradeNoteVersions(upgradeNumber).forEach { version ->
-            Text(
-                stringResource(Res.string.about_upgrade_version, version),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-            )
-            val notes = if (version == 2) upgradeTwoNotes else upgradeOneNotes
-            notes.forEach { note ->
-                Surface(
-                    shape = RoundedCornerShape(16.dp),
-                    color = glassCardColor(MaterialTheme.colorScheme.surfaceContainer),
-                    border = glassCardBorder(),
-                    modifier = Modifier.fillMaxWidth(),
+    Column(Modifier.fillMaxSize().statusBarsPadding()) {
+        LiquidGlassSurface(radius = 0.dp, modifier = Modifier.fillMaxWidth()) {
+            Surface(
+                color = glassCardColor(MaterialTheme.colorScheme.surface),
+                border = glassCardBorder(),
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text(stringResource(note), Modifier.padding(16.dp), style = MaterialTheme.typography.bodyLarge)
+                    LiquidGlassIconButton(onClick = onBack) {
+                        Icon(MetrolistIcons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(Res.string.back))
+                    }
+                    Text(stringResource(Res.string.about_upgrade_whats_new), style = MaterialTheme.typography.headlineSmall)
+                }
+            }
+        }
+        Column(
+            modifier =
+                Modifier
+                    .weight(1f)
+                    .verticalScrollWithDrag(rememberScrollState())
+                    .padding(horizontal = 16.dp, vertical = 16.dp)
+                    .padding(bottom = bottomInset),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            upgradeNoteVersions(upgradeNumber).forEach { version ->
+                Text(
+                    stringResource(Res.string.about_upgrade_version, version),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                )
+                val notes = if (version == 2) upgradeTwoNotes else upgradeOneNotes
+                notes.forEach { note ->
+                    LiquidGlassSurface(radius = 16.dp, modifier = Modifier.fillMaxWidth()) {
+                        Surface(
+                            shape = RoundedCornerShape(16.dp),
+                            color = glassCardColor(MaterialTheme.colorScheme.surfaceContainer),
+                            border = glassCardBorder(),
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            Text(stringResource(note), Modifier.padding(16.dp), style = MaterialTheme.typography.bodyLarge)
+                        }
+                    }
                 }
             }
         }
