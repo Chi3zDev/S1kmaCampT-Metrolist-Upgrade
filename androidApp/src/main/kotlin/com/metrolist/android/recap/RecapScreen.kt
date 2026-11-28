@@ -25,20 +25,22 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -106,6 +108,12 @@ import com.metrolist.shared.generated.resources.story_summary
 import com.metrolist.shared.settings.Settings
 import com.metrolist.shared.ui.LocalPlayerEffectsAllowed
 import com.metrolist.shared.ui.PolishMotion
+import com.metrolist.shared.ui.components.AlertDialog
+import com.metrolist.shared.ui.components.LiquidGlassIconButton
+import com.metrolist.shared.ui.components.LiquidGlassSurface
+import com.metrolist.shared.ui.components.appPageBackground
+import com.metrolist.shared.ui.components.glassCardBorder
+import com.metrolist.shared.ui.components.glassCardColor
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import com.metrolist.shared.ui.navigation.LocalContentObscured
 import com.metrolist.shared.ui.navigation.LocalRootContentActive
@@ -180,11 +188,14 @@ fun RecapScreen(onBack: () -> Unit) {
             confirmButton = {},
         )
     }
-    Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface), contentAlignment = Alignment.Center) {
+    Box(Modifier.fillMaxSize().background(appPageBackground(MaterialTheme.colorScheme.surface)), contentAlignment = Alignment.Center) {
         val recap = data
         when {
             failed -> {
-                Text(stringResource(Res.string.recap_error))
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(stringResource(Res.string.recap_error))
+                    TextButton(onClick = onBack) { Text(stringResource(Res.string.back)) }
+                }
             }
 
             recap == null -> {
@@ -447,7 +458,13 @@ private fun RecapStory(
                 }
             }
         }
-        Column(Modifier.align(Alignment.TopCenter).fillMaxWidth().padding(12.dp)) {
+        Column(
+            Modifier
+                .align(Alignment.TopCenter)
+                .fillMaxWidth()
+                .windowInsetsPadding(WindowInsets.statusBars)
+                .padding(12.dp),
+        ) {
             Row(horizontalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.fillMaxWidth()) {
                 pages.forEachIndexed { index, _ ->
                     Box(
@@ -477,11 +494,29 @@ private fun RecapStory(
                 }
             }
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                IconButton(onClick = onBack) {
-                    Icon(MetrolistIcons.AutoMirrored.Filled.ArrowBack, stringResource(Res.string.back), tint = colors.onPrimaryContainer)
+                LiquidGlassIconButton(onClick = onBack) {
+                    Icon(
+                        MetrolistIcons.AutoMirrored.Filled.ArrowBack,
+                        stringResource(Res.string.back),
+                        tint = if (Settings.shared.liquidGlassTheme) colors.onSurface else colors.onPrimaryContainer,
+                    )
                 }
-                TextButton(onClick = onPeriod) { Text(stringResource(Res.string.story_change_period), color = colors.onPrimaryContainer) }
-                IconButton(onClick = {
+                LiquidGlassSurface(radius = 24.dp) {
+                    TextButton(
+                        onClick = onPeriod,
+                        colors =
+                            if (Settings.shared.liquidGlassTheme) {
+                                ButtonDefaults.textButtonColors(
+                                    containerColor = glassCardColor(colors.surfaceContainer),
+                                    contentColor = colors.onSurface,
+                                )
+                            } else {
+                                ButtonDefaults.textButtonColors(contentColor = colors.onPrimaryContainer)
+                            },
+                        border = if (Settings.shared.liquidGlassTheme) glassCardBorder() else null,
+                    ) { Text(stringResource(Res.string.story_change_period)) }
+                }
+                LiquidGlassIconButton(onClick = {
                     sharing = true
                     pressed = true
                     scope.launch {
@@ -498,7 +533,13 @@ private fun RecapStory(
                             pressed = false
                         }
                     }
-                }, enabled = !sharing) { Icon(MetrolistIcons.Outlined.Share, shareLabel, tint = colors.onPrimaryContainer) }
+                }, enabled = !sharing) {
+                    Icon(
+                        MetrolistIcons.Outlined.Share,
+                        shareLabel,
+                        tint = if (Settings.shared.liquidGlassTheme) colors.onSurface else colors.onPrimaryContainer,
+                    )
+                }
             }
         }
     }
