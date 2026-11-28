@@ -1,21 +1,18 @@
 package com.metrolist.android.ui.component
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.captionBar
 import androidx.compose.foundation.layout.exclude
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.metrolist.shared.ui.components.GlassScreenFrame as SharedGlassScreenFrame
+import com.metrolist.shared.ui.components.glassScreenViewport as sharedGlassScreenViewport
 
 val TabTopBarHeight = 64.dp
 
@@ -23,7 +20,7 @@ val TabTopBarHeight = 64.dp
 val LocalTabContentTopPadding = staticCompositionLocalOf<Dp?> { null }
 
 /** Keep scrollable content below the floating bar even after scrolling. */
-fun Modifier.glassScreenViewport(topPadding: Dp): Modifier = fillMaxSize().padding(top = topPadding).clipToBounds()
+fun Modifier.glassScreenViewport(topPadding: Dp): Modifier = sharedGlassScreenViewport(topPadding)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,8 +41,5 @@ fun GlassScreenFrame(
     topBar: @Composable () -> Unit,
     content: @Composable (Modifier) -> Unit,
 ) {
-    Box(Modifier.fillMaxSize()) {
-        content(Modifier.glassScreenViewport(topInset + barHeight))
-        Box(Modifier.fillMaxWidth().padding(top = topInset)) { topBar() }
-    }
+    SharedGlassScreenFrame(topInset = topInset, barHeight = barHeight, topBar = topBar, content = content)
 }
