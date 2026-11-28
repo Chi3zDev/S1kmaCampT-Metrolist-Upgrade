@@ -5762,4 +5762,9 @@
     <string name="experimental_video_not_ready">Player is not ready.</string>
     <string name="video_home_title">Video</string>
     <string name="video_home_description">Explore videos, live streams and channels</string>
+    <string name="player_share_style_title">Choose player share style</string>
+    <string name="player_share_style_blur">Blur</string>
+    <string name="player_share_style_clear">Clear</string>
+    <string name="player_share_style_flat">Flat</string>
+    <string name="player_share_style_frosted">Frosted</string>
 </resources>

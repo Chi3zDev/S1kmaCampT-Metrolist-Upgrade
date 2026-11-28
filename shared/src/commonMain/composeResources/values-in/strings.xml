@@ -2683,4 +2683,9 @@
     <string name="experimental_video_not_ready">Pemutar belum siap.</string>
     <string name="video_home_title">Video</string>
     <string name="video_home_description">Jelajahi video, siaran langsung, dan channel</string>
+    <string name="player_share_style_title">Pilih tampilan bagikan pemutar</string>
+    <string name="player_share_style_blur">Blur</string>
+    <string name="player_share_style_clear">Jernih</string>
+    <string name="player_share_style_flat">Datar</string>
+    <string name="player_share_style_frosted">Buram kaca</string>
 </resources>

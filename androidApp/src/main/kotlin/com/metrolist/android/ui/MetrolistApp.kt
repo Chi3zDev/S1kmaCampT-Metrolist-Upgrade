@@ -205,6 +205,8 @@ import com.metrolist.android.ui.glass.hideBackdropHost
 import com.metrolist.android.ui.glass.rememberQweGlassAvailable
 import com.metrolist.android.ui.player.AndroidPlayerPlatform
 import com.metrolist.android.ui.player.GeneralVideoPlayer
+import com.metrolist.android.ui.player.MusicShareRequest
+import com.metrolist.android.ui.player.MusicShareSurface
 import com.metrolist.android.ui.player.MusicVideoSurface
 import com.metrolist.android.ui.player.PictureInPictureHelper
 import com.metrolist.android.ui.player.renderMusicSharePoster
@@ -295,6 +297,11 @@ import com.metrolist.shared.generated.resources.mysterious_fourth_tab
 import com.metrolist.shared.generated.resources.mysterious_fourth_tab_description
 import com.metrolist.shared.generated.resources.offline_mode
 import com.metrolist.shared.generated.resources.play
+import com.metrolist.shared.generated.resources.player_share_style_blur
+import com.metrolist.shared.generated.resources.player_share_style_clear
+import com.metrolist.shared.generated.resources.player_share_style_flat
+import com.metrolist.shared.generated.resources.player_share_style_frosted
+import com.metrolist.shared.generated.resources.player_share_style_title
 import com.metrolist.shared.generated.resources.profile
 import com.metrolist.shared.generated.resources.search
 import com.metrolist.shared.generated.resources.share
@@ -416,6 +423,7 @@ import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
 import io.github.neoruaa.glasmio.glass.render.backdrops.layerBackdrop
 import io.github.neoruaa.glasmio.glass.render.backdrops.rememberLayerBackdrop
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -2270,6 +2278,53 @@ fun MetrolistApp(
                             val playerLifecycleState by lifecycleOwner.lifecycle.currentStateAsState()
                             val sharePlayerLabel = stringResource(Res.string.share)
                             val sharePlayerError = stringResource(Res.string.statistics_share_failed)
+                            var pendingPlayerShare by remember { mutableStateOf<MusicShareRequest?>(null) }
+                            pendingPlayerShare?.let { request ->
+                                AlertDialog(
+                                    onDismissRequest = { pendingPlayerShare = null },
+                                    title = { Text(stringResource(Res.string.player_share_style_title)) },
+                                    text = {
+                                        Column(Modifier.fillMaxWidth()) {
+                                            MusicShareSurface.entries.forEach { surface ->
+                                                val label =
+                                                    when (surface) {
+                                                        MusicShareSurface.BLUR -> Res.string.player_share_style_blur
+                                                        MusicShareSurface.CLEAR -> Res.string.player_share_style_clear
+                                                        MusicShareSurface.FLAT -> Res.string.player_share_style_flat
+                                                        MusicShareSurface.FROSTED -> Res.string.player_share_style_frosted
+                                                    }
+                                                LiquidGlassTextButton(onClick = {
+                                                    pendingPlayerShare = null
+                                                    coroutineScope.launch {
+                                                        try {
+                                                            val image =
+                                                                renderMusicSharePoster(
+                                                                    context,
+                                                                    request.song,
+                                                                    request.positionMs,
+                                                                    request.durationMs,
+                                                                    request.playing,
+                                                                    surface,
+                                                                )
+                                                            shareImage(context, image, sharePlayerLabel)
+                                                        } catch (error: CancellationException) {
+                                                            throw error
+                                                        } catch (_: Exception) {
+                                                            Toast.makeText(context, sharePlayerError, Toast.LENGTH_SHORT).show()
+                                                        }
+                                                    }
+                                                }) { Text(stringResource(label)) }
+                                            }
+                                        }
+                                    },
+                                    confirmButton = {},
+                                    dismissButton = {
+                                        LiquidGlassTextButton(
+                                            onClick = { pendingPlayerShare = null },
+                                        ) { Text(stringResource(Res.string.cancel)) }
+                                    },
+                                )
+                            }
                             CompositionLocalProvider(LocalThemeGlassBackdrop provides qwePageBackdrop) {
                                 if (currentSong?.isGeneralVideo == true) {
                                     GeneralVideoPlayer(
@@ -2283,8 +2338,7 @@ fun MetrolistApp(
                                 } else {
                                     PlayerScreen(
                                         onSharePlayerImage = { song, position, duration, playing ->
-                                            val image = renderMusicSharePoster(context, song, position, duration, playing)
-                                            shareImage(context, image, sharePlayerLabel)
+                                            pendingPlayerShare = MusicShareRequest(song, position, duration, playing)
                                         },
                                         onSharePlayerImageError = { Toast.makeText(context, sharePlayerError, Toast.LENGTH_SHORT).show() },
                                         isScreenVisible = playerLifecycleState.isAtLeast(Lifecycle.State.STARTED),

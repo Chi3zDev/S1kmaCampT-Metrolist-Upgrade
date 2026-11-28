@@ -27,6 +27,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlin.math.min
 
+internal enum class MusicShareSurface { BLUR, CLEAR, FLAT, FROSTED }
+
+internal data class MusicShareRequest(
+    val song: SongUiModel,
+    val positionMs: Long,
+    val durationMs: Long,
+    val playing: Boolean,
+)
+
 /** A purpose-built image, rather than a capture of AndroidView or video surfaces. */
 internal suspend fun renderMusicSharePoster(
     context: Context,
@@ -34,6 +43,7 @@ internal suspend fun renderMusicSharePoster(
     positionMs: Long,
     durationMs: Long,
     playing: Boolean,
+    surface: MusicShareSurface = MusicShareSurface.FLAT,
 ): ImageBitmap {
     val artwork =
         song.displayThumbnail?.let { url ->
@@ -55,7 +65,7 @@ internal suspend fun renderMusicSharePoster(
     val audio = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
     val maxVolume = audio.getStreamMaxVolume(AudioManager.STREAM_MUSIC).coerceAtLeast(1)
     val volume = (audio.getStreamVolume(AudioManager.STREAM_MUSIC).toFloat() / maxVolume).coerceIn(0f, 1f)
-    return withContext(Dispatchers.Default) { drawMusicPoster(song, artwork, positionMs, durationMs, playing, volume) }
+    return withContext(Dispatchers.Default) { drawMusicPoster(song, artwork, positionMs, durationMs, playing, volume, surface) }
 }
 
 private fun drawMusicPoster(
@@ -65,6 +75,7 @@ private fun drawMusicPoster(
     durationMs: Long,
     playing: Boolean,
     volume: Float,
+    surface: MusicShareSurface,
 ): ImageBitmap {
     val output = Bitmap.createBitmap(1080, 1920, Bitmap.Config.ARGB_8888)
     val canvas = Canvas(output)
@@ -78,8 +89,39 @@ private fun drawMusicPoster(
     paint.shader = LinearGradient(0f, 0f, 1080f, 1920f, 0xAA000000.toInt(), 0xDD17171C.toInt(), Shader.TileMode.CLAMP)
     canvas.drawRect(0f, 0f, 1080f, 1920f, paint)
     paint.shader = null
-    paint.color = 0xD91B1B20.toInt()
-    canvas.drawRoundRect(RectF(80f, 165f, 1000f, 1740f), 88f, 88f, paint)
+    val cardRect = RectF(80f, 165f, 1000f, 1740f)
+    if (surface != MusicShareSurface.FLAT && artwork != null && artwork.width > 0 && artwork.height > 0) {
+        val detail =
+            when (surface) {
+                MusicShareSurface.CLEAR -> 160
+                MusicShareSurface.BLUR -> 24
+                MusicShareSurface.FROSTED -> 10
+                MusicShareSurface.FLAT -> 18
+            }
+        val backdrop = Bitmap.createScaledBitmap(artwork, detail, detail, true)
+        val clip = Path().apply { addRoundRect(cardRect, 88f, 88f, Path.Direction.CW) }
+        canvas.save()
+        canvas.clipPath(clip)
+        paint.color = Color.WHITE
+        canvas.drawBitmap(backdrop, null, Rect(0, 0, 1080, 1920), paint)
+        canvas.restore()
+        if (backdrop !== artwork) backdrop.recycle()
+    }
+    paint.color =
+        when (surface) {
+            MusicShareSurface.FLAT -> 0xD91B1B20.toInt()
+            MusicShareSurface.CLEAR -> 0x991B1B20.toInt()
+            MusicShareSurface.BLUR -> 0xB51B1B20.toInt()
+            MusicShareSurface.FROSTED -> 0xC95C5C63.toInt()
+        }
+    canvas.drawRoundRect(cardRect, 88f, 88f, paint)
+    if (surface != MusicShareSurface.FLAT) {
+        paint.style = Paint.Style.STROKE
+        paint.strokeWidth = 3f
+        paint.color = 0x55FFFFFF
+        canvas.drawRoundRect(cardRect, 88f, 88f, paint)
+        paint.style = Paint.Style.FILL
+    }
 
     val artRect = RectF(150f, 235f, 930f, 1015f)
     paint.color = Color.rgb(42, 42, 48)
