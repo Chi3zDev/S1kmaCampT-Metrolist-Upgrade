@@ -1288,6 +1288,7 @@ fun MetrolistApp(
                     val useQweThemeGlass =
                         rememberQweGlassAvailable(enabled = themeGlassRequested, lightMode = Settings.shared.glassLightMode)
                     var qweBackdropSource by remember { mutableStateOf<View?>(null) }
+                    var qwePageSource by remember { mutableStateOf<View?>(null) }
                     val qweThemeBackdrop =
                         if (useQweThemeGlass) {
                             qweBackdropSource?.let { source ->
@@ -1295,6 +1296,16 @@ fun MetrolistApp(
                                     QweThemeGlassBackdrop(source, Triple(backgroundUri, backgroundImageReady, appBackground))
                                 }
                             }
+                        } else {
+                            null
+                        }
+                    // Chrome outside the page may sample its live, separate ComposeView. Page
+                    // surfaces themselves keep the wallpaper source to avoid self-capture.
+                    val qwePageBackdrop =
+                        if (useQweThemeGlass) {
+                            qwePageSource?.let { source ->
+                                remember(source) { QweThemeGlassBackdrop(source, Unit, dynamicSource = true) }
+                            } ?: qweThemeBackdrop
                         } else {
                             null
                         }
@@ -1576,7 +1587,7 @@ fun MetrolistApp(
                         CompositionLocalProvider(
                             LocalAppBackgroundVisible provides backgroundImageReady,
                             LocalTabContentTopPadding provides screenTopPadding,
-                            LocalThemeGlassBackdrop provides qweThemeBackdrop,
+                            LocalThemeGlassBackdrop provides qwePageBackdrop,
                             LocalContentObscured provides (isInPipMode || contentObscured),
                             LocalFloatingNavBar provides useFloatingNavBar,
                             LocalGlassNavbarBottomOffset provides
@@ -1863,189 +1874,233 @@ fun MetrolistApp(
                                                 .consumeWindowInsets(scaffoldPadding)
                                                 .consumeWindowInsets(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)),
                                         ) {
-                                            val pageBackground: @Composable () -> Unit = {
-                                                Box(Modifier.fillMaxSize().background(appBackground)) {
-                                                    if (backgroundUri.isNotEmpty()) {
-                                                        CoilAsyncImage(
-                                                            model = android.net.Uri.parse(backgroundUri),
-                                                            contentDescription = null,
-                                                            contentScale = ContentScale.Crop,
-                                                            onSuccess = { backgroundImageReady = true },
-                                                            onError = { backgroundImageReady = false },
-                                                            modifier = Modifier.fillMaxSize(),
-                                                        )
-                                                        // Preserve text contrast over arbitrary user-selected photographs.
-                                                        Box(Modifier.fillMaxSize().background(appBackground.copy(alpha = 0.78f)))
-                                                    }
-                                                }
-                                            }
-                                            if (useQweThemeGlass) {
-                                                QweBackdropSource(
-                                                    onViewChanged = { qweBackdropSource = it },
-                                                    modifier = Modifier.fillMaxSize(),
-                                                    content = pageBackground,
-                                                )
-                                            } else {
-                                                pageBackground()
-                                            }
-                                            Box(
-                                                modifier =
-                                                    Modifier
-                                                        .fillMaxSize(),
-                                            ) {
-                                                Box(
-                                                    modifier =
-                                                        Modifier
-                                                            .fillMaxSize()
-                                                            .then(
-                                                                if (!isAndroidTv) {
+                                            val pageContent: @Composable () -> Unit = {
+                                                CompositionLocalProvider(LocalThemeGlassBackdrop provides qweThemeBackdrop) {
+                                                    Box(Modifier.fillMaxSize()) {
+                                                        val pageBackground: @Composable () -> Unit = {
+                                                            Box(Modifier.fillMaxSize().background(appBackground)) {
+                                                                if (backgroundUri.isNotEmpty()) {
+                                                                    CoilAsyncImage(
+                                                                        model = android.net.Uri.parse(backgroundUri),
+                                                                        contentDescription = null,
+                                                                        contentScale = ContentScale.Crop,
+                                                                        onSuccess = { backgroundImageReady = true },
+                                                                        onError = { backgroundImageReady = false },
+                                                                        modifier = Modifier.fillMaxSize(),
+                                                                    )
+                                                                    // Preserve text contrast over arbitrary user-selected photographs.
+                                                                    Box(
+                                                                        Modifier.fillMaxSize().background(
+                                                                            appBackground.copy(alpha = 0.78f),
+                                                                        ),
+                                                                    )
+                                                                }
+                                                            }
+                                                        }
+                                                        if (useQweThemeGlass) {
+                                                            QweBackdropSource(
+                                                                onViewChanged = { qweBackdropSource = it },
+                                                                modifier = Modifier.fillMaxSize(),
+                                                                content = pageBackground,
+                                                            )
+                                                        } else {
+                                                            pageBackground()
+                                                        }
+                                                        Box(
+                                                            modifier =
+                                                                Modifier
+                                                                    .fillMaxSize(),
+                                                        ) {
+                                                            Box(
+                                                                modifier =
                                                                     Modifier
-                                                                        .focusProperties { canFocus = !isPlayerExpanded }
-                                                                        .focusGroup()
-                                                                } else {
-                                                                    Modifier
-                                                                },
-                                                            ).focusRequester(contentFocusRequester)
-                                                            .focusRestorer()
-                                                            .then(
-                                                                if (useNavigationRail && shouldShowNavigationBar) {
-                                                                    Modifier.focusProperties {
-                                                                        onExit = {
-                                                                            if (requestedFocusDirection == directionToNavigationRail) {
-                                                                                selectedRailFocusRequester.requestFocus()
+                                                                        .fillMaxSize()
+                                                                        .then(
+                                                                            if (!isAndroidTv) {
+                                                                                Modifier
+                                                                                    .focusProperties { canFocus = !isPlayerExpanded }
+                                                                                    .focusGroup()
+                                                                            } else {
+                                                                                Modifier
+                                                                            },
+                                                                        ).focusRequester(contentFocusRequester)
+                                                                        .focusRestorer()
+                                                                        .then(
+                                                                            if (useNavigationRail && shouldShowNavigationBar) {
+                                                                                Modifier.focusProperties {
+                                                                                    onExit = {
+                                                                                        if (requestedFocusDirection ==
+                                                                                            directionToNavigationRail
+                                                                                        ) {
+                                                                                            selectedRailFocusRequester.requestFocus()
+                                                                                        }
+                                                                                    }
+                                                                                }
+                                                                            } else {
+                                                                                Modifier
+                                                                            },
+                                                                        ).focusGroup(),
+                                                            ) {
+                                                                val navEntryProvider =
+                                                                    remember(
+                                                                        navigator,
+                                                                        authManager,
+                                                                        context,
+                                                                        coroutineScope,
+                                                                        floatingActionsBottomInset,
+                                                                        homeScrollToTopEvents,
+                                                                        libraryScrollToTopEvents,
+                                                                        libraryViewModel,
+                                                                    ) {
+                                                                        getEntryProvider(
+                                                                            navigator,
+                                                                            authManager,
+                                                                            context,
+                                                                            coroutineScope,
+                                                                            { pendingSearchQuery },
+                                                                            { pendingSearchQuery = null },
+                                                                            { pendingRoomCode },
+                                                                            floatingActionsBottomInset,
+                                                                            homeScrollToTopEvents,
+                                                                            libraryScrollToTopEvents,
+                                                                            libraryViewModel,
+                                                                            onSearchResultsVisible = { searchResultsVisible = it },
+                                                                        )
+                                                                    }
+                                                                CompositionLocalProvider(
+                                                                    LocalHostDefaultProvider provides routeHostDefaults,
+                                                                ) {
+                                                                    RootExitBackHandler(
+                                                                        enabled = !navigator.canGoBack && !playerHandlesBack,
+                                                                        onExit = onExitApp,
+                                                                    )
+                                                                    NavSharedTransitionLayout(Modifier.fillMaxSize(), Alignment.TopCenter) {
+                                                                        val onBack: () -> Unit = {
+                                                                            if (navigator.goBack() &&
+                                                                                !navigationState.topLevelRoute.isVisibleNavigationScreen()
+                                                                            ) {
+                                                                                val target = resolveAndPersistStartupScreen()
+                                                                                navigationState.startRoute = target
+                                                                                navigator.navigate(target)
                                                                             }
                                                                         }
+                                                                        val sceneState =
+                                                                            rememberSceneState(
+                                                                                entries =
+                                                                                    navigationState.toEntries(navEntryProvider) {
+                                                                                        listOf(rememberDetailViewModelNavEntryDecorator())
+                                                                                    },
+                                                                                sceneStrategies =
+                                                                                    remember {
+                                                                                        listOf(
+                                                                                            DialogSceneStrategy(),
+                                                                                        )
+                                                                                    },
+                                                                                onBack = onBack,
+                                                                            )
+                                                                        val backState = rememberNavigationEventState(sceneState)
+                                                                        val input = navigationState.containers.input
+                                                                        val backInProgress =
+                                                                            backState.transitionState is
+                                                                                NavigationEventTransitionState.InProgress
+                                                                        SideEffect {
+                                                                            if (backInProgress) {
+                                                                                input.beginBack()
+                                                                            } else {
+                                                                                input.reset()
+                                                                            }
+                                                                        }
+                                                                        NavigationBackHandler(
+                                                                            sceneState = sceneState,
+                                                                            state = backState,
+                                                                            onBackCancelled = { input.cancelBack() },
+                                                                            onBackCompleted = onBack,
+                                                                        )
+                                                                        NavDisplay(
+                                                                            sceneState = sceneState,
+                                                                            navigationEventState = backState,
+                                                                            modifier =
+                                                                                if (useDesktopUi) {
+                                                                                    Modifier
+                                                                                        .widthIn(
+                                                                                            max = DesktopContentMaxWidth,
+                                                                                        ).fillMaxSize()
+                                                                                } else {
+                                                                                    Modifier
+                                                                                },
+                                                                            transitionSpec = {
+                                                                                val source =
+                                                                                    initialState.entries.lastOrNull()?.metadata?.get(
+                                                                                        NAVIGATION_ROUTE_METADATA_KEY,
+                                                                                    ) as? Screen
+                                                                                val destination =
+                                                                                    targetState.entries.lastOrNull()?.metadata?.get(
+                                                                                        NAVIGATION_ROUTE_METADATA_KEY,
+                                                                                    ) as? Screen
+                                                                                navigationMotion.transition(
+                                                                                    navigationState.containers.pagePattern(
+                                                                                        source,
+                                                                                        destination,
+                                                                                    ),
+                                                                                    origin =
+                                                                                        navigationState.containers.pageOrigin(
+                                                                                            destination,
+                                                                                        ),
+                                                                                )
+                                                                            },
+                                                                            popTransitionSpec = {
+                                                                                val source =
+                                                                                    targetState.entries.lastOrNull()?.metadata?.get(
+                                                                                        NAVIGATION_ROUTE_METADATA_KEY,
+                                                                                    ) as? Screen
+                                                                                val destination =
+                                                                                    initialState.entries.lastOrNull()?.metadata?.get(
+                                                                                        NAVIGATION_ROUTE_METADATA_KEY,
+                                                                                    ) as? Screen
+                                                                                navigationMotion.transition(
+                                                                                    navigationState.containers.pagePattern(
+                                                                                        source,
+                                                                                        destination,
+                                                                                    ),
+                                                                                    isPop = true,
+                                                                                    origin =
+                                                                                        navigationState.containers.pageOrigin(
+                                                                                            destination,
+                                                                                        ),
+                                                                                )
+                                                                            },
+                                                                            predictivePopTransitionSpec = {
+                                                                                val source =
+                                                                                    targetState.entries.lastOrNull()?.metadata?.get(
+                                                                                        NAVIGATION_ROUTE_METADATA_KEY,
+                                                                                    ) as? Screen
+                                                                                val destination =
+                                                                                    initialState.entries.lastOrNull()?.metadata?.get(
+                                                                                        NAVIGATION_ROUTE_METADATA_KEY,
+                                                                                    ) as? Screen
+                                                                                navigationMotion.predictiveBackTransition(
+                                                                                    navigationState.containers.pagePattern(
+                                                                                        source,
+                                                                                        destination,
+                                                                                    ),
+                                                                                    navigationState.containers.pageOrigin(destination),
+                                                                                )
+                                                                            },
+                                                                        )
                                                                     }
-                                                                } else {
-                                                                    Modifier
-                                                                },
-                                                            ).focusGroup(),
-                                                ) {
-                                                    val navEntryProvider =
-                                                        remember(
-                                                            navigator,
-                                                            authManager,
-                                                            context,
-                                                            coroutineScope,
-                                                            floatingActionsBottomInset,
-                                                            homeScrollToTopEvents,
-                                                            libraryScrollToTopEvents,
-                                                            libraryViewModel,
-                                                        ) {
-                                                            getEntryProvider(
-                                                                navigator,
-                                                                authManager,
-                                                                context,
-                                                                coroutineScope,
-                                                                { pendingSearchQuery },
-                                                                { pendingSearchQuery = null },
-                                                                { pendingRoomCode },
-                                                                floatingActionsBottomInset,
-                                                                homeScrollToTopEvents,
-                                                                libraryScrollToTopEvents,
-                                                                libraryViewModel,
-                                                                onSearchResultsVisible = { searchResultsVisible = it },
-                                                            )
-                                                        }
-                                                    CompositionLocalProvider(LocalHostDefaultProvider provides routeHostDefaults) {
-                                                        RootExitBackHandler(
-                                                            enabled = !navigator.canGoBack && !playerHandlesBack,
-                                                            onExit = onExitApp,
-                                                        )
-                                                        NavSharedTransitionLayout(Modifier.fillMaxSize(), Alignment.TopCenter) {
-                                                            val onBack: () -> Unit = {
-                                                                if (navigator.goBack() &&
-                                                                    !navigationState.topLevelRoute.isVisibleNavigationScreen()
-                                                                ) {
-                                                                    val target = resolveAndPersistStartupScreen()
-                                                                    navigationState.startRoute = target
-                                                                    navigator.navigate(target)
                                                                 }
                                                             }
-                                                            val sceneState =
-                                                                rememberSceneState(
-                                                                    entries =
-                                                                        navigationState.toEntries(navEntryProvider) {
-                                                                            listOf(rememberDetailViewModelNavEntryDecorator())
-                                                                        },
-                                                                    sceneStrategies = remember { listOf(DialogSceneStrategy()) },
-                                                                    onBack = onBack,
-                                                                )
-                                                            val backState = rememberNavigationEventState(sceneState)
-                                                            val input = navigationState.containers.input
-                                                            val backInProgress =
-                                                                backState.transitionState is NavigationEventTransitionState.InProgress
-                                                            SideEffect {
-                                                                if (backInProgress) {
-                                                                    input.beginBack()
-                                                                } else {
-                                                                    input.reset()
-                                                                }
-                                                            }
-                                                            NavigationBackHandler(
-                                                                sceneState = sceneState,
-                                                                state = backState,
-                                                                onBackCancelled = { input.cancelBack() },
-                                                                onBackCompleted = onBack,
-                                                            )
-                                                            NavDisplay(
-                                                                sceneState = sceneState,
-                                                                navigationEventState = backState,
-                                                                modifier =
-                                                                    if (useDesktopUi) {
-                                                                        Modifier
-                                                                            .widthIn(
-                                                                                max = DesktopContentMaxWidth,
-                                                                            ).fillMaxSize()
-                                                                    } else {
-                                                                        Modifier
-                                                                    },
-                                                                transitionSpec = {
-                                                                    val source =
-                                                                        initialState.entries.lastOrNull()?.metadata?.get(
-                                                                            NAVIGATION_ROUTE_METADATA_KEY,
-                                                                        ) as? Screen
-                                                                    val destination =
-                                                                        targetState.entries.lastOrNull()?.metadata?.get(
-                                                                            NAVIGATION_ROUTE_METADATA_KEY,
-                                                                        ) as? Screen
-                                                                    navigationMotion.transition(
-                                                                        navigationState.containers.pagePattern(source, destination),
-                                                                        origin = navigationState.containers.pageOrigin(destination),
-                                                                    )
-                                                                },
-                                                                popTransitionSpec = {
-                                                                    val source =
-                                                                        targetState.entries.lastOrNull()?.metadata?.get(
-                                                                            NAVIGATION_ROUTE_METADATA_KEY,
-                                                                        ) as? Screen
-                                                                    val destination =
-                                                                        initialState.entries.lastOrNull()?.metadata?.get(
-                                                                            NAVIGATION_ROUTE_METADATA_KEY,
-                                                                        ) as? Screen
-                                                                    navigationMotion.transition(
-                                                                        navigationState.containers.pagePattern(source, destination),
-                                                                        isPop = true,
-                                                                        origin = navigationState.containers.pageOrigin(destination),
-                                                                    )
-                                                                },
-                                                                predictivePopTransitionSpec = {
-                                                                    val source =
-                                                                        targetState.entries.lastOrNull()?.metadata?.get(
-                                                                            NAVIGATION_ROUTE_METADATA_KEY,
-                                                                        ) as? Screen
-                                                                    val destination =
-                                                                        initialState.entries.lastOrNull()?.metadata?.get(
-                                                                            NAVIGATION_ROUTE_METADATA_KEY,
-                                                                        ) as? Screen
-                                                                    navigationMotion.predictiveBackTransition(
-                                                                        navigationState.containers.pagePattern(source, destination),
-                                                                        navigationState.containers.pageOrigin(destination),
-                                                                    )
-                                                                },
-                                                            )
                                                         }
                                                     }
+                                                }
+                                                if (useQweThemeGlass) {
+                                                    QweBackdropSource(
+                                                        onViewChanged = { qwePageSource = it },
+                                                        modifier = Modifier.fillMaxSize(),
+                                                        content = pageContent,
+                                                    )
+                                                } else {
+                                                    pageContent()
                                                 }
 
                                                 installedReleaseNotes?.let { release ->
@@ -2191,7 +2246,7 @@ fun MetrolistApp(
                             val playerLifecycleState by lifecycleOwner.lifecycle.currentStateAsState()
                             val sharePlayerLabel = stringResource(Res.string.share)
                             val sharePlayerError = stringResource(Res.string.statistics_share_failed)
-                            CompositionLocalProvider(LocalThemeGlassBackdrop provides qweThemeBackdrop) {
+                            CompositionLocalProvider(LocalThemeGlassBackdrop provides qwePageBackdrop) {
                                 PlayerScreen(
                                     onSharePlayerImage = { song, position, duration, playing ->
                                         val image = renderMusicSharePoster(context, song, position, duration, playing)
