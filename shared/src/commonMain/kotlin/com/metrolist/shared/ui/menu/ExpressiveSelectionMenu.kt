@@ -12,6 +12,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.DropdownMenuPopup
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.SelectableDropdownMenuItem
 import androidx.compose.material3.Text
@@ -29,6 +30,10 @@ import androidx.compose.ui.layout.layout
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import com.metrolist.shared.settings.Settings
+import com.metrolist.shared.ui.components.LiquidGlassSurface
+import com.metrolist.shared.ui.components.glassCardBorder
+import com.metrolist.shared.ui.components.glassCardColor
 import com.metrolist.shared.ui.haptics.HapticEvent
 import com.metrolist.shared.ui.haptics.rememberMetrolistHaptics
 import com.metrolist.shared.ui.icons.MetrolistIcons
@@ -59,56 +64,67 @@ fun <T> BoxScope.ExpressiveSelectionMenu(
         },
     ) {
         DropdownMenuPopup(expanded = expanded, onDismissRequest = onDismissRequest) {
-            DropdownMenuGroup(
-                shapes = MenuDefaults.groupShape(0, 1),
-                modifier = Modifier.heightIn(max = 480.dp).verticalScrollWithDrag(rememberScrollState()),
-            ) {
-                options.forEachIndexed { index, option ->
-                    val shapes = groupedMenuItemShapes(index, options.size)
-                    val onClick = {
-                        haptic.perform(HapticEvent.PRESS)
-                        onOptionSelected(option)
-                        onDismissRequest()
-                    }
-                    val text: @Composable () -> Unit = { Text(optionLabel(option)) }
-                    val leadingIcon: (@Composable () -> Unit)? = optionIcon?.let { { it(option) } }
-                    val supportingText: (@Composable () -> Unit)? = optionSupportingText?.invoke(option)?.let { { Text(it) } }
-                    val focusRequester = remember { FocusRequester() }
-                    val initiallyFocused = if (selectedOption == null) index == 0 else option == selectedOption
-                    if (initiallyFocused) RequestTvFocus(focusRequester)
-                    val itemModifier =
-                        Modifier.focusRequester(focusRequester).tvFocusHighlight(
-                            shape = if (option == selectedOption) shapes.selectedShape else shapes.shape,
-                            scale = 1f,
-                        )
-                    if (selectedOption == null) {
-                        DropdownMenuItem(
-                            onClick = onClick,
-                            text = text,
-                            shape = shapes.shape,
-                            modifier = itemModifier,
-                            leadingIcon = leadingIcon,
-                            supportingText = supportingText,
-                            enabled = optionEnabled(option),
-                        )
-                    } else {
-                        SelectableDropdownMenuItem(
-                            selected = option == selectedOption,
-                            onClick = onClick,
-                            text = text,
-                            shapes = shapes,
-                            modifier = itemModifier,
-                            leadingIcon = leadingIcon,
-                            supportingText = supportingText,
-                            enabled = optionEnabled(option),
-                            selectedLeadingIcon = {
-                                Icon(
-                                    MetrolistIcons.Filled.Check,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(MenuDefaults.LeadingIconSize),
-                                )
-                            },
-                        )
+            LiquidGlassSurface(radius = 16.dp) {
+                DropdownMenuGroup(
+                    shapes = MenuDefaults.groupShape(0, 1),
+                    containerColor =
+                        if (Settings.shared.liquidGlassTheme) {
+                            glassCardColor(
+                                MaterialTheme.colorScheme.surfaceContainer,
+                            )
+                        } else {
+                            MenuDefaults.groupStandardContainerColor
+                        },
+                    border = if (Settings.shared.liquidGlassTheme) glassCardBorder() else null,
+                    modifier = Modifier.heightIn(max = 480.dp).verticalScrollWithDrag(rememberScrollState()),
+                ) {
+                    options.forEachIndexed { index, option ->
+                        val shapes = groupedMenuItemShapes(index, options.size)
+                        val onClick = {
+                            haptic.perform(HapticEvent.PRESS)
+                            onOptionSelected(option)
+                            onDismissRequest()
+                        }
+                        val text: @Composable () -> Unit = { Text(optionLabel(option)) }
+                        val leadingIcon: (@Composable () -> Unit)? = optionIcon?.let { { it(option) } }
+                        val supportingText: (@Composable () -> Unit)? = optionSupportingText?.invoke(option)?.let { { Text(it) } }
+                        val focusRequester = remember { FocusRequester() }
+                        val initiallyFocused = if (selectedOption == null) index == 0 else option == selectedOption
+                        if (initiallyFocused) RequestTvFocus(focusRequester)
+                        val itemModifier =
+                            Modifier.focusRequester(focusRequester).tvFocusHighlight(
+                                shape = if (option == selectedOption) shapes.selectedShape else shapes.shape,
+                                scale = 1f,
+                            )
+                        if (selectedOption == null) {
+                            DropdownMenuItem(
+                                onClick = onClick,
+                                text = text,
+                                shape = shapes.shape,
+                                modifier = itemModifier,
+                                leadingIcon = leadingIcon,
+                                supportingText = supportingText,
+                                enabled = optionEnabled(option),
+                            )
+                        } else {
+                            SelectableDropdownMenuItem(
+                                selected = option == selectedOption,
+                                onClick = onClick,
+                                text = text,
+                                shapes = shapes,
+                                modifier = itemModifier,
+                                leadingIcon = leadingIcon,
+                                supportingText = supportingText,
+                                enabled = optionEnabled(option),
+                                selectedLeadingIcon = {
+                                    Icon(
+                                        MetrolistIcons.Filled.Check,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(MenuDefaults.LeadingIconSize),
+                                    )
+                                },
+                            )
+                        }
                     }
                 }
             }
