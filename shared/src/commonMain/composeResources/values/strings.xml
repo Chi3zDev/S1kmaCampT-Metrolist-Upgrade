@@ -5627,6 +5627,9 @@
     <string name="app_background_error">Could not retain access to this image. Please choose another image.</string>
     <string name="about_glasmio_credit">Glass motion reference: Glasmio by NEORUAA (Apache 2.0)</string>
     <string name="about_liquid_glass_android_credit">Glass library: Liquid-Glass-Android by pandadog (MIT)</string>
+    <string name="liquid_glass_warning_title">Enable Liquid Glass?</string>
+    <string name="liquid_glass_warning_message">This feature is not yet stable. It may contain bugs and can be demanding on some phones or devices.</string>
+    <string name="liquid_glass_warning_wait">Continue (%1$d)</string>
     <string name="liquid_glass_theme">Liquid Glass theme</string>
     <string name="liquid_glass_theme_description">Use glass surfaces throughout the app, independently of light or dark mode.</string>
     <string name="glass_settings_title">Liquid glass</string>

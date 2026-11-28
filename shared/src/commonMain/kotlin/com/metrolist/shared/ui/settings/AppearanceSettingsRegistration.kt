@@ -15,7 +15,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.metrolist.shared.generated.resources.*
 import com.metrolist.shared.settings.AnimatedCoverResolution
@@ -37,13 +44,58 @@ import com.metrolist.shared.settings.desktopDefaultOpenTabs
 import com.metrolist.shared.settings.isDesktopMac
 import com.metrolist.shared.settings.normalizeDefaultOpenTab
 import com.metrolist.shared.settings.updateDefaultOpenTab
+import com.metrolist.shared.ui.components.AlertDialog
+import com.metrolist.shared.ui.components.LiquidGlassTextButton
 import com.metrolist.shared.ui.icons.MetrolistIcons
+import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.roundToInt
 
 @Composable
 internal fun SettingsUiRegistryBuilder.registerAppearanceSettings(host: SharedSettingsHost) {
     val settings = Settings.shared
+    var showGlassWarning by remember { mutableStateOf(false) }
+    var warningSeconds by remember { mutableIntStateOf(3) }
+    LaunchedEffect(showGlassWarning) {
+        if (showGlassWarning) {
+            warningSeconds = 3
+            repeat(3) {
+                delay(1_000)
+                warningSeconds--
+            }
+        }
+    }
+    if (showGlassWarning) {
+        AlertDialog(
+            onDismissRequest = { showGlassWarning = false },
+            title = { Text(stringResource(Res.string.liquid_glass_warning_title)) },
+            text = { Text(stringResource(Res.string.liquid_glass_warning_message)) },
+            confirmButton = {
+                LiquidGlassTextButton(
+                    enabled = warningSeconds == 0,
+                    onClick = {
+                        if (warningSeconds == 0) {
+                            showGlassWarning = false
+                            settings.liquidGlassTheme = true
+                        }
+                    },
+                ) {
+                    Text(
+                        if (warningSeconds > 0) {
+                            stringResource(Res.string.liquid_glass_warning_wait, warningSeconds)
+                        } else {
+                            stringResource(Res.string.continue_action)
+                        },
+                    )
+                }
+            },
+            dismissButton = {
+                LiquidGlassTextButton(onClick = { showGlassWarning = false }) {
+                    Text(stringResource(Res.string.cancel))
+                }
+            },
+        )
+    }
     val themeChoices =
         listOf(
             SettingsChoice(
@@ -107,7 +159,14 @@ internal fun SettingsUiRegistryBuilder.registerAppearanceSettings(host: SharedSe
                     title = stringResource(Res.string.liquid_glass_theme),
                     description = stringResource(Res.string.liquid_glass_theme_description),
                     checked = settings.liquidGlassTheme,
-                ) { settings.liquidGlassTheme = it }
+                ) { enabled ->
+                    if (enabled && !settings.liquidGlassTheme) {
+                        warningSeconds = 3
+                        showGlassWarning = true
+                    } else if (!enabled) {
+                        settings.liquidGlassTheme = false
+                    }
+                }
                 switch(
                     id = "glassNavigation",
                     title = stringResource(Res.string.glass_settings_title),

@@ -2548,6 +2548,9 @@
     <string name="app_background_reset">Hapus gambar latar</string>
     <string name="app_background_error">Akses gambar tidak dapat disimpan. Silakan pilih gambar lain.</string>
     <string name="about_glasmio_credit">Referensi animasi kaca: Glasmio oleh NEORUAA (Apache 2.0)</string>
+    <string name="liquid_glass_warning_title">Aktifkan Liquid Glass?</string>
+    <string name="liquid_glass_warning_message">Fitur ini belum stabil, masih memiliki beberapa bug, dan mungkin terasa berat di beberapa ponsel atau perangkat.</string>
+    <string name="liquid_glass_warning_wait">Lanjutkan (%1$d)</string>
     <string name="liquid_glass_theme">Tema Liquid Glass</string>
     <string name="liquid_glass_theme_description">Gunakan permukaan kaca di aplikasi, terpisah dari mode terang atau gelap.</string>
     <string name="glass_settings_title">Kaca cair</string>
