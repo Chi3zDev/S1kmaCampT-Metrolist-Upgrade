@@ -168,6 +168,8 @@ import com.metrolist.shared.ui.components.AlertDialog
 import com.metrolist.shared.ui.components.CollectionFilterBar
 import com.metrolist.shared.ui.components.CollectionFilterBarText
 import com.metrolist.shared.ui.components.ContainedLoadingIndicator
+import com.metrolist.shared.ui.components.LiquidGlassIconButton
+import com.metrolist.shared.ui.components.LiquidGlassSurface
 import com.metrolist.shared.ui.components.PlaylistOrderControls
 import com.metrolist.shared.ui.components.PopupContent
 import com.metrolist.shared.ui.components.PopupVisibility
@@ -176,6 +178,7 @@ import com.metrolist.shared.ui.components.SongSelectionControls
 import com.metrolist.shared.ui.components.TopPlaylistOrderControls
 import com.metrolist.shared.ui.components.appPageBackground
 import com.metrolist.shared.ui.components.appTopBarBackground
+import com.metrolist.shared.ui.components.glassCardColor
 import com.metrolist.shared.ui.components.images.AsyncImage
 import com.metrolist.shared.ui.components.libraryCover
 import com.metrolist.shared.ui.components.rememberDownloadPlaylistFilter
@@ -742,75 +745,100 @@ fun AutoPlaylistScreen(
             if (selection.active) {
                 selectionBar()
             } else {
-                TopAppBar(
-                    title = {},
-                    navigationIcon = {
-                        IconButton(
-                            onClick = onBackClick,
-                            modifier = Modifier.tvFocusHighlight(CircleShape),
-                            shapes = IconButtonDefaults.shapes(),
-                        ) {
-                            Icon(MetrolistIcons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(Res.string.back))
-                        }
-                    },
-                    actions = {
-                        IconButton(
-                            onClick = { editingCover = currentType },
-                            modifier = Modifier.tvFocusHighlight(CircleShape),
-                            shapes = IconButtonDefaults.shapes(),
-                        ) {
-                            Icon(MetrolistIcons.Outlined.Edit, contentDescription = stringResource(Res.string.edit_playlist_cover))
-                        }
-                        val action =
-                            when (currentType) {
-                                "liked" -> ({ showCollectionMenu = true })
-                                "downloaded", "cached" -> ({ showClearConfirmation = true })
-                                "uploaded" -> ({ uploadLauncher.launch(arrayOf("audio/*", "application/ogg", "application/octet-stream")) })
-                                else -> null
-                            }
-                        if (currentType != "liked") {
-                            IconButton(
-                                onClick = { showCollectionMenu = true },
+                LiquidGlassSurface(radius = 0.dp, modifier = Modifier.fillMaxWidth()) {
+                    TopAppBar(
+                        title = {},
+                        navigationIcon = {
+                            LiquidGlassIconButton(
+                                onClick = onBackClick,
                                 modifier = Modifier.tvFocusHighlight(CircleShape),
-                                shapes = IconButtonDefaults.shapes(),
                             ) {
-                                Icon(MetrolistIcons.Default.MoreVert, stringResource(Res.string.more_actions))
+                                Icon(MetrolistIcons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(Res.string.back))
                             }
-                        }
-                        if (action != null) {
-                            IconButton(
-                                modifier = Modifier.tvFocusHighlight(CircleShape).navigationPopupSource(),
-                                onClick = action,
-                                shapes = IconButtonDefaults.shapes(),
+                        },
+                        actions = {
+                            LiquidGlassIconButton(
+                                onClick = { editingCover = currentType },
+                                modifier = Modifier.tvFocusHighlight(CircleShape),
                             ) {
-                                if (currentType == "uploaded" && isUploading) {
-                                    LoadingIndicator(
-                                        modifier =
-                                            Modifier
-                                                .size(24.dp)
-                                                .semantics { contentDescription = uploadingDescription },
+                                Icon(MetrolistIcons.Outlined.Edit, contentDescription = stringResource(Res.string.edit_playlist_cover))
+                            }
+                            val action =
+                                when (currentType) {
+                                    "liked" -> ({ showCollectionMenu = true })
+
+                                    "downloaded", "cached" -> ({ showClearConfirmation = true })
+
+                                    "uploaded" -> (
+                                        {
+                                            uploadLauncher.launch(
+                                                arrayOf("audio/*", "application/ogg", "application/octet-stream"),
+                                            )
+                                        }
                                     )
-                                } else {
-                                    Icon(
-                                        imageVector =
-                                            when (currentType) {
-                                                "downloaded", "cached" -> MetrolistIcons.Outlined.Delete
-                                                "uploaded" -> MetrolistIcons.Outlined.CloudUpload
-                                                else -> MetrolistIcons.Default.MoreVert
-                                            },
-                                        contentDescription =
-                                            when (currentType) {
-                                                "downloaded", "cached" -> stringResource(Res.string.stored_clear_collection)
-                                                "uploaded" -> stringResource(Res.string.upload)
-                                                else -> stringResource(Res.string.more_actions)
-                                            },
-                                    )
+
+                                    else -> null
+                                }
+                            if (currentType != "liked") {
+                                LiquidGlassIconButton(
+                                    onClick = { showCollectionMenu = true },
+                                    modifier = Modifier.tvFocusHighlight(CircleShape),
+                                ) {
+                                    Icon(MetrolistIcons.Default.MoreVert, stringResource(Res.string.more_actions))
                                 }
                             }
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(containerColor = appTopBarBackground(MaterialTheme.colorScheme.surface)),
-                )
+                            if (action != null) {
+                                LiquidGlassIconButton(
+                                    modifier = Modifier.tvFocusHighlight(CircleShape).navigationPopupSource(),
+                                    onClick = action,
+                                ) {
+                                    if (currentType == "uploaded" && isUploading) {
+                                        LoadingIndicator(
+                                            modifier =
+                                                Modifier
+                                                    .size(24.dp)
+                                                    .semantics { contentDescription = uploadingDescription },
+                                        )
+                                    } else {
+                                        Icon(
+                                            imageVector =
+                                                when (currentType) {
+                                                    "downloaded", "cached" -> MetrolistIcons.Outlined.Delete
+                                                    "uploaded" -> MetrolistIcons.Outlined.CloudUpload
+                                                    else -> MetrolistIcons.Default.MoreVert
+                                                },
+                                            contentDescription =
+                                                when (currentType) {
+                                                    "downloaded", "cached" -> stringResource(Res.string.stored_clear_collection)
+                                                    "uploaded" -> stringResource(Res.string.upload)
+                                                    else -> stringResource(Res.string.more_actions)
+                                                },
+                                        )
+                                    }
+                                }
+                            }
+                        },
+                        colors =
+                            TopAppBarDefaults.topAppBarColors(
+                                containerColor =
+                                    if (Settings.shared.liquidGlassTheme) {
+                                        glassCardColor(
+                                            MaterialTheme.colorScheme.surface,
+                                        )
+                                    } else {
+                                        appTopBarBackground(MaterialTheme.colorScheme.surface)
+                                    },
+                                scrolledContainerColor =
+                                    if (Settings.shared.liquidGlassTheme) {
+                                        glassCardColor(
+                                            MaterialTheme.colorScheme.surface,
+                                        )
+                                    } else {
+                                        appTopBarBackground(MaterialTheme.colorScheme.surface)
+                                    },
+                            ),
+                    )
+                }
             }
         },
     ) { paddingValues ->
