@@ -57,7 +57,7 @@ import androidx.lifecycle.compose.currentStateAsState
 import com.metrolist.android.BuildConfig
 import com.metrolist.android.LocalMiniPlayerBottomInset
 import com.metrolist.android.playback.LocalPlayerConnection
-import com.metrolist.android.ui.component.glassScreenViewport
+import com.metrolist.android.ui.component.GlassScreenFrame
 import com.metrolist.android.ui.component.tabContentTopPadding
 import com.metrolist.android.utils.shareImage
 import com.metrolist.shared.db.MusicDatabase
@@ -273,10 +273,14 @@ fun StreakScreen(onBack: () -> Unit) {
 
     val backgroundEnabled = Settings.shared.streakLevelBackgroundEnabled
     val pageSurface = appPageBackground(MaterialTheme.colorScheme.surface)
-    Box(Modifier.fillMaxSize()) {
+    GlassScreenFrame(
+        topInset = tabContentTopPadding(),
+        barHeight = 64.dp,
+        topBar = { StreakTopBar(onBack) },
+    ) { viewport ->
         LazyColumn(
             modifier =
-                Modifier.glassScreenViewport(tabContentTopPadding() + 64.dp).background(
+                viewport.background(
                     if (backgroundEnabled) {
                         Brush.verticalGradient(listOf(flameColor.copy(alpha = 0.15f), pageSurface, pageSurface))
                     } else {
@@ -524,24 +528,6 @@ fun StreakScreen(onBack: () -> Unit) {
                 }
             }
         }
-        LiquidGlassSurface(
-            radius = 24.dp,
-            modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = tabContentTopPadding()),
-        ) {
-            Surface(
-                shape = RoundedCornerShape(24.dp),
-                color = glassCardColor(MaterialTheme.colorScheme.surfaceContainerHigh),
-                border = glassCardBorder(),
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().height(56.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    TextButton(onClick = onBack) { Text("‹  " + stringResource(Res.string.back)) }
-                    Text(stringResource(Res.string.streak_page_title), style = MaterialTheme.typography.titleMedium)
-                }
-            }
-        }
     }
     if (showLevels) {
         StreakLevelGallery(
@@ -722,6 +708,25 @@ private fun StreakTodayBadge(
 }
 
 @OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun StreakTopBar(onBack: () -> Unit) {
+    LiquidGlassSurface(radius = 24.dp, modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+        Surface(
+            shape = RoundedCornerShape(24.dp),
+            color = glassCardColor(MaterialTheme.colorScheme.surfaceContainerHigh),
+            border = glassCardBorder(),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth().height(56.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                TextButton(onClick = onBack) { Text("‹  " + stringResource(Res.string.back)) }
+                Text(stringResource(Res.string.streak_page_title), style = MaterialTheme.typography.titleMedium)
+            }
+        }
+    }
+}
+
 @Composable
 private fun StreakLevelGallery(
     longest: Int,

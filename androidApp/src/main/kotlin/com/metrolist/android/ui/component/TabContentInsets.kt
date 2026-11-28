@@ -1,10 +1,12 @@
 package com.metrolist.android.ui.component
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.captionBar
 import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TopAppBarDefaults
@@ -33,3 +35,17 @@ fun tabContentTopPadding(): Dp =
                 .asPaddingValues()
                 .calculateTopPadding() + TabTopBarHeight
         )
+
+/** Reserves the status inset and a fixed bar slot, clipping scrolling content below that slot. */
+@Composable
+fun GlassScreenFrame(
+    topInset: Dp,
+    barHeight: Dp,
+    topBar: @Composable () -> Unit,
+    content: @Composable (Modifier) -> Unit,
+) {
+    Box(Modifier.fillMaxSize()) {
+        content(Modifier.glassScreenViewport(topInset + barHeight))
+        Box(Modifier.fillMaxWidth().padding(top = topInset)) { topBar() }
+    }
+}
