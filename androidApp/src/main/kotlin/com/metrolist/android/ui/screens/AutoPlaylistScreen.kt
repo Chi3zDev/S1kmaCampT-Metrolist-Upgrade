@@ -38,20 +38,16 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -170,6 +166,7 @@ import com.metrolist.shared.ui.components.CollectionFilterBarText
 import com.metrolist.shared.ui.components.ContainedLoadingIndicator
 import com.metrolist.shared.ui.components.LiquidGlassIconButton
 import com.metrolist.shared.ui.components.LiquidGlassSurface
+import com.metrolist.shared.ui.components.LiquidGlassTextButton
 import com.metrolist.shared.ui.components.PlaylistOrderControls
 import com.metrolist.shared.ui.components.PopupContent
 import com.metrolist.shared.ui.components.PopupVisibility
@@ -937,10 +934,9 @@ fun AutoPlaylistScreen(
                             if (selection.active) {
                                 Checkbox(checked = selection.isSelected(song.id), onCheckedChange = { selection.toggle(song.id) })
                             } else {
-                                IconButton(
+                                LiquidGlassIconButton(
                                     modifier = Modifier.navigationPopupSource(),
                                     onClick = { selectedMenuSong = song },
-                                    shapes = IconButtonDefaults.shapes(),
                                 ) {
                                     Icon(MetrolistIcons.Default.MoreVert, stringResource(Res.string.more))
                                 }
@@ -1270,7 +1266,7 @@ fun AutoPlaylistScreen(
             },
             text = { Text(stringResource(Res.string.stored_remove_all_message)) },
             confirmButton = {
-                TextButton(
+                LiquidGlassTextButton(
                     onClick = {
                         showClearConfirmation = false
                         scope.launch {
@@ -1284,13 +1280,11 @@ fun AutoPlaylistScreen(
                             selection.exit()
                         }
                     },
-                    shapes = ButtonDefaults.shapes(),
                 ) { Text(stringResource(Res.string.remove_all)) }
             },
             dismissButton = {
-                TextButton(
+                LiquidGlassTextButton(
                     onClick = { showClearConfirmation = false },
-                    shapes = ButtonDefaults.shapes(),
                 ) { Text(stringResource(Res.string.cancel)) }
             },
         )
@@ -1305,7 +1299,7 @@ fun AutoPlaylistScreen(
             },
             text = { Text(stringResource(Res.string.stored_remove_selected_message)) },
             confirmButton = {
-                TextButton(
+                LiquidGlassTextButton(
                     onClick = {
                         val ids = removalIds
                         pendingRemovalIds = null
@@ -1322,13 +1316,11 @@ fun AutoPlaylistScreen(
                             if (failed.isEmpty()) selection.exit() else selection.replaceWith(failed.toSet())
                         }
                     },
-                    shapes = ButtonDefaults.shapes(),
                 ) { Text(stringResource(Res.string.remove), color = MaterialTheme.colorScheme.error) }
             },
             dismissButton = {
-                TextButton(
+                LiquidGlassTextButton(
                     onClick = { pendingRemovalIds = null },
-                    shapes = ButtonDefaults.shapes(),
                 ) { Text(stringResource(Res.string.cancel)) }
             },
         )
