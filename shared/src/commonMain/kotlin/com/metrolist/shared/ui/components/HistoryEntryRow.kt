@@ -41,6 +41,7 @@ import com.metrolist.shared.generated.resources.Res
 import com.metrolist.shared.generated.resources.delete
 import com.metrolist.shared.generated.resources.edit
 import com.metrolist.shared.generated.resources.more_options
+import com.metrolist.shared.settings.Settings
 import com.metrolist.shared.ui.components.images.AsyncImage
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import com.metrolist.shared.ui.menu.groupedMenuItemShapes
@@ -103,140 +104,145 @@ fun HistoryEntryRow(
             }
         }
 
-    Surface(
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .padding(vertical = 1.dp)
-                .clip(shape)
-                .combinedClickable(
-                    onClick = { if (isSelectMode) onToggleSelection() else onPlay() },
-                    onLongClick = onLongClick ?: onSongMenu,
-                ).onSecondaryClick(onSongMenu)
-                .semantics {
-                    if (isSelectMode) this.selected = isSelected
+    val glass = Settings.shared.liquidGlassTheme && LocalThemeGlassBackdrop.current != null
+    LiquidGlassSurface(radius = 20.dp, modifier = modifier.fillMaxWidth().padding(vertical = 1.dp), enabled = glass) {
+        Surface(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .clip(shape)
+                    .combinedClickable(
+                        onClick = { if (isSelectMode) onToggleSelection() else onPlay() },
+                        onLongClick = onLongClick ?: onSongMenu,
+                    ).onSecondaryClick(onSongMenu)
+                    .semantics {
+                        if (isSelectMode) this.selected = isSelected
+                    },
+            shape = shape,
+            color =
+                when {
+                    glass && isSelected -> MaterialTheme.colorScheme.primary.copy(alpha = 0.32f)
+                    glass -> glassCardColor(MaterialTheme.colorScheme.surfaceContainerHigh)
+                    isSelected -> MaterialTheme.colorScheme.primaryContainer
+                    isSelectMode -> MaterialTheme.colorScheme.surfaceContainerLow
+                    else -> MaterialTheme.colorScheme.surfaceContainerHigh
                 },
-        shape = shape,
-        color =
-            when {
-                isSelected -> MaterialTheme.colorScheme.primaryContainer
-                isSelectMode -> MaterialTheme.colorScheme.surfaceContainerLow
-                else -> MaterialTheme.colorScheme.surfaceContainerHigh
-            },
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically,
+            border = if (glass) glassCardBorder() else null,
         ) {
-            AsyncImage(
-                url = thumbnailUrl ?: "",
-                modifier = Modifier.size(56.dp).clip(ComponentShapes.SmallThumbnailShape),
-            )
-            Spacer(Modifier.width(12.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    title,
-                    style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
+            Row(
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                AsyncImage(
+                    url = thumbnailUrl ?: "",
+                    modifier = Modifier.size(56.dp).clip(ComponentShapes.SmallThumbnailShape),
                 )
-                Text(
-                    "${artists}${if (album != null) " ·\u00a0$album" else ""}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-                if (relativeTimeText != null) {
+                Spacer(Modifier.width(12.dp))
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        relativeTimeText,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        title,
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
                     )
-                }
-            }
-            if (isSelectMode) {
-                Spacer(Modifier.width(8.dp))
-                Checkbox(checked = isSelected, onCheckedChange = null)
-            }
-            Spacer(Modifier.width(4.dp))
-            if (showInlineMenu && !isSelectMode) {
-                Box {
-                    IconButton(
-                        modifier = Modifier.navigationPopupSource(),
-                        onClick = { menuExpanded = true },
-                        shapes = IconButtonDefaults.shapes(),
-                    ) {
-                        Icon(
-                            MetrolistIcons.Outlined.MoreVert,
-                            contentDescription = stringResource(Res.string.more_options),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    Text(
+                        "${artists}${if (album != null) " ·\u00a0$album" else ""}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    if (relativeTimeText != null) {
+                        Text(
+                            relativeTimeText,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
-                    DropdownMenuPopup(
-                        expanded = menuExpanded,
-                        onDismissRequest = { menuExpanded = false },
-                    ) {
-                        val menuItemCount = listOfNotNull(onEdit, onSongMenu).size + 1
-                        DropdownMenuGroup(shapes = MenuDefaults.groupShape(0, 1)) {
-                            if (onEdit != null) {
-                                DropdownMenuItem(
-                                    text = { Text(editText) },
-                                    shape = groupedMenuItemShapes(0, menuItemCount).shape,
-                                    onClick = {
-                                        menuExpanded = false
-                                        onEdit()
-                                    },
-                                    leadingIcon = {
-                                        Icon(
-                                            MetrolistIcons.Outlined.Edit,
-                                            contentDescription = null,
-                                            modifier = Modifier.size(18.dp),
-                                        )
-                                    },
-                                )
-                            }
-                            if (onSongMenu != null) {
-                                DropdownMenuItem(
-                                    text = { Text(stringResource(Res.string.more_options)) },
-                                    shape = groupedMenuItemShapes(if (onEdit == null) 0 else 1, menuItemCount).shape,
-                                    onClick = {
-                                        menuExpanded = false
-                                        onSongMenu()
-                                    },
-                                    leadingIcon = {
-                                        Icon(
-                                            MetrolistIcons.Outlined.MoreVert,
-                                            contentDescription = null,
-                                            modifier = Modifier.size(18.dp),
-                                        )
-                                    },
-                                )
-                            }
-                            DropdownMenuItem(
-                                text = { Text(deleteText) },
-                                shape = groupedMenuItemShapes(menuItemCount - 1, menuItemCount).shape,
-                                onClick = {
-                                    menuExpanded = false
-                                    onDelete()
-                                },
-                                leadingIcon = {
-                                    Icon(
-                                        MetrolistIcons.Outlined.Delete,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(18.dp),
-                                        tint = MaterialTheme.colorScheme.error,
-                                    )
-                                },
+                }
+                if (isSelectMode) {
+                    Spacer(Modifier.width(8.dp))
+                    Checkbox(checked = isSelected, onCheckedChange = null)
+                }
+                Spacer(Modifier.width(4.dp))
+                if (showInlineMenu && !isSelectMode) {
+                    Box {
+                        IconButton(
+                            modifier = Modifier.navigationPopupSource(),
+                            onClick = { menuExpanded = true },
+                            shapes = IconButtonDefaults.shapes(),
+                        ) {
+                            Icon(
+                                MetrolistIcons.Outlined.MoreVert,
+                                contentDescription = stringResource(Res.string.more_options),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
+                        }
+                        DropdownMenuPopup(
+                            expanded = menuExpanded,
+                            onDismissRequest = { menuExpanded = false },
+                        ) {
+                            val menuItemCount = listOfNotNull(onEdit, onSongMenu).size + 1
+                            DropdownMenuGroup(shapes = MenuDefaults.groupShape(0, 1)) {
+                                if (onEdit != null) {
+                                    DropdownMenuItem(
+                                        text = { Text(editText) },
+                                        shape = groupedMenuItemShapes(0, menuItemCount).shape,
+                                        onClick = {
+                                            menuExpanded = false
+                                            onEdit()
+                                        },
+                                        leadingIcon = {
+                                            Icon(
+                                                MetrolistIcons.Outlined.Edit,
+                                                contentDescription = null,
+                                                modifier = Modifier.size(18.dp),
+                                            )
+                                        },
+                                    )
+                                }
+                                if (onSongMenu != null) {
+                                    DropdownMenuItem(
+                                        text = { Text(stringResource(Res.string.more_options)) },
+                                        shape = groupedMenuItemShapes(if (onEdit == null) 0 else 1, menuItemCount).shape,
+                                        onClick = {
+                                            menuExpanded = false
+                                            onSongMenu()
+                                        },
+                                        leadingIcon = {
+                                            Icon(
+                                                MetrolistIcons.Outlined.MoreVert,
+                                                contentDescription = null,
+                                                modifier = Modifier.size(18.dp),
+                                            )
+                                        },
+                                    )
+                                }
+                                DropdownMenuItem(
+                                    text = { Text(deleteText) },
+                                    shape = groupedMenuItemShapes(menuItemCount - 1, menuItemCount).shape,
+                                    onClick = {
+                                        menuExpanded = false
+                                        onDelete()
+                                    },
+                                    leadingIcon = {
+                                        Icon(
+                                            MetrolistIcons.Outlined.Delete,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(18.dp),
+                                            tint = MaterialTheme.colorScheme.error,
+                                        )
+                                    },
+                                )
+                            }
                         }
                     }
                 }
-            }
-            onSongMenu?.takeUnless { isSelectMode || showInlineMenu }?.let { open ->
-                IconButton(modifier = Modifier.navigationPopupSource(), onClick = open, shapes = IconButtonDefaults.shapes()) {
-                    Icon(MetrolistIcons.Default.MoreVert, stringResource(Res.string.more_options))
+                onSongMenu?.takeUnless { isSelectMode || showInlineMenu }?.let { open ->
+                    IconButton(modifier = Modifier.navigationPopupSource(), onClick = open, shapes = IconButtonDefaults.shapes()) {
+                        Icon(MetrolistIcons.Default.MoreVert, stringResource(Res.string.more_options))
+                    }
                 }
             }
         }
