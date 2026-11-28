@@ -3,11 +3,9 @@ package com.metrolist.shared.ui.components
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.metrolist.shared.generated.resources.Res
@@ -35,20 +33,18 @@ fun CollectionCoverDialog(
         title = { Text(stringResource(Res.string.edit_playlist_cover)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(MdSpacing.xs)) {
-                TextButton(
+                LiquidGlassTextButton(
                     onClick = onChoose,
                     enabled = !busy,
                     modifier = Modifier.tvFocusHighlight(CircleShape),
-                    shapes = ButtonDefaults.shapes(),
                 ) {
                     Text(stringResource(Res.string.choose_cover_image))
                 }
                 if (hasCover) {
-                    TextButton(
+                    LiquidGlassTextButton(
                         onClick = onRemove,
                         enabled = !busy,
                         modifier = Modifier.tvFocusHighlight(CircleShape),
-                        shapes = ButtonDefaults.shapes(),
                     ) {
                         Text(stringResource(Res.string.remove_custom_image))
                     }
@@ -63,7 +59,7 @@ fun CollectionCoverDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = onDismiss, enabled = !busy, shapes = ButtonDefaults.shapes()) {
+            LiquidGlassTextButton(onClick = onDismiss, enabled = !busy) {
                 Text(stringResource(Res.string.close))
             }
         },
