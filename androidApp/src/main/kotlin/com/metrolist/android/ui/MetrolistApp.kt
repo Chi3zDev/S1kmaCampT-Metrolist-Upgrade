@@ -204,6 +204,7 @@ import com.metrolist.android.ui.glass.cacheSheetContentOffscreen
 import com.metrolist.android.ui.glass.hideBackdropHost
 import com.metrolist.android.ui.glass.rememberQweGlassAvailable
 import com.metrolist.android.ui.player.AndroidPlayerPlatform
+import com.metrolist.android.ui.player.GeneralVideoPlayer
 import com.metrolist.android.ui.player.MusicVideoSurface
 import com.metrolist.android.ui.player.PictureInPictureHelper
 import com.metrolist.android.ui.player.renderMusicSharePoster
@@ -1271,6 +1272,15 @@ fun MetrolistApp(
                     val floatingActionsBottomInset = remember { derivedStateOf { calculateFloatingActionsBottomInset() } }
                     var focusPlayPauseOnPlayerExpand by remember { mutableStateOf(false) }
                     var pendingOpenPlayer by rememberSaveable { mutableStateOf(false) }
+                    var pendingGeneralVideoId by remember { mutableStateOf<String?>(null) }
+                    LaunchedEffect(pendingGeneralVideoId, currentSong) {
+                        if (pendingGeneralVideoId != null && currentSong?.isGeneralVideo == true &&
+                            currentSong?.id == pendingGeneralVideoId
+                        ) {
+                            playerBottomSheetState.expandSoft()
+                            pendingGeneralVideoId = null
+                        }
+                    }
                     val miniPlayerFocusRequester = remember { FocusRequester() }
                     val youtubeMusicLabel = stringResource(Res.string.youtube_music)
                     val focusManager = LocalFocusManager.current
@@ -1975,6 +1985,7 @@ fun MetrolistApp(
                                                                             libraryScrollToTopEvents,
                                                                             libraryViewModel,
                                                                             onSearchResultsVisible = { searchResultsVisible = it },
+                                                                            onVideoSelected = { pendingGeneralVideoId = it },
                                                                         )
                                                                     }
                                                                 CompositionLocalProvider(
@@ -2260,44 +2271,54 @@ fun MetrolistApp(
                             val sharePlayerLabel = stringResource(Res.string.share)
                             val sharePlayerError = stringResource(Res.string.statistics_share_failed)
                             CompositionLocalProvider(LocalThemeGlassBackdrop provides qwePageBackdrop) {
-                                PlayerScreen(
-                                    onSharePlayerImage = { song, position, duration, playing ->
-                                        val image = renderMusicSharePoster(context, song, position, duration, playing)
-                                        shareImage(context, image, sharePlayerLabel)
-                                    },
-                                    onSharePlayerImageError = { Toast.makeText(context, sharePlayerError, Toast.LENGTH_SHORT).show() },
-                                    isScreenVisible = playerLifecycleState.isAtLeast(Lifecycle.State.STARTED),
-                                    viewModel = playerViewModel,
-                                    bottomSheetState = playerBottomSheetState,
-                                    requestPlayPauseFocus = focusPlayPauseOnPlayerExpand,
-                                    onPlayPauseFocusRequested = { focusPlayPauseOnPlayerExpand = false },
-                                    onLyricsVisibleChange = { lyricsVisible = it },
-                                    onClose = {
-                                        playerBottomSheetState.collapseSoft()
-                                        if (usesDirectionalNavigation) {
-                                            coroutineScope.launch {
-                                                delay(250.milliseconds)
-                                                runCatching { miniPlayerFocusRequester.requestFocus() }
+                                if (currentSong?.isGeneralVideo == true) {
+                                    GeneralVideoPlayer(
+                                        song = currentSong!!,
+                                        connection = playerConnection,
+                                        player = videoPlayer,
+                                        hasVideo = hasVideo,
+                                        onClose = { playerBottomSheetState.collapseSoft() },
+                                    )
+                                } else {
+                                    PlayerScreen(
+                                        onSharePlayerImage = { song, position, duration, playing ->
+                                            val image = renderMusicSharePoster(context, song, position, duration, playing)
+                                            shareImage(context, image, sharePlayerLabel)
+                                        },
+                                        onSharePlayerImageError = { Toast.makeText(context, sharePlayerError, Toast.LENGTH_SHORT).show() },
+                                        isScreenVisible = playerLifecycleState.isAtLeast(Lifecycle.State.STARTED),
+                                        viewModel = playerViewModel,
+                                        bottomSheetState = playerBottomSheetState,
+                                        requestPlayPauseFocus = focusPlayPauseOnPlayerExpand,
+                                        onPlayPauseFocusRequested = { focusPlayPauseOnPlayerExpand = false },
+                                        onLyricsVisibleChange = { lyricsVisible = it },
+                                        onClose = {
+                                            playerBottomSheetState.collapseSoft()
+                                            if (usesDirectionalNavigation) {
+                                                coroutineScope.launch {
+                                                    delay(250.milliseconds)
+                                                    runCatching { miniPlayerFocusRequester.requestFocus() }
+                                                }
                                             }
-                                        }
-                                    },
-                                    onNavigateToAlbum = { albumId ->
-                                        playerBottomSheetState.collapseSoft()
-                                        navigator.navigate(Screen.Album(albumId))
-                                    },
-                                    onNavigateToArtist = { artistId ->
-                                        playerBottomSheetState.collapseSoft()
-                                        navigator.navigate(Screen.Artist(artistId))
-                                    },
-                                    onNavigateToListenTogether = {
-                                        playerBottomSheetState.collapseSoft()
-                                        navigator.navigate(Screen.ListenTogether)
-                                    },
-                                    onNavigateToIntegrations = {
-                                        playerBottomSheetState.collapseSoft()
-                                        navigator.navigate(Screen.Integrations)
-                                    },
-                                )
+                                        },
+                                        onNavigateToAlbum = { albumId ->
+                                            playerBottomSheetState.collapseSoft()
+                                            navigator.navigate(Screen.Album(albumId))
+                                        },
+                                        onNavigateToArtist = { artistId ->
+                                            playerBottomSheetState.collapseSoft()
+                                            navigator.navigate(Screen.Artist(artistId))
+                                        },
+                                        onNavigateToListenTogether = {
+                                            playerBottomSheetState.collapseSoft()
+                                            navigator.navigate(Screen.ListenTogether)
+                                        },
+                                        onNavigateToIntegrations = {
+                                            playerBottomSheetState.collapseSoft()
+                                            navigator.navigate(Screen.Integrations)
+                                        },
+                                    )
+                                }
                             }
                         }
                     }
@@ -2817,6 +2838,7 @@ fun getEntryProvider(
     libraryScrollToTopEvents: SharedFlow<Long>,
     libraryViewModel: LibraryViewModel,
     onSearchResultsVisible: (Boolean) -> Unit = {},
+    onVideoSelected: (String) -> Unit = {},
 ): (NavKey) -> NavEntry<NavKey> =
     entryProvider<NavKey> {
         entry<Screen.Profile>(metadata = navTabMetadata) {
@@ -2845,7 +2867,7 @@ fun getEntryProvider(
         entry<Screen.Home>(metadata = navTabMetadata) {
             HomeScreen(
                 onNavigateToRecap = { navigator.navigate(Screen.Recap) },
-                onNavigateToExperimentalVideo = { if (BuildConfig.DEBUG) navigator.navigate(Screen.ExperimentalVideo) },
+                onNavigateToExperimentalVideo = { navigator.navigate(Screen.ExperimentalVideo) },
                 onNavigateToStreak = { navigator.navigate(Screen.Streak) },
                 floatingActionsBottomInset = floatingActionsBottomInset,
                 onNavigateToAlbum = { albumId -> navigator.navigate(Screen.Album(albumId)) },
@@ -2871,7 +2893,7 @@ fun getEntryProvider(
         }
 
         entry<Screen.ExperimentalVideo>(metadata = navTabMetadata) {
-            if (BuildConfig.DEBUG) ExperimentalVideoScreen(onBack = { navigator.goBack() })
+            ExperimentalVideoScreen(onBack = { navigator.goBack() }, onVideoSelected = onVideoSelected)
         }
 
         entry<Screen.EasterEgg>(metadata = navTabMetadata) {
