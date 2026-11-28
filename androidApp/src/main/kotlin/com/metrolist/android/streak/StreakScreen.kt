@@ -70,6 +70,7 @@ import com.metrolist.shared.ui.components.LiquidGlassSurface
 import com.metrolist.shared.ui.components.appPageBackground
 import com.metrolist.shared.ui.components.glassCardBorder
 import com.metrolist.shared.ui.components.glassCardColor
+import com.metrolist.shared.ui.components.glassEdgeBrush
 import com.metrolist.shared.ui.haptics.HapticEvent
 import com.metrolist.shared.ui.haptics.rememberMetrolistHaptics
 import com.metrolist.shared.ui.navigation.LocalContentObscured
@@ -778,15 +779,17 @@ internal fun DayDot(
     restored: Set<LocalDate>,
 ) {
     val c = MaterialTheme.colorScheme
+    val glass = Settings.shared.liquidGlassTheme
     val background =
         when {
             day in listened -> c.primary
             day in restored -> c.tertiary
             day == today -> c.secondaryContainer
             else -> c.surfaceVariant
-        }
+        }.let { if (glass) it.copy(alpha = if (day in listened || day in restored) 0.40f else 0.24f) else it }
     val foreground =
         when {
+            glass -> c.onSurface
             day in listened -> c.onPrimary
             day in restored -> c.onTertiary
             else -> c.onSurfaceVariant
@@ -809,7 +812,13 @@ internal fun DayDot(
             .padding(2.dp)
             .clearAndSetSemantics { contentDescription = description }
             .background(background, CircleShape)
-            .then(if (day == today) Modifier.border(2.dp, c.outline, CircleShape) else Modifier),
+            .then(
+                when {
+                    day == today -> Modifier.border(2.dp, c.outline, CircleShape)
+                    glass -> Modifier.border(1.dp, glassEdgeBrush(Settings.shared.glassStyle == "CLEAR"), CircleShape)
+                    else -> Modifier
+                },
+            ),
         contentAlignment = Alignment.Center,
     ) {
         Text(day.dayOfMonth.toString(), color = foreground, style = MaterialTheme.typography.labelSmall)
