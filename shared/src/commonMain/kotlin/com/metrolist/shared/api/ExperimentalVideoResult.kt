@@ -31,6 +31,7 @@ data class ExperimentalVideoResult(
             thumbnail = thumbnail,
             artists = channel?.let { listOf(ArtistTiny(channelId, it)) } ?: emptyList(),
             album = null,
+            isGeneralVideo = true,
             musicVideoType = if (isLive) MUSIC_VIDEO_TYPE_LIVE else MUSIC_VIDEO_TYPE_VIDEO,
         )
 }

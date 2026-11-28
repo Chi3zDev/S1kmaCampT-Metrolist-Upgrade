@@ -56,6 +56,8 @@ data class SongItem(
     val playbackProgressPercent: Int? = null,
     override val isUnavailable: Boolean = false,
     val downloadedAt: Long? = null,
+    // General video plays are not music-listening activity. Persist with queue restoration.
+    val isGeneralVideo: Boolean = false,
 ) : YTItem()
 
 val SongItem.artworkExplicitness: Boolean?

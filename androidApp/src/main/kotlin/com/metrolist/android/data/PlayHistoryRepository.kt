@@ -303,7 +303,7 @@ class PlayHistoryRepository(
         song: SongItem,
         playTimeMs: Long,
     ) = withContext(Dispatchers.IO) {
-        if (song.id.isBlank()) return@withContext
+        if (song.id.isBlank() || song.isGeneralVideo) return@withContext
         database.withDatabaseTransaction {
             dao.upsertHistorySong(song)
             dao.incrementTotalPlayTime(song.id, playTimeMs)

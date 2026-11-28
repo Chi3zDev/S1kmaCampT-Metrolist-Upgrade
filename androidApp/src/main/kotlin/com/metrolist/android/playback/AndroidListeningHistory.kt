@@ -71,7 +71,7 @@ internal class AndroidListeningHistory(
         newPlayback: Boolean,
     ) {
         if (!enabled) return
-        if (newPlayback || song?.id != listeningSongId) {
+        if (newPlayback || song?.id != listeningSongId || song?.isGeneralVideo != lastListeningSong?.isGeneralVideo) {
             finishSession()
             lastListeningSong = song
             listeningSongId = song?.id
@@ -91,7 +91,9 @@ internal class AndroidListeningHistory(
         listeningSongId = null
         listeningClock.reset()
         listeningIsPlaying = false
-        if (song != null && enabled && !Settings.shared.pauseListenHistory && playTime >= Settings.shared.historyDuration * 1000L) {
+        if (song != null && !song.isGeneralVideo && enabled && !Settings.shared.pauseListenHistory &&
+            playTime >= Settings.shared.historyDuration * 1000L
+        ) {
             val previousWrite = pendingWrite
             pendingWrite =
                 writerScope.launch {
@@ -103,7 +105,11 @@ internal class AndroidListeningHistory(
 
     /** Read-only progress for the visible streak UI; never writes or finalizes a play. */
     internal fun currentSessionListeningMs(): Long? =
-        if (enabled && !Settings.shared.pauseListenHistory && lastListeningSong != null) listeningClock.elapsedMs() else null
+        if (enabled && !Settings.shared.pauseListenHistory && lastListeningSong?.isGeneralVideo == false) {
+            listeningClock.elapsedMs()
+        } else {
+            null
+        }
 
     fun flush(): Job? {
         finishSession()

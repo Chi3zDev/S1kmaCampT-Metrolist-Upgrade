@@ -2304,7 +2304,7 @@ fun MetrolistApp(
 
                     StreakCelebrationPresenter(
                         database = database,
-                        isPlaying = isPlaying && hasMedia,
+                        isPlaying = isPlaying && hasMedia && currentSong?.isGeneralVideo != true,
                         visible = !isInPipMode,
                         snackbarHostState = snackbarHostState,
                         onOpenStreak = { navigator.navigate(Screen.Streak) },
