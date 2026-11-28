@@ -16,14 +16,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -77,6 +75,7 @@ import com.metrolist.shared.settings.getAutomotivePinnedPlaylists
 import com.metrolist.shared.settings.setAutomotivePinnedPlaylists
 import com.metrolist.shared.state.GlobalYouTubeRepository
 import com.metrolist.shared.ui.components.AlertDialog
+import com.metrolist.shared.ui.components.LiquidGlassTextButton
 import com.metrolist.shared.ui.components.PopupVisibility
 import com.metrolist.shared.ui.components.libraryArtwork
 import com.metrolist.shared.ui.tv.tvFocusHighlight
@@ -267,10 +266,9 @@ private fun PinnedPlaylistDialog(
                 )
                 if (loadFailed) {
                     Text(stringResource(Res.string.android_auto_playlists_load_failed), color = MaterialTheme.colorScheme.error)
-                    TextButton(
+                    LiquidGlassTextButton(
                         onClick = onRetry,
                         enabled = !loading,
-                        shapes = ButtonDefaults.shapes(),
                     ) { Text(stringResource(Res.string.retry)) }
                 }
                 if (loading) {
@@ -339,19 +337,17 @@ private fun PinnedPlaylistDialog(
             }
         },
         confirmButton = {
-            TextButton(
+            LiquidGlassTextButton(
                 onClick = onSave,
                 modifier = Modifier.tvFocusHighlight(RoundedCornerShape(100.dp)),
-                shapes = ButtonDefaults.shapes(),
             ) {
                 Text(stringResource(Res.string.save))
             }
         },
         dismissButton = {
-            TextButton(
+            LiquidGlassTextButton(
                 onClick = onDismiss,
                 modifier = Modifier.tvFocusHighlight(RoundedCornerShape(100.dp)),
-                shapes = ButtonDefaults.shapes(),
             ) {
                 Text(stringResource(Res.string.cancel))
             }
