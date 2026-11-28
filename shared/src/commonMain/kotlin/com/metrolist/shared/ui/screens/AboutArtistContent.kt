@@ -114,6 +114,7 @@ import com.metrolist.shared.ui.components.LiquidGlassTextButton
 import com.metrolist.shared.ui.components.appPageBackground
 import com.metrolist.shared.ui.components.glassCardBorder
 import com.metrolist.shared.ui.components.glassCardColor
+import com.metrolist.shared.ui.components.glassScaffoldViewport
 import com.metrolist.shared.ui.components.images.AsyncImage
 import com.metrolist.shared.ui.components.liquidGlassBackdropReady
 import com.metrolist.shared.ui.components.loadingShimmer
@@ -548,7 +549,8 @@ fun AboutArtistContent(
                     }
                 },
             ) { padding ->
-                BoxWithConstraints(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.TopCenter) {
+                val viewport = if (glass) Modifier.glassScaffoldViewport(padding) else Modifier.fillMaxSize().padding(padding)
+                BoxWithConstraints(viewport, contentAlignment = Alignment.TopCenter) {
                     val showGallery = loading || galleryPhotos.isNotEmpty()
                     if (maxWidth >= WIDE_LAYOUT_WIDTH && showGallery) {
                         val galleryHeight = maxHeight - 32.dp - bottomContentPadding
