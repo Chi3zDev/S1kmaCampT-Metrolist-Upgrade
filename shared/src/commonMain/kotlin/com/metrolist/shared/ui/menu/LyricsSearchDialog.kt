@@ -11,13 +11,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.clearText
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -47,6 +42,9 @@ import com.metrolist.shared.generated.resources.search_lyrics
 import com.metrolist.shared.generated.resources.song_title
 import com.metrolist.shared.ui.LocalIsTv
 import com.metrolist.shared.ui.components.AlertDialog
+import com.metrolist.shared.ui.components.LiquidGlassCompactButton
+import com.metrolist.shared.ui.components.LiquidGlassIconButton
+import com.metrolist.shared.ui.components.LiquidGlassOutlinedButton
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import com.metrolist.shared.ui.tv.tvFocusHighlight
 import com.metrolist.shared.ui.utils.verticalScrollWithDrag
@@ -93,17 +91,16 @@ fun LyricsSearchDialog(
             }
         },
         confirmButton = {
-            Button(
+            LiquidGlassCompactButton(
                 onClick = submitSearch,
                 enabled = title.text.isNotBlank(),
-                shapes = ButtonDefaults.shapes(),
                 modifier = Modifier.tvFocusHighlight(),
             ) {
                 Text(stringResource(Res.string.search))
             }
         },
         dismissButton = {
-            OutlinedButton(onClick = onDismiss, shapes = ButtonDefaults.shapes()) { Text(stringResource(Res.string.cancel)) }
+            LiquidGlassOutlinedButton(onClick = onDismiss) { Text(stringResource(Res.string.cancel)) }
         },
     )
 }
@@ -122,7 +119,7 @@ private fun LyricsSearchTextField(
         state = state,
         label = { Text(label) },
         trailingIcon = {
-            IconButton(onClick = state::clearText, shapes = IconButtonDefaults.shapes()) {
+            LiquidGlassIconButton(onClick = state::clearText) {
                 Icon(MetrolistIcons.Default.Clear, stringResource(Res.string.clear))
             }
         },
