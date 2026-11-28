@@ -5,6 +5,7 @@ package com.metrolist.shared.ui.listentogether
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -43,7 +44,12 @@ import androidx.compose.ui.unit.dp
 import com.metrolist.shared.generated.resources.Res
 import com.metrolist.shared.generated.resources.back
 import com.metrolist.shared.ui.components.LiquidGlassIconButton
+import com.metrolist.shared.ui.components.LiquidGlassSurface
+import com.metrolist.shared.ui.components.appPageBackground
 import com.metrolist.shared.ui.components.focusOutline
+import com.metrolist.shared.ui.components.glassCardBorder
+import com.metrolist.shared.ui.components.glassCardColor
+import com.metrolist.shared.ui.components.liquidGlassBackdropReady
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import com.metrolist.shared.ui.utils.segmentedGroupShape
 import com.metrolist.shared.ui.utils.verticalScrollWithDrag
@@ -59,29 +65,45 @@ fun SettingsSubScreen(
     content: @Composable () -> Unit,
 ) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    val glass = liquidGlassBackdropReady()
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        containerColor = appPageBackground(MaterialTheme.colorScheme.background),
         topBar = {
-            LargeFlexibleTopAppBar(
-                title = { Text(title) },
-                navigationIcon = {
-                    if (onNavigateBack != null) {
-                        LiquidGlassIconButton(onClick = onNavigateBack) {
-                            Icon(
-                                MetrolistIcons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = stringResource(Res.string.back),
-                            )
+            LiquidGlassSurface(radius = 0.dp, modifier = Modifier.fillMaxWidth(), enabled = glass) {
+                LargeFlexibleTopAppBar(
+                    title = { Text(title) },
+                    navigationIcon = {
+                        if (onNavigateBack != null) {
+                            LiquidGlassIconButton(onClick = onNavigateBack) {
+                                Icon(
+                                    MetrolistIcons.AutoMirrored.Filled.ArrowBack,
+                                    contentDescription = stringResource(Res.string.back),
+                                )
+                            }
                         }
-                    }
-                },
-                colors =
-                    TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.surface,
-                        scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                    ),
-                scrollBehavior = scrollBehavior,
-            )
+                    },
+                    colors =
+                        TopAppBarDefaults.topAppBarColors(
+                            containerColor =
+                                if (glass) {
+                                    glassCardColor(
+                                        MaterialTheme.colorScheme.surface,
+                                    )
+                                } else {
+                                    MaterialTheme.colorScheme.surface
+                                },
+                            scrolledContainerColor =
+                                if (glass) {
+                                    glassCardColor(MaterialTheme.colorScheme.surfaceContainerHigh)
+                                } else {
+                                    MaterialTheme.colorScheme.surfaceContainerHigh
+                                },
+                        ),
+                    scrollBehavior = scrollBehavior,
+                )
+            }
         },
         floatingActionButton = {
             Box(Modifier.padding(bottom = bottomInset)) {
@@ -165,41 +187,49 @@ private fun SettingsSubScreenItemRow(
         },
     )
 
-    Row(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(horizontal = horizontalPadding)
-                .clip(shape)
-                .background(backgroundColor)
-                .focusOutline(shape)
-                .clickable(
-                    interactionSource = interactionSource,
-                    enabled = item.onClick != null,
-                    onClick = { item.onClick?.invoke() },
-                ).padding(horizontal = 16.dp, vertical = 16.dp),
-        verticalAlignment = Alignment.CenterVertically,
+    val glass = liquidGlassBackdropReady()
+    val border = if (glass) glassCardBorder() else null
+    LiquidGlassSurface(
+        radius = 20.dp,
+        modifier = Modifier.fillMaxWidth().padding(horizontal = horizontalPadding),
+        enabled = glass,
     ) {
-        item.leadingContent?.let {
-            it()
-            Spacer(Modifier.width(16.dp))
-        }
-        Column(Modifier.weight(1f)) {
-            Text(
-                text = item.title,
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Medium),
-            )
-            item.description?.let {
-                Text(
-                    text = it,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+        Row(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .clip(shape)
+                    .then(if (border != null) Modifier.border(border, shape) else Modifier)
+                    .background(if (glass) glassCardColor(backgroundColor) else backgroundColor)
+                    .focusOutline(shape)
+                    .clickable(
+                        interactionSource = interactionSource,
+                        enabled = item.onClick != null,
+                        onClick = { item.onClick?.invoke() },
+                    ).padding(horizontal = 16.dp, vertical = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            item.leadingContent?.let {
+                it()
+                Spacer(Modifier.width(16.dp))
             }
-        }
-        item.trailingContent?.let {
-            Spacer(Modifier.width(8.dp))
-            it()
+            Column(Modifier.weight(1f)) {
+                Text(
+                    text = item.title,
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Medium),
+                )
+                item.description?.let {
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+            item.trailingContent?.let {
+                Spacer(Modifier.width(8.dp))
+                it()
+            }
         }
     }
 }
