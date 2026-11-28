@@ -13,6 +13,7 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -75,6 +76,36 @@ fun LiquidGlassCompactButton(
                     ButtonDefaults.buttonColors()
                 },
             border = if (glass) glassCardBorder() else null,
+            content = content,
+        )
+    }
+}
+
+/** Outlined action that preserves its Material appearance when glass is unavailable. */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+fun LiquidGlassOutlinedButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    content: @Composable RowScope.() -> Unit,
+) {
+    val glass = liquidGlassBackdropReady()
+    LiquidGlassSurface(radius = 24.dp, modifier = modifier, enabled = glass) {
+        OutlinedButton(
+            onClick = onClick,
+            enabled = enabled,
+            shapes = ButtonDefaults.shapes(),
+            colors =
+                if (glass) {
+                    ButtonDefaults.outlinedButtonColors(
+                        containerColor = glassCardColor(MaterialTheme.colorScheme.surfaceContainer),
+                        contentColor = MaterialTheme.colorScheme.onSurface,
+                    )
+                } else {
+                    ButtonDefaults.outlinedButtonColors()
+                },
+            border = if (glass) glassCardBorder() else ButtonDefaults.outlinedButtonBorder(enabled),
             content = content,
         )
     }
