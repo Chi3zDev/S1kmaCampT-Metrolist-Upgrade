@@ -69,6 +69,7 @@ import com.metrolist.shared.ui.components.AlertDialog
 import com.metrolist.shared.ui.components.ExpressiveSwitch
 import com.metrolist.shared.ui.components.LiquidGlassButton
 import com.metrolist.shared.ui.components.LiquidGlassSurface
+import com.metrolist.shared.ui.components.LiquidGlassTextButton
 import com.metrolist.shared.ui.components.appPageBackground
 import com.metrolist.shared.ui.components.glassCardBorder
 import com.metrolist.shared.ui.components.glassCardColor
@@ -212,7 +213,7 @@ fun StreakScreen(onBack: () -> Unit) {
             confirmButton = {
                 Row {
                     listOf(false, true).forEach { story ->
-                        TextButton(enabled = !sharing, onClick = {
+                        LiquidGlassTextButton(enabled = !sharing, onClick = {
                             sharing = true
                             scope.launch {
                                 try {
@@ -267,7 +268,12 @@ fun StreakScreen(onBack: () -> Unit) {
                     }
                 }
             },
-            dismissButton = { TextButton(onClick = { showShare = false }, enabled = !sharing) { Text(stringResource(Res.string.cancel)) } },
+            dismissButton = {
+                LiquidGlassTextButton(
+                    onClick = { showShare = false },
+                    enabled = !sharing,
+                ) { Text(stringResource(Res.string.cancel)) }
+            },
         )
     }
 
@@ -355,7 +361,7 @@ fun StreakScreen(onBack: () -> Unit) {
                         )
                     }
                     Text(stringResource(Res.string.streak_reminder_timing), style = MaterialTheme.typography.bodySmall)
-                    TextButton(onClick = {
+                    LiquidGlassTextButton(onClick = {
                         TimePickerDialog(context, { _, hour, minute ->
                             val value = hour * 60 + minute
                             Settings.shared.streakReminderMinuteOfDay = value
@@ -373,9 +379,9 @@ fun StreakScreen(onBack: () -> Unit) {
                         Text(stringResource(Res.string.streak_debug_date, today.toString(), debugDays))
                         Text(stringResource(Res.string.streak_debug_read_only), style = MaterialTheme.typography.bodySmall)
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            TextButton(onClick = { debugDays = (debugDays - 1).coerceAtLeast(-366) }) { Text("−1") }
-                            TextButton(onClick = { debugDays = 0 }) { Text(stringResource(Res.string.streak_debug_reset)) }
-                            TextButton(onClick = { debugDays = (debugDays + 1).coerceAtMost(366) }) { Text("+1") }
+                            LiquidGlassTextButton(onClick = { debugDays = (debugDays - 1).coerceAtLeast(-366) }) { Text("−1") }
+                            LiquidGlassTextButton(onClick = { debugDays = 0 }) { Text(stringResource(Res.string.streak_debug_reset)) }
+                            LiquidGlassTextButton(onClick = { debugDays = (debugDays + 1).coerceAtMost(366) }) { Text("+1") }
                         }
                     }
                 }
@@ -405,7 +411,7 @@ fun StreakScreen(onBack: () -> Unit) {
                         )
                         StreakTodayBadge(streak.todayCounted, flameColor, motionEnabled)
                         StreakCount(streak.current, screenActive && streakMotionEnabled(), MaterialTheme.typography.displayMedium)
-                        TextButton(onClick = { showLevels = true }) {
+                        LiquidGlassTextButton(onClick = { showLevels = true }) {
                             Text(stringResource(shownLevel.title), color = flameColor, style = MaterialTheme.typography.titleLarge)
                         }
                         Text(
@@ -559,7 +565,7 @@ fun StreakScreen(onBack: () -> Unit) {
                 }
             },
             confirmButton = {
-                TextButton(onClick = {
+                LiquidGlassTextButton(onClick = {
                     previewLevel = null
                     showLevels = true
                 }) { Text(stringResource(Res.string.back)) }
@@ -576,7 +582,7 @@ fun StreakScreen(onBack: () -> Unit) {
                 )
             },
             confirmButton = {
-                TextButton(onClick = {
+                LiquidGlassTextButton(onClick = {
                     confirmation = false
                     scope.launch {
                         restoreFailed =
@@ -589,7 +595,7 @@ fun StreakScreen(onBack: () -> Unit) {
                     }
                 }) { Text(stringResource(Res.string.streak_restore)) }
             },
-            dismissButton = { TextButton(onClick = { confirmation = false }) { Text(stringResource(Res.string.cancel)) } },
+            dismissButton = { LiquidGlassTextButton(onClick = { confirmation = false }) { Text(stringResource(Res.string.cancel)) } },
         )
     }
 }
@@ -720,7 +726,7 @@ private fun StreakTopBar(onBack: () -> Unit) {
                 modifier = Modifier.fillMaxWidth().height(56.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                TextButton(onClick = onBack) { Text("‹  " + stringResource(Res.string.back)) }
+                LiquidGlassTextButton(onClick = onBack) { Text("‹  " + stringResource(Res.string.back)) }
                 Text(stringResource(Res.string.streak_page_title), style = MaterialTheme.typography.titleMedium)
             }
         }
@@ -769,7 +775,7 @@ private fun StreakLevelGallery(
                 }
             }
         },
-        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.back)) } },
+        confirmButton = { LiquidGlassTextButton(onClick = onDismiss) { Text(stringResource(Res.string.back)) } },
     )
 }
 
