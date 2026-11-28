@@ -38,7 +38,6 @@ import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -325,10 +324,9 @@ fun CompactSearchBar(
                 )
             }
             if (query.isNotEmpty()) {
-                IconButton(
+                LiquidGlassIconButton(
                     onClick = { onQueryChange("") },
                     modifier = Modifier.size(24.dp).pointerHoverIcon(PointerIcon.Hand),
-                    shapes = IconButtonDefaults.shapes(),
                 ) {
                     Icon(
                         imageVector = MetrolistIcons.Default.Clear,
@@ -338,10 +336,9 @@ fun CompactSearchBar(
                     )
                 }
             } else if (onClose != null) {
-                IconButton(
+                LiquidGlassIconButton(
                     onClick = onClose,
                     modifier = Modifier.size(24.dp).pointerHoverIcon(PointerIcon.Hand),
-                    shapes = IconButtonDefaults.shapes(),
                 ) {
                     Icon(
                         imageVector = MetrolistIcons.Default.Close,
