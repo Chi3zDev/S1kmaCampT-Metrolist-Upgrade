@@ -18,8 +18,6 @@ import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.SearchBarValue
@@ -51,7 +49,6 @@ import com.metrolist.shared.generated.resources.playlist_direction_ascending
 import com.metrolist.shared.generated.resources.playlist_direction_descending
 import com.metrolist.shared.model.HistorySortMode
 import com.metrolist.shared.model.SortDirection
-import com.metrolist.shared.settings.Settings
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import com.metrolist.shared.ui.menu.ExpressiveSelectionMenu
 import com.metrolist.shared.ui.menu.trackPressPosition
@@ -101,10 +98,11 @@ fun HistoryFilterBar(
             }
     }
 
+    val glass = liquidGlassBackdropReady()
     val searchBarColors =
         SearchBarDefaults.colors(
             containerColor =
-                if (Settings.shared.liquidGlassTheme) {
+                if (glass) {
                     glassCardColor(MaterialTheme.colorScheme.surfaceContainerHigh)
                 } else {
                     MaterialTheme.colorScheme.surfaceContainerHigh
@@ -117,7 +115,7 @@ fun HistoryFilterBar(
     ) {
         if (showSearch) {
             Box(Modifier.fillMaxWidth()) {
-                if (Settings.shared.liquidGlassTheme) {
+                if (glass) {
                     LocalThemeGlassBackdrop.current?.Background(radius = 28.dp, modifier = Modifier.matchParentSize())
                 }
                 Surface(
@@ -137,7 +135,7 @@ fun HistoryFilterBar(
                             },
                             trailingIcon = {
                                 if (query.isNotEmpty()) {
-                                    IconButton(onClick = { onQueryChange("") }, shapes = IconButtonDefaults.shapes()) {
+                                    LiquidGlassIconButton(onClick = { onQueryChange("") }) {
                                         Icon(
                                             imageVector = MetrolistIcons.Default.Clear,
                                             contentDescription = stringResource(Res.string.clear_search),
@@ -150,7 +148,7 @@ fun HistoryFilterBar(
                     },
                     modifier = Modifier.fillMaxWidth(),
                     color = searchBarColors.containerColor,
-                    border = if (Settings.shared.liquidGlassTheme) glassCardBorder() else null,
+                    border = if (glass) glassCardBorder() else null,
                     tonalElevation = 0.dp,
                     shadowElevation = 0.dp,
                 )
@@ -167,14 +165,14 @@ fun HistoryFilterBar(
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 Box(Modifier.trackPressPosition { sortMenuOffset = it.round() }) {
-                    if (Settings.shared.liquidGlassTheme) {
+                    if (glass) {
                         LocalThemeGlassBackdrop.current?.Background(radius = 24.dp, modifier = Modifier.matchParentSize())
                     }
                     SplitButtonLayout(
                         leadingButton = {
                             SplitButtonDefaults.TonalLeadingButton(
                                 colors = liquidGlassTonalColors(),
-                                border = if (Settings.shared.liquidGlassTheme) glassCardBorder() else null,
+                                border = if (glass) glassCardBorder() else null,
                                 onClick = { sortExpanded = true },
                                 modifier =
                                     Modifier
@@ -198,7 +196,7 @@ fun HistoryFilterBar(
                         trailingButton = {
                             SplitButtonDefaults.TrailingButton(
                                 colors = liquidGlassTonalColors(),
-                                border = if (Settings.shared.liquidGlassTheme) glassCardBorder() else null,
+                                border = if (glass) glassCardBorder() else null,
                                 elevation = ButtonDefaults.filledTonalButtonElevation(),
                                 onClick = {
                                     onSortDirectionChange(
