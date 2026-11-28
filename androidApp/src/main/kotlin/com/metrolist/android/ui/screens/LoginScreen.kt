@@ -95,6 +95,7 @@ import com.metrolist.shared.ui.components.LiquidGlassSurface
 import com.metrolist.shared.ui.components.LiquidGlassTextButton
 import com.metrolist.shared.ui.components.PopupVisibility
 import com.metrolist.shared.ui.components.glassCardColor
+import com.metrolist.shared.ui.components.glassScaffoldViewport
 import com.metrolist.shared.ui.components.liquidGlassBackdropReady
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import com.metrolist.shared.ui.sanitizeDataSyncId
@@ -428,9 +429,9 @@ fun LoginScreen(
         }
     }
 
+    val glass = liquidGlassBackdropReady()
     Scaffold(
         topBar = {
-            val glass = liquidGlassBackdropReady()
             LiquidGlassSurface(radius = 0.dp, modifier = Modifier.fillMaxWidth(), enabled = glass) {
                 TopAppBar(
                     title = {
@@ -476,12 +477,8 @@ fun LoginScreen(
             }
         },
     ) { paddingValues ->
-        Box(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-        ) {
+        val viewport = if (glass) Modifier.glassScaffoldViewport(paddingValues) else Modifier.fillMaxSize().padding(paddingValues)
+        Box(modifier = viewport) {
             if (tvWarningAccepted) {
                 AndroidView(
                     modifier =
