@@ -111,9 +111,11 @@ import com.metrolist.shared.ui.PolishMotion
 import com.metrolist.shared.ui.components.AlertDialog
 import com.metrolist.shared.ui.components.LiquidGlassIconButton
 import com.metrolist.shared.ui.components.LiquidGlassSurface
+import com.metrolist.shared.ui.components.LiquidGlassTextButton
 import com.metrolist.shared.ui.components.appPageBackground
 import com.metrolist.shared.ui.components.glassCardBorder
 import com.metrolist.shared.ui.components.glassCardColor
+import com.metrolist.shared.ui.components.liquidGlassBackdropReady
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import com.metrolist.shared.ui.navigation.LocalContentObscured
 import com.metrolist.shared.ui.navigation.LocalRootContentActive
@@ -163,20 +165,20 @@ fun RecapScreen(onBack: () -> Unit) {
                                 RecapPeriod.MONTH -> Res.string.recap_month_filter
                                 else -> Res.string.recap_thirty_filter
                             }
-                        TextButton(onClick = {
+                        LiquidGlassTextButton(onClick = {
                             period = choice
                             showPeriods = false
                         }) { Text(stringResource(label)) }
                     }
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        TextButton(onClick = {
+                        LiquidGlassTextButton(onClick = {
                             month = month.minusMonths(1)
                             period = RecapPeriod.MONTH
                         }) {
                             Text(stringResource(Res.string.story_previous_month))
                         }
                         Text(month.format(DateTimeFormatter.ofPattern("MMM yyyy")))
-                        TextButton(onClick = {
+                        LiquidGlassTextButton(onClick = {
                             month = month.plusMonths(1)
                             period = RecapPeriod.MONTH
                         }, enabled = month < YearMonth.now()) {
@@ -194,7 +196,7 @@ fun RecapScreen(onBack: () -> Unit) {
             failed -> {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(stringResource(Res.string.recap_error))
-                    TextButton(onClick = onBack) { Text(stringResource(Res.string.back)) }
+                    LiquidGlassTextButton(onClick = onBack) { Text(stringResource(Res.string.back)) }
                 }
             }
 
@@ -205,8 +207,8 @@ fun RecapScreen(onBack: () -> Unit) {
             recap.songs.isEmpty() -> {
                 Column {
                     Text(stringResource(Res.string.recap_empty))
-                    TextButton(onClick = { showPeriods = true }) { Text(stringResource(Res.string.recap_title)) }
-                    TextButton(onClick = onBack) { Text(stringResource(Res.string.back)) }
+                    LiquidGlassTextButton(onClick = { showPeriods = true }) { Text(stringResource(Res.string.recap_title)) }
+                    LiquidGlassTextButton(onClick = onBack) { Text(stringResource(Res.string.back)) }
                 }
             }
 
@@ -277,6 +279,7 @@ private fun RecapStory(
         if (recapTimerRunning(visible, pressed, paused) && progress >= 1f && page < pages.lastIndex) page++
     }
     val colors = MaterialTheme.colorScheme
+    val glassReady = liquidGlassBackdropReady()
     val slideColor =
         when (pages[page]) {
             0 -> colors.primaryContainer
@@ -498,14 +501,14 @@ private fun RecapStory(
                     Icon(
                         MetrolistIcons.AutoMirrored.Filled.ArrowBack,
                         stringResource(Res.string.back),
-                        tint = if (Settings.shared.liquidGlassTheme) colors.onSurface else colors.onPrimaryContainer,
+                        tint = if (glassReady) colors.onSurface else colors.onPrimaryContainer,
                     )
                 }
                 LiquidGlassSurface(radius = 24.dp) {
                     TextButton(
                         onClick = onPeriod,
                         colors =
-                            if (Settings.shared.liquidGlassTheme) {
+                            if (glassReady) {
                                 ButtonDefaults.textButtonColors(
                                     containerColor = glassCardColor(colors.surfaceContainer),
                                     contentColor = colors.onSurface,
@@ -513,7 +516,7 @@ private fun RecapStory(
                             } else {
                                 ButtonDefaults.textButtonColors(contentColor = colors.onPrimaryContainer)
                             },
-                        border = if (Settings.shared.liquidGlassTheme) glassCardBorder() else null,
+                        border = if (glassReady) glassCardBorder() else null,
                     ) { Text(stringResource(Res.string.story_change_period)) }
                 }
                 LiquidGlassIconButton(onClick = {
@@ -537,7 +540,7 @@ private fun RecapStory(
                     Icon(
                         MetrolistIcons.Outlined.Share,
                         shareLabel,
-                        tint = if (Settings.shared.liquidGlassTheme) colors.onSurface else colors.onPrimaryContainer,
+                        tint = if (glassReady) colors.onSurface else colors.onPrimaryContainer,
                     )
                 }
             }
