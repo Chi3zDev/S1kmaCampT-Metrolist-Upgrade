@@ -22,13 +22,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -116,6 +114,7 @@ import com.metrolist.shared.storage.cacheAllocationBytes
 import com.metrolist.shared.storage.imageCacheLimitOptions
 import com.metrolist.shared.storage.songCacheLimitIndex
 import com.metrolist.shared.ui.components.AlertDialog
+import com.metrolist.shared.ui.components.LiquidGlassTextButton
 import com.metrolist.shared.ui.components.PopupVisibility
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import com.metrolist.shared.ui.settings.StorageConfirmationDialog
@@ -480,7 +479,7 @@ fun StorageSettingsScreen(
             title = { Text(stringResource(Res.string.clear_music_video_cache)) },
             text = { Text(stringResource(Res.string.clear_music_video_cache_dialog)) },
             confirmButton = {
-                TextButton(
+                LiquidGlassTextButton(
                     onClick = {
                         launchStorageOperation {
                             withContext(Dispatchers.IO) {
@@ -490,7 +489,6 @@ fun StorageSettingsScreen(
                         }
                         clearMusicVideoCacheDialog = false
                     },
-                    shapes = ButtonDefaults.shapes(),
                 ) {
                     Text(
                         stringResource(Res.string.clear_music_video_cache),
@@ -499,7 +497,7 @@ fun StorageSettingsScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { clearMusicVideoCacheDialog = false }, shapes = ButtonDefaults.shapes()) {
+                LiquidGlassTextButton(onClick = { clearMusicVideoCacheDialog = false }) {
                     Text(androidStringResource(android.R.string.cancel))
                 }
             },
@@ -524,7 +522,7 @@ fun StorageSettingsScreen(
                 )
             },
             confirmButton = {
-                TextButton(
+                LiquidGlassTextButton(
                     onClick = {
                         showCacheWarningDialog = false
                         coroutineScope.launch {
@@ -542,7 +540,6 @@ fun StorageSettingsScreen(
                             }
                         }
                     },
-                    shapes = ButtonDefaults.shapes(),
                 ) {
                     Text(
                         stringResource(Res.string.continue_action),
@@ -551,12 +548,11 @@ fun StorageSettingsScreen(
                 }
             },
             dismissButton = {
-                TextButton(
+                LiquidGlassTextButton(
                     onClick = {
                         showCacheWarningDialog = false
                         cacheSliderRevision++
                     },
-                    shapes = ButtonDefaults.shapes(),
                 ) {
                     Text(androidStringResource(android.R.string.cancel))
                 }
@@ -604,9 +600,8 @@ fun StorageSettingsScreen(
             title = { Text(stringResource(Res.string.song_cache_directory)) },
             text = { SelectionContainer { Text(audioCacheManager.cacheDirectoryLabel()) } },
             confirmButton = {
-                TextButton(
+                LiquidGlassTextButton(
                     onClick = { showCacheDirectory = false },
-                    shapes = ButtonDefaults.shapes(),
                 ) { Text(stringResource(Res.string.close)) }
             },
         )
