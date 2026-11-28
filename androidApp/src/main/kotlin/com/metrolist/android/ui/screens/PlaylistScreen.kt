@@ -149,7 +149,9 @@ import com.metrolist.shared.ui.components.SongSelectionControls
 import com.metrolist.shared.ui.components.appPageBackground
 import com.metrolist.shared.ui.components.appTopBarBackground
 import com.metrolist.shared.ui.components.glassCardColor
+import com.metrolist.shared.ui.components.glassScreenViewport
 import com.metrolist.shared.ui.components.images.AsyncImage
+import com.metrolist.shared.ui.components.liquidGlassBackdropReady
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import com.metrolist.shared.ui.navigation.navigationPopupSource
 import com.metrolist.shared.ui.screens.PlaylistContent
@@ -550,6 +552,7 @@ fun PlaylistScreen(
     }
 
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    val glass = liquidGlassBackdropReady()
     val isTopBarCollapsed by remember(scrollBehavior) { derivedStateOf { scrollBehavior.state.overlappedFraction > 0.5f } }
     val miniPlayerInset = LocalMiniPlayerBottomInset.current
 
@@ -621,7 +624,7 @@ fun PlaylistScreen(
                         colors =
                             TopAppBarDefaults.topAppBarColors(
                                 containerColor =
-                                    if (Settings.shared.liquidGlassTheme) {
+                                    if (glass) {
                                         glassCardColor(MaterialTheme.colorScheme.surface)
                                     } else if (isTopBarCollapsed) {
                                         appTopBarBackground(
@@ -631,7 +634,7 @@ fun PlaylistScreen(
                                         Color.Transparent
                                     },
                                 scrolledContainerColor =
-                                    if (Settings.shared.liquidGlassTheme) {
+                                    if (glass) {
                                         glassCardColor(MaterialTheme.colorScheme.surface)
                                     } else if (isTopBarCollapsed) {
                                         MaterialTheme.colorScheme.surface
@@ -645,9 +648,12 @@ fun PlaylistScreen(
             }
         },
     ) { paddingValues ->
-        Box(modifier = Modifier.fillMaxSize().padding(bottom = paddingValues.calculateBottomPadding())) {
+        val contentTopPadding = if (glass) 0.dp else paddingValues.calculateTopPadding()
+        val contentViewport =
+            if (glass) Modifier.glassScreenViewport(paddingValues.calculateTopPadding()) else Modifier.fillMaxSize()
+        Box(modifier = contentViewport.padding(bottom = paddingValues.calculateBottomPadding())) {
             if (playlistInfo == null && preview == null && (isLoading || errorMessage == null)) {
-                CollectionLoadingPlaceholder(Modifier.padding(top = paddingValues.calculateTopPadding()))
+                CollectionLoadingPlaceholder(Modifier.padding(top = contentTopPadding))
             } else if (playlistInfo == null && !isLoading && errorMessage != null) {
                 Column(Modifier.align(Alignment.Center), horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(errorMessage ?: stringResource(Res.string.error_unknown))
@@ -752,7 +758,7 @@ fun PlaylistScreen(
                     listState = listState,
                     contentPadding =
                         PaddingValues(
-                            top = paddingValues.calculateTopPadding(),
+                            top = contentTopPadding,
                             bottom =
                                 paddingValues.calculateBottomPadding() +
                                     miniPlayerInset,
@@ -862,7 +868,7 @@ fun PlaylistScreen(
                     modifier =
                         Modifier
                             .align(Alignment.TopCenter)
-                            .padding(top = paddingValues.calculateTopPadding()),
+                            .padding(top = contentTopPadding),
                 ) {
                     ContainedLoadingIndicator()
                 }
@@ -873,7 +879,7 @@ fun PlaylistScreen(
                         Modifier
                             .align(Alignment.TopCenter)
                             .fillMaxWidth()
-                            .padding(top = paddingValues.calculateTopPadding()),
+                            .padding(top = contentTopPadding),
                 )
             }
         }
