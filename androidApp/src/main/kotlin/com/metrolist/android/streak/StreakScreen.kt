@@ -67,6 +67,7 @@ import com.metrolist.shared.ui.LocalPlayerEffectsAllowed
 import com.metrolist.shared.ui.PolishMotion
 import com.metrolist.shared.ui.components.AlertDialog
 import com.metrolist.shared.ui.components.ExpressiveSwitch
+import com.metrolist.shared.ui.components.LiquidGlassButton
 import com.metrolist.shared.ui.components.LiquidGlassSurface
 import com.metrolist.shared.ui.components.appPageBackground
 import com.metrolist.shared.ui.components.glassCardBorder
@@ -312,7 +313,11 @@ fun StreakScreen(onBack: () -> Unit) {
                 )
             }
             item {
-                OutlinedButton(onClick = { showShare = true }) { Text(stringResource(Res.string.streak_share)) }
+                if (Settings.shared.liquidGlassTheme) {
+                    LiquidGlassButton(onClick = { showShare = true }) { Text(stringResource(Res.string.streak_share)) }
+                } else {
+                    OutlinedButton(onClick = { showShare = true }) { Text(stringResource(Res.string.streak_share)) }
+                }
             }
             item {
                 val label = stringResource(Res.string.streak_level_background)
@@ -505,10 +510,15 @@ fun StreakScreen(onBack: () -> Unit) {
                         if (plan?.canRecover ==
                             true
                         ) {
-                            Button(
-                                onClick = { confirmation = true },
-                                enabled = !simulated,
-                            ) { Text(stringResource(Res.string.streak_restore)) }
+                            if (Settings.shared.liquidGlassTheme) {
+                                LiquidGlassButton(onClick = { confirmation = true }, enabled = !simulated) {
+                                    Text(stringResource(Res.string.streak_restore))
+                                }
+                            } else {
+                                Button(onClick = { confirmation = true }, enabled = !simulated) {
+                                    Text(stringResource(Res.string.streak_restore))
+                                }
+                            }
                         }
                     }
                 }
