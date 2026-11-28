@@ -183,6 +183,7 @@ import com.metrolist.shared.ui.components.currentSongSemantics
 import com.metrolist.shared.ui.components.glassCardBorder
 import com.metrolist.shared.ui.components.glassCardColor
 import com.metrolist.shared.ui.components.images.AsyncImage
+import com.metrolist.shared.ui.components.liquidGlassBackdropReady
 import com.metrolist.shared.ui.components.liquidGlassTonalColors
 import com.metrolist.shared.ui.components.loadingShimmer
 import com.metrolist.shared.ui.components.rememberCurrentSongArtworkRotation
@@ -602,7 +603,7 @@ private fun ArtistScreenContent(
             }
             LaunchedEffect(showAppBar) { onAppBarVisibleChange(showAppBar) }
             val progress by animateFloatAsState(if (showAppBar) 1f else 0f, MaterialTheme.motionScheme.fastEffectsSpec())
-            val glass = Settings.shared.liquidGlassTheme
+            val glass = liquidGlassBackdropReady()
             val surface = if (glass) glassCardColor(MaterialTheme.colorScheme.surface) else MaterialTheme.colorScheme.surface
             val iconColor =
                 if (glass) {
@@ -1123,7 +1124,7 @@ private fun ArtistActionRow(
     val textMeasurer = rememberTextMeasurer()
     val density = LocalDensity.current
     val tonalColors = FilledTonalToggleButtonDefaults.colors()
-    val glass = Settings.shared.liquidGlassTheme && LocalThemeGlassBackdrop.current != null
+    val glass = liquidGlassBackdropReady()
     val subscribeColor by animateColorAsState(
         if (glass && isSubscribed) {
             MaterialTheme.colorScheme.primary.copy(alpha = 0.32f)
@@ -1831,7 +1832,7 @@ private fun ArtistAboutCard(
             )
             Spacer(Modifier.height(10.dp))
             Box(artistCardModifier(isWide)) {
-                val glassCard = photoUrl.isNullOrBlank() && Settings.shared.liquidGlassTheme
+                val glassCard = photoUrl.isNullOrBlank() && liquidGlassBackdropReady()
                 if (glassCard) {
                     LocalThemeGlassBackdrop.current?.Background(radius = 28.dp, modifier = Modifier.matchParentSize())
                 }
