@@ -158,11 +158,15 @@ import com.metrolist.shared.settings.Settings
 import com.metrolist.shared.ui.LocalIsTv
 import com.metrolist.shared.ui.components.ChipShelf
 import com.metrolist.shared.ui.components.ContainedLoadingIndicator
+import com.metrolist.shared.ui.components.LiquidGlassSurface
+import com.metrolist.shared.ui.components.LocalThemeGlassBackdrop
 import com.metrolist.shared.ui.components.PlayerMenuAction
 import com.metrolist.shared.ui.components.ReorderMenu
 import com.metrolist.shared.ui.components.animateCurrentSongColors
 import com.metrolist.shared.ui.components.animatedCurrentSongArtworkShape
 import com.metrolist.shared.ui.components.currentSongSemantics
+import com.metrolist.shared.ui.components.glassCardBorder
+import com.metrolist.shared.ui.components.glassCardColor
 import com.metrolist.shared.ui.components.images.AsyncImage
 import com.metrolist.shared.ui.components.rememberArtworkShapeRotation
 import com.metrolist.shared.ui.components.squareArtworkSlot
@@ -959,83 +963,94 @@ private fun QueueBottomToolbar(
     val sleepTimerState by LocalPlayerSession.current?.sleepTimerState?.collectWhilePlayerActive()
         ?: remember { mutableStateOf(SleepTimerState()) }
     val hapticManager = rememberMetrolistHaptics()
+    val glass = Settings.shared.liquidGlassTheme && LocalThemeGlassBackdrop.current != null
     Row(
         modifier = modifier.width(240.dp).height(72.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Surface(
-            modifier = Modifier.width(176.dp).height(72.dp),
-            shape = RoundedCornerShape(36.dp),
-            color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.85f),
-        ) {
-            Row(
-                modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically,
+        LiquidGlassSurface(radius = 36.dp, modifier = Modifier.width(176.dp).height(72.dp), enabled = glass) {
+            Surface(
+                modifier = Modifier.fillMaxSize(),
+                shape = RoundedCornerShape(36.dp),
+                color =
+                    if (glass) {
+                        glassCardColor(
+                            MaterialTheme.colorScheme.surfaceContainerHighest,
+                        )
+                    } else {
+                        MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.85f)
+                    },
+                border = if (glass) glassCardBorder() else null,
             ) {
-                if (selectionActions != null) {
-                    selectionActions.take(3).forEach { action ->
+                Row(
+                    modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    if (selectionActions != null) {
+                        selectionActions.take(3).forEach { action ->
+                            IconButton(
+                                onClick = {
+                                    hapticManager.perform(HapticEvent.PRESS)
+                                    action.onClick()
+                                },
+                                enabled = action.enabled,
+                                modifier = Modifier.size(48.dp).tvFocusHighlight(CircleShape, scale = 1f).navigationPopupSource(),
+                                shapes = IconButtonDefaults.shapes(),
+                            ) {
+                                Icon(action.icon, contentDescription = action.title, tint = MaterialTheme.colorScheme.onSurface)
+                            }
+                        }
+                    } else {
                         IconButton(
                             onClick = {
                                 hapticManager.perform(HapticEvent.PRESS)
-                                action.onClick()
+                                onEvent(QueueEvent.ToggleSleepTimer)
                             },
-                            enabled = action.enabled,
-                            modifier = Modifier.size(48.dp).tvFocusHighlight(CircleShape, scale = 1f).navigationPopupSource(),
+                            modifier = Modifier.size(48.dp).tvFocusHighlight(CircleShape, scale = 1f),
                             shapes = IconButtonDefaults.shapes(),
                         ) {
-                            Icon(action.icon, contentDescription = action.title, tint = MaterialTheme.colorScheme.onSurface)
+                            Icon(
+                                imageVector = MetrolistIcons.Outlined.Bedtime,
+                                contentDescription = sleepTimerContentDescription(sleepTimerState),
+                                tint = MaterialTheme.colorScheme.onSurface,
+                            )
                         }
-                    }
-                } else {
-                    IconButton(
-                        onClick = {
-                            hapticManager.perform(HapticEvent.PRESS)
-                            onEvent(QueueEvent.ToggleSleepTimer)
-                        },
-                        modifier = Modifier.size(48.dp).tvFocusHighlight(CircleShape, scale = 1f),
-                        shapes = IconButtonDefaults.shapes(),
-                    ) {
-                        Icon(
-                            imageVector = MetrolistIcons.Outlined.Bedtime,
-                            contentDescription = sleepTimerContentDescription(sleepTimerState),
-                            tint = MaterialTheme.colorScheme.onSurface,
-                        )
-                    }
-                    IconButton(
-                        onClick = {
-                            hapticManager.perform(HapticEvent.PRESS)
-                            onEvent(QueueEvent.ToggleShuffle)
-                        },
-                        modifier = Modifier.size(48.dp).tvFocusHighlight(CircleShape, scale = 1f),
-                        shapes = IconButtonDefaults.shapes(),
-                    ) {
-                        Icon(
-                            imageVector = MetrolistIcons.Rounded.Shuffle,
-                            contentDescription = stringResource(Res.string.shuffle),
-                            tint = if (isShuffleOn) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
-                        )
-                    }
-                    IconButton(
-                        onClick = {
-                            hapticManager.perform(HapticEvent.PRESS)
-                            onEvent(QueueEvent.CycleRepeat)
-                        },
-                        modifier = Modifier.size(48.dp).tvFocusHighlight(CircleShape, scale = 1f),
-                        shapes = IconButtonDefaults.shapes(),
-                    ) {
-                        Icon(
-                            imageVector = if (repeatMode == 1) MetrolistIcons.Rounded.RepeatOne else MetrolistIcons.Rounded.Repeat,
-                            contentDescription =
-                                stringResource(
-                                    when (repeatMode) {
-                                        1 -> Res.string.repeat_mode_one
-                                        2 -> Res.string.repeat_mode_all
-                                        else -> Res.string.repeat_mode_off
-                                    },
-                                ),
-                            tint = if (repeatMode == 0) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.primary,
-                        )
+                        IconButton(
+                            onClick = {
+                                hapticManager.perform(HapticEvent.PRESS)
+                                onEvent(QueueEvent.ToggleShuffle)
+                            },
+                            modifier = Modifier.size(48.dp).tvFocusHighlight(CircleShape, scale = 1f),
+                            shapes = IconButtonDefaults.shapes(),
+                        ) {
+                            Icon(
+                                imageVector = MetrolistIcons.Rounded.Shuffle,
+                                contentDescription = stringResource(Res.string.shuffle),
+                                tint = if (isShuffleOn) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                            )
+                        }
+                        IconButton(
+                            onClick = {
+                                hapticManager.perform(HapticEvent.PRESS)
+                                onEvent(QueueEvent.CycleRepeat)
+                            },
+                            modifier = Modifier.size(48.dp).tvFocusHighlight(CircleShape, scale = 1f),
+                            shapes = IconButtonDefaults.shapes(),
+                        ) {
+                            Icon(
+                                imageVector = if (repeatMode == 1) MetrolistIcons.Rounded.RepeatOne else MetrolistIcons.Rounded.Repeat,
+                                contentDescription =
+                                    stringResource(
+                                        when (repeatMode) {
+                                            1 -> Res.string.repeat_mode_one
+                                            2 -> Res.string.repeat_mode_all
+                                            else -> Res.string.repeat_mode_off
+                                        },
+                                    ),
+                                tint = if (repeatMode == 0) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.primary,
+                            )
+                        }
                     }
                 }
             }
@@ -1104,113 +1119,117 @@ private fun PlaylistHeader(
     actions: @Composable RowScope.() -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Surface(
-        color = MaterialTheme.colorScheme.surfaceContainer,
-        shape = shape,
-        modifier =
-            modifier
-                .padding(horizontal = queueHorizontalInset)
-                .fillMaxWidth()
-                .heightIn(min = 64.dp),
+    val glass = Settings.shared.liquidGlassTheme && LocalThemeGlassBackdrop.current != null
+    LiquidGlassSurface(
+        radius = 20.dp,
+        modifier = modifier.padding(horizontal = queueHorizontalInset).fillMaxWidth(),
+        enabled = glass,
     ) {
-        Column(Modifier.padding(horizontal = 8.dp, vertical = 8.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Column(
-                    modifier = Modifier.weight(1f).padding(horizontal = 6.dp),
-                    verticalArrangement = Arrangement.Center,
+        Surface(
+            color = if (glass) glassCardColor(MaterialTheme.colorScheme.surfaceContainer) else MaterialTheme.colorScheme.surfaceContainer,
+            border = if (glass) glassCardBorder() else null,
+            shape = shape,
+            modifier = Modifier.fillMaxWidth().heightIn(min = 64.dp),
+        ) {
+            Column(Modifier.padding(horizontal = 8.dp, vertical = 8.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text(
-                        text =
-                            if (selectedCount > 0) {
-                                pluralStringResource(Res.plurals.n_selected, selectedCount, selectedCount)
-                            } else {
-                                playlist?.name ?: stringResource(Res.string.up_next)
-                            },
-                        modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
-                        style =
-                            MaterialTheme.typography.headlineSmall.copy(
-                                fontSize = 24.sp,
-                                fontWeight = FontWeight.Medium,
-                                lineHeight = 28.sp,
-                                letterSpacing = 0.sp,
-                            ),
-                        color = MaterialTheme.colorScheme.onSurface,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                    if (selectedCount == 0 && isQueueLoading) {
-                        ContainedLoadingIndicator(Modifier.size(24.dp), label = stringResource(Res.string.queue_loading))
-                    } else if (selectedCount == 0) {
+                    Column(
+                        modifier = Modifier.weight(1f).padding(horizontal = 6.dp),
+                        verticalArrangement = Arrangement.Center,
+                    ) {
                         Text(
                             text =
-                                playlist?.let {
-                                    pluralStringResource(
-                                        Res.plurals.queue_track_count_duration,
-                                        it.trackCount,
-                                        it.trackCount,
-                                        it.totalDuration,
-                                    )
-                                } ?: "",
+                                if (selectedCount > 0) {
+                                    pluralStringResource(Res.plurals.n_selected, selectedCount, selectedCount)
+                                } else {
+                                    playlist?.name ?: stringResource(Res.string.up_next)
+                                },
+                            modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
                             style =
-                                MaterialTheme.typography.labelSmall.copy(
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                    lineHeight = 16.sp,
-                                    letterSpacing = 0.5.sp,
+                                MaterialTheme.typography.headlineSmall.copy(
+                                    fontSize = 24.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    lineHeight = 28.sp,
+                                    letterSpacing = 0.sp,
                                 ),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 2,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
                         )
-                    }
-                }
-
-                if (selectedCount > 0) {
-                    val selectAllLabel = stringResource(if (allSelected) Res.string.deselect_all else Res.string.select_all)
-                    Checkbox(
-                        modifier =
-                            Modifier.semantics(mergeDescendants = true) {
-                                contentDescription = selectAllLabel
-                            },
-                        checked = allSelected,
-                        onCheckedChange = { checked -> if (checked) onSelectAll() else onClearSelection() },
-                    )
-                }
-                if (selectedCount > 0) {
-                    Surface(
-                        shape = RoundedCornerShape(100.dp),
-                        color = MaterialTheme.colorScheme.secondaryContainer,
-                    ) {
-                        IconButton(
-                            onClick = onClearSelection,
-                            modifier = Modifier.size(48.dp),
-                            shapes = IconButtonDefaults.shapes(),
-                        ) {
-                            Icon(
-                                imageVector = MetrolistIcons.Filled.Close,
-                                contentDescription = stringResource(Res.string.clear_selection),
-                                tint = MaterialTheme.colorScheme.onSecondaryContainer,
-                                modifier = Modifier.size(24.dp),
+                        if (selectedCount == 0 && isQueueLoading) {
+                            ContainedLoadingIndicator(Modifier.size(24.dp), label = stringResource(Res.string.queue_loading))
+                        } else if (selectedCount == 0) {
+                            Text(
+                                text =
+                                    playlist?.let {
+                                        pluralStringResource(
+                                            Res.plurals.queue_track_count_duration,
+                                            it.trackCount,
+                                            it.trackCount,
+                                            it.totalDuration,
+                                        )
+                                    } ?: "",
+                                style =
+                                    MaterialTheme.typography.labelSmall.copy(
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        lineHeight = 16.sp,
+                                        letterSpacing = 0.5.sp,
+                                    ),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 2,
                             )
                         }
                     }
-                } else {
-                    actions()
-                }
-                if (selectedCount == 0 && !LocalIsTv.current) {
-                    FilledTonalIconToggleButton(
-                        checked = isUnlocked,
-                        onCheckedChange = onUnlockedChange,
-                        modifier = Modifier.size(48.dp),
-                        shapes = IconButtonDefaults.toggleableShapes(),
-                    ) {
-                        Icon(
-                            imageVector = if (isUnlocked) MetrolistIcons.Rounded.LockOpen else MetrolistIcons.Rounded.Lock,
-                            contentDescription = stringResource(if (isUnlocked) Res.string.lock_queue else Res.string.unlock_queue),
-                            modifier = Modifier.size(22.dp),
+
+                    if (selectedCount > 0) {
+                        val selectAllLabel = stringResource(if (allSelected) Res.string.deselect_all else Res.string.select_all)
+                        Checkbox(
+                            modifier =
+                                Modifier.semantics(mergeDescendants = true) {
+                                    contentDescription = selectAllLabel
+                                },
+                            checked = allSelected,
+                            onCheckedChange = { checked -> if (checked) onSelectAll() else onClearSelection() },
                         )
+                    }
+                    if (selectedCount > 0) {
+                        Surface(
+                            shape = RoundedCornerShape(100.dp),
+                            color = MaterialTheme.colorScheme.secondaryContainer,
+                        ) {
+                            IconButton(
+                                onClick = onClearSelection,
+                                modifier = Modifier.size(48.dp),
+                                shapes = IconButtonDefaults.shapes(),
+                            ) {
+                                Icon(
+                                    imageVector = MetrolistIcons.Filled.Close,
+                                    contentDescription = stringResource(Res.string.clear_selection),
+                                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                                    modifier = Modifier.size(24.dp),
+                                )
+                            }
+                        }
+                    } else {
+                        actions()
+                    }
+                    if (selectedCount == 0 && !LocalIsTv.current) {
+                        FilledTonalIconToggleButton(
+                            checked = isUnlocked,
+                            onCheckedChange = onUnlockedChange,
+                            modifier = Modifier.size(48.dp),
+                            shapes = IconButtonDefaults.toggleableShapes(),
+                        ) {
+                            Icon(
+                                imageVector = if (isUnlocked) MetrolistIcons.Rounded.LockOpen else MetrolistIcons.Rounded.Lock,
+                                contentDescription = stringResource(if (isUnlocked) Res.string.lock_queue else Res.string.unlock_queue),
+                                modifier = Modifier.size(22.dp),
+                            )
+                        }
                     }
                 }
             }
@@ -1383,187 +1402,208 @@ private fun TrackItem(
             track.title,
             track.artist,
         )
+    val glass = Settings.shared.liquidGlassTheme && LocalThemeGlassBackdrop.current != null && !isActive
     val colors =
         animateCurrentSongColors(
             isCurrent = isActive,
             container =
-                if (isSelected ||
-                    isMoving
-                ) {
+                if (glass && (isSelected || isMoving)) {
+                    MaterialTheme.colorScheme.primary.copy(alpha = 0.32f)
+                } else if (glass) {
+                    glassCardColor(MaterialTheme.colorScheme.surfaceContainer)
+                } else if (isSelected || isMoving) {
                     MaterialTheme.colorScheme.primaryContainer
                 } else {
                     MaterialTheme.colorScheme.surfaceContainer
                 },
-            content = if (isSelected || isMoving) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface,
+            content =
+                if (!glass &&
+                    (isSelected || isMoving)
+                ) {
+                    MaterialTheme.colorScheme.onPrimaryContainer
+                } else {
+                    MaterialTheme.colorScheme.onSurface
+                },
             subtitle =
-                if (isSelected || isMoving) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.secondary,
+                if (!glass &&
+                    (isSelected || isMoving)
+                ) {
+                    MaterialTheme.colorScheme.onPrimaryContainer
+                } else if (glass) {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                } else {
+                    MaterialTheme.colorScheme.secondary
+                },
         )
     val backgroundColor = colors.container
     val contentColor = colors.content
     val secondaryContentColor = colors.subtitle
     val durationText = remember(track.duration, isActive, currentDuration) { track.durationText(isActive, currentDuration) }
 
-    Surface(
-        color = if (isHovered || isPressed) contentColor.copy(alpha = 0.08f).compositeOver(backgroundColor) else backgroundColor,
-        contentColor = contentColor,
-        shape = shape,
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .heightIn(min = 60.dp)
-                .tvFocusHighlight(shape)
-                .currentSongSemantics(isActive, isPlaying)
-                .cursorContextMenu(contextMenu)
-                .combinedClickable(
-                    interactionSource = interactionSource,
-                    indication = null,
-                    onClick = onClick,
-                    onLongClickLabel = stringResource(Res.string.more_options),
-                    onLongClick = { onEvent(QueueEvent.OpenTrackMenu(track.entryKey, contextMenu.offset)) },
-                ).semantics {
-                    contentDescription = trackActionDescription
-                    selected = isSelected || isMoving
-                },
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
+    LiquidGlassSurface(radius = 12.dp, modifier = modifier, enabled = glass) {
+        Surface(
+            color = if (isHovered || isPressed) contentColor.copy(alpha = 0.08f).compositeOver(backgroundColor) else backgroundColor,
+            contentColor = contentColor,
+            shape = shape,
+            border = if (glass) glassCardBorder() else null,
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 60.dp)
+                    .tvFocusHighlight(shape)
+                    .currentSongSemantics(isActive, isPlaying)
+                    .cursorContextMenu(contextMenu)
+                    .combinedClickable(
+                        interactionSource = interactionSource,
+                        indication = null,
+                        onClick = onClick,
+                        onLongClickLabel = stringResource(Res.string.more_options),
+                        onLongClick = { onEvent(QueueEvent.OpenTrackMenu(track.entryKey, contextMenu.offset)) },
+                    ).semantics {
+                        contentDescription = trackActionDescription
+                        selected = isSelected || isMoving
+                    },
         ) {
-            AnimatedVisibility(
-                visible = showReorderHandleSpace,
-                enter =
-                    fadeIn(MaterialTheme.motionScheme.defaultEffectsSpec()) +
-                        expandHorizontally(MaterialTheme.motionScheme.defaultSpatialSpec()),
-                exit =
-                    fadeOut(
-                        MaterialTheme.motionScheme.fastEffectsSpec(),
-                    ) + shrinkHorizontally(MaterialTheme.motionScheme.fastSpatialSpec()),
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    if (isReorderable) {
-                        ReorderMenu(
-                            onMoveUp = onMoveUp,
-                            onMoveDown = onMoveDown,
-                            onMoveToTop = onMoveToTop,
-                            onMoveToBottom = onMoveToBottom,
-                            modifier = Modifier.size(36.dp),
-                            dragHandleModifier = if (LocalIsTv.current) Modifier else dragHandleModifier,
-                        )
-                    } else {
-                        Spacer(modifier = Modifier.size(36.dp))
+                AnimatedVisibility(
+                    visible = showReorderHandleSpace,
+                    enter =
+                        fadeIn(MaterialTheme.motionScheme.defaultEffectsSpec()) +
+                            expandHorizontally(MaterialTheme.motionScheme.defaultSpatialSpec()),
+                    exit =
+                        fadeOut(
+                            MaterialTheme.motionScheme.fastEffectsSpec(),
+                        ) + shrinkHorizontally(MaterialTheme.motionScheme.fastSpatialSpec()),
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        if (isReorderable) {
+                            ReorderMenu(
+                                onMoveUp = onMoveUp,
+                                onMoveDown = onMoveDown,
+                                onMoveToTop = onMoveToTop,
+                                onMoveToBottom = onMoveToBottom,
+                                modifier = Modifier.size(36.dp),
+                                dragHandleModifier = if (LocalIsTv.current) Modifier else dragHandleModifier,
+                            )
+                        } else {
+                            Spacer(modifier = Modifier.size(36.dp))
+                        }
+                        Spacer(modifier = Modifier.width(6.dp))
                     }
-                    Spacer(modifier = Modifier.width(6.dp))
                 }
-            }
 
-            Box(
-                modifier =
-                    Modifier
-                        .squareArtworkSlot(44.dp, if (isActive) 1f else track.thumbnailAspectRatio)
-                        .graphicsLayer { rotationZ = artworkRotation }
-                        .clip(artworkShape)
-                        .background(MaterialTheme.colorScheme.surfaceContainerHighest),
-                contentAlignment = Alignment.Center,
-            ) {
                 Box(
                     modifier =
                         Modifier
-                            .fillMaxSize()
-                            .graphicsLayer { rotationZ = -artworkRotation },
+                            .squareArtworkSlot(44.dp, if (isActive) 1f else track.thumbnailAspectRatio)
+                            .graphicsLayer { rotationZ = artworkRotation }
+                            .clip(artworkShape)
+                            .background(MaterialTheme.colorScheme.surfaceContainerHighest),
                     contentAlignment = Alignment.Center,
                 ) {
-                    if (track.thumbnailUrl != null) {
-                        AsyncImage(
-                            url = track.thumbnailUrl,
-                            contentDescription = null,
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Crop,
-                        )
-                    } else {
-                        Icon(
-                            imageVector = MetrolistIcons.Rounded.MusicNote,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(24.dp),
-                        )
+                    Box(
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .graphicsLayer { rotationZ = -artworkRotation },
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        if (track.thumbnailUrl != null) {
+                            AsyncImage(
+                                url = track.thumbnailUrl,
+                                contentDescription = null,
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Crop,
+                            )
+                        } else {
+                            Icon(
+                                imageVector = MetrolistIcons.Rounded.MusicNote,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(24.dp),
+                            )
+                        }
                     }
                 }
-            }
 
-            Spacer(modifier = Modifier.width(10.dp))
+                Spacer(modifier = Modifier.width(10.dp))
 
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.Center,
-            ) {
-                Text(
-                    text = track.title,
-                    style =
-                        MaterialTheme.typography.titleMedium.copy(
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            lineHeight = 20.sp,
-                            letterSpacing = 0.15.sp,
-                        ),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    color = contentColor,
-                )
-                Row(
-                    modifier = Modifier.height(18.dp),
-                    verticalAlignment = Alignment.CenterVertically,
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.Center,
                 ) {
-                    MetadataIcons(track = track)
-                    if (
-                        track.isLiked ||
-                        track.isExplicit ||
-                        track.isSaved ||
-                        track.isDownloaded
-                    ) {
-                        Spacer(modifier = Modifier.width(3.dp))
-                    }
                     Text(
-                        text =
-                            listOf(track.artist, durationText)
-                                .filter { it.isNotBlank() }
-                                .joinToString(" \u00b7 "),
+                        text = track.title,
                         style =
-                            MaterialTheme.typography.bodyMedium.copy(
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.Medium,
-                                lineHeight = 18.sp,
-                                letterSpacing = 0.1.sp,
+                            MaterialTheme.typography.titleMedium.copy(
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                lineHeight = 20.sp,
+                                letterSpacing = 0.15.sp,
                             ),
-                        color = secondaryContentColor,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
+                        color = contentColor,
                     )
+                    Row(
+                        modifier = Modifier.height(18.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        MetadataIcons(track = track)
+                        if (
+                            track.isLiked ||
+                            track.isExplicit ||
+                            track.isSaved ||
+                            track.isDownloaded
+                        ) {
+                            Spacer(modifier = Modifier.width(3.dp))
+                        }
+                        Text(
+                            text =
+                                listOf(track.artist, durationText)
+                                    .filter { it.isNotBlank() }
+                                    .joinToString(" \u00b7 "),
+                            style =
+                                MaterialTheme.typography.bodyMedium.copy(
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    lineHeight = 18.sp,
+                                    letterSpacing = 0.1.sp,
+                                ),
+                            color = secondaryContentColor,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
                 }
-            }
 
-            if (showSelectionCheckbox || isSelected) {
-                Box(
-                    modifier = Modifier.size(40.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Checkbox(checked = isSelected, onCheckedChange = null)
-                }
-            } else {
-                IconButton(
-                    onClick = {
-                        Logger.d("Haptics", "Trigger QueueScreen track menu click index=$trackIndex")
-                        hapticManager.perform(HapticEvent.PRESS)
-                        onEvent(QueueEvent.OpenTrackMenu(track.entryKey, contextMenu.offset))
-                    },
-                    modifier = Modifier.size(40.dp).navigationPopupSource(),
-                    shapes = IconButtonDefaults.shapes(),
-                ) {
-                    Icon(
-                        imageVector = MetrolistIcons.Rounded.MoreVert,
-                        contentDescription = stringResource(Res.string.more_options),
-                        tint = if (isActive || isSelected || isMoving) contentColor else MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(20.dp),
-                    )
+                if (showSelectionCheckbox || isSelected) {
+                    Box(
+                        modifier = Modifier.size(40.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Checkbox(checked = isSelected, onCheckedChange = null)
+                    }
+                } else {
+                    IconButton(
+                        onClick = {
+                            Logger.d("Haptics", "Trigger QueueScreen track menu click index=$trackIndex")
+                            hapticManager.perform(HapticEvent.PRESS)
+                            onEvent(QueueEvent.OpenTrackMenu(track.entryKey, contextMenu.offset))
+                        },
+                        modifier = Modifier.size(40.dp).navigationPopupSource(),
+                        shapes = IconButtonDefaults.shapes(),
+                    ) {
+                        Icon(
+                            imageVector = MetrolistIcons.Rounded.MoreVert,
+                            contentDescription = stringResource(Res.string.more_options),
+                            tint = if (isActive || isSelected || isMoving) contentColor else MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(20.dp),
+                        )
+                    }
                 }
             }
         }
