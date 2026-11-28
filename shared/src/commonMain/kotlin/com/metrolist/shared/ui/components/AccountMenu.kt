@@ -24,15 +24,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -387,18 +383,17 @@ internal fun AccountMenuContent(
             title = { Text(stringResource(Res.string.action_logout)) },
             text = { Text(stringResource(Res.string.account_logout_confirm)) },
             confirmButton = {
-                TextButton(
+                LiquidGlassTextButton(
                     onClick = {
                         showLogoutDialog = false
                         onLogout()
                     },
-                    shapes = ButtonDefaults.shapes(),
                 ) {
                     Text(stringResource(Res.string.action_logout), color = colorScheme.error)
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showLogoutDialog = false }, shapes = ButtonDefaults.shapes()) {
+                LiquidGlassTextButton(onClick = { showLogoutDialog = false }) {
                     Text(stringResource(Res.string.cancel))
                 }
             },
@@ -550,16 +545,15 @@ private fun AccountMenuHero(
             }
         }
         if (isSignedIn) {
-            IconButton(
+            LiquidGlassIconButton(
                 onClick = onLogout,
                 enabled = !isLoggingOut,
                 modifier = Modifier.size(48.dp).then(focusModifier(CircleShape)).navigationPopupSource(),
-                colors = IconButtonDefaults.iconButtonColors(contentColor = colorScheme.error),
-                shapes = IconButtonDefaults.shapes(),
             ) {
                 Icon(
                     MetrolistIcons.AutoMirrored.Outlined.Logout,
                     contentDescription = stringResource(Res.string.action_logout),
+                    tint = if (isLoggingOut) colorScheme.error.copy(alpha = 0.38f) else colorScheme.error,
                 )
             }
         }
