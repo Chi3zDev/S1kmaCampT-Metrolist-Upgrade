@@ -28,7 +28,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -41,7 +40,6 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -142,6 +140,7 @@ import com.metrolist.shared.ui.components.CollectionSongsLoadingPlaceholder
 import com.metrolist.shared.ui.components.ContainedLoadingIndicator
 import com.metrolist.shared.ui.components.LiquidGlassIconButton
 import com.metrolist.shared.ui.components.LiquidGlassSurface
+import com.metrolist.shared.ui.components.LiquidGlassTextButton
 import com.metrolist.shared.ui.components.PlaylistCoverImage
 import com.metrolist.shared.ui.components.PlaylistOrderControls
 import com.metrolist.shared.ui.components.PopupContent
@@ -652,9 +651,8 @@ fun PlaylistScreen(
             } else if (playlistInfo == null && !isLoading && errorMessage != null) {
                 Column(Modifier.align(Alignment.Center), horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(errorMessage ?: stringResource(Res.string.error_unknown))
-                    TextButton(
+                    LiquidGlassTextButton(
                         onClick = { viewModel.loadPlaylist() },
-                        shapes = ButtonDefaults.shapes(),
                     ) { Text(stringResource(Res.string.retry)) }
                 }
             } else {
@@ -686,9 +684,8 @@ fun PlaylistScreen(
                                     if (isLoadingMore) {
                                         ContainedLoadingIndicator()
                                     } else if (errorMessage != null) {
-                                        TextButton(
+                                        LiquidGlassTextButton(
                                             onClick = { viewModel.loadMore(Int.MAX_VALUE, retry = true) },
-                                            shapes = ButtonDefaults.shapes(),
                                         ) {
                                             Text(stringResource(Res.string.retry))
                                         }
@@ -1012,19 +1009,17 @@ fun PlaylistScreen(
                                 )
                             }
                             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                                TextButton(
+                                LiquidGlassTextButton(
                                     onClick = { launchCoverPicker() },
                                     enabled = coverReadJob == null,
                                     modifier = Modifier.tvFocusHighlight(CircleShape),
-                                    shapes = ButtonDefaults.shapes(),
                                 ) {
                                     Text(stringResource(Res.string.choose_from_library))
                                 }
                                 if (stagedCoverUri != null || hasStagedCustom) {
-                                    TextButton(
+                                    LiquidGlassTextButton(
                                         onClick = { stageCoverRemoval() },
                                         modifier = Modifier.tvFocusHighlight(CircleShape),
-                                        shapes = ButtonDefaults.shapes(),
                                     ) {
                                         Text(stringResource(Res.string.remove_custom_image))
                                     }
@@ -1050,21 +1045,19 @@ fun PlaylistScreen(
                 },
                 confirmButton = {
                     if (isEditablePlaylist) {
-                        TextButton(
+                        LiquidGlassTextButton(
                             enabled = editName.isNotBlank() && coverReadJob == null,
                             onClick = { saveFullEdit() },
-                            shapes = ButtonDefaults.shapes(),
                         ) { Text(stringResource(Res.string.save)) }
                     } else {
-                        TextButton(
+                        LiquidGlassTextButton(
                             enabled = coverReadJob == null,
                             onClick = { saveFullEdit() },
-                            shapes = ButtonDefaults.shapes(),
                         ) { Text(stringResource(Res.string.done)) }
                     }
                 },
                 dismissButton = {
-                    TextButton(onClick = { cancelFullEdit() }, shapes = ButtonDefaults.shapes()) { Text(stringResource(Res.string.cancel)) }
+                    LiquidGlassTextButton(onClick = { cancelFullEdit() }) { Text(stringResource(Res.string.cancel)) }
                 },
             )
         }
@@ -1092,7 +1085,7 @@ fun PlaylistScreen(
                         null
                     },
                 confirmButton = {
-                    TextButton(
+                    LiquidGlassTextButton(
                         onClick = {
                             viewModel.deletePlaylist { result ->
                                 result.onSuccess {
@@ -1109,7 +1102,6 @@ fun PlaylistScreen(
                                 }
                             }
                         },
-                        shapes = ButtonDefaults.shapes(),
                     ) {
                         Text(
                             stringResource(
@@ -1125,9 +1117,8 @@ fun PlaylistScreen(
                     }
                 },
                 dismissButton = {
-                    TextButton(
+                    LiquidGlassTextButton(
                         onClick = { showDeleteDialog = false },
-                        shapes = ButtonDefaults.shapes(),
                     ) { Text(stringResource(Res.string.cancel)) }
                 },
             )
@@ -1148,18 +1139,16 @@ fun PlaylistScreen(
                     }
                 },
                 confirmButton = {
-                    TextButton(
+                    LiquidGlassTextButton(
                         onClick = {
                             showCoverNoteDialog = false
                             coverPicker.launch(arrayOf("image/*"))
                         },
-                        shapes = ButtonDefaults.shapes(),
                     ) { Text(stringResource(Res.string.ok)) }
                 },
                 dismissButton = {
-                    TextButton(
+                    LiquidGlassTextButton(
                         onClick = { showCoverNoteDialog = false },
-                        shapes = ButtonDefaults.shapes(),
                     ) { Text(stringResource(Res.string.cancel)) }
                 },
             )
