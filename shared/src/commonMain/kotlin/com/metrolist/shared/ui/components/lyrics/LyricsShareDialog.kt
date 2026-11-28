@@ -28,15 +28,12 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberSliderState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -111,6 +108,13 @@ import com.metrolist.shared.ui.components.ContainedLoadingIndicator
 import com.metrolist.shared.ui.components.Dialog
 import com.metrolist.shared.ui.components.LazyListScrollbar
 import com.metrolist.shared.ui.components.LiquidGlassChip
+import com.metrolist.shared.ui.components.LiquidGlassCompactButton
+import com.metrolist.shared.ui.components.LiquidGlassSliderContainer
+import com.metrolist.shared.ui.components.LiquidGlassSurface
+import com.metrolist.shared.ui.components.LiquidGlassTextButton
+import com.metrolist.shared.ui.components.glassCardBorder
+import com.metrolist.shared.ui.components.glassCardColor
+import com.metrolist.shared.ui.components.liquidGlassBackdropReady
 import com.metrolist.shared.ui.playback.retainPlaybackKeyFocus
 import com.metrolist.shared.ui.utils.DragScrollableColumn
 import com.metrolist.shared.ui.utils.carouselScroll
@@ -337,7 +341,10 @@ fun LyricsShareDialog(
         onDismissRequest = { if (!busy) onDismiss() },
         properties = DialogProperties(usePlatformDefaultWidth = false, dismissOnBackPress = !busy, dismissOnClickOutside = !busy),
     ) {
-        Surface(
+        val glass = liquidGlassBackdropReady()
+        LiquidGlassSurface(
+            radius = 24.dp,
+            enabled = glass,
             modifier =
                 Modifier
                     .padding(horizontal = 24.dp, vertical = 16.dp)
@@ -345,227 +352,239 @@ fun LyricsShareDialog(
                     .fillMaxWidth()
                     .heightIn(max = 880.dp)
                     .fillMaxHeight(0.9f),
-            shape = RoundedCornerShape(24.dp),
-            color = if (useStoryLayout) MaterialTheme.colorScheme.surfaceContainerHigh else MaterialTheme.colorScheme.surface,
         ) {
-            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(
-                    stringResource(if (useStoryLayout) Res.string.lyrics_share_story_style else Res.string.customize_colors),
-                    style = MaterialTheme.typography.headlineSmall,
-                )
-                Text(stringResource(Res.string.lyrics_share_scroll_options), style = MaterialTheme.typography.bodySmall)
-                Box(Modifier.weight(1f)) {
-                    DragScrollableColumn(
-                        state = scrollState,
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                        modifier = Modifier.fillMaxSize().padding(end = 16.dp),
-                    ) {
-                        item {
-                            Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                                Box(
-                                    Modifier.widthIn(max = 420.dp).fillMaxWidth().aspectRatio(if (useStoryLayout) 9f / 16f else 1f),
-                                    contentAlignment = Alignment.Center,
-                                ) {
-                                    bitmap?.let { Image(it, stringResource(Res.string.preview), Modifier.fillMaxWidth()) }
-                                    if (bitmap == null && !failed) ContainedLoadingIndicator()
-                                }
-                            }
-                        }
-                        if (artworkFailed) item { Text(stringResource(Res.string.lyrics_share_artwork_failed)) }
-                        item {
-                            Text(stringResource(Res.string.lyrics_share_text_size, (style.textScale * 100).roundToInt()))
-                            val textScaleState = rememberSliderState(value = style.textScale, trackRange = 0.5f..2f)
-                            textScaleState.value = style.textScale
-                            Slider(
-                                modifier = Modifier.retainPlaybackKeyFocus(),
-                                state = textScaleState,
-                                onValueChange = { style = style.copy(textScale = it) },
-                                enabled = !busy,
-                            )
-                            Text(stringResource(Res.string.lyrics_share_content_scale, (style.contentScale * 100).roundToInt()))
-                            val contentScaleState = rememberSliderState(value = style.contentScale, trackRange = 0.6f..1.35f)
-                            contentScaleState.value = style.contentScale
-                            Slider(
-                                modifier = Modifier.retainPlaybackKeyFocus(),
-                                state = contentScaleState,
-                                onValueChange = { style = style.copy(contentScale = it) },
-                                enabled = !busy,
-                            )
-                            TextButton(
-                                enabled = !busy,
-                                onClick = { style = style.copy(textScale = 1f, contentScale = 1f) },
-                                shapes = ButtonDefaults.shapes(),
-                            ) {
-                                Text(stringResource(Res.string.lyrics_share_auto_fit))
-                            }
-                        }
-                        item {
-                            Text(stringResource(Res.string.lyrics_poster_style))
-                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                LiquidGlassChip(
-                                    selected = style.posterStyle == LyricsPosterStyle.CLASSIC,
-                                    enabled = !busy,
-                                    onClick = { style = style.copy(posterStyle = LyricsPosterStyle.CLASSIC) },
-                                    label = { Text(stringResource(Res.string.lyrics_poster_classic)) },
-                                )
-                                LiquidGlassChip(
-                                    selected = style.posterStyle == LyricsPosterStyle.GLASS_CARD,
-                                    enabled = !busy,
-                                    onClick = {
-                                        style =
-                                            style.copy(
-                                                posterStyle = LyricsPosterStyle.GLASS_CARD,
-                                                background =
-                                                    if (artwork !=
-                                                        null
-                                                    ) {
-                                                        LyricsImageBackground.BLUR
-                                                    } else {
-                                                        LyricsImageBackground.SOLID
-                                                    },
-                                            )
-                                    },
-                                    label = { Text(stringResource(Res.string.lyrics_poster_glass_card)) },
-                                )
-                            }
-                        }
-                        run {
+            Surface(
+                modifier = Modifier.fillMaxSize(),
+                shape = RoundedCornerShape(24.dp),
+                color =
+                    if (glass) {
+                        glassCardColor(MaterialTheme.colorScheme.surfaceContainerHigh)
+                    } else if (useStoryLayout) {
+                        MaterialTheme.colorScheme.surfaceContainerHigh
+                    } else {
+                        MaterialTheme.colorScheme.surface
+                    },
+                border = if (glass) glassCardBorder() else null,
+            ) {
+                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        stringResource(if (useStoryLayout) Res.string.lyrics_share_story_style else Res.string.customize_colors),
+                        style = MaterialTheme.typography.headlineSmall,
+                    )
+                    Text(stringResource(Res.string.lyrics_share_scroll_options), style = MaterialTheme.typography.bodySmall)
+                    Box(Modifier.weight(1f)) {
+                        DragScrollableColumn(
+                            state = scrollState,
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                            modifier = Modifier.fillMaxSize().padding(end = 16.dp),
+                        ) {
                             item {
-                                Text(stringResource(Res.string.player_background_style))
-                                val scrollState = rememberScrollState()
-                                Row(
-                                    Modifier.fillMaxWidth().carouselScroll(scrollState).horizontalScroll(scrollState),
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                                    Box(
+                                        Modifier.widthIn(max = 420.dp).fillMaxWidth().aspectRatio(if (useStoryLayout) 9f / 16f else 1f),
+                                        contentAlignment = Alignment.Center,
+                                    ) {
+                                        bitmap?.let { Image(it, stringResource(Res.string.preview), Modifier.fillMaxWidth()) }
+                                        if (bitmap == null && !failed) ContainedLoadingIndicator()
+                                    }
+                                }
+                            }
+                            if (artworkFailed) item { Text(stringResource(Res.string.lyrics_share_artwork_failed)) }
+                            item {
+                                Text(stringResource(Res.string.lyrics_share_text_size, (style.textScale * 100).roundToInt()))
+                                val textScaleState = rememberSliderState(value = style.textScale, trackRange = 0.5f..2f)
+                                textScaleState.value = style.textScale
+                                LiquidGlassSliderContainer(modifier = Modifier.fillMaxWidth()) {
+                                    Slider(
+                                        modifier = Modifier.retainPlaybackKeyFocus(),
+                                        state = textScaleState,
+                                        onValueChange = { style = style.copy(textScale = it) },
+                                        enabled = !busy,
+                                    )
+                                }
+                                Text(stringResource(Res.string.lyrics_share_content_scale, (style.contentScale * 100).roundToInt()))
+                                val contentScaleState = rememberSliderState(value = style.contentScale, trackRange = 0.6f..1.35f)
+                                contentScaleState.value = style.contentScale
+                                LiquidGlassSliderContainer(modifier = Modifier.fillMaxWidth()) {
+                                    Slider(
+                                        modifier = Modifier.retainPlaybackKeyFocus(),
+                                        state = contentScaleState,
+                                        onValueChange = { style = style.copy(contentScale = it) },
+                                        enabled = !busy,
+                                    )
+                                }
+                                LiquidGlassTextButton(
+                                    enabled = !busy,
+                                    onClick = { style = style.copy(textScale = 1f, contentScale = 1f) },
                                 ) {
-                                    LyricsImageBackground.entries
-                                        .filter {
-                                            style.posterStyle != LyricsPosterStyle.GLASS_CARD ||
-                                                it != LyricsImageBackground.GLASS
-                                        }.forEach { background ->
-                                            LiquidGlassChip(
-                                                selected = style.background == background,
-                                                enabled = !busy && (background == LyricsImageBackground.SOLID || artwork != null),
-                                                onClick = { style = style.copy(background = background) },
-                                                label = {
-                                                    Text(
-                                                        stringResource(
-                                                            when (background) {
-                                                                LyricsImageBackground.GLASS -> Res.string.lyrics_poster_glass
-                                                                LyricsImageBackground.SOLID -> Res.string.settings_solid
-                                                                LyricsImageBackground.BLUR -> Res.string.blurred_artwork
-                                                                LyricsImageBackground.GRADIENT -> Res.string.gradient
-                                                            },
-                                                        ),
-                                                        maxLines = 1,
-                                                    )
-                                                },
-                                            )
-                                        }
+                                    Text(stringResource(Res.string.lyrics_share_auto_fit))
                                 }
                             }
-                        }
-
-                        item {
-                            Text(stringResource(Res.string.lyrics_poster_format))
-                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                LiquidGlassChip(selected = !useStoryLayout, enabled = !busy, onClick = {
-                                    useStoryLayout = false
-                                }, label = { Text(stringResource(Res.string.lyrics_share_square_image)) })
-                                LiquidGlassChip(selected = useStoryLayout, enabled = !busy, onClick = {
-                                    useStoryLayout = true
-                                }, label = { Text(stringResource(Res.string.lyrics_share_story_image)) })
-                            }
-                        }
-                        item {
-                            Text(stringResource(Res.string.lyrics_poster_font))
-                            val fontScroll = rememberScrollState()
-                            Row(
-                                Modifier.fillMaxWidth().carouselScroll(fontScroll).horizontalScroll(fontScroll),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            ) {
-                                LyricsPosterFont.entries.forEach { font ->
-                                    val label =
-                                        when (font) {
-                                            LyricsPosterFont.SANS -> Res.string.lyrics_poster_font_sans
-                                            LyricsPosterFont.SERIF -> Res.string.lyrics_poster_font_serif
-                                            LyricsPosterFont.MONO -> Res.string.lyrics_poster_font_mono
-                                            LyricsPosterFont.HANDWRITING -> Res.string.lyrics_poster_font_handwriting
-                                            LyricsPosterFont.NUNITO_BOLD -> Res.string.app_font_nunito_bold
-                                            LyricsPosterFont.NUNITO_EXTRABOLD -> Res.string.app_font_nunito_extrabold
-                                        }
-                                    LiquidGlassChip(selected = style.font == font, enabled = !busy, onClick = {
-                                        style =
-                                            style.copy(font = font)
-                                    }, label = { Text(stringResource(label), maxLines = 1) })
+                            item {
+                                Text(stringResource(Res.string.lyrics_poster_style))
+                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    LiquidGlassChip(
+                                        selected = style.posterStyle == LyricsPosterStyle.CLASSIC,
+                                        enabled = !busy,
+                                        onClick = { style = style.copy(posterStyle = LyricsPosterStyle.CLASSIC) },
+                                        label = { Text(stringResource(Res.string.lyrics_poster_classic)) },
+                                    )
+                                    LiquidGlassChip(
+                                        selected = style.posterStyle == LyricsPosterStyle.GLASS_CARD,
+                                        enabled = !busy,
+                                        onClick = {
+                                            style =
+                                                style.copy(
+                                                    posterStyle = LyricsPosterStyle.GLASS_CARD,
+                                                    background =
+                                                        if (artwork !=
+                                                            null
+                                                        ) {
+                                                            LyricsImageBackground.BLUR
+                                                        } else {
+                                                            LyricsImageBackground.SOLID
+                                                        },
+                                                )
+                                        },
+                                        label = { Text(stringResource(Res.string.lyrics_poster_glass_card)) },
+                                    )
                                 }
                             }
-                        }
-                    }
-                    LazyListScrollbar(scrollState, Modifier.align(Alignment.CenterEnd))
-                }
-                if (failed) Text(stringResource(Res.string.lyrics_share_failed), color = MaterialTheme.colorScheme.error)
-                if (busy) LoadingIndicator(Modifier.size(24.dp))
-                FlowRow(
-                    Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    TextButton(
-                        enabled = !busy,
-                        onClick = onDismiss,
-                        shapes = ButtonDefaults.shapes(),
-                    ) { Text(stringResource(Res.string.cancel)) }
-                    Button(
-                        enabled = !busy,
-                        onClick = {
-                            onShareText(shareText)
-                            onDismiss()
-                        },
-                        shapes = ButtonDefaults.shapes(),
-                    ) { Text(stringResource(Res.string.share_as_text)) }
-                    Button(
-                        enabled = bitmap != null && !busy,
-                        onClick = {
-                            busy = true
-                            failed = false
-                            scope.launch {
-                                try {
-                                    val image =
-                                        withContext(Dispatchers.Default) {
-                                            renderMutex.withLock {
-                                                renderLyricsImage(
-                                                    text,
-                                                    title,
-                                                    artist,
-                                                    appName,
-                                                    artwork,
-                                                    blurredArtwork,
-                                                    palette,
-                                                    renderStyle,
-                                                    measurer,
-                                                    logo,
-                                                    direction,
-                                                    story = useStoryLayout,
-                                                    storyBackgroundColor = storyBackgroundColor,
-                                                    storyCardColor = storyCardColor,
-                                                    storyTextColor = storyTextColor,
-                                                    storySecondaryColor = storySecondaryColor,
-                                                    shareUrl = null,
+                            run {
+                                item {
+                                    Text(stringResource(Res.string.player_background_style))
+                                    val scrollState = rememberScrollState()
+                                    Row(
+                                        Modifier.fillMaxWidth().carouselScroll(scrollState).horizontalScroll(scrollState),
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    ) {
+                                        LyricsImageBackground.entries
+                                            .filter {
+                                                style.posterStyle != LyricsPosterStyle.GLASS_CARD ||
+                                                    it != LyricsImageBackground.GLASS
+                                            }.forEach { background ->
+                                                LiquidGlassChip(
+                                                    selected = style.background == background,
+                                                    enabled = !busy && (background == LyricsImageBackground.SOLID || artwork != null),
+                                                    onClick = { style = style.copy(background = background) },
+                                                    label = {
+                                                        Text(
+                                                            stringResource(
+                                                                when (background) {
+                                                                    LyricsImageBackground.GLASS -> Res.string.lyrics_poster_glass
+                                                                    LyricsImageBackground.SOLID -> Res.string.settings_solid
+                                                                    LyricsImageBackground.BLUR -> Res.string.blurred_artwork
+                                                                    LyricsImageBackground.GRADIENT -> Res.string.gradient
+                                                                },
+                                                            ),
+                                                            maxLines = 1,
+                                                        )
+                                                    },
                                                 )
                                             }
-                                        }
-                                    if (onExport(image)) onDismiss()
-                                } catch (e: CancellationException) {
-                                    throw e
-                                } catch (_: Exception) {
-                                    failed = true
-                                } finally {
-                                    busy = false
+                                    }
                                 }
                             }
-                        },
-                        shapes = ButtonDefaults.shapes(),
-                    ) { Text(if (storyMode && !useStoryLayout) stringResource(Res.string.share) else exportLabel) }
+
+                            item {
+                                Text(stringResource(Res.string.lyrics_poster_format))
+                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    LiquidGlassChip(selected = !useStoryLayout, enabled = !busy, onClick = {
+                                        useStoryLayout = false
+                                    }, label = { Text(stringResource(Res.string.lyrics_share_square_image)) })
+                                    LiquidGlassChip(selected = useStoryLayout, enabled = !busy, onClick = {
+                                        useStoryLayout = true
+                                    }, label = { Text(stringResource(Res.string.lyrics_share_story_image)) })
+                                }
+                            }
+                            item {
+                                Text(stringResource(Res.string.lyrics_poster_font))
+                                val fontScroll = rememberScrollState()
+                                Row(
+                                    Modifier.fillMaxWidth().carouselScroll(fontScroll).horizontalScroll(fontScroll),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                ) {
+                                    LyricsPosterFont.entries.forEach { font ->
+                                        val label =
+                                            when (font) {
+                                                LyricsPosterFont.SANS -> Res.string.lyrics_poster_font_sans
+                                                LyricsPosterFont.SERIF -> Res.string.lyrics_poster_font_serif
+                                                LyricsPosterFont.MONO -> Res.string.lyrics_poster_font_mono
+                                                LyricsPosterFont.HANDWRITING -> Res.string.lyrics_poster_font_handwriting
+                                                LyricsPosterFont.NUNITO_BOLD -> Res.string.app_font_nunito_bold
+                                                LyricsPosterFont.NUNITO_EXTRABOLD -> Res.string.app_font_nunito_extrabold
+                                            }
+                                        LiquidGlassChip(selected = style.font == font, enabled = !busy, onClick = {
+                                            style =
+                                                style.copy(font = font)
+                                        }, label = { Text(stringResource(label), maxLines = 1) })
+                                    }
+                                }
+                            }
+                        }
+                        LazyListScrollbar(scrollState, Modifier.align(Alignment.CenterEnd))
+                    }
+                    if (failed) Text(stringResource(Res.string.lyrics_share_failed), color = MaterialTheme.colorScheme.error)
+                    if (busy) LoadingIndicator(Modifier.size(24.dp))
+                    FlowRow(
+                        Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        LiquidGlassTextButton(
+                            enabled = !busy,
+                            onClick = onDismiss,
+                        ) { Text(stringResource(Res.string.cancel)) }
+                        LiquidGlassCompactButton(
+                            enabled = !busy,
+                            onClick = {
+                                onShareText(shareText)
+                                onDismiss()
+                            },
+                        ) { Text(stringResource(Res.string.share_as_text)) }
+                        LiquidGlassCompactButton(
+                            enabled = bitmap != null && !busy,
+                            onClick = {
+                                busy = true
+                                failed = false
+                                scope.launch {
+                                    try {
+                                        val image =
+                                            withContext(Dispatchers.Default) {
+                                                renderMutex.withLock {
+                                                    renderLyricsImage(
+                                                        text,
+                                                        title,
+                                                        artist,
+                                                        appName,
+                                                        artwork,
+                                                        blurredArtwork,
+                                                        palette,
+                                                        renderStyle,
+                                                        measurer,
+                                                        logo,
+                                                        direction,
+                                                        story = useStoryLayout,
+                                                        storyBackgroundColor = storyBackgroundColor,
+                                                        storyCardColor = storyCardColor,
+                                                        storyTextColor = storyTextColor,
+                                                        storySecondaryColor = storySecondaryColor,
+                                                        shareUrl = null,
+                                                    )
+                                                }
+                                            }
+                                        if (onExport(image)) onDismiss()
+                                    } catch (e: CancellationException) {
+                                        throw e
+                                    } catch (_: Exception) {
+                                        failed = true
+                                    } finally {
+                                        busy = false
+                                    }
+                                }
+                            },
+                        ) { Text(if (storyMode && !useStoryLayout) stringResource(Res.string.share) else exportLabel) }
+                    }
                 }
             }
         }
