@@ -23,21 +23,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material3.AlertDialogDefaults
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -75,8 +68,17 @@ import com.metrolist.shared.generated.resources.save
 import com.metrolist.shared.generated.resources.system_equalizer
 import com.metrolist.shared.ui.components.AlertDialog
 import com.metrolist.shared.ui.components.BasicAlertDialog
+import com.metrolist.shared.ui.components.LiquidGlassCompactButton
+import com.metrolist.shared.ui.components.LiquidGlassDropdownMenu
+import com.metrolist.shared.ui.components.LiquidGlassIconButton
+import com.metrolist.shared.ui.components.LiquidGlassSurface
+import com.metrolist.shared.ui.components.LiquidGlassTextButton
+import com.metrolist.shared.ui.components.LiquidGlassTonalButton
 import com.metrolist.shared.ui.components.PopupContent
 import com.metrolist.shared.ui.components.PopupVisibility
+import com.metrolist.shared.ui.components.glassCardBorder
+import com.metrolist.shared.ui.components.glassCardColor
+import com.metrolist.shared.ui.components.liquidGlassBackdropReady
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import com.metrolist.shared.ui.utils.toPolygonShape
 import org.jetbrains.compose.resources.pluralStringResource
@@ -155,135 +157,139 @@ private fun EqualizerProfileDialog(
         onDismissRequest = onDismiss,
         modifier = Modifier.widthIn(max = 400.dp).fillMaxWidth(),
     ) {
-        Surface(
-            shape = AlertDialogDefaults.shape,
-            color = AlertDialogDefaults.containerColor,
-            tonalElevation = AlertDialogDefaults.TonalElevation,
-            modifier = Modifier.heightIn(max = 600.dp),
-        ) {
-            Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                Row(verticalAlignment = Alignment.Top) {
-                    Column(Modifier.weight(1f)) {
-                        Text(stringResource(Res.string.equalizer), style = MaterialTheme.typography.headlineSmall)
+        val glass = liquidGlassBackdropReady()
+        LiquidGlassSurface(radius = 28.dp, modifier = Modifier.heightIn(max = 600.dp), enabled = glass) {
+            Surface(
+                shape = AlertDialogDefaults.shape,
+                color = if (glass) glassCardColor(AlertDialogDefaults.containerColor) else AlertDialogDefaults.containerColor,
+                border = if (glass) glassCardBorder() else null,
+                tonalElevation = if (glass) 0.dp else AlertDialogDefaults.TonalElevation,
+                modifier = Modifier.heightIn(max = 600.dp),
+            ) {
+                Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Row(verticalAlignment = Alignment.Top) {
+                        Column(Modifier.weight(1f)) {
+                            Text(stringResource(Res.string.equalizer), style = MaterialTheme.typography.headlineSmall)
+                            Text(
+                                pluralStringResource(Res.plurals.equalizer_profile_count, profiles.size, profiles.size),
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
+                        }
+                        LiquidGlassIconButton(onClick = onDismiss) {
+                            Icon(MetrolistIcons.Default.Close, stringResource(Res.string.close))
+                        }
+                    }
+                    if (!isAudioProcessingAvailable) {
                         Text(
-                            pluralStringResource(Res.plurals.equalizer_profile_count, profiles.size, profiles.size),
+                            stringResource(Res.string.equalizer_stream_unavailable),
                             style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.error,
                         )
                     }
-                    IconButton(onClick = onDismiss, shapes = IconButtonDefaults.shapes()) {
-                        Icon(MetrolistIcons.Default.Close, stringResource(Res.string.close))
-                    }
-                }
-                if (!isAudioProcessingAvailable) {
-                    Text(
-                        stringResource(Res.string.equalizer_stream_unavailable),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.error,
-                    )
-                }
-                LazyColumn(Modifier.weight(1f, fill = false).selectableGroup()) {
-                    if (profiles.isEmpty()) {
-                        item {
-                            Column(
-                                Modifier.fillMaxWidth().padding(vertical = 16.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.spacedBy(16.dp),
-                            ) {
-                                Box(
-                                    Modifier.size(120.dp).background(
-                                        MaterialTheme.colorScheme.secondaryContainer,
-                                        MaterialShapes.Cookie12Sided.toPolygonShape(),
-                                    ),
-                                    contentAlignment = Alignment.Center,
+                    LazyColumn(Modifier.weight(1f, fill = false).selectableGroup()) {
+                        if (profiles.isEmpty()) {
+                            item {
+                                Column(
+                                    Modifier.fillMaxWidth().padding(vertical = 16.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.spacedBy(16.dp),
                                 ) {
-                                    Icon(
-                                        MetrolistIcons.Outlined.BarChart,
-                                        null,
-                                        Modifier.size(36.dp),
-                                        tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                                    Box(
+                                        Modifier.size(120.dp).background(
+                                            MaterialTheme.colorScheme.secondaryContainer,
+                                            MaterialShapes.Cookie12Sided.toPolygonShape(),
+                                        ),
+                                        contentAlignment = Alignment.Center,
+                                    ) {
+                                        Icon(
+                                            MetrolistIcons.Outlined.BarChart,
+                                            null,
+                                            Modifier.size(36.dp),
+                                            tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                                        )
+                                    }
+                                    Text(
+                                        stringResource(Res.string.no_profiles),
+                                        style = MaterialTheme.typography.titleLarge,
+                                        textAlign = TextAlign.Center,
                                     )
                                 }
-                                Text(
-                                    stringResource(Res.string.no_profiles),
-                                    style = MaterialTheme.typography.titleLarge,
-                                    textAlign = TextAlign.Center,
+                            }
+                        } else {
+                            item {
+                                EqualizerProfileRow(
+                                    name = stringResource(Res.string.eq_disabled),
+                                    selected = !enabled,
+                                    onSelect = { EqualizerProfiles.setEnabled(false) },
+                                )
+                            }
+                            items(profiles, key = { it.id }) { profile ->
+                                EqualizerProfileRow(
+                                    name = profile.name,
+                                    selected = enabled && activeId == profile.id,
+                                    onSelect = {
+                                        if (activeId == profile.id) {
+                                            EqualizerProfiles.setEnabled(true)
+                                        } else {
+                                            changeProfile { EqualizerProfiles.setActive(profile.id) }
+                                        }
+                                    },
+                                    onEdit = {
+                                        if (activeId == profile.id) {
+                                            onOpenMetroEq(false)
+                                        } else {
+                                            changeProfile {
+                                                EqualizerProfiles.setActive(profile.id)
+                                                onOpenMetroEq(false)
+                                            }
+                                        }
+                                    },
+                                    onDelete = { deletingProfile = profile },
                                 )
                             }
                         }
-                    } else {
-                        item {
-                            EqualizerProfileRow(
-                                name = stringResource(Res.string.eq_disabled),
-                                selected = !enabled,
-                                onSelect = { EqualizerProfiles.setEnabled(false) },
-                            )
-                        }
-                        items(profiles, key = { it.id }) { profile ->
-                            EqualizerProfileRow(
-                                name = profile.name,
-                                selected = enabled && activeId == profile.id,
-                                onSelect = {
-                                    if (activeId == profile.id) {
-                                        EqualizerProfiles.setEnabled(true)
-                                    } else {
-                                        changeProfile { EqualizerProfiles.setActive(profile.id) }
-                                    }
-                                },
-                                onEdit = {
-                                    if (activeId == profile.id) {
-                                        onOpenMetroEq(false)
-                                    } else {
-                                        changeProfile {
-                                            EqualizerProfiles.setActive(profile.id)
-                                            onOpenMetroEq(false)
-                                        }
-                                    }
-                                },
-                                onDelete = { deletingProfile = profile },
-                            )
-                        }
                     }
-                }
-                if (importError) {
-                    Text(
-                        stringResource(Res.string.equalizer_invalid_profile),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.error,
-                    )
-                }
-                FlowRow(
-                    Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    FilledTonalButton(onClick = { onOpenMetroEq(false) }, shapes = ButtonDefaults.shapes()) {
-                        Text(stringResource(Res.string.metroeq))
+                    if (importError) {
+                        Text(
+                            stringResource(Res.string.equalizer_invalid_profile),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.error,
+                        )
                     }
-                    onOpenSystemEqualizer?.let { open ->
-                        FilledTonalButton(onClick = open, shapes = ButtonDefaults.shapes()) {
-                            Text(stringResource(Res.string.system_equalizer))
+                    FlowRow(
+                        Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        LiquidGlassTonalButton(onClick = { onOpenMetroEq(false) }) {
+                            Text(stringResource(Res.string.metroeq))
                         }
-                    }
-                    Box {
-                        Button(onClick = { importing = true }, shapes = ButtonDefaults.shapes()) {
-                            Text(stringResource(Res.string.import_profile))
+                        onOpenSystemEqualizer?.let { open ->
+                            LiquidGlassTonalButton(onClick = open) {
+                                Text(stringResource(Res.string.system_equalizer))
+                            }
                         }
-                        DropdownMenu(expanded = importing, onDismissRequest = { importing = false }) {
-                            DropdownMenuItem(
-                                text = { Text(stringResource(Res.string.eq_wizard)) },
-                                onClick = {
-                                    importing = false
-                                    changeProfile { onOpenMetroEq(true) }
-                                },
-                            )
-                            pickFile?.let { pick ->
+                        Box {
+                            LiquidGlassCompactButton(onClick = { importing = true }) {
+                                Text(stringResource(Res.string.import_profile))
+                            }
+                            LiquidGlassDropdownMenu(expanded = importing, onDismissRequest = { importing = false }) {
                                 DropdownMenuItem(
-                                    text = { Text(stringResource(Res.string.import_from_file)) },
+                                    text = { Text(stringResource(Res.string.eq_wizard)) },
                                     onClick = {
                                         importing = false
-                                        changeProfile { pick() }
+                                        changeProfile { onOpenMetroEq(true) }
                                     },
                                 )
+                                pickFile?.let { pick ->
+                                    DropdownMenuItem(
+                                        text = { Text(stringResource(Res.string.import_from_file)) },
+                                        onClick = {
+                                            importing = false
+                                            changeProfile { pick() }
+                                        },
+                                    )
+                                }
                             }
                         }
                     }
@@ -299,16 +305,15 @@ private fun EqualizerProfileDialog(
             onDismissRequest = { deletingProfile = null },
             text = { Text(stringResource(Res.string.metroeq_delete_profile_confirm, profile.name)) },
             confirmButton = {
-                TextButton(
+                LiquidGlassTextButton(
                     onClick = {
                         EqualizerProfiles.delete(profile.id)
                         deletingProfile = null
                     },
-                    shapes = ButtonDefaults.shapes(),
                 ) { Text(stringResource(Res.string.delete)) }
             },
             dismissButton = {
-                TextButton(onClick = { deletingProfile = null }, shapes = ButtonDefaults.shapes()) {
+                LiquidGlassTextButton(onClick = { deletingProfile = null }) {
                     Text(stringResource(Res.string.cancel))
                 }
             },
@@ -333,10 +338,10 @@ private fun EqualizerProfileRow(
         if (onEdit != null && onDelete != null) {
             Box {
                 var expanded by remember { mutableStateOf(false) }
-                IconButton(onClick = { expanded = true }, shapes = IconButtonDefaults.shapes()) {
+                LiquidGlassIconButton(onClick = { expanded = true }) {
                     Icon(MetrolistIcons.Default.MoreVert, stringResource(Res.string.more_options))
                 }
-                DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                LiquidGlassDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                     Text(name, Modifier.padding(horizontal = 16.dp, vertical = 8.dp), style = MaterialTheme.typography.labelLarge)
                     DropdownMenuItem(
                         text = { Text(stringResource(Res.string.edit_in_metroeq)) },
@@ -370,22 +375,21 @@ internal fun ConfirmEqualizerProfileChange(
         title = { Text(stringResource(Res.string.metroeq_unsaved_changes)) },
         text = { Text(stringResource(Res.string.metroeq_switch_profile_confirm)) },
         confirmButton = {
-            TextButton(
+            LiquidGlassTextButton(
                 onClick = {
                     EqualizerProfiles.activeProfile?.let { EqualizerProfiles.saveCurrent(it.name) }
                     onDismiss()
                     action()
                 },
-                shapes = ButtonDefaults.shapes(),
             ) { Text(stringResource(Res.string.save)) }
         },
         dismissButton = {
             Row {
-                TextButton(onClick = {
+                LiquidGlassTextButton(onClick = {
                     onDismiss()
                     action()
-                }, shapes = ButtonDefaults.shapes()) { Text(stringResource(Res.string.metroeq_discard_changes)) }
-                TextButton(onClick = onDismiss, shapes = ButtonDefaults.shapes()) { Text(stringResource(Res.string.cancel)) }
+                }) { Text(stringResource(Res.string.metroeq_discard_changes)) }
+                LiquidGlassTextButton(onClick = onDismiss) { Text(stringResource(Res.string.cancel)) }
             }
         },
     )
