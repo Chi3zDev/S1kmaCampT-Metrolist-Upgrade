@@ -1291,7 +1291,7 @@ fun MetrolistApp(
                     // Provide one shared wallpaper source on every route; individual visible
                     // surfaces choose whether to instantiate a glass renderer.
                     val themeGlassRequested =
-                        Settings.shared.liquidGlassTheme && !usesDirectionalNavigation && !isPlayerExpandedOrExpanding && !isInPipMode
+                        Settings.shared.liquidGlassTheme && !usesDirectionalNavigation && !isInPipMode
                     val useQweThemeGlass =
                         rememberQweGlassAvailable(enabled = themeGlassRequested, lightMode = Settings.shared.glassLightMode)
                     var qweBackdropSource by remember { mutableStateOf<View?>(null) }
@@ -2198,44 +2198,46 @@ fun MetrolistApp(
                             val playerLifecycleState by lifecycleOwner.lifecycle.currentStateAsState()
                             val sharePlayerLabel = stringResource(Res.string.share)
                             val sharePlayerError = stringResource(Res.string.statistics_share_failed)
-                            PlayerScreen(
-                                onSharePlayerImage = { song, position, duration, playing ->
-                                    val image = renderMusicSharePoster(context, song, position, duration, playing)
-                                    shareImage(context, image, sharePlayerLabel)
-                                },
-                                onSharePlayerImageError = { Toast.makeText(context, sharePlayerError, Toast.LENGTH_SHORT).show() },
-                                isScreenVisible = playerLifecycleState.isAtLeast(Lifecycle.State.STARTED),
-                                viewModel = playerViewModel,
-                                bottomSheetState = playerBottomSheetState,
-                                requestPlayPauseFocus = focusPlayPauseOnPlayerExpand,
-                                onPlayPauseFocusRequested = { focusPlayPauseOnPlayerExpand = false },
-                                onLyricsVisibleChange = { lyricsVisible = it },
-                                onClose = {
-                                    playerBottomSheetState.collapseSoft()
-                                    if (usesDirectionalNavigation) {
-                                        coroutineScope.launch {
-                                            delay(250.milliseconds)
-                                            runCatching { miniPlayerFocusRequester.requestFocus() }
+                            CompositionLocalProvider(LocalThemeGlassBackdrop provides qweThemeBackdrop) {
+                                PlayerScreen(
+                                    onSharePlayerImage = { song, position, duration, playing ->
+                                        val image = renderMusicSharePoster(context, song, position, duration, playing)
+                                        shareImage(context, image, sharePlayerLabel)
+                                    },
+                                    onSharePlayerImageError = { Toast.makeText(context, sharePlayerError, Toast.LENGTH_SHORT).show() },
+                                    isScreenVisible = playerLifecycleState.isAtLeast(Lifecycle.State.STARTED),
+                                    viewModel = playerViewModel,
+                                    bottomSheetState = playerBottomSheetState,
+                                    requestPlayPauseFocus = focusPlayPauseOnPlayerExpand,
+                                    onPlayPauseFocusRequested = { focusPlayPauseOnPlayerExpand = false },
+                                    onLyricsVisibleChange = { lyricsVisible = it },
+                                    onClose = {
+                                        playerBottomSheetState.collapseSoft()
+                                        if (usesDirectionalNavigation) {
+                                            coroutineScope.launch {
+                                                delay(250.milliseconds)
+                                                runCatching { miniPlayerFocusRequester.requestFocus() }
+                                            }
                                         }
-                                    }
-                                },
-                                onNavigateToAlbum = { albumId ->
-                                    playerBottomSheetState.collapseSoft()
-                                    navigator.navigate(Screen.Album(albumId))
-                                },
-                                onNavigateToArtist = { artistId ->
-                                    playerBottomSheetState.collapseSoft()
-                                    navigator.navigate(Screen.Artist(artistId))
-                                },
-                                onNavigateToListenTogether = {
-                                    playerBottomSheetState.collapseSoft()
-                                    navigator.navigate(Screen.ListenTogether)
-                                },
-                                onNavigateToIntegrations = {
-                                    playerBottomSheetState.collapseSoft()
-                                    navigator.navigate(Screen.Integrations)
-                                },
-                            )
+                                    },
+                                    onNavigateToAlbum = { albumId ->
+                                        playerBottomSheetState.collapseSoft()
+                                        navigator.navigate(Screen.Album(albumId))
+                                    },
+                                    onNavigateToArtist = { artistId ->
+                                        playerBottomSheetState.collapseSoft()
+                                        navigator.navigate(Screen.Artist(artistId))
+                                    },
+                                    onNavigateToListenTogether = {
+                                        playerBottomSheetState.collapseSoft()
+                                        navigator.navigate(Screen.ListenTogether)
+                                    },
+                                    onNavigateToIntegrations = {
+                                        playerBottomSheetState.collapseSoft()
+                                        navigator.navigate(Screen.Integrations)
+                                    },
+                                )
+                            }
                         }
                     }
 
