@@ -63,6 +63,7 @@ import com.metrolist.shared.generated.resources.experimental_video_not_ready
 import com.metrolist.shared.generated.resources.experimental_video_search
 import com.metrolist.shared.generated.resources.experimental_video_title
 import com.metrolist.shared.generated.resources.experimental_video_videos
+import com.metrolist.shared.generated.resources.experimental_video_warning
 import com.metrolist.shared.generated.resources.search
 import com.metrolist.shared.ui.components.LiquidGlassChip
 import com.metrolist.shared.ui.components.LiquidGlassCompactButton
@@ -117,6 +118,12 @@ fun ExperimentalVideoScreen(
         },
     ) { viewport ->
         Column(viewport.padding(horizontal = 16.dp)) {
+            Text(
+                stringResource(Res.string.experimental_video_warning),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.padding(bottom = 8.dp),
+            )
             Text(stringResource(Res.string.experimental_video_hint), style = MaterialTheme.typography.bodySmall)
 
             fun submitSearch() {

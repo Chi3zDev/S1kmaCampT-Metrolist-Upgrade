@@ -2678,6 +2678,7 @@
     <string name="experimental_video_live">Live</string>
     <string name="experimental_video_empty">Tidak ada hasil</string>
     <string name="experimental_video_error">Pencarian gagal. Periksa koneksi dan coba lagi.</string>
+    <string name="experimental_video_warning">Fitur ini belum stabil dan mungkin masih memiliki banyak bug.</string>
     <string name="experimental_video_hint">Eksperimen: aktifkan pemutaran video musik di pengaturan. Beberapa video atau live mungkin tidak bisa diputar. Channel dibuka di YouTube.</string>
     <string name="experimental_video_not_ready">Pemutar belum siap.</string>
     <string name="video_home_title">Video</string>

@@ -5757,6 +5757,7 @@
     <string name="experimental_video_live">Live</string>
     <string name="experimental_video_empty">No results found</string>
     <string name="experimental_video_error">Search failed. Check your connection and try again.</string>
+    <string name="experimental_video_warning">This feature is not stable yet and may contain many bugs.</string>
     <string name="experimental_video_hint">Experimental: enable music video playback in settings. Some videos or live streams may not play. Channels open in YouTube.</string>
     <string name="experimental_video_not_ready">Player is not ready.</string>
     <string name="video_home_title">Video</string>
