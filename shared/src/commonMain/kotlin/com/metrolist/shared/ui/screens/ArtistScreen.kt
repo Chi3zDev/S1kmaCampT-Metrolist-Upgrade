@@ -183,6 +183,7 @@ import com.metrolist.shared.ui.components.currentSongSemantics
 import com.metrolist.shared.ui.components.glassCardBorder
 import com.metrolist.shared.ui.components.glassCardColor
 import com.metrolist.shared.ui.components.images.AsyncImage
+import com.metrolist.shared.ui.components.liquidGlassTonalColors
 import com.metrolist.shared.ui.components.loadingShimmer
 import com.metrolist.shared.ui.components.rememberCurrentSongArtworkRotation
 import com.metrolist.shared.ui.components.squareArtworkSlot
@@ -1122,12 +1123,27 @@ private fun ArtistActionRow(
     val textMeasurer = rememberTextMeasurer()
     val density = LocalDensity.current
     val tonalColors = FilledTonalToggleButtonDefaults.colors()
+    val glass = Settings.shared.liquidGlassTheme && LocalThemeGlassBackdrop.current != null
     val subscribeColor by animateColorAsState(
-        if (isSubscribed) MaterialTheme.colorScheme.primary else tonalColors.containerColor,
+        if (glass && isSubscribed) {
+            MaterialTheme.colorScheme.primary.copy(alpha = 0.32f)
+        } else if (glass) {
+            glassCardColor(MaterialTheme.colorScheme.surfaceContainer)
+        } else if (isSubscribed) {
+            MaterialTheme.colorScheme.primary
+        } else {
+            tonalColors.containerColor
+        },
         animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
     )
     val subscribeContentColor by animateColorAsState(
-        if (isSubscribed) MaterialTheme.colorScheme.onPrimary else tonalColors.contentColor,
+        if (glass) {
+            MaterialTheme.colorScheme.onSurface
+        } else if (isSubscribed) {
+            MaterialTheme.colorScheme.onPrimary
+        } else {
+            tonalColors.contentColor
+        },
         animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
     )
     // BoxWithConstraints composes at the lookahead width; keep ButtonGroup and its menu at that width in both passes.
@@ -1162,115 +1178,140 @@ private fun ArtistActionRow(
                         ArtistPlaceholderBlock(Modifier.width(widths.playWidth).height(rowHeight), MaterialTheme.shapes.small)
                     }
                 } else {
-                    ButtonGroup(
-                        overflowIndicator = { ButtonGroupDefaults.OverflowIndicator(it) },
-                        expandedRatio = 1f,
-                        horizontalArrangement = Arrangement.spacedBy(widths.spacing),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        if (showSubscribe) {
-                            customItem(
-                                buttonGroupContent = {
-                                    val interactionSource = remember { MutableInteractionSource() }
-                                    Box(Modifier.animateWidth(interactionSource, 12.dp).width(widths.subscribeWidth).height(rowHeight)) {
-                                        FilledTonalToggleButton(
-                                            checked = isSubscribed,
-                                            onCheckedChange = { onSubscribeClick() },
-                                            interactionSource = interactionSource,
-                                            modifier = Modifier.fillMaxSize(),
-                                            shapes =
-                                                FilledTonalToggleButtonDefaults.shapesFor(rowHeight).copy(
-                                                    shape = MaterialTheme.shapes.small,
-                                                    checkedShape = MaterialTheme.shapes.medium,
-                                                ),
-                                            contentPadding = PaddingValues(horizontal = 12.dp),
-                                            colors =
-                                                tonalColors.copy(
-                                                    containerColor = subscribeColor,
-                                                    contentColor = subscribeContentColor,
-                                                    checkedContainerColor = subscribeColor,
-                                                    checkedContentColor = subscribeContentColor,
-                                                ),
+                    LiquidGlassSurface(radius = rowHeight / 2, enabled = glass) {
+                        ButtonGroup(
+                            overflowIndicator = { ButtonGroupDefaults.OverflowIndicator(it) },
+                            expandedRatio = 1f,
+                            horizontalArrangement = Arrangement.spacedBy(widths.spacing),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            if (showSubscribe) {
+                                customItem(
+                                    buttonGroupContent = {
+                                        val interactionSource = remember { MutableInteractionSource() }
+                                        Box(
+                                            Modifier.animateWidth(interactionSource, 12.dp).width(widths.subscribeWidth).height(rowHeight),
                                         ) {
-                                            Text(subscribeLabel, style = textStyle, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                            FilledTonalToggleButton(
+                                                checked = isSubscribed,
+                                                onCheckedChange = { onSubscribeClick() },
+                                                interactionSource = interactionSource,
+                                                modifier = Modifier.fillMaxSize(),
+                                                shapes =
+                                                    FilledTonalToggleButtonDefaults.shapesFor(rowHeight).copy(
+                                                        shape = MaterialTheme.shapes.small,
+                                                        checkedShape = MaterialTheme.shapes.medium,
+                                                    ),
+                                                contentPadding = PaddingValues(horizontal = 12.dp),
+                                                border = if (glass) glassCardBorder() else null,
+                                                colors =
+                                                    tonalColors.copy(
+                                                        containerColor = subscribeColor,
+                                                        contentColor = subscribeContentColor,
+                                                        checkedContainerColor = subscribeColor,
+                                                        checkedContentColor = subscribeContentColor,
+                                                    ),
+                                            ) {
+                                                Text(subscribeLabel, style = textStyle, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                            }
+                                            SubscribeConfetti(subscribeSuccessCount, Modifier.matchParentSize())
                                         }
-                                        SubscribeConfetti(subscribeSuccessCount, Modifier.matchParentSize())
-                                    }
-                                },
-                                menuContent = { DropdownMenuItem(text = { Text(subscribeLabel) }, onClick = onSubscribeClick) },
-                            )
-                        }
-                        if (showSubscribe) {
-                            customItem(
-                                buttonGroupContent = { Spacer(Modifier.width(widths.separation)) },
-                                menuContent = {},
-                            )
-                        }
-                        listOf(radioLabel, shuffleLabel).forEachIndexed { index, label ->
-                            val onClick = if (index == 0) onMixClick else onShuffleClick
-                            val showLabel = index == 0 && widths.labelRadio
+                                    },
+                                    menuContent = { DropdownMenuItem(text = { Text(subscribeLabel) }, onClick = onSubscribeClick) },
+                                )
+                            }
+                            if (showSubscribe) {
+                                customItem(
+                                    buttonGroupContent = { Spacer(Modifier.width(widths.separation)) },
+                                    menuContent = {},
+                                )
+                            }
+                            listOf(radioLabel, shuffleLabel).forEachIndexed { index, label ->
+                                val onClick = if (index == 0) onMixClick else onShuffleClick
+                                val showLabel = index == 0 && widths.labelRadio
+                                customItem(
+                                    buttonGroupContent = {
+                                        val interactionSource = remember { MutableInteractionSource() }
+                                        val shapes =
+                                            if (index == 0) {
+                                                ButtonGroupDefaults.connectedLeadingButtonShapes()
+                                            } else {
+                                                ButtonGroupDefaults.connectedMiddleButtonShapes()
+                                            }
+                                        FilledTonalButton(
+                                            onClick = onClick,
+                                            interactionSource = interactionSource,
+                                            modifier =
+                                                Modifier
+                                                    .animateWidth(interactionSource, 12.dp)
+                                                    .width(if (index == 0) widths.radioWidth else widths.shuffleWidth)
+                                                    .height(rowHeight),
+                                            shapes = ButtonDefaults.shapes(shape = shapes.shape, pressedShape = shapes.pressedShape),
+                                            contentPadding = PaddingValues(horizontal = if (showLabel) 12.dp else 0.dp),
+                                            colors = if (glass) liquidGlassTonalColors() else ButtonDefaults.filledTonalButtonColors(),
+                                            border = if (glass) glassCardBorder() else null,
+                                        ) {
+                                            Icon(
+                                                if (index == 0) MetrolistIcons.Outlined.Sensors else MetrolistIcons.Rounded.Shuffle,
+                                                if (showLabel) null else label,
+                                                Modifier.size(24.dp),
+                                            )
+                                            if (showLabel) {
+                                                Spacer(Modifier.width(8.dp))
+                                                Text(label, style = textStyle, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                            }
+                                        }
+                                    },
+                                    menuContent = { DropdownMenuItem(text = { Text(label) }, onClick = onClick) },
+                                )
+                            }
                             customItem(
                                 buttonGroupContent = {
                                     val interactionSource = remember { MutableInteractionSource() }
-                                    val shapes =
-                                        if (index == 0) {
-                                            ButtonGroupDefaults.connectedLeadingButtonShapes()
-                                        } else {
-                                            ButtonGroupDefaults.connectedMiddleButtonShapes()
-                                        }
-                                    FilledTonalButton(
-                                        onClick = onClick,
+                                    val shapes = ButtonGroupDefaults.connectedTrailingButtonShapes()
+                                    Button(
+                                        onClick = onPlayAllClick,
                                         interactionSource = interactionSource,
                                         modifier =
                                             Modifier
-                                                .animateWidth(interactionSource, 12.dp)
-                                                .width(if (index == 0) widths.radioWidth else widths.shuffleWidth)
+                                                .animateWidth(
+                                                    interactionSource,
+                                                    12.dp,
+                                                ).width(widths.playWidth)
                                                 .height(rowHeight),
                                         shapes = ButtonDefaults.shapes(shape = shapes.shape, pressedShape = shapes.pressedShape),
-                                        contentPadding = PaddingValues(horizontal = if (showLabel) 12.dp else 0.dp),
+                                        contentPadding = PaddingValues(0.dp),
+                                        colors = if (glass) liquidGlassTonalColors() else ButtonDefaults.buttonColors(),
+                                        border = if (glass) glassCardBorder() else null,
                                     ) {
                                         Icon(
-                                            if (index == 0) MetrolistIcons.Outlined.Sensors else MetrolistIcons.Rounded.Shuffle,
-                                            if (showLabel) null else label,
-                                            Modifier.size(24.dp),
+                                            MetrolistIcons.Default.PlayArrow,
+                                            stringResource(Res.string.artist_play_all),
+                                            Modifier.size(32.dp),
                                         )
-                                        if (showLabel) {
-                                            Spacer(Modifier.width(8.dp))
-                                            Text(label, style = textStyle, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                                        }
                                     }
                                 },
-                                menuContent = { DropdownMenuItem(text = { Text(label) }, onClick = onClick) },
+                                menuContent = {
+                                    DropdownMenuItem(text = { Text(stringResource(Res.string.artist_play_all)) }, onClick = onPlayAllClick)
+                                },
                             )
                         }
-                        customItem(
-                            buttonGroupContent = {
-                                val interactionSource = remember { MutableInteractionSource() }
-                                val shapes = ButtonGroupDefaults.connectedTrailingButtonShapes()
-                                Button(
-                                    onClick = onPlayAllClick,
-                                    interactionSource = interactionSource,
-                                    modifier = Modifier.animateWidth(interactionSource, 12.dp).width(widths.playWidth).height(rowHeight),
-                                    shapes = ButtonDefaults.shapes(shape = shapes.shape, pressedShape = shapes.pressedShape),
-                                    contentPadding = PaddingValues(0.dp),
-                                ) {
-                                    Icon(MetrolistIcons.Default.PlayArrow, stringResource(Res.string.artist_play_all), Modifier.size(32.dp))
-                                }
-                            },
-                            menuContent = {
-                                DropdownMenuItem(text = { Text(stringResource(Res.string.artist_play_all)) }, onClick = onPlayAllClick)
-                            },
-                        )
                     }
                 }
             }
             if (!compact && onMenuClick != null) {
-                FilledTonalIconButton(
-                    onClick = onMenuClick,
-                    modifier = Modifier.size(rowHeight).navigationPopupSource(),
-                    shapes = IconButtonDefaults.shapes(),
-                ) {
-                    Icon(MetrolistIcons.Default.MoreVert, stringResource(Res.string.artist_actions), modifier = Modifier.size(24.dp))
+                if (glass) {
+                    LiquidGlassIconButton(onClick = onMenuClick, modifier = Modifier.size(rowHeight).navigationPopupSource()) {
+                        Icon(MetrolistIcons.Default.MoreVert, stringResource(Res.string.artist_actions), modifier = Modifier.size(24.dp))
+                    }
+                } else {
+                    FilledTonalIconButton(
+                        onClick = onMenuClick,
+                        modifier = Modifier.size(rowHeight).navigationPopupSource(),
+                        shapes = IconButtonDefaults.shapes(),
+                    ) {
+                        Icon(MetrolistIcons.Default.MoreVert, stringResource(Res.string.artist_actions), modifier = Modifier.size(24.dp))
+                    }
                 }
             }
         }
