@@ -4,7 +4,10 @@ import android.app.ActivityManager
 import android.content.Context
 import android.os.Build
 import android.view.View
+import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -17,6 +20,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.viewinterop.AndroidView
 
@@ -25,9 +29,19 @@ import androidx.compose.ui.viewinterop.AndroidView
 internal fun QweBackdropSource(
     onViewChanged: (View?) -> Unit,
     modifier: Modifier = Modifier,
+    contentModifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
     val parent = rememberCompositionContext()
+    // ComposeView installs platform defaults. Carry the user's appearance density and touch
+    // sizing across this view boundary instead of silently resetting pages to system density.
+    val density = LocalDensity.current
+    val viewConfiguration = LocalViewConfiguration.current
+    val minimumInteractiveSize = LocalMinimumInteractiveComponentSize.current
+    val latestDensity by rememberUpdatedState(density)
+    val latestViewConfiguration by rememberUpdatedState(viewConfiguration)
+    val latestMinimumInteractiveSize by rememberUpdatedState(minimumInteractiveSize)
+    val latestContentModifier by rememberUpdatedState(contentModifier)
     val latestContent by rememberUpdatedState(content)
     val latestCallback by rememberUpdatedState(onViewChanged)
     AndroidView(
@@ -35,7 +49,15 @@ internal fun QweBackdropSource(
         factory = { context ->
             ComposeView(context).apply {
                 setParentCompositionContext(parent)
-                setContent { latestContent() }
+                setContent {
+                    CompositionLocalProvider(
+                        LocalDensity provides latestDensity,
+                        LocalViewConfiguration provides latestViewConfiguration,
+                        LocalMinimumInteractiveComponentSize provides latestMinimumInteractiveSize,
+                    ) {
+                        Box(latestContentModifier) { latestContent() }
+                    }
+                }
                 latestCallback(this)
             }
         },
