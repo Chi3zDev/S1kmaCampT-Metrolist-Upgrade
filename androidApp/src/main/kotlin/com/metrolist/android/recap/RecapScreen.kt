@@ -26,7 +26,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -311,14 +310,16 @@ private fun RecapStory(
     var sharing by remember { mutableStateOf(false) }
     Box(
         Modifier
-            .fillMaxWidth()
-            .aspectRatio(9f / 16f)
+            .fillMaxSize()
             .pointerInput(page) {
                 detectTapGestures(
                     onPress = {
                         pressed = true
-                        tryAwaitRelease()
-                        pressed = false
+                        try {
+                            tryAwaitRelease()
+                        } finally {
+                            pressed = false
+                        }
                     },
                     onTap = { offset: Offset ->
                         page = if (offset.x < size.width / 2) (page - 1).coerceAtLeast(0) else (page + 1).coerceAtMost(pages.lastIndex)
@@ -327,10 +328,18 @@ private fun RecapStory(
                 )
             }.pointerInput(Unit) {
                 var drag = 0f
-                detectVerticalDragGestures(onVerticalDrag = { _, amount -> drag += amount }, onDragEnd = {
-                    if (drag > 100f) onBack()
-                    drag = 0f
-                })
+                detectVerticalDragGestures(
+                    onDragStart = { drag = 0f },
+                    onVerticalDrag = { change, amount ->
+                        drag += amount
+                        change.consume()
+                    },
+                    onDragCancel = { drag = 0f },
+                    onDragEnd = {
+                        if (drag > 100.dp.toPx()) onBack()
+                        drag = 0f
+                    },
+                )
             },
     ) {
         Box(
