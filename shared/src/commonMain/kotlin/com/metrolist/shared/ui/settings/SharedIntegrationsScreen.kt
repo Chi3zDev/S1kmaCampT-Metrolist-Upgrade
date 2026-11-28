@@ -24,19 +24,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.TextObfuscationMode
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedSecureTextField
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -83,6 +78,9 @@ import com.metrolist.shared.scrobble.ScrobbleSessions
 import com.metrolist.shared.settings.Settings
 import com.metrolist.shared.state.GlobalYouTube
 import com.metrolist.shared.ui.components.AlertDialog
+import com.metrolist.shared.ui.components.LiquidGlassButton
+import com.metrolist.shared.ui.components.LiquidGlassIconButton
+import com.metrolist.shared.ui.components.LiquidGlassTextButton
 import com.metrolist.shared.ui.components.PopupContent
 import com.metrolist.shared.ui.components.images.AsyncImage
 import com.metrolist.shared.ui.icons.MetrolistIcons
@@ -810,11 +808,11 @@ private fun DiscordErrorPanel(
             Icon(MetrolistIcons.Outlined.Warning, null, tint = MaterialTheme.colorScheme.error)
             Spacer(Modifier.width(12.dp))
             Text(message, modifier = Modifier.weight(1f), color = MaterialTheme.colorScheme.error)
-            IconButton(onClick = DiscordRpcManager::clearLastError, enabled = enabled, shapes = IconButtonDefaults.shapes()) {
+            LiquidGlassIconButton(onClick = DiscordRpcManager::clearLastError, enabled = enabled) {
                 Icon(MetrolistIcons.Default.Close, stringResource(Res.string.dismiss))
             }
         }
-        TextButton(onClick = { host.onCopyText(errorTitle, message) }, enabled = enabled, shapes = ButtonDefaults.shapes()) {
+        LiquidGlassTextButton(onClick = { host.onCopyText(errorTitle, message) }, enabled = enabled) {
             Icon(MetrolistIcons.Outlined.ContentCopy, null)
             Spacer(Modifier.width(8.dp))
             Text(stringResource(Res.string.copy))
@@ -902,9 +900,9 @@ private fun DiscordPresencePreview(
             ).filter { (label, url) -> label.isNotEmpty() && url.isNotEmpty() }
         val buttons = DiscordPresence.validatedButtons(configuredButtons)
         buttons.forEach { (label, url) ->
-            Button(onClick = {
+            LiquidGlassButton(onClick = {
                 onOpenUrl(url)
-            }, enabled = enabled, modifier = Modifier.fillMaxWidth(), shapes = ButtonDefaults.shapes()) { Text(label) }
+            }, enabled = enabled, modifier = Modifier.fillMaxWidth()) { Text(label) }
         }
         if (buttons != configuredButtons) {
             Text(stringResource(Res.string.discord_preview_buttons_adjusted), style = MaterialTheme.typography.bodySmall)
@@ -969,13 +967,13 @@ private fun ScrobbleLoginDialog(
                     textObfuscationMode = TextObfuscationMode.Hidden,
                 )
                 if (!isLastFm) {
-                    TextButton(onClick = { onOpenUrl("https://listenbrainz.org/settings/") }, shapes = ButtonDefaults.shapes()) {
+                    LiquidGlassTextButton(onClick = { onOpenUrl("https://listenbrainz.org/settings/") }) {
                         Text(stringResource(Res.string.listenbrainz_user_token))
                         Spacer(Modifier.width(8.dp))
                         Icon(MetrolistIcons.AutoMirrored.Filled.OpenInNew, stringResource(Res.string.open_website))
                     }
                 }
-                TextButton(
+                LiquidGlassTextButton(
                     onClick = {
                         onOpenUrl(
                             if (isLastFm) {
@@ -985,7 +983,6 @@ private fun ScrobbleLoginDialog(
                             },
                         )
                     },
-                    shapes = ButtonDefaults.shapes(),
                 ) {
                     Text(stringResource(Res.string.scrobble_create_account))
                     Spacer(Modifier.width(8.dp))
@@ -995,7 +992,7 @@ private fun ScrobbleLoginDialog(
             }
         },
         confirmButton = {
-            TextButton(
+            LiquidGlassTextButton(
                 enabled = !connecting && credential.isNotBlank() && (!isLastFm || username.isNotBlank()),
                 onClick = {
                     connecting = true
@@ -1033,7 +1030,6 @@ private fun ScrobbleLoginDialog(
                         connecting = false
                     }
                 },
-                shapes = ButtonDefaults.shapes(),
             ) {
                 if (connecting) {
                     LoadingIndicator(Modifier.size(18.dp))
@@ -1043,10 +1039,9 @@ private fun ScrobbleLoginDialog(
             }
         },
         dismissButton = {
-            TextButton(
+            LiquidGlassTextButton(
                 onClick = onDismiss,
                 enabled = !connecting,
-                shapes = ButtonDefaults.shapes(),
             ) { Text(stringResource(Res.string.cancel)) }
         },
     )
