@@ -116,7 +116,9 @@ import com.metrolist.shared.ui.components.LocalThemeGlassBackdrop
 import com.metrolist.shared.ui.components.appPageBackground
 import com.metrolist.shared.ui.components.glassCardBorder
 import com.metrolist.shared.ui.components.glassCardColor
+import com.metrolist.shared.ui.components.glassScaffoldViewport
 import com.metrolist.shared.ui.components.images.AsyncImage
+import com.metrolist.shared.ui.components.liquidGlassBackdropReady
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import com.metrolist.shared.ui.navigation.NavigationBackHandler
 import com.metrolist.shared.ui.utils.toPolygonShape
@@ -145,6 +147,7 @@ fun AboutScreen(
     onPlayFavoriteSong: ((videoId: String) -> Unit)? = null,
 ) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    val glass = liquidGlassBackdropReady()
     var logoClickCount by rememberSaveable { mutableIntStateOf(0) }
     var devtoolsUnlocked by remember { mutableStateOf(Settings.shared.devtoolsUnlocked) }
     val coroutineScope = rememberCoroutineScope()
@@ -245,11 +248,10 @@ fun AboutScreen(
             )
         },
     ) { paddingValues ->
+        val viewport = if (glass) Modifier.glassScaffoldViewport(paddingValues) else Modifier.fillMaxSize().padding(paddingValues)
         Column(
             modifier =
-                Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
+                viewport
                     .verticalScrollWithDrag(rememberScrollState())
                     .padding(contentPadding)
                     .padding(bottom = bottomInset),
