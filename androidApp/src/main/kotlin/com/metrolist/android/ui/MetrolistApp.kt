@@ -1853,9 +1853,13 @@ fun MetrolistApp(
                                             }
                                         },
                                         modifier =
-                                            Modifier
-                                                .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection)
-                                                .nestedScroll(glassScrollConnection),
+                                            if (useQweThemeGlass) {
+                                                Modifier
+                                            } else {
+                                                Modifier
+                                                    .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection)
+                                                    .nestedScroll(glassScrollConnection)
+                                            },
                                     ) { scaffoldPadding ->
                                         Box(
                                             Modifier
@@ -2098,6 +2102,11 @@ fun MetrolistApp(
                                                 QweBackdropSource(
                                                     onViewChanged = { qwePageSource = it },
                                                     modifier = Modifier.fillMaxSize(),
+                                                    contentModifier =
+                                                        Modifier
+                                                            .fillMaxSize()
+                                                            .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection)
+                                                            .nestedScroll(glassScrollConnection),
                                                     content = pageContent,
                                                 )
                                             } else {
