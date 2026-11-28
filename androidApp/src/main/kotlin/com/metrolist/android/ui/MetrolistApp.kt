@@ -213,6 +213,7 @@ import com.metrolist.android.ui.screens.ArtistScreenHost
 import com.metrolist.android.ui.screens.AutoPlaylistScreen
 import com.metrolist.android.ui.screens.BrowseScreen
 import com.metrolist.android.ui.screens.DownloadsScreen
+import com.metrolist.android.ui.screens.ExperimentalVideoScreen
 import com.metrolist.android.ui.screens.HistoryScreen
 import com.metrolist.android.ui.screens.HomeScreen
 import com.metrolist.android.ui.screens.HomeSectionScreen
@@ -2844,6 +2845,7 @@ fun getEntryProvider(
         entry<Screen.Home>(metadata = navTabMetadata) {
             HomeScreen(
                 onNavigateToRecap = { navigator.navigate(Screen.Recap) },
+                onNavigateToExperimentalVideo = { if (BuildConfig.DEBUG) navigator.navigate(Screen.ExperimentalVideo) },
                 onNavigateToStreak = { navigator.navigate(Screen.Streak) },
                 floatingActionsBottomInset = floatingActionsBottomInset,
                 onNavigateToAlbum = { albumId -> navigator.navigate(Screen.Album(albumId)) },
@@ -2866,6 +2868,10 @@ fun getEntryProvider(
                 },
                 scrollToTopEvents = homeScrollToTopEvents,
             )
+        }
+
+        entry<Screen.ExperimentalVideo>(metadata = navTabMetadata) {
+            if (BuildConfig.DEBUG) ExperimentalVideoScreen(onBack = { navigator.goBack() })
         }
 
         entry<Screen.EasterEgg>(metadata = navTabMetadata) {

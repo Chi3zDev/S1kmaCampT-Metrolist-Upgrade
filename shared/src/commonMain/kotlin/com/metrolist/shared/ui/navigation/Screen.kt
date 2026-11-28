@@ -22,6 +22,9 @@ sealed class Screen : NavKey {
     data object Home : Screen()
 
     @Serializable
+    data object ExperimentalVideo : Screen()
+
+    @Serializable
     data object Library : Screen()
 
     @Serializable

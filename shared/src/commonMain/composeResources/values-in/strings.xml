@@ -2670,4 +2670,14 @@
     <string name="about_upgrade_candidate_four">Upgrade %1$d (kandidat 4)</string>
     <string name="about_upgrade_candidate_six">Upgrade %1$d (kandidat 6)</string>
     <string name="about_upgrade_candidate_five">Upgrade %1$d (kandidat 5)</string>
+    <string name="experimental_video_title">Eksperimen video</string>
+    <string name="experimental_video_search">Cari video dan channel</string>
+    <string name="experimental_video_all">Semua</string>
+    <string name="experimental_video_videos">Video</string>
+    <string name="experimental_video_channels">Channel</string>
+    <string name="experimental_video_live">Live</string>
+    <string name="experimental_video_empty">Tidak ada hasil</string>
+    <string name="experimental_video_error">Pencarian gagal. Periksa koneksi dan coba lagi.</string>
+    <string name="experimental_video_hint">Eksperimen: aktifkan pemutaran video musik di pengaturan. Beberapa video atau live mungkin tidak bisa diputar. Channel dibuka di YouTube.</string>
+    <string name="experimental_video_not_ready">Pemutar belum siap.</string>
 </resources>

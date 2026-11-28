@@ -72,6 +72,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.metrolist.android.BuildConfig
 import com.metrolist.android.LocalMiniPlayerBottomInset
 import com.metrolist.android.LocalStartupPresentation
 import com.metrolist.android.playback.LocalPlayerConnection
@@ -89,6 +90,7 @@ import com.metrolist.shared.auth.AuthManager
 import com.metrolist.shared.db.MusicDatabase
 import com.metrolist.shared.generated.resources.Res
 import com.metrolist.shared.generated.resources.error_occurred
+import com.metrolist.shared.generated.resources.experimental_video_title
 import com.metrolist.shared.generated.resources.home_load_failed
 import com.metrolist.shared.generated.resources.home_offline_empty
 import com.metrolist.shared.generated.resources.no_playable_items
@@ -150,6 +152,7 @@ fun HomeScreen(
     onNavigateToLibrary: (LibraryFilterType?) -> Unit = {},
     onNavigateToStreak: () -> Unit = {},
     onNavigateToRecap: () -> Unit = {},
+    onNavigateToExperimentalVideo: () -> Unit = {},
     floatingActionsBottomInset: State<Dp>,
     scrollToTopEvents: Flow<Long> = emptyFlow(),
     viewModel: HomeViewModel = koinViewModel<HomeViewModel>(),
@@ -332,6 +335,13 @@ fun HomeScreen(
                 }
                 item(key = "recap_entry") {
                     RecapEntry(onNavigateToRecap, Modifier.padding(horizontal = 16.dp))
+                }
+                if (BuildConfig.DEBUG) {
+                    item(key = "experimental_video") {
+                        TextButton(onClick = onNavigateToExperimentalVideo, modifier = Modifier.padding(horizontal = 16.dp)) {
+                            Text(stringResource(Res.string.experimental_video_title))
+                        }
+                    }
                 }
                 if (isTv) {
                     item(key = "tv_refresh") {

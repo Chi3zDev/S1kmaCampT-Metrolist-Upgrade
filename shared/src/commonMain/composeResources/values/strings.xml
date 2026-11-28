@@ -5749,4 +5749,14 @@
     <string name="about_upgrade_candidate_four">Upgrade %1$d (candidate 4)</string>
     <string name="about_upgrade_candidate_six">Upgrade %1$d (candidate 6)</string>
     <string name="about_upgrade_candidate_five">Upgrade %1$d (candidate 5)</string>
+    <string name="experimental_video_title">Video experiment</string>
+    <string name="experimental_video_search">Search videos and channels</string>
+    <string name="experimental_video_all">All</string>
+    <string name="experimental_video_videos">Videos</string>
+    <string name="experimental_video_channels">Channels</string>
+    <string name="experimental_video_live">Live</string>
+    <string name="experimental_video_empty">No results found</string>
+    <string name="experimental_video_error">Search failed. Check your connection and try again.</string>
+    <string name="experimental_video_hint">Experimental: enable music video playback in settings. Some videos or live streams may not play. Channels open in YouTube.</string>
+    <string name="experimental_video_not_ready">Player is not ready.</string>
 </resources>
