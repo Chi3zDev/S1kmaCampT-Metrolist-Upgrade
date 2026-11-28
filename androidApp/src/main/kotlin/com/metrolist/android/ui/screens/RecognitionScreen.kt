@@ -182,6 +182,10 @@ import com.metrolist.shared.state.SongLikeState
 import com.metrolist.shared.ui.LocalIsTv
 import com.metrolist.shared.ui.components.AlertDialog
 import com.metrolist.shared.ui.components.HistoryEntryGroupPosition
+import com.metrolist.shared.ui.components.LiquidGlassSurface
+import com.metrolist.shared.ui.components.glassCardBorder
+import com.metrolist.shared.ui.components.glassCardColor
+import com.metrolist.shared.ui.components.liquidGlassBackdropReady
 import com.metrolist.shared.ui.components.sliders.rememberWavePhase
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import com.metrolist.shared.ui.navigation.LocalContentObscured
@@ -1190,33 +1194,50 @@ private fun ConnectedResultButton(
     contentPadding: PaddingValues = PaddingValues(horizontal = 16.dp),
     content: @Composable RowScope.() -> Unit,
 ) {
-    ToggleButton(
-        checked = checked,
-        onCheckedChange = { onAction() },
-        enabled = enabled,
-        shapes = shapes,
-        colors = colors,
-        contentPadding = contentPadding,
-        modifier =
-            modifier
-                .height(ResultButtonHeight)
-                .then(
-                    if (isToggle) {
-                        Modifier.semantics { this.contentDescription = description }
-                    } else {
-                        Modifier.clearAndSetSemantics {
-                            this.contentDescription = description
-                            role = Role.Button
-                            if (!enabled) disabled()
-                            onClick {
-                                onAction()
-                                true
+    val glass = liquidGlassBackdropReady()
+    LiquidGlassSurface(radius = 16.dp, modifier = modifier, enabled = glass) {
+        ToggleButton(
+            checked = checked,
+            onCheckedChange = { onAction() },
+            enabled = enabled,
+            shapes = shapes,
+            colors =
+                if (glass) {
+                    colors.copy(
+                        containerColor = glassCardColor(MaterialTheme.colorScheme.surfaceContainer),
+                        contentColor = MaterialTheme.colorScheme.onSurface,
+                        disabledContainerColor = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.25f),
+                        disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                        checkedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.32f),
+                        checkedContentColor = MaterialTheme.colorScheme.onSurface,
+                    )
+                } else {
+                    colors
+                },
+            border = if (glass) glassCardBorder() else null,
+            contentPadding = contentPadding,
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(ResultButtonHeight)
+                    .then(
+                        if (isToggle) {
+                            Modifier.semantics { this.contentDescription = description }
+                        } else {
+                            Modifier.clearAndSetSemantics {
+                                this.contentDescription = description
+                                role = Role.Button
+                                if (!enabled) disabled()
+                                onClick {
+                                    onAction()
+                                    true
+                                }
                             }
-                        }
-                    },
-                ),
-        content = content,
-    )
+                        },
+                    ),
+            content = content,
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
