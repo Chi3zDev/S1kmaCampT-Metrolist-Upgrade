@@ -28,6 +28,7 @@ import com.metrolist.android.ui.glass.QweBackdropSource
 class LiquidGlassAncestorProbeActivity : ComponentActivity() {
     var sceneColor by mutableStateOf(Color.Green)
     var stripedScene by mutableStateOf(false)
+    var foregroundMarker by mutableStateOf(false)
     var pageSource: View? = null
     var glass: LiquidGlassView? = null
 
@@ -87,6 +88,9 @@ class LiquidGlassAncestorProbeActivity : ComponentActivity() {
                                 glass = null
                             },
                         )
+                    }
+                    if (foregroundMarker) {
+                        Box(Modifier.align(Alignment.Center).size(12.dp).background(Color.White))
                     }
                 }
             }

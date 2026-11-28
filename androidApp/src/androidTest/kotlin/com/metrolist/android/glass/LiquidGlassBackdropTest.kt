@@ -200,7 +200,20 @@ class LiquidGlassBackdropTest {
             val blue = captureWindowGlassCenter(activity.window, glass)
             assertTrue("ancestor scene should begin green: $green", AndroidColor.green(green) > AndroidColor.blue(green) + 20)
             assertTrue("ancestor scene should update to blue: $blue", AndroidColor.blue(blue) > AndroidColor.green(blue) + 20)
-            instrumentation.runOnMainSync { activity.stripedScene = true }
+            // A foreground label above glass must not be reflected into its own backdrop.
+            val density = activity.resources.displayMetrics.density
+            val offset = (18f * density).toInt()
+            val beforeMarker = captureWindowGlassOffset(activity.window, glass, offset)
+            instrumentation.runOnMainSync { activity.foregroundMarker = true }
+            instrumentation.waitForIdleSync()
+            Thread.sleep(1000)
+            val afterMarker = captureWindowGlassOffset(activity.window, glass, offset)
+            val markerLeak = AndroidColor.red(afterMarker) - AndroidColor.red(beforeMarker)
+            assertTrue("foreground must not leak into its own glass backdrop: $markerLeak", markerLeak < 20)
+            instrumentation.runOnMainSync {
+                activity.foregroundMarker = false
+                activity.stripedScene = true
+            }
             instrumentation.waitForIdleSync()
             Thread.sleep(1000)
             val stripes = captureWindowGlassRow(activity.window, glass, 32)
@@ -307,6 +320,28 @@ class LiquidGlassBackdropTest {
         window: Window,
         glass: View,
     ): Int = captureWindowGlassRow(window, glass, 1).single()
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun captureWindowGlassOffset(
+        window: Window,
+        glass: View,
+        offsetX: Int,
+    ): Int {
+        val bitmap = Bitmap.createBitmap(window.decorView.width, window.decorView.height, Bitmap.Config.ARGB_8888)
+        val latch = CountDownLatch(1)
+        var result = -1
+        PixelCopy.request(window, bitmap, {
+            result = it
+            latch.countDown()
+        }, Handler(Looper.getMainLooper()))
+        assertTrue("PixelCopy timed out", latch.await(5, TimeUnit.SECONDS))
+        assertEquals(PixelCopy.SUCCESS, result)
+        val position = IntArray(2)
+        InstrumentationRegistry.getInstrumentation().runOnMainSync { glass.getLocationInWindow(position) }
+        val pixel = bitmap.getPixel(position[0] + glass.width / 2 + offsetX, position[1] + glass.height / 2)
+        bitmap.recycle()
+        return pixel
+    }
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun captureWindowGlassRow(
