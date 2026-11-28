@@ -2,12 +2,11 @@
 
 package com.metrolist.shared.ui.selection
 
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -18,12 +17,18 @@ import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.dp
 import com.metrolist.shared.generated.resources.Res
 import com.metrolist.shared.generated.resources.cancel
 import com.metrolist.shared.generated.resources.deselect_all
 import com.metrolist.shared.generated.resources.menu
 import com.metrolist.shared.generated.resources.n_selected
 import com.metrolist.shared.generated.resources.select_all
+import com.metrolist.shared.settings.Settings
+import com.metrolist.shared.ui.components.LiquidGlassIconButton
+import com.metrolist.shared.ui.components.LiquidGlassSurface
+import com.metrolist.shared.ui.components.LocalThemeGlassBackdrop
+import com.metrolist.shared.ui.components.glassCardColor
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import com.metrolist.shared.ui.navigation.navigationPopupSource
 import org.jetbrains.compose.resources.pluralStringResource
@@ -49,49 +54,58 @@ fun SelectionTopBar(
     val selectedLabel = pluralStringResource(Res.plurals.n_selected, count, count)
     val selectAllChecked = allSelected && count > 0
     val selectAllLabel = stringResource(if (selectAllChecked) Res.string.deselect_all else Res.string.select_all)
-    TopAppBar(
-        modifier = modifier,
-        title = {
-            Text(
-                text = selectedLabel,
-                modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
-            )
-        },
-        navigationIcon =
-            if (showClose) {
-                {
-                    IconButton(onClick = onClose, shapes = IconButtonDefaults.shapes()) {
-                        Icon(MetrolistIcons.Filled.Close, contentDescription = stringResource(Res.string.cancel))
-                    }
-                }
-            } else {
-                {}
-            },
-        actions = {
-            if (showSelectAll) {
-                Checkbox(
-                    modifier =
-                        Modifier.semantics(mergeDescendants = true) {
-                            contentDescription = selectAllLabel
-                        },
-                    checked = selectAllChecked,
-                    onCheckedChange = { onSelectAll() },
+    val glass = Settings.shared.liquidGlassTheme && LocalThemeGlassBackdrop.current != null
+    LiquidGlassSurface(radius = 0.dp, modifier = modifier.fillMaxWidth(), enabled = glass) {
+        TopAppBar(
+            modifier = Modifier.fillMaxWidth(),
+            title = {
+                Text(
+                    text = selectedLabel,
+                    modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
                 )
-            }
-            IconButton(
-                modifier = Modifier.navigationPopupSource(),
-                onClick = onMore,
-                enabled = moreEnabled,
-                shapes = IconButtonDefaults.shapes(),
-            ) {
-                Icon(MetrolistIcons.Default.MoreVert, contentDescription = stringResource(Res.string.menu))
-            }
-        },
-        colors =
-            TopAppBarDefaults.topAppBarColors(
-                // Same colour as the screen background so the bar blends in instead of standing out.
-                containerColor = MaterialTheme.colorScheme.surface,
-                scrolledContainerColor = MaterialTheme.colorScheme.surface,
-            ),
-    )
+            },
+            navigationIcon =
+                if (showClose) {
+                    {
+                        LiquidGlassIconButton(onClick = onClose) {
+                            Icon(MetrolistIcons.Filled.Close, contentDescription = stringResource(Res.string.cancel))
+                        }
+                    }
+                } else {
+                    {}
+                },
+            actions = {
+                if (showSelectAll) {
+                    Checkbox(
+                        modifier =
+                            Modifier.semantics(mergeDescendants = true) {
+                                contentDescription = selectAllLabel
+                            },
+                        checked = selectAllChecked,
+                        onCheckedChange = { onSelectAll() },
+                    )
+                }
+                LiquidGlassIconButton(
+                    modifier = Modifier.navigationPopupSource(),
+                    onClick = onMore,
+                    enabled = moreEnabled,
+                ) {
+                    Icon(MetrolistIcons.Default.MoreVert, contentDescription = stringResource(Res.string.menu))
+                }
+            },
+            colors =
+                TopAppBarDefaults.topAppBarColors(
+                    // Same colour as the screen background so the bar blends in instead of standing out.
+                    containerColor = if (glass) glassCardColor(MaterialTheme.colorScheme.surface) else MaterialTheme.colorScheme.surface,
+                    scrolledContainerColor =
+                        if (glass) {
+                            glassCardColor(
+                                MaterialTheme.colorScheme.surface,
+                            )
+                        } else {
+                            MaterialTheme.colorScheme.surface
+                        },
+                ),
+        )
+    }
 }
