@@ -9,9 +9,7 @@ import android.content.Intent
 import android.widget.Toast
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -55,6 +53,7 @@ import com.metrolist.shared.state.SongLikeState
 import com.metrolist.shared.ui.LocalIsTv
 import com.metrolist.shared.ui.components.CollectionPreviews
 import com.metrolist.shared.ui.components.ContainedLoadingIndicator
+import com.metrolist.shared.ui.components.LiquidGlassTextButton
 import com.metrolist.shared.ui.components.PopupContent
 import com.metrolist.shared.ui.screens.ArtistScreen
 import com.metrolist.shared.utils.ShareUrls
@@ -203,9 +202,8 @@ fun ArtistScreenHost(
                 if (title !in uiState.failedSections) viewModel.shared.loadSection(title)
             }
             if (title in uiState.failedSections) {
-                TextButton(
+                LiquidGlassTextButton(
                     onClick = { viewModel.shared.loadSection(title) },
-                    shapes = ButtonDefaults.shapes(),
                 ) { Text(stringResource(Res.string.retry)) }
             } else {
                 ContainedLoadingIndicator()
