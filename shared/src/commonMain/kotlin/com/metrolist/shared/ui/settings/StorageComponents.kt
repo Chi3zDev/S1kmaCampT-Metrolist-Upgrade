@@ -23,8 +23,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -58,7 +56,12 @@ import com.metrolist.shared.generated.resources.size_used
 import com.metrolist.shared.generated.resources.storage_in_total
 import com.metrolist.shared.storage.storageUsageFraction
 import com.metrolist.shared.ui.components.AlertDialog
+import com.metrolist.shared.ui.components.LiquidGlassIconButton
 import com.metrolist.shared.ui.components.LiquidGlassSliderContainer
+import com.metrolist.shared.ui.components.LocalThemeGlassBackdrop
+import com.metrolist.shared.ui.components.glassCardBorder
+import com.metrolist.shared.ui.components.glassCardColor
+import com.metrolist.shared.ui.components.liquidGlassBackdropReady
 import com.metrolist.shared.ui.haptics.rememberMetrolistHaptics
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import com.metrolist.shared.ui.playback.retainPlaybackKeyFocus
@@ -183,30 +186,35 @@ private fun StorageTile(
             bottomStart = if (isLast) 24.dp else 4.dp,
             bottomEnd = if (isLast) 24.dp else 4.dp,
         )
-    Surface(
-        modifier =
-            Modifier.fillMaxWidth().clip(shape).then(
-                when {
-                    onClick == null -> {
-                        Modifier
-                    }
-
-                    checked != null -> {
-                        Modifier.toggleable(checked, enabled = enabled, role = Role.Switch) {
-                            haptics.toggle(it)
-                            onClick()
+    val glass = liquidGlassBackdropReady()
+    Box(Modifier.fillMaxWidth().clip(shape)) {
+        if (glass) LocalThemeGlassBackdrop.current?.Background(radius = 24.dp, modifier = Modifier.matchParentSize())
+        Surface(
+            modifier =
+                Modifier.fillMaxWidth().clip(shape).then(
+                    when {
+                        onClick == null -> {
+                            Modifier
                         }
-                    }
 
-                    else -> {
-                        Modifier.clickable(enabled = enabled, onClickLabel = onClickLabel, role = Role.Button, onClick = onClick)
-                    }
-                },
-            ),
-        shape = shape,
-        color = MaterialTheme.colorScheme.surfaceContainer,
-    ) {
-        Box(Modifier.heightIn(min = 56.dp).padding(16.dp)) { content() }
+                        checked != null -> {
+                            Modifier.toggleable(checked, enabled = enabled, role = Role.Switch) {
+                                haptics.toggle(it)
+                                onClick()
+                            }
+                        }
+
+                        else -> {
+                            Modifier.clickable(enabled = enabled, onClickLabel = onClickLabel, role = Role.Button, onClick = onClick)
+                        }
+                    },
+                ),
+            shape = shape,
+            color = if (glass) glassCardColor(MaterialTheme.colorScheme.surfaceContainer) else MaterialTheme.colorScheme.surfaceContainer,
+            border = if (glass) glassCardBorder() else null,
+        ) {
+            Box(Modifier.heightIn(min = 56.dp).padding(16.dp)) { content() }
+        }
     }
 }
 
@@ -235,7 +243,7 @@ fun StorageUsageRow(
                 )
             }
             if (onClick != null && onClickLabel != null) {
-                IconButton(onClick = onClick, shapes = IconButtonDefaults.shapes()) {
+                LiquidGlassIconButton(onClick = onClick) {
                     Icon(
                         MetrolistIcons.Outlined.Delete,
                         contentDescription = onClickLabel,
