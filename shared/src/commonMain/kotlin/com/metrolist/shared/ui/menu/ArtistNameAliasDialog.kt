@@ -3,11 +3,9 @@
 package com.metrolist.shared.ui.menu
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -23,6 +21,7 @@ import com.metrolist.shared.model.ArtistItem
 import com.metrolist.shared.settings.ArtistNameAliases
 import com.metrolist.shared.settings.displayTitle
 import com.metrolist.shared.ui.components.AlertDialog
+import com.metrolist.shared.ui.components.LiquidGlassTextButton
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -42,25 +41,23 @@ fun ArtistNameAliasDialog(
                     label = { Text(stringResource(Res.string.artist_name)) },
                     singleLine = true,
                 )
-                TextButton(
+                LiquidGlassTextButton(
                     onClick = {
                         ArtistNameAliases.clear(artist.id, artist.channelId, artist.title)
                         onDismiss()
                     },
-                    shapes = ButtonDefaults.shapes(),
                 ) { Text(stringResource(Res.string.clear_artist_alias)) }
             }
         },
         confirmButton = {
-            TextButton(
+            LiquidGlassTextButton(
                 enabled = name.isNotBlank(),
                 onClick = {
                     ArtistNameAliases.set(artist.id, artist.channelId, artist.displayTitle, name.trim())
                     onDismiss()
                 },
-                shapes = ButtonDefaults.shapes(),
             ) { Text(stringResource(Res.string.save)) }
         },
-        dismissButton = { TextButton(onClick = onDismiss, shapes = ButtonDefaults.shapes()) { Text(stringResource(Res.string.cancel)) } },
+        dismissButton = { LiquidGlassTextButton(onClick = onDismiss) { Text(stringResource(Res.string.cancel)) } },
     )
 }
