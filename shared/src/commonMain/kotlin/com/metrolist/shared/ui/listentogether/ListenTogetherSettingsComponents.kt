@@ -49,6 +49,7 @@ import com.metrolist.shared.ui.components.appPageBackground
 import com.metrolist.shared.ui.components.focusOutline
 import com.metrolist.shared.ui.components.glassCardBorder
 import com.metrolist.shared.ui.components.glassCardColor
+import com.metrolist.shared.ui.components.glassScaffoldViewport
 import com.metrolist.shared.ui.components.liquidGlassBackdropReady
 import com.metrolist.shared.ui.icons.MetrolistIcons
 import com.metrolist.shared.ui.utils.segmentedGroupShape
@@ -111,11 +112,10 @@ fun SettingsSubScreen(
             }
         },
     ) { paddingValues ->
+        val viewport = if (glass) Modifier.glassScaffoldViewport(paddingValues) else Modifier.fillMaxSize().padding(paddingValues)
         Column(
             modifier =
-                Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
+                viewport
                     .verticalScrollWithDrag(rememberScrollState())
                     .focusGroup()
                     .padding(top = 16.dp, bottom = 16.dp + bottomInset),
