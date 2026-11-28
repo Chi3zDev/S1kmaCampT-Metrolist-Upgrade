@@ -26,8 +26,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -40,7 +38,6 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -213,6 +210,8 @@ import com.metrolist.shared.state.GlobalYouTubeRepository
 import com.metrolist.shared.tidalimport.TidalImportManager
 import com.metrolist.shared.ui.components.AlertDialog
 import com.metrolist.shared.ui.components.LiquidGlassChip
+import com.metrolist.shared.ui.components.LiquidGlassCompactButton
+import com.metrolist.shared.ui.components.LiquidGlassTextButton
 import com.metrolist.shared.ui.components.PopupContent
 import com.metrolist.shared.ui.components.PopupVisibility
 import com.metrolist.shared.ui.menu.CsvColumnMappingDialog
@@ -818,13 +817,12 @@ fun BackupRestoreScreen(onNavigateBack: () -> Unit) {
                 )
             },
             confirmButton = {
-                TextButton(
+                LiquidGlassTextButton(
                     enabled = warningSeconds == 0,
                     onClick = {
                         showBackupWarning = false
                         runCatching { createBackupLauncher.launch("${defaultBackupFilename(backupFilenamePrefix)}.zip") }
                     },
-                    shapes = ButtonDefaults.shapes(),
                 ) {
                     Text(
                         if (warningSeconds == 0) {
@@ -836,9 +834,9 @@ fun BackupRestoreScreen(onNavigateBack: () -> Unit) {
                 }
             },
             dismissButton = {
-                TextButton(onClick = {
+                LiquidGlassTextButton(onClick = {
                     showBackupWarning = false
-                }, shapes = ButtonDefaults.shapes()) { Text(androidStringResource(android.R.string.cancel)) }
+                }) { Text(androidStringResource(android.R.string.cancel)) }
             },
         )
     }
@@ -849,7 +847,7 @@ fun BackupRestoreScreen(onNavigateBack: () -> Unit) {
             title = { Text(stringResource(Res.string.restore_confirm_title)) },
             text = { Text(stringResource(Res.string.restore_confirm_message)) },
             confirmButton = {
-                TextButton(
+                LiquidGlassTextButton(
                     onClick = {
                         restoreUri = null
                         scope.launch {
@@ -864,13 +862,12 @@ fun BackupRestoreScreen(onNavigateBack: () -> Unit) {
                             }
                         }
                     },
-                    shapes = ButtonDefaults.shapes(),
                 ) {
                     Text(stringResource(Res.string.action_restore))
                 }
             },
             dismissButton = {
-                TextButton(onClick = { restoreUri = null }, shapes = ButtonDefaults.shapes()) {
+                LiquidGlassTextButton(onClick = { restoreUri = null }) {
                     Text(androidStringResource(android.R.string.cancel))
                 }
             },
@@ -887,7 +884,7 @@ fun BackupRestoreScreen(onNavigateBack: () -> Unit) {
                 } else {
                     LazyColumn {
                         items(automaticBackups, key = File::getName) { backup ->
-                            TextButton(
+                            LiquidGlassTextButton(
                                 onClick = {
                                     automaticBackupToRestore = backup
                                     showAutomaticBackupPicker = false
@@ -900,7 +897,7 @@ fun BackupRestoreScreen(onNavigateBack: () -> Unit) {
                 }
             },
             confirmButton = {
-                TextButton(
+                LiquidGlassTextButton(
                     onClick = {
                         showAutomaticBackupPicker = false
                         runCatching {
@@ -912,7 +909,7 @@ fun BackupRestoreScreen(onNavigateBack: () -> Unit) {
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showAutomaticBackupPicker = false }) {
+                LiquidGlassTextButton(onClick = { showAutomaticBackupPicker = false }) {
                     Text(androidStringResource(android.R.string.cancel))
                 }
             },
@@ -925,7 +922,7 @@ fun BackupRestoreScreen(onNavigateBack: () -> Unit) {
             title = { Text(stringResource(Res.string.restore_confirm_title)) },
             text = { Text(stringResource(Res.string.restore_confirm_message)) },
             confirmButton = {
-                TextButton(
+                LiquidGlassTextButton(
                     onClick = {
                         automaticBackupToRestore = null
                         scope.launch {
@@ -943,7 +940,7 @@ fun BackupRestoreScreen(onNavigateBack: () -> Unit) {
                 }
             },
             dismissButton = {
-                TextButton(onClick = { automaticBackupToRestore = null }) {
+                LiquidGlassTextButton(onClick = { automaticBackupToRestore = null }) {
                     Text(androidStringResource(android.R.string.cancel))
                 }
             },
@@ -956,7 +953,7 @@ fun BackupRestoreScreen(onNavigateBack: () -> Unit) {
             title = { Text(stringResource(Res.string.restore_failed)) },
             text = { Text(message) },
             confirmButton = {
-                TextButton(onClick = { restoreError = null }, shapes = ButtonDefaults.shapes()) {
+                LiquidGlassTextButton(onClick = { restoreError = null }) {
                     Text(androidStringResource(android.R.string.ok))
                 }
             },
@@ -1010,7 +1007,7 @@ fun BackupRestoreScreen(onNavigateBack: () -> Unit) {
                     )
                     if (clipboard?.hasPrimaryClip() == true) {
                         Spacer(modifier = Modifier.height(8.dp))
-                        TextButton(
+                        LiquidGlassTextButton(
                             onClick = {
                                 val item = clipboard.primaryClip?.getItemAt(0)
                                 val text = item?.text?.toString()
@@ -1018,7 +1015,6 @@ fun BackupRestoreScreen(onNavigateBack: () -> Unit) {
                                     inputDialogValue = text
                                 }
                             },
-                            shapes = ButtonDefaults.shapes(),
                         ) {
                             Text(androidStringResource(android.R.string.paste))
                         }
@@ -1026,7 +1022,7 @@ fun BackupRestoreScreen(onNavigateBack: () -> Unit) {
                 }
             },
             confirmButton = {
-                Button(
+                LiquidGlassCompactButton(
                     modifier = Modifier.navigationPopupSource(),
                     enabled = inputDialogValue.isNotBlank(),
                     onClick = {
@@ -1036,17 +1032,15 @@ fun BackupRestoreScreen(onNavigateBack: () -> Unit) {
                         returnToImportInput = { showInputDialog = true }
                         callback?.invoke(value)
                     },
-                    shapes = ButtonDefaults.shapes(),
                 ) {
                     Text(stringResource(Res.string.import_action_start))
                 }
             },
             dismissButton = {
-                TextButton(
+                LiquidGlassTextButton(
                     onClick = {
                         showInputDialog = false
                     },
-                    shapes = ButtonDefaults.shapes(),
                 ) {
                     Text(androidStringResource(android.R.string.cancel))
                 }
@@ -1273,11 +1267,11 @@ fun BackupRestoreScreen(onNavigateBack: () -> Unit) {
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        TextButton(onClick = onBack, modifier = Modifier.tvFocusHighlight(CircleShape), shapes = ButtonDefaults.shapes()) {
+                        LiquidGlassTextButton(onClick = onBack, modifier = Modifier.tvFocusHighlight(CircleShape)) {
                             Text(stringResource(Res.string.back))
                         }
                         Spacer(Modifier.weight(1f))
-                        Button(
+                        LiquidGlassCompactButton(
                             modifier = Modifier.tvFocusHighlight(CircleShape),
                             enabled =
 
@@ -1306,7 +1300,6 @@ fun BackupRestoreScreen(onNavigateBack: () -> Unit) {
                                 showDestinationPicker = false
                                 startUnifiedImport(data, destination)
                             },
-                            shapes = ButtonDefaults.shapes(),
                         ) {
                             Text(stringResource(Res.string.import_action_start))
                         }
@@ -1346,12 +1339,11 @@ fun BackupRestoreScreen(onNavigateBack: () -> Unit) {
                 }
             },
             confirmButton = {
-                Button(
+                LiquidGlassCompactButton(
                     onClick = {
                         errorDetails = null
                         clearRetainedPreparationResult()
                     },
-                    shapes = ButtonDefaults.shapes(),
                 ) {
                     Text(stringResource(Res.string.close))
                 }
@@ -1374,7 +1366,7 @@ fun BackupRestoreScreen(onNavigateBack: () -> Unit) {
                 )
             },
             confirmButton = {
-                TextButton(
+                LiquidGlassTextButton(
                     onClick = {
                         val dest = pendingDuplicateDestination ?: return@TextButton
                         val data = pendingImportData ?: return@TextButton
@@ -1382,20 +1374,18 @@ fun BackupRestoreScreen(onNavigateBack: () -> Unit) {
                         pendingDuplicateDestination = null
                         startUnifiedImport(data, dest, ignoreDuplicate = true)
                     },
-                    shapes = ButtonDefaults.shapes(),
                 ) {
                     Text(stringResource(Res.string.import_duplicate_playlist_import_anyway))
                 }
             },
             dismissButton = {
-                TextButton(
+                LiquidGlassTextButton(
                     onClick = {
                         duplicateWarning = null
                         pendingDuplicateDestination = null
                         pendingImportData = null
                         clearRetainedPreparationResult()
                     },
-                    shapes = ButtonDefaults.shapes(),
                 ) {
                     Text(stringResource(Res.string.import_duplicate_playlist_skip))
                 }
@@ -1477,9 +1467,8 @@ fun BackupRestoreScreen(onNavigateBack: () -> Unit) {
             title = { Text(stringResource(Res.string.import_error_details_title)) },
             text = { Text(warning) },
             confirmButton = {
-                TextButton(
+                LiquidGlassTextButton(
                     onClick = { spotifyLoadWarning = null },
-                    shapes = ButtonDefaults.shapes(),
                 ) { Text(stringResource(Res.string.close)) }
             },
         )
@@ -1633,7 +1622,7 @@ fun BackupRestoreScreen(onNavigateBack: () -> Unit) {
                 LazyColumn {
                     item { Text(stringResource(Res.string.import_choose_single_playlist)) }
                     items(preparation.playlists, key = { it.id }) { playlist ->
-                        TextButton(
+                        LiquidGlassTextButton(
                             modifier = Modifier.fillMaxWidth(),
                             onClick = {
                                 reportPreparationStartFailure(
@@ -1653,17 +1642,16 @@ fun BackupRestoreScreen(onNavigateBack: () -> Unit) {
                                 )
                                 accountPlaylists = null
                             },
-                            shapes = ButtonDefaults.shapes(),
                         ) { Text(playlist.title) }
                     }
                 }
             },
             confirmButton = {},
             dismissButton = {
-                TextButton(onClick = {
+                LiquidGlassTextButton(onClick = {
                     accountPlaylists = null
                     clearRetainedPreparationResult()
-                }, shapes = ButtonDefaults.shapes()) { Text(stringResource(Res.string.close)) }
+                }) { Text(stringResource(Res.string.close)) }
             },
         )
     }
