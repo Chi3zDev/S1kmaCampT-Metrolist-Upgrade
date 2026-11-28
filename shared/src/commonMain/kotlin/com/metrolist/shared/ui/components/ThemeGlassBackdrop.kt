@@ -36,7 +36,9 @@ fun LiquidGlassSurface(
     enabled: Boolean = Settings.shared.liquidGlassTheme,
     content: @Composable BoxScope.() -> Unit,
 ) {
-    Box(modifier) {
+    // Preserve the caller's minimum size for interactive children (for example a full-width
+    // action). Box normally drops those constraints, leaving a small hit target inside a wide glass.
+    Box(modifier, propagateMinConstraints = true) {
         if (enabled) LocalThemeGlassBackdrop.current?.Background(radius = radius, modifier = Modifier.matchParentSize())
         content()
     }
